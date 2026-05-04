@@ -57,7 +57,7 @@ export function HUD() {
           </span>
         </span>
         <span className="px-2 py-1 rounded bg-clinical-bg border border-clinical-border text-clinical-subtle">
-          Patient bill so far: <span className="text-white font-mono">S${cost.toFixed(0)}</span>
+          Cash OOP so far: <span className="text-white font-mono">S${cost.toFixed(0)}</span>
         </span>
       </div>
 

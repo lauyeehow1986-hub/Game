@@ -9,6 +9,9 @@ export function ResultsModal() {
   const log = useGame((s) => s.run.log);
   const caseDef = useGame((s) => s.caseDef);
   const totalCost = useGame((s) => s.run.totalCostSGD);
+  const totals = useGame((s) => s.totals);
+  const burden = useGame((s) => s.caregiverBurden);
+  const profile = useGame((s) => s.profile);
   const elapsed = useGame((s) => s.run.elapsedGameMin);
   const resetRun = useGame((s) => s.resetRun);
   const perspective = usePerspective((s) => s.current);
@@ -50,10 +53,34 @@ export function ResultsModal() {
         <section className="px-5 py-4 grid grid-cols-3 gap-3 border-b border-clinical-border">
           <Stat label="Score" value={`${earned.toFixed(1)} / ${max.toFixed(1)}`} />
           <Stat label="Decisions" value={`${log.length}`} />
-          <Stat label="Patient bill" value={`S$${totalCost.toFixed(0)}`} />
+          <Stat label="Cash OOP" value={`S$${totalCost.toFixed(0)}`} />
           <Stat label="In-game time" value={fmtElapsed(elapsed)} />
           <Stat label="Outcome" value={grade.message} />
+          {profile && (
+            <Stat
+              label="Ward class"
+              value={profile.wardClass === 'na' ? 'Outpatient' : `Class ${profile.wardClass}`}
+            />
+          )}
         </section>
+
+        {totals.gross > 0 && (
+          <section className="px-5 py-4 border-b border-clinical-border space-y-2">
+            <h3 className="text-sm font-semibold text-white">Patient financing breakdown</h3>
+            <div className="grid grid-cols-5 gap-2 text-xs">
+              <Money label="Gross" value={totals.gross} colour="#cbd5f5" />
+              <Money label="Subsidy" value={totals.subsidy} colour="#4ade80" />
+              <Money label="MediShield" value={totals.mediShield} colour="#3aa6ff" />
+              <Money label="MediSave" value={totals.mediSave} colour="#a3e635" />
+              <Money label="Cash" value={totals.cash} colour={totals.cash > 1500 ? '#f87171' : '#facc15'} />
+            </div>
+            <div className="flex gap-3 text-[11px] text-clinical-subtle pt-2">
+              <span>Caregiver: <span className="text-white">{burden.timeOffWorkHours.toFixed(0)}h off work</span></span>
+              <span>Worry: <span className="text-white">{burden.financialWorry.toFixed(0)}/100</span></span>
+              <span>Sleep debt: <span className="text-white">{burden.sleepDebt.toFixed(0)}/100</span></span>
+            </div>
+          </section>
+        )}
 
         <section className="px-5 py-4 border-b border-clinical-border space-y-3">
           <div className="flex items-center gap-2">
@@ -127,6 +154,17 @@ function Stat({ label, value }: { label: string; value: string }) {
     <div className="rounded border border-clinical-border bg-clinical-bg/40 p-2">
       <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">{label}</div>
       <div className="text-sm font-semibold text-white mt-0.5">{value}</div>
+    </div>
+  );
+}
+
+function Money({ label, value, colour }: { label: string; value: number; colour: string }) {
+  return (
+    <div className="rounded border border-clinical-border bg-clinical-bg/40 p-2">
+      <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">{label}</div>
+      <div className="text-sm font-mono font-semibold mt-0.5" style={{ color: colour }}>
+        S${value.toFixed(0)}
+      </div>
     </div>
   );
 }

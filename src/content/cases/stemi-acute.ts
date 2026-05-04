@@ -28,6 +28,8 @@ export const stemiAcute: CaseDefinition = {
   category: 'acute',
   primaryFacility: 'ttsh',
   involvedFacilities: ['ttsh'],
+  profileKey: 'taxiDriver',
+  allowsWardChoice: true,
   guidelines: [MOH_ACS, ESC_STEMI, SCDF_TRIAGE, HEALTHIER_SG],
   pathway: [
     {
@@ -104,6 +106,8 @@ export const stemiAcute: CaseDefinition = {
       department: 'ed',
       durationMin: 12,
       costSGD: 160,
+      charge: 'a&e',
+      caregiverBurden: { timeOffWorkHours: 4, financialWorry: 8, sleepDebt: 4 },
       framing: {
         patient: 'They keep cutting your shirt. Wires everywhere. Someone shoves a tablet.',
         caregiver: 'You are asked about allergies, medications, last meal. You scramble to remember.',
@@ -172,6 +176,7 @@ export const stemiAcute: CaseDefinition = {
       department: 'imaging',
       durationMin: 5,
       costSGD: 90,
+      charge: 'imaging',
       framing: {
         patient: 'They wheel you past more lights and a big machine.',
         caregiver: 'A staff member directs you to wait outside; you can see your husband through a window.',
@@ -184,6 +189,8 @@ export const stemiAcute: CaseDefinition = {
       department: 'cathlab',
       durationMin: 55,
       costSGD: 4200,
+      charge: 'inpatient-procedure',
+      caregiverBurden: { timeOffWorkHours: 2, financialWorry: 18, sleepDebt: 6 },
       framing: {
         patient: 'A new room, more cold gel. Someone says "small prick at the wrist." You drift.',
         caregiver:
@@ -241,6 +248,8 @@ export const stemiAcute: CaseDefinition = {
       department: 'icu',
       durationMin: 1440, // ~24 h
       costSGD: 950,
+      charge: 'icu',
+      caregiverBurden: { timeOffWorkHours: 16, financialWorry: 12, sleepDebt: 18 },
       framing: {
         patient: 'Beeps. A long night. A nurse adjusts something on your arm every hour.',
         caregiver: 'Visiting hours are restricted. You are told he is stable. You cry in the corridor.',
@@ -294,6 +303,8 @@ export const stemiAcute: CaseDefinition = {
       department: 'ward',
       durationMin: 4320, // 3 days
       costSGD: 1100,
+      charge: 'inpatient-ward',
+      caregiverBurden: { timeOffWorkHours: 12, financialWorry: 22, sleepDebt: 10 },
       framing: {
         patient:
           'Day 2 — the curtain neighbour snores. The food is bland. You start to think about going home, your taxi rental, your bills.',
@@ -356,6 +367,7 @@ export const stemiAcute: CaseDefinition = {
       department: 'pharmacy',
       durationMin: 30,
       costSGD: 80,
+      charge: 'pharmacy',
       framing: {
         patient:
           'The pharmacist asks if you smoke. You lie a little. She gives you a smoking-cessation pamphlet anyway.',
@@ -424,6 +436,8 @@ export const stemiAcute: CaseDefinition = {
       department: 'soc',
       durationMin: 45,
       costSGD: 110,
+      charge: 'soc',
+      caregiverBurden: { timeOffWorkHours: 4, financialWorry: 4, sleepDebt: 0 },
       framing: {
         patient: 'Two weeks later. The waiting room is full. You are nervous about the bill.',
         caregiver: 'You took half a day off work to come.',
@@ -435,6 +449,8 @@ export const stemiAcute: CaseDefinition = {
       department: 'rehab',
       durationMin: 60,
       costSGD: 70,
+      charge: 'rehab',
+      caregiverBurden: { timeOffWorkHours: 2, financialWorry: -8, sleepDebt: -10 },
       framing: {
         patient:
           'The treadmill is slower than you thought. The physiotherapist tells you you can return to driving in two more weeks.',

@@ -97,8 +97,26 @@ export interface PathwayNode {
   framing: Record<Perspective, string>;
   /** Optional decision presented at this node. */
   decision?: Decision;
-  /** Cost incurred at this node (SGD, post-subsidy approximation). */
+  /** Cost incurred at this node (SGD, gross/private rate; financing engine applies subsidy etc). */
   costSGD?: number;
+  /** Charge category for the financing engine. */
+  charge?:
+    | 'inpatient-ward'
+    | 'inpatient-procedure'
+    | 'icu'
+    | 'imaging'
+    | 'pharmacy'
+    | 'soc'
+    | 'polyclinic'
+    | 'rehab'
+    | 'community-hospital'
+    | 'a&e';
+  /** Caregiver-burden delta applied when the patient enters this node. */
+  caregiverBurden?: {
+    timeOffWorkHours?: number;
+    financialWorry?: number; // 0..100 delta
+    sleepDebt?: number; // 0..100 delta
+  };
 }
 
 export interface CaseDefinition {
@@ -110,6 +128,10 @@ export interface CaseDefinition {
   involvedFacilities: string[];
   pathway: PathwayNode[];
   guidelines: GuidelineRef[];
+  /** Default patient profile id (key in DEFAULT_PROFILES). */
+  profileKey: string;
+  /** Whether the case lets the player choose a ward class up-front. */
+  allowsWardChoice: boolean;
 }
 
 export type DecisionLogEntry = {
