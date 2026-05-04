@@ -8,13 +8,31 @@ import { NNI_TTSH } from './facilities/nhg/nni-ttsh';
 import { YCH } from './facilities/nhg/ych';
 import { AdMC } from './facilities/nhg/admc';
 import { NHGP_ALL } from './facilities/nhg/nhgp';
+
+import { SGH } from './facilities/singhealth/sgh';
+import { CGH } from './facilities/singhealth/cgh';
+import { SKH } from './facilities/singhealth/skh';
+import { KKH } from './facilities/singhealth/kkh';
+import { NHCS } from './facilities/singhealth/nhcs';
+import { NCCS } from './facilities/singhealth/nccs';
+import { NDCS } from './facilities/singhealth/ndcs';
+import { NNI_SGH } from './facilities/singhealth/nni-sgh';
+import { SNEC } from './facilities/singhealth/snec';
+import { OCH } from './facilities/singhealth/och';
+import { SKCH } from './facilities/singhealth/skch';
+import { BVH } from './facilities/singhealth/bvh';
+import { SHP_ALL } from './facilities/singhealth/shp';
+
 import { stemiAcute } from './cases/stemi-acute';
 import { electiveTHR } from './cases/elective-thr';
 import { outpatientDiabetes } from './cases/outpatient-diabetes';
 import { diseaseXOutbreak } from './cases/disease-x-outbreak';
+import { paediatricFeverKKH } from './cases/paediatric-fever-kkh';
+import { breastCancerCrossCluster } from './cases/breast-cancer-crosscluster';
 import type { CaseDefinition, Facility } from '../lib/types';
 
 const allFacilities: Facility[] = [
+  // NHG
   TTSH,
   KTPH,
   WH,
@@ -25,6 +43,20 @@ const allFacilities: Facility[] = [
   YCH,
   AdMC,
   ...NHGP_ALL,
+  // SingHealth
+  SGH,
+  CGH,
+  SKH,
+  KKH,
+  NHCS,
+  NCCS,
+  NDCS,
+  NNI_SGH,
+  SNEC,
+  OCH,
+  SKCH,
+  BVH,
+  ...SHP_ALL,
 ];
 
 export const facilities: Record<string, Facility> = Object.fromEntries(
@@ -36,6 +68,8 @@ export const cases: Record<string, CaseDefinition> = {
   [electiveTHR.id]: electiveTHR,
   [outpatientDiabetes.id]: outpatientDiabetes,
   [diseaseXOutbreak.id]: diseaseXOutbreak,
+  [paediatricFeverKKH.id]: paediatricFeverKKH,
+  [breastCancerCrossCluster.id]: breastCancerCrossCluster,
 };
 
 export function getFacility(id: string): Facility | undefined {
