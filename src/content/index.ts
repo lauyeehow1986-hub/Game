@@ -23,12 +23,22 @@ import { SKCH } from './facilities/singhealth/skch';
 import { BVH } from './facilities/singhealth/bvh';
 import { SHP_ALL } from './facilities/singhealth/shp';
 
+import { NUH } from './facilities/nuhs/nuh';
+import { NTFGH } from './facilities/nuhs/ntfgh';
+import { AH } from './facilities/nuhs/ah';
+import { NCIS } from './facilities/nuhs/ncis';
+import { NUHCS } from './facilities/nuhs/nuhcs';
+import { NUCOHS } from './facilities/nuhs/nucohs';
+import { JCH } from './facilities/nuhs/jch';
+import { NUP_ALL } from './facilities/nuhs/nup';
+
 import { stemiAcute } from './cases/stemi-acute';
 import { electiveTHR } from './cases/elective-thr';
 import { outpatientDiabetes } from './cases/outpatient-diabetes';
 import { diseaseXOutbreak } from './cases/disease-x-outbreak';
 import { paediatricFeverKKH } from './cases/paediatric-fever-kkh';
 import { breastCancerCrossCluster } from './cases/breast-cancer-crosscluster';
+import { strokeThrombectomy } from './cases/stroke-thrombectomy';
 import type { CaseDefinition, Facility } from '../lib/types';
 
 const allFacilities: Facility[] = [
@@ -57,6 +67,15 @@ const allFacilities: Facility[] = [
   SKCH,
   BVH,
   ...SHP_ALL,
+  // NUHS
+  NUH,
+  NTFGH,
+  AH,
+  NCIS,
+  NUHCS,
+  NUCOHS,
+  JCH,
+  ...NUP_ALL,
 ];
 
 export const facilities: Record<string, Facility> = Object.fromEntries(
@@ -70,6 +89,7 @@ export const cases: Record<string, CaseDefinition> = {
   [diseaseXOutbreak.id]: diseaseXOutbreak,
   [paediatricFeverKKH.id]: paediatricFeverKKH,
   [breastCancerCrossCluster.id]: breastCancerCrossCluster,
+  [strokeThrombectomy.id]: strokeThrombectomy,
 };
 
 export function getFacility(id: string): Facility | undefined {
