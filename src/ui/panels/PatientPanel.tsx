@@ -1,6 +1,6 @@
 import { useGame } from '../../state/gameStore';
 import { usePerspective } from '../../state/perspectiveStore';
-import { TTSH } from '../../content/facilities/nhg/ttsh';
+import { getFacility } from '../../content';
 import type { WardClass } from '../../lib/financing';
 
 const wardLabels: Record<WardClass, string> = {
@@ -28,7 +28,8 @@ export function PatientPanel() {
   }
 
   const node = caseDef.pathway.find((n) => n.id === run.currentNodeId) ?? caseDef.pathway[0];
-  const dept = TTSH.departments.find((d) => d.id === node.department);
+  const facility = getFacility(node.facility ?? caseDef.primaryFacility);
+  const dept = facility?.departments.find((d) => d.id === node.department);
   const framing = node.framing[perspective];
 
   return (
@@ -75,12 +76,17 @@ export function PatientPanel() {
       )}
 
       <div className="border-t border-clinical-border pt-2 space-y-1">
+        {facility && (
+          <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
+            {facility.name}
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <span
             className="w-2 h-2 rounded-full"
             style={{ backgroundColor: dept?.colour ?? '#3aa6ff' }}
           />
-          <span className="text-xs font-semibold text-white">{dept?.name ?? '—'}</span>
+          <span className="text-xs font-semibold text-white">{dept?.name ?? node.department}</span>
         </div>
         <p className="text-[11px] text-clinical-subtle leading-snug">{dept?.description}</p>
       </div>

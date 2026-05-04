@@ -30,6 +30,20 @@ const emptyBurden: CaregiverBurden = {
   sleepDebt: 0,
 };
 
+export type Dorscon = 'Green' | 'Yellow' | 'Orange' | 'Red';
+
+export interface PandemicState {
+  dorscon: Dorscon;
+  ppeStockpilePct: number;
+  surgeCapacityPct: number;
+  edDiversionActive: boolean;
+  ncidActivated: boolean;
+  /** Generic Disease X r0 (illustrative). */
+  rEffective: number;
+  /** Free-text current alert label. */
+  label: string;
+}
+
 interface GameState {
   run: CaseRunSnapshot;
   caseDef: CaseDefinition | null;
@@ -37,31 +51,54 @@ interface GameState {
   segments: FinancingSegmentResult[];
   totals: FinancingTotals;
   caregiverBurden: CaregiverBurden;
+  /** Facility the player is currently viewing in the canvas. */
+  viewedFacilityId: string;
+  pandemic: PandemicState;
 
   kpis: {
     bedOccupancyPct: number;
     edWaitMin: number;
     staffFatiguePct: number;
     runningCostSGD: number;
-    dorscon: 'Green' | 'Yellow' | 'Orange' | 'Red';
+    dorscon: Dorscon;
   };
 
   startCase: (caseDef: CaseDefinition) => void;
   setWardClass: (ward: WardClass) => void;
   resolveDecision: (option: DecisionOption) => void;
   resetRun: () => void;
+  viewFacility: (facilityId: string) => void;
+  setDorscon: (level: Dorscon) => void;
+  setPpe: (pct: number) => void;
+  setSurge: (pct: number) => void;
+  setEdDiversion: (on: boolean) => void;
+  setNcidActivated: (on: boolean) => void;
 }
 
 const emptyRun: CaseRunSnapshot = {
   caseId: null,
   status: 'idle',
   currentNodeId: null,
+  currentFacilityId: null,
   pendingDecision: null,
   log: [],
   startedAtGameMin: 0,
   elapsedGameMin: 0,
   totalCostSGD: 0,
 };
+
+const baseDorscon: Dorscon = 'Green';
+
+const basePandemic: PandemicState = {
+  dorscon: baseDorscon,
+  ppeStockpilePct: 78,
+  surgeCapacityPct: 22,
+  edDiversionActive: false,
+  ncidActivated: false,
+  rEffective: 0.9,
+  label: 'No outbreak in progress',
+};
+
 
 const baseKpis = {
   bedOccupancyPct: 87,
@@ -104,6 +141,8 @@ export const useGame = create<GameState>((set, get) => ({
   segments: [],
   totals: { ...emptyTotals },
   caregiverBurden: { ...emptyBurden },
+  viewedFacilityId: 'ttsh',
+  pandemic: { ...basePandemic },
   kpis: { ...baseKpis },
 
   startCase: (caseDef) => {
@@ -114,17 +153,20 @@ export const useGame = create<GameState>((set, get) => ({
     const segments = first ? applyNodeFinancing(profile, [], first) : [];
     const totals = totalsFor(segments);
     const burden = first ? applyBurden(emptyBurden, first) : emptyBurden;
+    const startFacilityId = first?.facility ?? caseDef.primaryFacility;
 
-    set({
+    set((s) => ({
       caseDef,
       profile,
       segments,
       totals,
       caregiverBurden: burden,
+      viewedFacilityId: startFacilityId,
       run: {
         caseId: caseDef.id,
         status: first?.decision ? 'awaiting-decision' : 'running',
         currentNodeId: first?.id ?? null,
+        currentFacilityId: startFacilityId,
         pendingDecision:
           first && first.decision
             ? { nodeId: first.id, decision: first.decision }
@@ -134,14 +176,42 @@ export const useGame = create<GameState>((set, get) => ({
         elapsedGameMin: 0,
         totalCostSGD: totals.cash,
       },
-      kpis: { ...baseKpis, runningCostSGD: totals.cash },
-    });
+      kpis: { ...baseKpis, runningCostSGD: totals.cash, dorscon: s.pandemic.dorscon },
+    }));
     bus.emit(Events.CaseStart, { caseId: caseDef.id });
+    bus.emit(Events.FacilityChanged, { facilityId: startFacilityId });
     bus.emit(Events.PatientMoveTo, { department: first?.department });
     if (first?.decision) {
       bus.emit(Events.CaseDecisionRequested, { decision: first.decision, nodeId: first.id });
     }
   },
+
+  viewFacility: (facilityId) => {
+    set({ viewedFacilityId: facilityId });
+    bus.emit(Events.FacilityChanged, { facilityId });
+  },
+
+  setDorscon: (level) =>
+    set((s) => ({
+      pandemic: {
+        ...s.pandemic,
+        dorscon: level,
+        label:
+          level === 'Green'
+            ? 'No or low pathogen activity'
+            : level === 'Yellow'
+            ? 'Mild disease, mostly contained — heightened vigilance'
+            : level === 'Orange'
+            ? 'Moderate transmission — NCID-led, hospital surge plans active'
+            : 'Severe widespread transmission — system-wide surge and resource rationing',
+        ncidActivated: level === 'Orange' || level === 'Red' ? true : s.pandemic.ncidActivated,
+      },
+      kpis: { ...s.kpis, dorscon: level },
+    })),
+  setPpe: (pct) => set((s) => ({ pandemic: { ...s.pandemic, ppeStockpilePct: clamp(pct) } })),
+  setSurge: (pct) => set((s) => ({ pandemic: { ...s.pandemic, surgeCapacityPct: clamp(pct) } })),
+  setEdDiversion: (on) => set((s) => ({ pandemic: { ...s.pandemic, edDiversionActive: on } })),
+  setNcidActivated: (on) => set((s) => ({ pandemic: { ...s.pandemic, ncidActivated: on } })),
 
   setWardClass: (ward) => {
     const { profile, caseDef, segments } = get();
@@ -218,22 +288,24 @@ export const useGame = create<GameState>((set, get) => ({
     }
 
     const newSegments = applyNodeFinancing(nextProfile, get().segments, nextNode);
-    // Recompute everything against the latest profile so a ward-class change
-    // earlier in the run propagates.
     const fully = newSegments.map((s) =>
       computeSegment(nextProfile, { charge: s.charge, grossSGD: s.grossSGD }),
     );
     const totals = totalsFor(fully);
     const burden = applyBurden(get().caregiverBurden, nextNode);
+    const nextFacilityId = nextNode.facility ?? caseDef.primaryFacility;
+    const facilityChanged = nextFacilityId !== get().run.currentFacilityId;
 
     set((s) => ({
       profile: nextProfile,
       segments: fully,
       totals,
       caregiverBurden: burden,
+      viewedFacilityId: nextFacilityId,
       run: {
         ...s.run,
         currentNodeId: nextNode!.id,
+        currentFacilityId: nextFacilityId,
         status: nextNode!.decision ? 'awaiting-decision' : 'running',
         pendingDecision: nextNode!.decision
           ? { nodeId: nextNode!.id, decision: nextNode!.decision }
@@ -244,6 +316,9 @@ export const useGame = create<GameState>((set, get) => ({
       },
       kpis: { ...s.kpis, runningCostSGD: totals.cash },
     }));
+    if (facilityChanged) {
+      bus.emit(Events.FacilityChanged, { facilityId: nextFacilityId });
+    }
     bus.emit(Events.PatientMoveTo, { department: nextNode.department });
     if (nextNode.decision) {
       bus.emit(Events.CaseDecisionRequested, {
@@ -254,15 +329,15 @@ export const useGame = create<GameState>((set, get) => ({
   },
 
   resetRun: () => {
-    set({
+    set((s) => ({
       run: { ...emptyRun },
       caseDef: null,
       profile: null,
       segments: [],
       totals: { ...emptyTotals },
       caregiverBurden: { ...emptyBurden },
-      kpis: { ...baseKpis },
-    });
+      kpis: { ...baseKpis, dorscon: s.pandemic.dorscon },
+    }));
     bus.emit(Events.CaseReset);
   },
 }));

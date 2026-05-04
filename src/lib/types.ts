@@ -25,19 +25,18 @@ export type Cluster =
   | 'national'
   | 'na';
 
-export type DepartmentId =
-  | 'entrance'
-  | 'triage'
-  | 'ed'
-  | 'imaging'
-  | 'cathlab'
-  | 'icu'
-  | 'ot'
-  | 'ward'
-  | 'pharmacy'
-  | 'discharge'
-  | 'soc'
-  | 'rehab';
+/**
+ * Department identifier. Common values used across multiple facilities are
+ * documented below; specific facilities (NCID isolation, IMH ECT, NSC
+ * phototherapy, etc.) can declare their own ids without type churn.
+ *
+ * Common values: 'entrance' | 'triage' | 'ed' | 'imaging' | 'cathlab' |
+ * 'icu' | 'ot' | 'ward' | 'pharmacy' | 'discharge' | 'soc' | 'rehab' |
+ * 'isolation' | 'lab' | 'psych-ward' | 'psych-clinic' | 'ect' |
+ * 'derm-clinic' | 'phototherapy' | 'gp-room' | 'treatment-room' |
+ * 'rehab-gym' | 'subacute-ward' | 'consult-room' | 'screening'.
+ */
+export type DepartmentId = string;
 
 export interface Department {
   id: DepartmentId;
@@ -91,6 +90,8 @@ export interface Decision {
 export interface PathwayNode {
   id: string;
   department: DepartmentId;
+  /** Optional facility id; defaults to the case's primaryFacility if unset. */
+  facility?: string;
   /** In-game minutes the patient spends here (before decision and travel). */
   durationMin: number;
   /** Per-perspective narrative shown when the patient enters this node. */
@@ -148,6 +149,7 @@ export interface CaseRunSnapshot {
   caseId: string | null;
   status: CaseRunStatus;
   currentNodeId: string | null;
+  currentFacilityId: string | null;
   pendingDecision: { nodeId: string; decision: Decision } | null;
   log: DecisionLogEntry[];
   startedAtGameMin: number;

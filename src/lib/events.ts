@@ -34,6 +34,7 @@ export const Events = {
   CaseReset: 'case:reset',
   PatientMoveTo: 'patient:move-to',
   PatientArrived: 'patient:arrived',
+  FacilityChanged: 'facility:changed',
   TimeAdvance: 'time:advance',
 } as const;
 

@@ -1,0 +1,106 @@
+import type { Facility } from '../../../lib/types';
+
+/**
+ * Khoo Teck Puat Hospital — Yishun. NHG cluster acute restructured hospital.
+ * Known for its biophilic design and integrated approach to ageing care
+ * (paired with Yishun Community Hospital next door).
+ */
+export const KTPH: Facility = {
+  id: 'ktph',
+  name: 'Khoo Teck Puat Hospital',
+  type: 'acute',
+  sector: 'public',
+  cluster: 'nhg',
+  departments: [
+    {
+      id: 'entrance',
+      name: 'Main Entrance / Garden Lobby',
+      shortLabel: 'Lobby',
+      position: { x: 90, y: 530 },
+      radius: 34,
+      colour: '#3aa6ff',
+      description: 'Sheltered drop-off, retail, integrated with Yishun pond. Volunteer wayfinders on duty.',
+    },
+    {
+      id: 'triage',
+      name: 'Emergency Triage',
+      shortLabel: 'Triage',
+      position: { x: 220, y: 480 },
+      radius: 32,
+      colour: '#facc15',
+      description: 'Triage P1-P4. KTPH ED is one of the busiest in the north.',
+    },
+    {
+      id: 'ed',
+      name: 'Emergency Department',
+      shortLabel: 'A&E',
+      position: { x: 360, y: 440 },
+      radius: 36,
+      colour: '#f87171',
+      description: '24/7 ED with resus, observation, fast-track, geriatric ED area (GEDI).',
+    },
+    {
+      id: 'imaging',
+      name: 'Diagnostic Imaging',
+      shortLabel: 'Imaging',
+      position: { x: 500, y: 380 },
+      radius: 30,
+      colour: '#8b5cf6',
+      description: 'CT, MRI, ultrasound. NEHR-integrated PACS.',
+    },
+    {
+      id: 'icu',
+      name: 'Medical ICU',
+      shortLabel: 'MICU',
+      position: { x: 660, y: 280 },
+      radius: 34,
+      colour: '#fb923c',
+      description: 'Mixed med-surg ICU. Tele-ICU support overnight from cluster centre.',
+    },
+    {
+      id: 'ot',
+      name: 'Operating Theatres',
+      shortLabel: 'OT',
+      position: { x: 500, y: 220 },
+      radius: 30,
+      colour: '#ec4899',
+      description: 'General, ortho, vascular ORs. Day-surgery suites.',
+    },
+    {
+      id: 'ward',
+      name: 'Geriatric / General Ward',
+      shortLabel: 'Ward',
+      position: { x: 590, y: 130 },
+      radius: 34,
+      colour: '#4ade80',
+      description: 'Subsidy-class A/B1/B2/C wards. KTPH pioneered integrated ageing care.',
+    },
+    {
+      id: 'soc',
+      name: 'Specialist Outpatient Clinic',
+      shortLabel: 'SOC',
+      position: { x: 360, y: 130 },
+      radius: 32,
+      colour: '#22d3ee',
+      description: 'Multi-specialty SOC. Subsidised referrals from polyclinics or NHGP.',
+    },
+    {
+      id: 'pharmacy',
+      name: 'Outpatient Pharmacy',
+      shortLabel: 'Pharmacy',
+      position: { x: 220, y: 200 },
+      radius: 28,
+      colour: '#38bdf8',
+      description: 'Dispensing + chronic-disease drug counselling.',
+    },
+    {
+      id: 'discharge',
+      name: 'Transit Lounge / AIC desk',
+      shortLabel: 'Discharge',
+      position: { x: 110, y: 320 },
+      radius: 30,
+      colour: '#a3e635',
+      description: 'Discharge planning + Agency for Integrated Care desk for step-down to YCH.',
+    },
+  ],
+};

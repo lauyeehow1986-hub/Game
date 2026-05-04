@@ -10,7 +10,7 @@ interface ProgressStore extends ProgressState {
 }
 
 const initial: ProgressState = {
-  unlockedCaseIds: ['stemi-acute', 'elective-thr', 'outpatient-diabetes'],
+  unlockedCaseIds: ['stemi-acute', 'elective-thr', 'outpatient-diabetes', 'disease-x'],
   bestScores: {},
   decisionsMade: 0,
   casesCompleted: 0,
@@ -44,16 +44,13 @@ export const useProgress = create<ProgressStore>()(
     }),
     {
       name: 'sg-pathway-progress',
-      version: 2,
-      // v2 unlocked the elective THR and outpatient diabetes cases.
+      version: 3,
       migrate: (persisted: unknown, version) => {
         const obj = (persisted ?? {}) as Partial<ProgressState>;
-        if (version < 2) {
+        if (version < 3) {
           const merged = new Set([
             ...(obj.unlockedCaseIds ?? []),
-            'stemi-acute',
-            'elective-thr',
-            'outpatient-diabetes',
+            ...initial.unlockedCaseIds,
           ]);
           return { ...initial, ...obj, unlockedCaseIds: Array.from(merged) };
         }

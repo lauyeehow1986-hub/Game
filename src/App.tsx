@@ -4,6 +4,8 @@ import { PatientPanel } from './ui/panels/PatientPanel';
 import { CaseList } from './ui/panels/CaseList';
 import { DecisionLog } from './ui/panels/DecisionLog';
 import { FinancingPanel } from './ui/panels/FinancingPanel';
+import { FacilityBrowser } from './ui/panels/FacilityBrowser';
+import { PandemicPanel } from './ui/panels/PandemicPanel';
 import { DecisionModal } from './ui/modals/DecisionModal';
 import { ResultsModal } from './ui/modals/ResultsModal';
 import { PhaserGame } from './game/PhaserGame';
@@ -16,6 +18,7 @@ export default function App() {
       <main className="flex-1 grid grid-cols-1 md:grid-cols-[300px_1fr_340px] gap-3 p-3 min-h-0">
         <aside className="space-y-3 overflow-y-auto scrollbar-thin">
           <CaseList />
+          <FacilityBrowser />
           <PatientPanel />
         </aside>
 
@@ -25,6 +28,7 @@ export default function App() {
 
         <aside className="space-y-3 overflow-y-auto scrollbar-thin">
           <FinancingPanel />
+          <PandemicPanel />
           <TycoonDashboard />
           <DecisionLog />
         </aside>
