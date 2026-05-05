@@ -6,6 +6,8 @@ const groups: Array<{ key: string; label: string; types: string[] }> = [
   { key: 'specialty', label: 'Specialty centres', types: ['specialty'] },
   { key: 'community', label: 'Community / step-down', types: ['community', 'vwo'] },
   { key: 'polyclinic', label: 'Polyclinics', types: ['polyclinic'] },
+  { key: 'gp', label: 'Private GP clinics', types: ['gp'] },
+  { key: 'telemed', label: 'Telemedicine', types: ['telemed'] },
   { key: 'ancillary', label: 'Ancillary / pre-hospital / community', types: ['ancillary'] },
 ];
 

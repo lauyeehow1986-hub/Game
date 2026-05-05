@@ -43,6 +43,10 @@ import { NKF, KDF, FRESENIUS } from './facilities/ancillary/dialysis';
 import { HCA, DOVER_PARK, ASSISI } from './facilities/ancillary/hospices';
 import { NURSING_HOME, HOME, RETAIL_PHARMACY } from './facilities/ancillary/community';
 
+import { GP_CHAINS } from './facilities/primary-care/gp-chains';
+import { TELEMED_ALL } from './facilities/primary-care/telemed';
+import { HPB_SCHOOL, WORKPLACE_HEALTH } from './facilities/primary-care/school-occ';
+
 import { stemiAcute } from './cases/stemi-acute';
 import { electiveTHR } from './cases/elective-thr';
 import { outpatientDiabetes } from './cases/outpatient-diabetes';
@@ -51,6 +55,7 @@ import { paediatricFeverKKH } from './cases/paediatric-fever-kkh';
 import { breastCancerCrossCluster } from './cases/breast-cancer-crosscluster';
 import { strokeThrombectomy } from './cases/stroke-thrombectomy';
 import { palliativeEndOfLife } from './cases/palliative-end-of-life';
+import { urtiChasGP } from './cases/urti-chas-gp';
 import type { CaseDefinition, Facility } from '../lib/types';
 
 const allFacilities: Facility[] = [
@@ -67,6 +72,10 @@ const allFacilities: Facility[] = [
   NKF, KDF, FRESENIUS,
   HCA, DOVER_PARK, ASSISI,
   NURSING_HOME, HOME, RETAIL_PHARMACY,
+  // Private primary care + telemed + occupational
+  ...GP_CHAINS,
+  ...TELEMED_ALL,
+  HPB_SCHOOL, WORKPLACE_HEALTH,
 ];
 
 export const facilities: Record<string, Facility> = Object.fromEntries(
@@ -82,6 +91,7 @@ export const cases: Record<string, CaseDefinition> = {
   [breastCancerCrossCluster.id]: breastCancerCrossCluster,
   [strokeThrombectomy.id]: strokeThrombectomy,
   [palliativeEndOfLife.id]: palliativeEndOfLife,
+  [urtiChasGP.id]: urtiChasGP,
 };
 
 export function getFacility(id: string): Facility | undefined {
