@@ -4,8 +4,9 @@ import { listFacilities } from '../../content';
 const groups: Array<{ key: string; label: string; types: string[] }> = [
   { key: 'acute', label: 'Acute hospitals', types: ['acute'] },
   { key: 'specialty', label: 'Specialty centres', types: ['specialty'] },
-  { key: 'community', label: 'Community / step-down', types: ['community'] },
+  { key: 'community', label: 'Community / step-down', types: ['community', 'vwo'] },
   { key: 'polyclinic', label: 'Polyclinics', types: ['polyclinic'] },
+  { key: 'ancillary', label: 'Ancillary / pre-hospital / community', types: ['ancillary'] },
 ];
 
 export function FacilityBrowser() {

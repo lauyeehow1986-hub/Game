@@ -32,6 +32,17 @@ import { NUCOHS } from './facilities/nuhs/nucohs';
 import { JCH } from './facilities/nuhs/jch';
 import { NUP_ALL } from './facilities/nuhs/nup';
 
+import { SLH } from './facilities/vwo/slh';
+import { RenCi } from './facilities/vwo/renci';
+import { AMKH } from './facilities/vwo/amkh';
+import { SACH } from './facilities/vwo/sach';
+
+import { SCDF } from './facilities/ancillary/scdf';
+import { HSA } from './facilities/ancillary/hsa';
+import { NKF, KDF, FRESENIUS } from './facilities/ancillary/dialysis';
+import { HCA, DOVER_PARK, ASSISI } from './facilities/ancillary/hospices';
+import { NURSING_HOME, HOME, RETAIL_PHARMACY } from './facilities/ancillary/community';
+
 import { stemiAcute } from './cases/stemi-acute';
 import { electiveTHR } from './cases/elective-thr';
 import { outpatientDiabetes } from './cases/outpatient-diabetes';
@@ -39,43 +50,23 @@ import { diseaseXOutbreak } from './cases/disease-x-outbreak';
 import { paediatricFeverKKH } from './cases/paediatric-fever-kkh';
 import { breastCancerCrossCluster } from './cases/breast-cancer-crosscluster';
 import { strokeThrombectomy } from './cases/stroke-thrombectomy';
+import { palliativeEndOfLife } from './cases/palliative-end-of-life';
 import type { CaseDefinition, Facility } from '../lib/types';
 
 const allFacilities: Facility[] = [
   // NHG
-  TTSH,
-  KTPH,
-  WH,
-  NCID,
-  IMH,
-  NSC,
-  NNI_TTSH,
-  YCH,
-  AdMC,
-  ...NHGP_ALL,
+  TTSH, KTPH, WH, NCID, IMH, NSC, NNI_TTSH, YCH, AdMC, ...NHGP_ALL,
   // SingHealth
-  SGH,
-  CGH,
-  SKH,
-  KKH,
-  NHCS,
-  NCCS,
-  NDCS,
-  NNI_SGH,
-  SNEC,
-  OCH,
-  SKCH,
-  BVH,
-  ...SHP_ALL,
+  SGH, CGH, SKH, KKH, NHCS, NCCS, NDCS, NNI_SGH, SNEC, OCH, SKCH, BVH, ...SHP_ALL,
   // NUHS
-  NUH,
-  NTFGH,
-  AH,
-  NCIS,
-  NUHCS,
-  NUCOHS,
-  JCH,
-  ...NUP_ALL,
+  NUH, NTFGH, AH, NCIS, NUHCS, NUCOHS, JCH, ...NUP_ALL,
+  // VWO partner hospitals
+  SLH, RenCi, AMKH, SACH,
+  // Ancillary / pre-hospital / community
+  SCDF, HSA,
+  NKF, KDF, FRESENIUS,
+  HCA, DOVER_PARK, ASSISI,
+  NURSING_HOME, HOME, RETAIL_PHARMACY,
 ];
 
 export const facilities: Record<string, Facility> = Object.fromEntries(
@@ -90,6 +81,7 @@ export const cases: Record<string, CaseDefinition> = {
   [paediatricFeverKKH.id]: paediatricFeverKKH,
   [breastCancerCrossCluster.id]: breastCancerCrossCluster,
   [strokeThrombectomy.id]: strokeThrombectomy,
+  [palliativeEndOfLife.id]: palliativeEndOfLife,
 };
 
 export function getFacility(id: string): Facility | undefined {
