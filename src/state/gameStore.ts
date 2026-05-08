@@ -17,6 +17,7 @@ import {
   type PatientProfile,
   type WardClass,
 } from '../lib/financing';
+import { getFacility } from '../content';
 
 interface CaregiverBurden {
   timeOffWorkHours: number;
@@ -65,6 +66,7 @@ interface GameState {
 
   startCase: (caseDef: CaseDefinition) => void;
   setWardClass: (ward: WardClass) => void;
+  setIntegratedShield: (on: boolean) => void;
   resolveDecision: (option: DecisionOption) => void;
   resetRun: () => void;
   viewFacility: (facilityId: string) => void;
@@ -110,13 +112,30 @@ const baseKpis = {
 
 const emptyTotals: FinancingTotals = { gross: 0, subsidy: 0, mediShield: 0, mediSave: 0, cash: 0 };
 
+function tierForFacility(facilityId?: string): 'subsidised' | 'private' {
+  if (!facilityId) return 'subsidised';
+  const f = getFacility(facilityId);
+  if (!f) return 'subsidised';
+  // Private hospitals / specialists / GPs / telemed bill at private rate.
+  if (f.sector === 'private' && f.type !== 'ancillary') return 'private';
+  if (f.type === 'private-acute' || f.type === 'private-specialist') return 'private';
+  if (f.type === 'gp' || f.type === 'telemed') return 'private';
+  return 'subsidised';
+}
+
 function applyNodeFinancing(
   profile: PatientProfile | null,
   prev: FinancingSegmentResult[],
   node: PathwayNode,
+  fallbackFacilityId?: string,
 ): FinancingSegmentResult[] {
   if (!profile || !node.costSGD || !node.charge) return prev;
-  const seg = computeSegment(profile, { charge: node.charge, grossSGD: node.costSGD });
+  const tier = tierForFacility(node.facility ?? fallbackFacilityId);
+  const seg = computeSegment(profile, {
+    charge: node.charge,
+    grossSGD: node.costSGD,
+    tier,
+  });
   return [...prev, seg];
 }
 
@@ -150,7 +169,7 @@ export const useGame = create<GameState>((set, get) => ({
     const profileTemplate =
       DEFAULT_PROFILES[caseDef.profileKey] ?? DEFAULT_PROFILES.taxiDriver;
     const profile: PatientProfile = { ...profileTemplate };
-    const segments = first ? applyNodeFinancing(profile, [], first) : [];
+    const segments = first ? applyNodeFinancing(profile, [], first, caseDef.primaryFacility) : [];
     const totals = totalsFor(segments);
     const burden = first ? applyBurden(emptyBurden, first) : emptyBurden;
     const startFacilityId = first?.facility ?? caseDef.primaryFacility;
@@ -217,10 +236,25 @@ export const useGame = create<GameState>((set, get) => ({
     const { profile, caseDef, segments } = get();
     if (!profile || !caseDef) return;
     const next: PatientProfile = { ...profile, wardClass: ward };
-    // Recompute existing segments with the new profile so the bill reflects the
-    // selection consistently — important if the player switches mid-run.
     const recomputed = segments.map((s) =>
-      computeSegment(next, { charge: s.charge, grossSGD: s.grossSGD }),
+      computeSegment(next, { charge: s.charge, grossSGD: s.grossSGD, tier: s.tier }),
+    );
+    const totals = totalsFor(recomputed);
+    set((s) => ({
+      profile: next,
+      segments: recomputed,
+      totals,
+      run: { ...s.run, totalCostSGD: totals.cash },
+      kpis: { ...s.kpis, runningCostSGD: totals.cash },
+    }));
+  },
+
+  setIntegratedShield: (on) => {
+    const { profile, segments } = get();
+    if (!profile) return;
+    const next: PatientProfile = { ...profile, hasIntegratedShield: on };
+    const recomputed = segments.map((s) =>
+      computeSegment(next, { charge: s.charge, grossSGD: s.grossSGD, tier: s.tier }),
     );
     const totals = totalsFor(recomputed);
     set((s) => ({
@@ -267,7 +301,7 @@ export const useGame = create<GameState>((set, get) => ({
 
     if (!nextNode) {
       const recomputed = get().segments.map((s) =>
-        computeSegment(nextProfile, { charge: s.charge, grossSGD: s.grossSGD }),
+        computeSegment(nextProfile, { charge: s.charge, grossSGD: s.grossSGD, tier: s.tier }),
       );
       const totals = totalsFor(recomputed);
       set((s) => ({
@@ -287,9 +321,9 @@ export const useGame = create<GameState>((set, get) => ({
       return;
     }
 
-    const newSegments = applyNodeFinancing(nextProfile, get().segments, nextNode);
+    const newSegments = applyNodeFinancing(nextProfile, get().segments, nextNode, caseDef.primaryFacility);
     const fully = newSegments.map((s) =>
-      computeSegment(nextProfile, { charge: s.charge, grossSGD: s.grossSGD }),
+      computeSegment(nextProfile, { charge: s.charge, grossSGD: s.grossSGD, tier: s.tier }),
     );
     const totals = totalsFor(fully);
     const burden = applyBurden(get().caregiverBurden, nextNode);

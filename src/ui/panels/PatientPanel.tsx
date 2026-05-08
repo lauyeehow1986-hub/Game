@@ -16,6 +16,7 @@ export function PatientPanel() {
   const run = useGame((s) => s.run);
   const profile = useGame((s) => s.profile);
   const setWardClass = useGame((s) => s.setWardClass);
+  const setIp = useGame((s) => s.setIntegratedShield);
   const perspective = usePerspective((s) => s.current);
 
   if (!caseDef || !profile) {
@@ -47,6 +48,18 @@ export function PatientPanel() {
         <Mini label="Per-capita income" value={`S$${profile.perCapitaIncomeSGD}/mo`} />
         <Mini label="MediSave" value={`S$${profile.mediSaveBalanceSGD}`} />
       </div>
+
+      <button
+        onClick={() => setIp(!profile.hasIntegratedShield)}
+        className={`w-full text-left px-2 py-1.5 rounded border text-[11px] transition ${
+          profile.hasIntegratedShield
+            ? 'border-clinical-accent bg-clinical-accent/15 text-white'
+            : 'border-clinical-border text-clinical-subtle hover:text-white'
+        }`}
+      >
+        <span className="block text-[9px] uppercase tracking-wider">Integrated Shield Plan</span>
+        {profile.hasIntegratedShield ? 'Active — IP rider tops up to as-charged' : 'None — MediShield Life only'}
+      </button>
 
       {caseDef.allowsWardChoice && (
         <div className="border-t border-clinical-border pt-2 space-y-1">

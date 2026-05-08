@@ -47,6 +47,9 @@ import { GP_CHAINS } from './facilities/primary-care/gp-chains';
 import { TELEMED_ALL } from './facilities/primary-care/telemed';
 import { HPB_SCHOOL, WORKPLACE_HEALTH } from './facilities/primary-care/school-occ';
 
+import { PRIVATE_ACUTE_ALL } from './facilities/private/hospitals';
+import { PRIVATE_SPECIALIST_ALL } from './facilities/private/specialists';
+
 import { stemiAcute } from './cases/stemi-acute';
 import { electiveTHR } from './cases/elective-thr';
 import { outpatientDiabetes } from './cases/outpatient-diabetes';
@@ -56,6 +59,7 @@ import { breastCancerCrossCluster } from './cases/breast-cancer-crosscluster';
 import { strokeThrombectomy } from './cases/stroke-thrombectomy';
 import { palliativeEndOfLife } from './cases/palliative-end-of-life';
 import { urtiChasGP } from './cases/urti-chas-gp';
+import { privateCataract } from './cases/private-cataract';
 import type { CaseDefinition, Facility } from '../lib/types';
 
 const allFacilities: Facility[] = [
@@ -76,6 +80,9 @@ const allFacilities: Facility[] = [
   ...GP_CHAINS,
   ...TELEMED_ALL,
   HPB_SCHOOL, WORKPLACE_HEALTH,
+  // Private hospitals + specialists
+  ...PRIVATE_ACUTE_ALL,
+  ...PRIVATE_SPECIALIST_ALL,
 ];
 
 export const facilities: Record<string, Facility> = Object.fromEntries(
@@ -92,6 +99,7 @@ export const cases: Record<string, CaseDefinition> = {
   [strokeThrombectomy.id]: strokeThrombectomy,
   [palliativeEndOfLife.id]: palliativeEndOfLife,
   [urtiChasGP.id]: urtiChasGP,
+  [privateCataract.id]: privateCataract,
 };
 
 export function getFacility(id: string): Facility | undefined {

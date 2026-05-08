@@ -2,10 +2,12 @@ import { useGame } from '../../state/gameStore';
 import { listFacilities } from '../../content';
 
 const groups: Array<{ key: string; label: string; types: string[] }> = [
-  { key: 'acute', label: 'Acute hospitals', types: ['acute'] },
-  { key: 'specialty', label: 'Specialty centres', types: ['specialty'] },
+  { key: 'acute', label: 'Acute hospitals (public)', types: ['acute'] },
+  { key: 'specialty', label: 'Specialty centres (public)', types: ['specialty'] },
   { key: 'community', label: 'Community / step-down', types: ['community', 'vwo'] },
   { key: 'polyclinic', label: 'Polyclinics', types: ['polyclinic'] },
+  { key: 'private-acute', label: 'Private hospitals', types: ['private-acute'] },
+  { key: 'private-specialist', label: 'Private specialists', types: ['private-specialist'] },
   { key: 'gp', label: 'Private GP clinics', types: ['gp'] },
   { key: 'telemed', label: 'Telemedicine', types: ['telemed'] },
   { key: 'ancillary', label: 'Ancillary / pre-hospital / community', types: ['ancillary'] },

@@ -46,6 +46,15 @@ export interface FinancingSegmentInput {
   charge: 'inpatient-ward' | 'inpatient-procedure' | 'icu' | 'imaging' | 'pharmacy' | 'soc' | 'polyclinic' | 'rehab' | 'community-hospital' | 'a&e';
   /** Gross bill at private rate (S$). */
   grossSGD: number;
+  /**
+   * Pricing tier for this segment.
+   * - 'subsidised': public restructured / VWO charges with government subsidy
+   *   eligibility, MediShield Life claim, MediSave drawdown, CHAS top-ups.
+   * - 'private': private-hospital, private-specialist, or non-subsidised
+   *   pathway. No government subsidy. Citizens/PRs can still claim
+   *   MediShield Life up to standard limits; IP riders top up further.
+   */
+  tier?: 'subsidised' | 'private';
 }
 
 export interface FinancingSegmentResult extends FinancingSegmentInput {
@@ -191,16 +200,20 @@ export function computeSegment(
   profile: PatientProfile,
   segment: FinancingSegmentInput,
 ): FinancingSegmentResult {
-  const subsidyPct = effectiveSubsidy(profile, segment.charge);
+  const isPrivate = segment.tier === 'private';
+
+  // Government subsidy not applicable at private facilities.
+  const subsidyPct = isPrivate ? 0 : effectiveSubsidy(profile, segment.charge);
   const subsidised = segment.grossSGD * (1 - subsidyPct);
 
   const mshl = mediShieldClaim(profile, segment.charge, subsidised);
   const afterMshl = Math.max(0, subsidised - mshl);
 
-  // CHAS / Healthier SG can be applied to outpatient categories before MediSave/cash.
-  const chasPct = (segment.charge === 'soc' || segment.charge === 'polyclinic')
-    ? chasSubsidyPct[profile.chasTier] * 0.5  // CHAS modest top-up over base subsidy
-    : 0;
+  // CHAS / Healthier SG only at subsidised outpatient categories.
+  const chasPct =
+    !isPrivate && (segment.charge === 'soc' || segment.charge === 'polyclinic')
+      ? chasSubsidyPct[profile.chasTier] * 0.5
+      : 0;
   const afterChas = Math.max(0, afterMshl - subsidised * chasPct);
 
   const ms = mediSaveDraw(profile, segment.charge, afterChas);
@@ -208,6 +221,7 @@ export function computeSegment(
 
   return {
     ...segment,
+    tier: segment.tier ?? 'subsidised',
     subsidyPct,
     subsidisedSGD: subsidised,
     mediShieldSGD: mshl,
