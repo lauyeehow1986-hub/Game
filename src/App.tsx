@@ -6,6 +6,7 @@ import { DecisionLog } from './ui/panels/DecisionLog';
 import { FinancingPanel } from './ui/panels/FinancingPanel';
 import { FacilityBrowser } from './ui/panels/FacilityBrowser';
 import { PandemicPanel } from './ui/panels/PandemicPanel';
+import { DataExchangePanel } from './ui/panels/DataExchangePanel';
 import { DecisionModal } from './ui/modals/DecisionModal';
 import { ResultsModal } from './ui/modals/ResultsModal';
 import { PhaserGame } from './game/PhaserGame';
@@ -28,6 +29,7 @@ export default function App() {
 
         <aside className="space-y-3 overflow-y-auto scrollbar-thin">
           <FinancingPanel />
+          <DataExchangePanel />
           <PandemicPanel />
           <TycoonDashboard />
           <DecisionLog />

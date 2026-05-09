@@ -60,6 +60,7 @@ import { strokeThrombectomy } from './cases/stroke-thrombectomy';
 import { palliativeEndOfLife } from './cases/palliative-end-of-life';
 import { urtiChasGP } from './cases/urti-chas-gp';
 import { privateCataract } from './cases/private-cataract';
+import { privateToPublicHandover } from './cases/private-to-public-handover';
 import type { CaseDefinition, Facility } from '../lib/types';
 
 const allFacilities: Facility[] = [
@@ -100,6 +101,7 @@ export const cases: Record<string, CaseDefinition> = {
   [palliativeEndOfLife.id]: palliativeEndOfLife,
   [urtiChasGP.id]: urtiChasGP,
   [privateCataract.id]: privateCataract,
+  [privateToPublicHandover.id]: privateToPublicHandover,
 };
 
 export function getFacility(id: string): Facility | undefined {

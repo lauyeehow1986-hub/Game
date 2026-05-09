@@ -18,6 +18,7 @@ import {
   type WardClass,
 } from '../lib/financing';
 import { getFacility } from '../content';
+import { recordsFlowBetween, profileForFacility, type RecordsFlow, type DataExchangeProfile } from '../lib/referral';
 
 interface CaregiverBurden {
   timeOffWorkHours: number;
@@ -55,6 +56,18 @@ interface GameState {
   /** Facility the player is currently viewing in the canvas. */
   viewedFacilityId: string;
   pandemic: PandemicState;
+  /** Most recent inter-facility records-flow event for the current run. */
+  lastTransfer: {
+    fromFacilityId: string;
+    toFacilityId: string;
+    flow: RecordsFlow;
+  } | null;
+  /** Cumulative log of records flows during the run. */
+  transferLog: Array<{
+    fromFacilityId: string;
+    toFacilityId: string;
+    flow: RecordsFlow;
+  }>;
 
   kpis: {
     bedOccupancyPct: number;
@@ -162,6 +175,8 @@ export const useGame = create<GameState>((set, get) => ({
   caregiverBurden: { ...emptyBurden },
   viewedFacilityId: 'ttsh',
   pandemic: { ...basePandemic },
+  lastTransfer: null,
+  transferLog: [],
   kpis: { ...baseKpis },
 
   startCase: (caseDef) => {
@@ -181,6 +196,8 @@ export const useGame = create<GameState>((set, get) => ({
       totals,
       caregiverBurden: burden,
       viewedFacilityId: startFacilityId,
+      lastTransfer: null,
+      transferLog: [],
       run: {
         caseId: caseDef.id,
         status: first?.decision ? 'awaiting-decision' : 'running',
@@ -351,6 +368,17 @@ export const useGame = create<GameState>((set, get) => ({
       kpis: { ...s.kpis, runningCostSGD: totals.cash },
     }));
     if (facilityChanged) {
+      const prev = get().run.currentFacilityId;
+      const fromF = prev ? getFacility(prev) : undefined;
+      const toF = getFacility(nextFacilityId);
+      if (fromF && toF) {
+        const flow = recordsFlowBetween(fromF, toF);
+        const transfer = { fromFacilityId: fromF.id, toFacilityId: toF.id, flow };
+        set((s) => ({
+          lastTransfer: transfer,
+          transferLog: [...s.transferLog, transfer],
+        }));
+      }
       bus.emit(Events.FacilityChanged, { facilityId: nextFacilityId });
     }
     bus.emit(Events.PatientMoveTo, { department: nextNode.department });
@@ -370,6 +398,8 @@ export const useGame = create<GameState>((set, get) => ({
       segments: [],
       totals: { ...emptyTotals },
       caregiverBurden: { ...emptyBurden },
+      lastTransfer: null,
+      transferLog: [],
       kpis: { ...baseKpis, dorscon: s.pandemic.dorscon },
     }));
     bus.emit(Events.CaseReset);
