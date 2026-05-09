@@ -127,7 +127,21 @@ export function getFacility(id: string): Facility | undefined {
 }
 
 export function getCase(id: string): CaseDefinition | undefined {
-  return cases[id];
+  if (cases[id]) return cases[id];
+  // Fallthrough to custom cases imported by the player.
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('sg-pathway-custom-cases-v1');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const custom = parsed?.state?.cases?.[id];
+        if (custom) return custom as CaseDefinition;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  return undefined;
 }
 
 export function listCases(): CaseDefinition[] {

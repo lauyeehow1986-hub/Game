@@ -8,6 +8,7 @@ import { FacilityBrowser } from './ui/panels/FacilityBrowser';
 import { PandemicPanel } from './ui/panels/PandemicPanel';
 import { DataExchangePanel } from './ui/panels/DataExchangePanel';
 import { CitationsPanel } from './ui/panels/CitationsPanel';
+import { LeaderboardPanel } from './ui/panels/LeaderboardPanel';
 import { OpsPanel } from './ui/panels/OpsPanel';
 import { DecisionModal } from './ui/modals/DecisionModal';
 import { ResultsModal } from './ui/modals/ResultsModal';
@@ -52,6 +53,7 @@ export default function App() {
               <PandemicPanel />
               <TycoonDashboard />
               <DecisionLog />
+              <LeaderboardPanel />
               <CitationsPanel />
             </>
           ) : (

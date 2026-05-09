@@ -1,0 +1,62 @@
+import type { CaseDefinition } from './types';
+import { serialiseCase, validateCase } from './case-schema';
+
+/**
+ * Pack/unpack a case to/from a base64url string for URL sharing via
+ * ?case=... — kept short by skipping pretty-printing.
+ */
+
+function utf8ToBase64Url(s: string): string {
+  if (typeof window === 'undefined') return '';
+  const bytes = new TextEncoder().encode(s);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  const b64 = btoa(bin);
+  return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function base64UrlToUtf8(s: string): string {
+  if (typeof window === 'undefined') return '';
+  const padded = s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4);
+  const bin = atob(padded);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+export function encodeCaseToUrl(c: CaseDefinition, base?: string): string {
+  const json = JSON.stringify(c);
+  const b64 = utf8ToBase64Url(json);
+  const origin = base ?? (typeof window !== 'undefined' ? window.location.origin + window.location.pathname : '');
+  return `${origin}?case=${b64}`;
+}
+
+export function tryDecodeCaseFromHref(href: string): CaseDefinition | null {
+  try {
+    const url = new URL(href);
+    const q = url.searchParams.get('case');
+    if (!q) return null;
+    const json = base64UrlToUtf8(q);
+    const parsed = JSON.parse(json);
+    const v = validateCase(parsed);
+    return v.ok ? v.case : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Trigger a browser file download of the case as JSON.
+ */
+export function downloadCaseJson(c: CaseDefinition): void {
+  if (typeof document === 'undefined') return;
+  const blob = new Blob([serialiseCase(c)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${c.id}.case.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
