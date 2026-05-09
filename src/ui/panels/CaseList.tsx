@@ -32,7 +32,14 @@ export function CaseList() {
             >
               <div className="flex items-baseline justify-between gap-2">
                 <div>
-                  <div className="text-xs font-semibold text-white">{c.title}</div>
+                  <div className="text-xs font-semibold text-white flex items-center gap-1.5">
+                    {c.historical && (
+                      <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">
+                        Historical
+                      </span>
+                    )}
+                    <span>{c.title}</span>
+                  </div>
                   <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
                     {c.category} · {c.primaryFacility.toUpperCase()}
                   </div>

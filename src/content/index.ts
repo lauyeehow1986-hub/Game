@@ -68,6 +68,8 @@ import { imhFirstEpisodeCase } from './cases/imh-first-psychosis';
 import { obstetricDeliveryCase } from './cases/obstetric-delivery';
 import { geriatricFallsCase } from './cases/geriatric-falls';
 import { heartFailureCase } from './cases/heart-failure-clinic';
+import { sars2003Case } from './cases/sars-2003-historical';
+import { covid19Case } from './cases/covid19-historical';
 import type { CaseDefinition, Facility } from '../lib/types';
 
 const allFacilities: Facility[] = [
@@ -116,6 +118,8 @@ export const cases: Record<string, CaseDefinition> = {
   [obstetricDeliveryCase.id]: obstetricDeliveryCase,
   [geriatricFallsCase.id]: geriatricFallsCase,
   [heartFailureCase.id]: heartFailureCase,
+  [sars2003Case.id]: sars2003Case,
+  [covid19Case.id]: covid19Case,
 };
 
 export function getFacility(id: string): Facility | undefined {

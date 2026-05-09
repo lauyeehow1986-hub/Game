@@ -133,6 +133,11 @@ export interface CaseDefinition {
   profileKey: string;
   /** Whether the case lets the player choose a ward class up-front. */
   allowsWardChoice: boolean;
+  /** Marks scenarios drawn from real historical events. UI shows a badge
+   *  and an educational disclaimer; citations should accompany them. */
+  historical?: boolean;
+  /** Optional citation block for historical / educational scenarios. */
+  citations?: string[];
 }
 
 export type DecisionLogEntry = {

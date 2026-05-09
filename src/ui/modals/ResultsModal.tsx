@@ -136,6 +136,29 @@ export function ResultsModal() {
           </div>
         </section>
 
+        {caseDef.historical && caseDef.citations && caseDef.citations.length > 0 && (
+          <section className="px-5 py-4 border-b border-clinical-border space-y-2">
+            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+              <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">
+                Historical
+              </span>
+              Educational disclaimer & citations
+            </h3>
+            <p className="text-[11px] text-clinical-subtle leading-snug">
+              This scenario is a simplified educational reconstruction of a real Singapore healthcare event.
+              Decisions, timings, and outcomes are stylised; refer to the listed sources and current MOH /
+              NCID guidance for clinical or operational use.
+            </p>
+            <ul className="space-y-1 text-[11px]">
+              {caseDef.citations.map((c, i) => (
+                <li key={i} className="text-clinical-subtle">
+                  <span className="text-white/70">[{i + 1}]</span> {c}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <footer className="px-5 py-4 flex items-center justify-end gap-2">
           <button
             onClick={resetRun}
