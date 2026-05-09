@@ -16,15 +16,20 @@ const OPS_DEPTS: OpsDepartmentId[] = ['triage', 'ed', 'imaging', 'ot', 'ward'];
 
 function snapshotBadges(state: OpsState): OpsBadgePayload {
   const byDept: OpsBadgePayload['byDept'] = {};
+  const dots: NonNullable<OpsBadgePayload['dots']> = {};
   for (const id of OPS_DEPTS) {
     const dept = state.departments[id];
     const queue = state.queues[id].length;
-    const occ = state.patients.filter(
-      (p) => !p.done && p.route[p.step] === id && !state.queues[id].includes(p.id),
-    ).length;
+    const here = state.patients.filter((p) => !p.done && p.route[p.step] === id);
+    const occ = here.length - queue;
     byDept[id] = { occ, cap: dept.capacity, queue, open: dept.open };
+    dots[id] = { p1: 0, p2: 0, p3: 0, p4: 0 };
+    for (const p of here) {
+      const k = p.acuity.toLowerCase() as 'p1' | 'p2' | 'p3' | 'p4';
+      dots[id][k] += 1;
+    }
   }
-  return { byDept };
+  return { byDept, dots };
 }
 
 export function PhaserGame({ className }: Props) {

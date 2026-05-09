@@ -20,9 +20,19 @@ const SECTOR_LABELS: Record<string, string> = {
 
 export interface OpsBadgePayload {
   byDept: Record<string, { occ: number; cap: number; queue: number; open: boolean }>;
+  /** Per-department per-acuity dot counts (P1..P4). When provided the scene
+   *  draws small coloured patient dots inside each department circle. */
+  dots?: Record<string, { p1: number; p2: number; p3: number; p4: number }>;
 }
 
 const OPS_BADGE_EVENT = 'ops:badges';
+
+const ACUITY_COLOUR = {
+  p1: 0xf87171,
+  p2: 0xfb923c,
+  p3: 0xfacc15,
+  p4: 0x4ade80,
+} as const;
 
 /** Helper used by PhaserGame to push ops badge data into the scene. */
 export function pushOpsBadges(payload: OpsBadgePayload | null): void {
@@ -38,6 +48,7 @@ export class HospitalScene extends Phaser.Scene {
     badgeText: Phaser.GameObjects.Text;
   }>();
   private bgGraphics!: Phaser.GameObjects.Graphics;
+  private dotsGraphics!: Phaser.GameObjects.Graphics;
   private currentDept: Department | null = null;
   private moveTween: Phaser.Tweens.Tween | null = null;
   private cleanup: Array<() => void> = [];
@@ -64,6 +75,9 @@ export class HospitalScene extends Phaser.Scene {
     this.bgGraphics = this.add.graphics();
     root.add(this.bgGraphics);
     this.drawFloorplan();
+
+    this.dotsGraphics = this.add.graphics();
+    root.add(this.dotsGraphics);
 
     const title = this.add
       .text(LOGICAL_W / 2, 28, this.facility.name, {
@@ -220,12 +234,12 @@ export class HospitalScene extends Phaser.Scene {
   }
 
   private applyOpsBadges(payload: OpsBadgePayload | null) {
+    this.dotsGraphics.clear();
     if (!payload) {
       this.deptObjects.forEach(({ badgeBg, badgeText }) => {
         badgeBg.setVisible(false);
         badgeText.setVisible(false);
       });
-      // Reset all department fills.
       this.deptObjects.forEach((obj, id) => {
         const dept = this.facility.departments.find((d) => d.id === id);
         if (dept) {
@@ -246,6 +260,42 @@ export class HospitalScene extends Phaser.Scene {
       obj.badgeText.setText(label);
       obj.badgeBg.setVisible(true);
       obj.badgeText.setVisible(true);
+    }
+
+    // Draw per-acuity patient dots inside each department circle.
+    if (payload.dots) {
+      for (const [deptId, dotCounts] of Object.entries(payload.dots)) {
+        const dept = this.facility.departments.find((d) => d.id === deptId);
+        if (!dept) continue;
+        const dots: Array<keyof typeof ACUITY_COLOUR> = [];
+        for (let i = 0; i < dotCounts.p1; i++) dots.push('p1');
+        for (let i = 0; i < dotCounts.p2; i++) dots.push('p2');
+        for (let i = 0; i < dotCounts.p3; i++) dots.push('p3');
+        for (let i = 0; i < dotCounts.p4; i++) dots.push('p4');
+        const max = Math.min(dots.length, 18);
+        const r = 3;
+        const gap = 8;
+        const cols = Math.min(max, 6);
+        const rows = Math.ceil(max / cols);
+        const startX = dept.position.x - ((cols - 1) * gap) / 2;
+        const startY = dept.position.y - ((rows - 1) * gap) / 2;
+        for (let i = 0; i < max; i++) {
+          const c = i % cols;
+          const r0 = Math.floor(i / cols);
+          this.dotsGraphics.fillStyle(ACUITY_COLOUR[dots[i]], 1);
+          this.dotsGraphics.fillCircle(startX + c * gap, startY + r0 * gap, r);
+        }
+        if (dots.length > max) {
+          // Overflow indicator — small grey notch.
+          this.dotsGraphics.fillStyle(0x7d8ba4, 1);
+          this.dotsGraphics.fillRect(
+            dept.position.x - 6,
+            dept.position.y + (rows * gap) / 2 - 2,
+            12,
+            2,
+          );
+        }
+      }
     }
   }
 }

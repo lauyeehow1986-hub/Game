@@ -1,5 +1,15 @@
 import { create } from 'zustand';
-import { initialOpsState, tickOps, type OpsDepartment, type OpsState } from '../lib/ops';
+import {
+  rollIntoNextDay,
+  summariseBudget,
+  summariseDay,
+  tickOps,
+  type OpsDaySummary,
+  type OpsDepartment,
+  type OpsDepartmentId,
+  type OpsState,
+} from '../lib/ops';
+import { applyScenario, getScenario, SCENARIOS, type OpsScenario } from '../lib/ops-scenarios';
 import { useGame } from './gameStore';
 
 export type OpsMode = 'idle' | 'running' | 'paused' | 'ended';
@@ -10,6 +20,9 @@ interface OpsStore {
   mode: OpsMode;
   speed: OpsSpeed;
   intervalHandle: number | null;
+  scenarioId: string;
+  /** Per-day summaries for the current campaign. */
+  history: OpsDaySummary[];
 
   start: () => void;
   pause: () => void;
@@ -18,18 +31,35 @@ interface OpsStore {
   end: () => void;
   setSpeed: (s: OpsSpeed) => void;
   setDiversion: (on: boolean) => void;
-  setDepartmentCapacity: (id: OpsDepartment['id'], capacity: number) => void;
-  setDepartmentOpen: (id: OpsDepartment['id'], open: boolean) => void;
+  setDepartmentCapacity: (id: OpsDepartmentId, capacity: number) => void;
+  setDepartmentOpen: (id: OpsDepartmentId, open: boolean) => void;
+  hire: (id: OpsDepartmentId, kind: 'doctors' | 'nurses', delta: 1 | -1) => void;
+  selectScenario: (id: string) => void;
+  nextDay: () => void;
   step: () => void;
 }
 
-const TICK_HZ = 4; // 4 ticks per real second; one tick advances `speed` minutes.
+const TICK_HZ = 4;
+
+function recomputeBudget(s: OpsState): OpsState {
+  const sums = summariseBudget(s.departments, s.policy);
+  return {
+    ...s,
+    budget: {
+      ...s.budget,
+      dailyFixedCostSGD: sums.dailyFixedCostSGD,
+      dailyStaffingCostSGD: sums.dailyStaffingCostSGD,
+    },
+  };
+}
 
 export const useOps = create<OpsStore>((set, get) => ({
-  state: initialOpsState(Date.now()),
+  state: applyScenario(SCENARIOS[0]),
   mode: 'idle',
   speed: 5,
   intervalHandle: null,
+  scenarioId: SCENARIOS[0].id,
+  history: [],
 
   start: () => {
     get().reset();
@@ -55,51 +85,97 @@ export const useOps = create<OpsStore>((set, get) => ({
   },
 
   reset: () => {
-    const { intervalHandle } = get();
+    const { intervalHandle, scenarioId } = get();
     if (intervalHandle !== null && typeof window !== 'undefined') {
       window.clearInterval(intervalHandle);
     }
+    const sc = getScenario(scenarioId) ?? SCENARIOS[0];
     set({
-      state: initialOpsState(Date.now()),
+      state: applyScenario(sc),
       mode: 'idle',
       intervalHandle: null,
+      history: [],
     });
   },
 
   end: () => {
-    const { intervalHandle } = get();
+    const { intervalHandle, state, history } = get();
     if (intervalHandle !== null && typeof window !== 'undefined') {
       window.clearInterval(intervalHandle);
     }
-    set({ mode: 'ended', intervalHandle: null });
+    set({
+      mode: 'ended',
+      intervalHandle: null,
+      history: [...history, summariseDay(state)],
+    });
   },
 
   setSpeed: (s) => set({ speed: s }),
 
-  setDiversion: (on) =>
-    set((g) => ({ state: { ...g.state, diversion: on } })),
+  setDiversion: (on) => set((g) => ({ state: { ...g.state, diversion: on } })),
 
   setDepartmentCapacity: (id, capacity) =>
-    set((g) => ({
-      state: {
+    set((g) => {
+      const updated = {
         ...g.state,
         departments: {
           ...g.state.departments,
           [id]: { ...g.state.departments[id], capacity: Math.max(0, capacity) },
         },
-      },
-    })),
+      };
+      return { state: recomputeBudget(updated) };
+    }),
 
   setDepartmentOpen: (id, open) =>
-    set((g) => ({
-      state: {
+    set((g) => {
+      const updated = {
         ...g.state,
         departments: {
           ...g.state.departments,
           [id]: { ...g.state.departments[id], open },
         },
-      },
-    })),
+      };
+      return { state: recomputeBudget(updated) };
+    }),
+
+  hire: (id, kind, delta) =>
+    set((g) => {
+      const dept = g.state.departments[id];
+      const next = Math.max(0, dept[kind] + delta);
+      const updated = {
+        ...g.state,
+        departments: {
+          ...g.state.departments,
+          [id]: { ...dept, [kind]: next } as OpsDepartment,
+        },
+      };
+      return { state: recomputeBudget(updated) };
+    }),
+
+  selectScenario: (id) => {
+    const sc = getScenario(id);
+    if (!sc) return;
+    const { intervalHandle } = get();
+    if (intervalHandle !== null && typeof window !== 'undefined') {
+      window.clearInterval(intervalHandle);
+    }
+    set({
+      scenarioId: id,
+      state: applyScenario(sc),
+      mode: 'idle',
+      intervalHandle: null,
+      history: [],
+    });
+  },
+
+  nextDay: () => {
+    const { state } = get();
+    if (state.shiftMinElapsed < state.shiftLengthMin) return;
+    set({
+      state: rollIntoNextDay(state),
+      mode: 'idle',
+    });
+  },
 
   step: () => {
     const { state, speed } = get();
@@ -111,3 +187,6 @@ export const useOps = create<OpsStore>((set, get) => ({
     }
   },
 }));
+
+export { SCENARIOS };
+export type { OpsScenario };

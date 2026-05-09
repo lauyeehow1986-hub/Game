@@ -48,6 +48,63 @@ export interface OpsDepartment {
   serviceTimeMin: number;
   /** Whether the department is currently open (player can close to reallocate). */
   open: boolean;
+  /** Number of doctors rostered. Required minimums vary by department. */
+  doctors: number;
+  /** Number of nurses rostered. */
+  nurses: number;
+  /** Daily fixed cost in SGD just for keeping the room open. */
+  dailyFixedCostSGD: number;
+}
+
+export interface OpsBudget {
+  /** Cash on hand (SGD). */
+  cashSGD: number;
+  /** Per-day fixed costs from open departments. */
+  dailyFixedCostSGD: number;
+  /** Per-day staffing cost. */
+  dailyStaffingCostSGD: number;
+  /** Cumulative revenue this shift. */
+  revenueShiftSGD: number;
+  /** Cumulative cost this shift. */
+  costShiftSGD: number;
+}
+
+export interface OpsStaffingPolicy {
+  doctorCostPerShift: number;
+  nurseCostPerShift: number;
+  revenuePerDischarge: number;
+  reputationPenaltyPerDeterioration: number;
+  reputationGainPerDischarge: number;
+}
+
+export const DEFAULT_STAFFING_POLICY: OpsStaffingPolicy = {
+  doctorCostPerShift: 600,
+  nurseCostPerShift: 280,
+  revenuePerDischarge: 1900,
+  reputationPenaltyPerDeterioration: 4,
+  reputationGainPerDischarge: 0.2,
+};
+
+/** Entrance and discharge are flow nodes, not staffed wards — bypass the staffing gate. */
+const STAFFING_EXEMPT: OpsDepartmentId[] = ['entrance', 'discharge'];
+
+/**
+ * Staffing constrains capacity for clinical departments. Above the minimum,
+ * additional staff modestly speed up service time. Entrance and discharge
+ * are exempt — they always allow patient flow.
+ */
+export function effectiveCapacity(dept: OpsDepartment): number {
+  if (!dept.open) return 0;
+  if (STAFFING_EXEMPT.includes(dept.id)) return dept.capacity;
+  if (dept.doctors === 0 || dept.nurses === 0) return 0;
+  return dept.capacity;
+}
+
+export function effectiveServiceTimeMin(dept: OpsDepartment): number {
+  if (!dept.open) return dept.serviceTimeMin;
+  const docFactor = 1 - 0.05 * Math.max(0, dept.doctors - 1);
+  const nurFactor = 1 - 0.03 * Math.max(0, dept.nurses - 1);
+  return Math.max(dept.serviceTimeMin * 0.5, dept.serviceTimeMin * docFactor * nurFactor);
 }
 
 export interface OpsKpis {
@@ -80,6 +137,14 @@ export interface OpsState {
   kpis: OpsKpis;
   /** Running RNG seed for reproducibility. */
   rngSeed: number;
+  /** Cumulative day count (1-based). Increments on shift end. */
+  dayNumber: number;
+  /** Hospital budget. Drains by minute, refills on discharge. */
+  budget: OpsBudget;
+  /** Reputation 0..100. Drops on deteriorations, rises on discharges. */
+  reputation: number;
+  /** Staffing/cost policy in effect. */
+  policy: OpsStaffingPolicy;
 }
 
 /** Mulberry32 — deterministic RNG. */
@@ -150,16 +215,33 @@ function makeRoute(rand: () => number, acuity: Acuity): OpsDepartmentId[] {
 }
 
 const DEFAULT_DEPARTMENTS: Record<OpsDepartmentId, OpsDepartment> = {
-  entrance: { id: 'entrance', name: 'Entrance', capacity: 999, serviceTimeMin: 1, open: true },
-  triage: { id: 'triage', name: 'Triage', capacity: 4, serviceTimeMin: 8, open: true },
-  ed: { id: 'ed', name: 'ED', capacity: 12, serviceTimeMin: 90, open: true },
-  imaging: { id: 'imaging', name: 'Imaging', capacity: 4, serviceTimeMin: 25, open: true },
-  ot: { id: 'ot', name: 'OT', capacity: 3, serviceTimeMin: 110, open: true },
-  ward: { id: 'ward', name: 'Ward', capacity: 30, serviceTimeMin: 720, open: true },
-  discharge: { id: 'discharge', name: 'Discharge', capacity: 999, serviceTimeMin: 5, open: true },
+  entrance: { id: 'entrance', name: 'Entrance', capacity: 999, serviceTimeMin: 1, open: true, doctors: 0, nurses: 1, dailyFixedCostSGD: 200 },
+  triage: { id: 'triage', name: 'Triage', capacity: 4, serviceTimeMin: 8, open: true, doctors: 1, nurses: 2, dailyFixedCostSGD: 800 },
+  ed: { id: 'ed', name: 'ED', capacity: 12, serviceTimeMin: 90, open: true, doctors: 4, nurses: 8, dailyFixedCostSGD: 4500 },
+  imaging: { id: 'imaging', name: 'Imaging', capacity: 4, serviceTimeMin: 25, open: true, doctors: 2, nurses: 2, dailyFixedCostSGD: 2200 },
+  ot: { id: 'ot', name: 'OT', capacity: 3, serviceTimeMin: 110, open: true, doctors: 3, nurses: 4, dailyFixedCostSGD: 5800 },
+  ward: { id: 'ward', name: 'Ward', capacity: 30, serviceTimeMin: 720, open: true, doctors: 3, nurses: 10, dailyFixedCostSGD: 6500 },
+  discharge: { id: 'discharge', name: 'Discharge', capacity: 999, serviceTimeMin: 5, open: true, doctors: 0, nurses: 1, dailyFixedCostSGD: 150 },
 };
 
-export function initialOpsState(seed = 1): OpsState {
+/**
+ * Walk all departments and sum daily staff + fixed costs at the given policy.
+ */
+export function summariseBudget(
+  departments: Record<OpsDepartmentId, OpsDepartment>,
+  policy: OpsStaffingPolicy,
+): { dailyFixedCostSGD: number; dailyStaffingCostSGD: number } {
+  let fixed = 0;
+  let staff = 0;
+  for (const d of Object.values(departments)) {
+    if (!d.open) continue;
+    fixed += d.dailyFixedCostSGD;
+    staff += d.doctors * policy.doctorCostPerShift + d.nurses * policy.nurseCostPerShift;
+  }
+  return { dailyFixedCostSGD: fixed, dailyStaffingCostSGD: staff };
+}
+
+export function initialOpsState(seed = 1, startingCashSGD = 80000, dayNumber = 1): OpsState {
   const empties: Record<OpsDepartmentId, string[]> = {
     entrance: [],
     triage: [],
@@ -169,11 +251,13 @@ export function initialOpsState(seed = 1): OpsState {
     ward: [],
     discharge: [],
   };
+  const departments = { ...DEFAULT_DEPARTMENTS };
+  const sums = summariseBudget(departments, DEFAULT_STAFFING_POLICY);
   return {
     shiftMinElapsed: 0,
     shiftLengthMin: 480,
     patients: [],
-    departments: { ...DEFAULT_DEPARTMENTS },
+    departments,
     queues: empties,
     diversion: false,
     kpis: {
@@ -185,6 +269,16 @@ export function initialOpsState(seed = 1): OpsState {
       occupancy: 0,
     },
     rngSeed: seed,
+    dayNumber,
+    budget: {
+      cashSGD: startingCashSGD,
+      dailyFixedCostSGD: sums.dailyFixedCostSGD,
+      dailyStaffingCostSGD: sums.dailyStaffingCostSGD,
+      revenueShiftSGD: 0,
+      costShiftSGD: 0,
+    },
+    reputation: 70,
+    policy: DEFAULT_STAFFING_POLICY,
   };
 }
 
@@ -217,7 +311,15 @@ export function tickOps(state: OpsState, dorscon: Dorscon, tickMin = 1): OpsStat
     },
     departments: { ...state.departments },
     kpis: { ...state.kpis },
+    budget: { ...state.budget },
+    reputation: state.reputation,
   };
+
+  // --- 0. Drain budget for the elapsed minutes (proportional). ---
+  const minuteFraction = tickMin / state.shiftLengthMin;
+  const tickCost = (state.budget.dailyFixedCostSGD + state.budget.dailyStaffingCostSGD) * minuteFraction;
+  next.budget.costShiftSGD += tickCost;
+  next.budget.cashSGD -= tickCost;
 
   // --- 1. Generate arrivals ---
   const rate = arrivalRatePerMin(dorscon, state.diversion) * tickMin;
@@ -257,6 +359,7 @@ export function tickOps(state: OpsState, dorscon: Dorscon, tickMin = 1): OpsStat
           patient.deteriorated = true;
           patient.done = true;
           next.kpis.deteriorations += 1;
+          next.reputation = Math.max(0, next.reputation - next.policy.reputationPenaltyPerDeterioration);
         }
       }
       continue;
@@ -273,25 +376,28 @@ export function tickOps(state: OpsState, dorscon: Dorscon, tickMin = 1): OpsStat
         const prevAvg = next.kpis.avgLosMin;
         const n = next.kpis.discharged;
         next.kpis.avgLosMin = prevAvg + (patient.losMin - prevAvg) / n;
+        // Revenue + reputation on each clean discharge.
+        next.budget.revenueShiftSGD += next.policy.revenuePerDischarge;
+        next.budget.cashSGD += next.policy.revenuePerDischarge;
+        next.reputation = Math.min(100, next.reputation + next.policy.reputationGainPerDischarge);
         continue;
       }
       const nextDept = patient.route[nextStep];
       const nextDeptState = next.departments[nextDept];
+      const cap = effectiveCapacity(nextDeptState);
+      const svcTime = effectiveServiceTimeMin(nextDeptState);
       const occupants = activeCount(next, nextDept);
-      const queueLen = next.queues[nextDept].length;
-      if (!nextDeptState.open) {
-        // Closed → patient stays in current dept until reopened.
+      if (cap === 0) {
+        // No effective capacity (closed / unstaffed) → patient waits at current dept.
         patient.remainingMin = 5;
         continue;
       }
-      if (occupants + 1 <= nextDeptState.capacity) {
-        // Take a slot.
+      if (occupants + 1 <= cap) {
         patient.step = nextStep;
-        patient.remainingMin = nextDeptState.serviceTimeMin;
+        patient.remainingMin = svcTime;
       } else {
-        // Queue.
         patient.step = nextStep;
-        patient.remainingMin = nextDeptState.serviceTimeMin;
+        patient.remainingMin = svcTime;
         next.queues[nextDept].push(patient.id);
       }
     }
@@ -300,13 +406,13 @@ export function tickOps(state: OpsState, dorscon: Dorscon, tickMin = 1): OpsStat
   // --- 3. Drain queues into freed slots ---
   for (const id of Object.keys(next.queues) as OpsDepartmentId[]) {
     const dept = next.departments[id];
-    if (!dept.open) continue;
+    const cap = effectiveCapacity(dept);
+    if (cap === 0) continue;
     const occupants = activeCount(next, id);
-    let free = dept.capacity - occupants;
+    let free = cap - occupants;
     while (free > 0 && next.queues[id].length > 0) {
       const patientId = next.queues[id].shift()!;
       free -= 1;
-      // Already pointed at this dept; just take a slot (queue removal is the slot).
       const _p = next.patients.find((p) => p.id === patientId);
       void _p;
     }
@@ -315,7 +421,7 @@ export function tickOps(state: OpsState, dorscon: Dorscon, tickMin = 1): OpsStat
   // --- 4. Update derived KPIs ---
   const totalCapacity = Object.values(next.departments)
     .filter((d) => d.id !== 'entrance' && d.id !== 'discharge')
-    .reduce((acc, d) => acc + d.capacity, 0);
+    .reduce((acc, d) => acc + effectiveCapacity(d), 0);
   const totalActive = (['triage', 'ed', 'imaging', 'ot', 'ward'] as OpsDepartmentId[])
     .reduce((acc, d) => acc + activeCount(next, d), 0);
   next.kpis.occupancy = totalCapacity > 0 ? totalActive / totalCapacity : 0;
@@ -333,4 +439,53 @@ export function tickOps(state: OpsState, dorscon: Dorscon, tickMin = 1): OpsStat
   }
 
   return next;
+}
+
+export interface OpsDaySummary {
+  day: number;
+  arrivals: number;
+  discharged: number;
+  deteriorations: number;
+  avgLosMin: number;
+  netSGD: number;
+  reputation: number;
+}
+
+export function summariseDay(state: OpsState): OpsDaySummary {
+  return {
+    day: state.dayNumber,
+    arrivals: state.kpis.arrivals,
+    discharged: state.kpis.discharged,
+    deteriorations: state.kpis.deteriorations,
+    avgLosMin: state.kpis.avgLosMin,
+    netSGD: state.budget.revenueShiftSGD - state.budget.costShiftSGD,
+    reputation: state.reputation,
+  };
+}
+
+/**
+ * Roll a finished shift into the next day: keep cash, reputation, and
+ * department configuration; reset patients, queues, KPIs, shift clock.
+ */
+export function rollIntoNextDay(state: OpsState): OpsState {
+  const sums = summariseBudget(state.departments, state.policy);
+  const empties: Record<OpsDepartmentId, string[]> = {
+    entrance: [], triage: [], ed: [], imaging: [], ot: [], ward: [], discharge: [],
+  };
+  return {
+    ...state,
+    dayNumber: state.dayNumber + 1,
+    shiftMinElapsed: 0,
+    patients: [],
+    queues: empties,
+    kpis: { arrivals: 0, discharged: 0, deteriorations: 0, avgLosMin: 0, edWaitP3Min: 0, occupancy: 0 },
+    budget: {
+      ...state.budget,
+      dailyFixedCostSGD: sums.dailyFixedCostSGD,
+      dailyStaffingCostSGD: sums.dailyStaffingCostSGD,
+      revenueShiftSGD: 0,
+      costShiftSGD: 0,
+    },
+    rngSeed: state.rngSeed + 1, // change RNG so each day differs
+  };
 }
