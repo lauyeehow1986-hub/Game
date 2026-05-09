@@ -25,7 +25,13 @@ export function HUD() {
   const elapsed = useGame((s) => s.run.elapsedGameMin);
   const status = useGame((s) => s.run.status);
   const cost = useGame((s) => s.run.totalCostSGD);
+  const caseDef = useGame((s) => s.caseDef);
+  const flags = useGame((s) => s.run.flags);
   const [muted, setMutedState] = useState(true);
+
+  const timer = caseDef?.acuteTimer;
+  const exceeded = timer && elapsed > timer.goalMin;
+  const flagAlreadySet = timer && flags.includes(timer.missedFlag);
 
   useEffect(() => {
     setMutedState(isMuted());
@@ -77,6 +83,21 @@ export function HUD() {
         <span className="px-2 py-1 rounded bg-clinical-bg border border-clinical-border text-clinical-subtle">
           Cash OOP so far: <span className="text-white font-mono">S${cost.toFixed(0)}</span>
         </span>
+        {timer && (
+          <span
+            className={`px-2 py-1 rounded border font-mono ${
+              exceeded
+                ? 'bg-clinical-danger/20 border-clinical-danger text-clinical-danger'
+                : elapsed > timer.goalMin * 0.7
+                ? 'bg-clinical-warn/15 border-clinical-warn/50 text-clinical-warn'
+                : 'bg-clinical-bg border-clinical-border text-clinical-ok'
+            }`}
+            title={timer.goalLabel}
+          >
+            {timer.goalLabel}: {elapsed}/{timer.goalMin} min
+            {exceeded && !flagAlreadySet && ' — exceeded'}
+          </span>
+        )}
       </div>
 
       <div className="ml-auto flex items-center gap-2">

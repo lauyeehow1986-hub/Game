@@ -61,6 +61,7 @@ export const sars2003Case: CaseDefinition = {
             rationale:
               'A core SARS lesson: when the pathogen is unknown, default to the highest plausible level of precaution. Today, NCID and DORSCON encode this — it didn\'t exist in March 2003.',
             outcome: { patient: '', caregiver: '', staff: 'Cohort cubicle, full PPE, smaller exposure footprint.' },
+            effects: { pandemic: { dorsconShift: 1, ppeStockpilePctDelta: -8 } },
           },
           {
             id: 'standard-only',
@@ -69,6 +70,7 @@ export const sars2003Case: CaseDefinition = {
             rationale:
               'What actually happened in the early weeks. Resulted in extensive nosocomial spread to staff and patients.',
             outcome: { patient: '', caregiver: '', staff: 'Multiple HCW infections; outbreak amplified.' },
+            effects: { setFlags: ['hcw-cluster'], pandemic: { dorsconShift: 1, ppeStockpilePctDelta: -20, surgeCapacityPctDelta: -20 } },
           },
         ],
       },
@@ -101,6 +103,7 @@ export const sars2003Case: CaseDefinition = {
             rationale:
               'This was the operational decision that broke the chain. Centralisation + ring-fencing + no rotation prevents seeding of other hospitals.',
             outcome: { patient: '', caregiver: '', staff: 'TTSH becomes the SARS hospital; other hospitals continue routine care.' },
+            effects: { clearFlags: ['hcw-cluster'], pandemic: { dorsconShift: 1, surgeCapacityPctDelta: 20 } },
           },
           {
             id: 'distribute',
@@ -108,6 +111,7 @@ export const sars2003Case: CaseDefinition = {
             score: -10,
             rationale: 'Multiplies seeding events — opposite of what the outbreak needed.',
             outcome: { patient: '', caregiver: '', staff: 'New clusters at SGH and NUH.' },
+            effects: { setFlags: ['multi-cluster-seeded'], pandemic: { dorsconShift: 1, ppeStockpilePctDelta: -25, surgeCapacityPctDelta: -30 } },
           },
           {
             id: 'no-change',
@@ -115,6 +119,7 @@ export const sars2003Case: CaseDefinition = {
             score: -8,
             rationale: 'Inadequate; PPE alone without ring-fencing failed in early-2003 reality.',
             outcome: { patient: '', caregiver: '', staff: 'Spread continues.' },
+            effects: { pandemic: { ppeStockpilePctDelta: -15, surgeCapacityPctDelta: -15 } },
           },
         ],
       },

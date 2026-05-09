@@ -16,14 +16,16 @@ import {
   type FinancingTotals,
   type PatientProfile,
   type WardClass,
+  type ChasTier,
 } from '../lib/financing';
 import { getFacility } from '../content';
-import { recordsFlowBetween, profileForFacility, type RecordsFlow, type DataExchangeProfile } from '../lib/referral';
+import { recordsFlowBetween, type RecordsFlow } from '../lib/referral';
+import { firstVisibleNode, pickNextNode } from '../lib/pathway';
 
 interface CaregiverBurden {
   timeOffWorkHours: number;
-  financialWorry: number; // 0..100
-  sleepDebt: number; // 0..100
+  financialWorry: number;
+  sleepDebt: number;
 }
 
 const emptyBurden: CaregiverBurden = {
@@ -40,10 +42,16 @@ export interface PandemicState {
   surgeCapacityPct: number;
   edDiversionActive: boolean;
   ncidActivated: boolean;
-  /** Generic Disease X r0 (illustrative). */
   rEffective: number;
-  /** Free-text current alert label. */
   label: string;
+}
+
+interface KpiState {
+  bedOccupancyPct: number;
+  edWaitMin: number;
+  staffFatiguePct: number;
+  runningCostSGD: number;
+  dorscon: Dorscon;
 }
 
 interface GameState {
@@ -53,29 +61,19 @@ interface GameState {
   segments: FinancingSegmentResult[];
   totals: FinancingTotals;
   caregiverBurden: CaregiverBurden;
-  /** Facility the player is currently viewing in the canvas. */
   viewedFacilityId: string;
   pandemic: PandemicState;
-  /** Most recent inter-facility records-flow event for the current run. */
   lastTransfer: {
     fromFacilityId: string;
     toFacilityId: string;
     flow: RecordsFlow;
   } | null;
-  /** Cumulative log of records flows during the run. */
   transferLog: Array<{
     fromFacilityId: string;
     toFacilityId: string;
     flow: RecordsFlow;
   }>;
-
-  kpis: {
-    bedOccupancyPct: number;
-    edWaitMin: number;
-    staffFatiguePct: number;
-    runningCostSGD: number;
-    dorscon: Dorscon;
-  };
+  kpis: KpiState;
 
   startCase: (caseDef: CaseDefinition) => void;
   setWardClass: (ward: WardClass) => void;
@@ -88,6 +86,21 @@ interface GameState {
   setSurge: (pct: number) => void;
   setEdDiversion: (on: boolean) => void;
   setNcidActivated: (on: boolean) => void;
+  /** Restore a previously persisted run from snapshot data + a case def. */
+  restoreRun: (caseDef: CaseDefinition, snap: PersistedSnapshot) => void;
+}
+
+interface PersistedSnapshot {
+  run: CaseRunSnapshot;
+  caseId: string;
+  profile: PatientProfile;
+  segments: FinancingSegmentResult[];
+  totals: FinancingTotals;
+  caregiverBurden: CaregiverBurden;
+  viewedFacilityId: string;
+  transferLog: GameState['transferLog'];
+  lastTransfer: GameState['lastTransfer'];
+  pandemic: PandemicState;
 }
 
 const emptyRun: CaseRunSnapshot = {
@@ -100,12 +113,11 @@ const emptyRun: CaseRunSnapshot = {
   startedAtGameMin: 0,
   elapsedGameMin: 0,
   totalCostSGD: 0,
+  flags: [],
 };
 
-const baseDorscon: Dorscon = 'Green';
-
 const basePandemic: PandemicState = {
-  dorscon: baseDorscon,
+  dorscon: 'Green',
   ppeStockpilePct: 78,
   surgeCapacityPct: 22,
   edDiversionActive: false,
@@ -114,22 +126,69 @@ const basePandemic: PandemicState = {
   label: 'No outbreak in progress',
 };
 
-
-const baseKpis = {
+/** Baseline KPIs for DORSCON Green; deriveKpis modifies them by pandemic state. */
+const baseKpisGreen: KpiState = {
   bedOccupancyPct: 87,
   edWaitMin: 168,
   staffFatiguePct: 64,
   runningCostSGD: 0,
-  dorscon: 'Green' as const,
+  dorscon: 'Green',
 };
 
-const emptyTotals: FinancingTotals = { gross: 0, subsidy: 0, mediShield: 0, mediSave: 0, cash: 0 };
+const emptyTotals: FinancingTotals = {
+  gross: 0,
+  subsidy: 0,
+  mediShield: 0,
+  mediSave: 0,
+  cash: 0,
+};
+
+const SAVE_KEY = 'sg-pathway-active-run-v1';
+
+/**
+ * Compute live KPIs from pandemic state so that DORSCON, PPE depletion, surge
+ * capacity, and ED diversion actually bite. Replaces the previous static
+ * values that didn't change.
+ */
+function deriveKpis(pandemic: PandemicState, runningCost: number): KpiState {
+  const dorsconLoad: Record<Dorscon, number> = {
+    Green: 0,
+    Yellow: 0.15,
+    Orange: 0.45,
+    Red: 0.9,
+  };
+  const load = dorsconLoad[pandemic.dorscon];
+  const ppeShortfall = Math.max(0, (50 - pandemic.ppeStockpilePct) / 50);
+  const surgeBuffer = Math.max(0, (40 - pandemic.surgeCapacityPct) / 40);
+  const diversion = pandemic.edDiversionActive ? -40 : 0;
+  return {
+    bedOccupancyPct: clamp(
+      Math.round(baseKpisGreen.bedOccupancyPct + load * 12 + surgeBuffer * 6),
+      0,
+      100,
+    ),
+    edWaitMin: Math.max(
+      30,
+      Math.round(baseKpisGreen.edWaitMin + load * 240 + ppeShortfall * 60 + diversion),
+    ),
+    staffFatiguePct: clamp(
+      Math.round(baseKpisGreen.staffFatiguePct + load * 30 + ppeShortfall * 10 + surgeBuffer * 8),
+      0,
+      100,
+    ),
+    runningCostSGD: runningCost,
+    dorscon: pandemic.dorscon,
+  };
+}
+
+function clamp(n: number, min = 0, max = 100) {
+  return Math.max(min, Math.min(max, n));
+}
 
 function tierForFacility(facilityId?: string): 'subsidised' | 'private' {
   if (!facilityId) return 'subsidised';
   const f = getFacility(facilityId);
   if (!f) return 'subsidised';
-  // Private hospitals / specialists / GPs / telemed bill at private rate.
   if (f.sector === 'private' && f.type !== 'ancillary') return 'private';
   if (f.type === 'private-acute' || f.type === 'private-specialist') return 'private';
   if (f.type === 'gp' || f.type === 'telemed') return 'private';
@@ -162,8 +221,95 @@ function applyBurden(prev: CaregiverBurden, node: PathwayNode): CaregiverBurden 
   };
 }
 
-function clamp(n: number, min = 0, max = 100) {
-  return Math.max(min, Math.min(max, n));
+function applyEffectBurden(prev: CaregiverBurden, eff: DecisionOption['effects']): CaregiverBurden {
+  if (!eff?.caregiverBurden) return prev;
+  const b = eff.caregiverBurden;
+  return {
+    timeOffWorkHours: prev.timeOffWorkHours + (b.timeOffWorkHours ?? 0),
+    financialWorry: clamp(prev.financialWorry + (b.financialWorry ?? 0)),
+    sleepDebt: clamp(prev.sleepDebt + (b.sleepDebt ?? 0)),
+  };
+}
+
+const DORSCON_ORDER: Dorscon[] = ['Green', 'Yellow', 'Orange', 'Red'];
+function shiftDorscon(current: Dorscon, delta: 1 | -1 | undefined): Dorscon {
+  if (!delta) return current;
+  const idx = DORSCON_ORDER.indexOf(current);
+  return DORSCON_ORDER[clamp(idx + delta, 0, DORSCON_ORDER.length - 1)];
+}
+
+function dorsconLabel(level: Dorscon): string {
+  switch (level) {
+    case 'Green':
+      return 'No or low pathogen activity';
+    case 'Yellow':
+      return 'Mild disease, mostly contained — heightened vigilance';
+    case 'Orange':
+      return 'Moderate transmission — NCID-led, hospital surge plans active';
+    case 'Red':
+      return 'Severe widespread transmission — system-wide surge and resource rationing';
+  }
+}
+
+/**
+ * Optionally perturb a profile within case-allowed ranges so each run feels
+ * different. Used when CaseDefinition.randomiseProfile is set.
+ */
+function maybeRandomiseProfile(profile: PatientProfile, randomise: boolean | undefined): PatientProfile {
+  if (!randomise) return profile;
+  const chasTiers: ChasTier[] = ['none', 'green', 'orange', 'blue', 'pg', 'mg'];
+  const pickedChas = chasTiers[Math.floor(Math.random() * chasTiers.length)];
+  const ipFlip = Math.random() < 0.35;
+  const incomeJitter = Math.round((Math.random() * 800 - 400));
+  const msJitter = Math.round((Math.random() * 4000 - 1500));
+  return {
+    ...profile,
+    chasTier: pickedChas,
+    hasIntegratedShield: ipFlip ? !profile.hasIntegratedShield : profile.hasIntegratedShield,
+    perCapitaIncomeSGD: clamp(profile.perCapitaIncomeSGD + incomeJitter, 600, 8000),
+    mediSaveBalanceSGD: Math.max(500, profile.mediSaveBalanceSGD + msJitter),
+  };
+}
+
+function persistSnapshot(state: GameState): void {
+  if (typeof window === 'undefined') return;
+  if (!state.caseDef || state.run.status === 'idle' || state.run.status === 'completed') {
+    localStorage.removeItem(SAVE_KEY);
+    return;
+  }
+  try {
+    const payload: PersistedSnapshot = {
+      run: state.run,
+      caseId: state.caseDef.id,
+      profile: state.profile!,
+      segments: state.segments,
+      totals: state.totals,
+      caregiverBurden: state.caregiverBurden,
+      viewedFacilityId: state.viewedFacilityId,
+      transferLog: state.transferLog,
+      lastTransfer: state.lastTransfer,
+      pandemic: state.pandemic,
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
+  } catch {
+    /* swallow quota / serialisation errors */
+  }
+}
+
+export function loadSnapshot(): PersistedSnapshot | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as PersistedSnapshot;
+  } catch {
+    return null;
+  }
+}
+
+export function clearSnapshot(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(SAVE_KEY);
 }
 
 export const useGame = create<GameState>((set, get) => ({
@@ -177,17 +323,18 @@ export const useGame = create<GameState>((set, get) => ({
   pandemic: { ...basePandemic },
   lastTransfer: null,
   transferLog: [],
-  kpis: { ...baseKpis },
+  kpis: deriveKpis(basePandemic, 0),
 
   startCase: (caseDef) => {
-    const first = caseDef.pathway[0];
-    const profileTemplate =
+    const first = firstVisibleNode(caseDef);
+    if (!first) return;
+    const baseProfile =
       DEFAULT_PROFILES[caseDef.profileKey] ?? DEFAULT_PROFILES.taxiDriver;
-    const profile: PatientProfile = { ...profileTemplate };
-    const segments = first ? applyNodeFinancing(profile, [], first, caseDef.primaryFacility) : [];
+    const profile = maybeRandomiseProfile({ ...baseProfile }, caseDef.randomiseProfile);
+    const segments = applyNodeFinancing(profile, [], first, caseDef.primaryFacility);
     const totals = totalsFor(segments);
-    const burden = first ? applyBurden(emptyBurden, first) : emptyBurden;
-    const startFacilityId = first?.facility ?? caseDef.primaryFacility;
+    const burden = applyBurden(emptyBurden, first);
+    const startFacilityId = first.facility ?? caseDef.primaryFacility;
 
     set((s) => ({
       caseDef,
@@ -200,25 +347,56 @@ export const useGame = create<GameState>((set, get) => ({
       transferLog: [],
       run: {
         caseId: caseDef.id,
-        status: first?.decision ? 'awaiting-decision' : 'running',
-        currentNodeId: first?.id ?? null,
+        status: first.decision ? 'awaiting-decision' : 'running',
+        currentNodeId: first.id,
         currentFacilityId: startFacilityId,
-        pendingDecision:
-          first && first.decision
-            ? { nodeId: first.id, decision: first.decision }
-            : null,
+        pendingDecision: first.decision
+          ? { nodeId: first.id, decision: first.decision }
+          : null,
         log: [],
         startedAtGameMin: 0,
-        elapsedGameMin: 0,
+        elapsedGameMin: first.durationMin,
         totalCostSGD: totals.cash,
+        flags: [],
       },
-      kpis: { ...baseKpis, runningCostSGD: totals.cash, dorscon: s.pandemic.dorscon },
+      kpis: deriveKpis(s.pandemic, totals.cash),
     }));
     bus.emit(Events.CaseStart, { caseId: caseDef.id });
     bus.emit(Events.FacilityChanged, { facilityId: startFacilityId });
-    bus.emit(Events.PatientMoveTo, { department: first?.department });
-    if (first?.decision) {
+    bus.emit(Events.PatientMoveTo, { department: first.department });
+    if (first.decision) {
       bus.emit(Events.CaseDecisionRequested, { decision: first.decision, nodeId: first.id });
+    }
+    persistSnapshot(get());
+  },
+
+  restoreRun: (caseDef, snap) => {
+    set(() => ({
+      caseDef,
+      profile: snap.profile,
+      segments: snap.segments,
+      totals: snap.totals,
+      caregiverBurden: snap.caregiverBurden,
+      viewedFacilityId: snap.viewedFacilityId,
+      lastTransfer: snap.lastTransfer,
+      transferLog: snap.transferLog,
+      run: snap.run,
+      pandemic: snap.pandemic,
+      kpis: deriveKpis(snap.pandemic, snap.totals.cash),
+    }));
+    bus.emit(Events.CaseStart, { caseId: caseDef.id });
+    if (snap.run.currentFacilityId) {
+      bus.emit(Events.FacilityChanged, { facilityId: snap.run.currentFacilityId });
+    }
+    bus.emit(Events.PatientMoveTo, {
+      department:
+        caseDef.pathway.find((n) => n.id === snap.run.currentNodeId)?.department ?? 'entrance',
+    });
+    if (snap.run.pendingDecision) {
+      bus.emit(Events.CaseDecisionRequested, {
+        decision: snap.run.pendingDecision.decision,
+        nodeId: snap.run.pendingDecision.nodeId,
+      });
     }
   },
 
@@ -228,26 +406,39 @@ export const useGame = create<GameState>((set, get) => ({
   },
 
   setDorscon: (level) =>
-    set((s) => ({
-      pandemic: {
+    set((s) => {
+      const pandemic: PandemicState = {
         ...s.pandemic,
         dorscon: level,
-        label:
-          level === 'Green'
-            ? 'No or low pathogen activity'
-            : level === 'Yellow'
-            ? 'Mild disease, mostly contained — heightened vigilance'
-            : level === 'Orange'
-            ? 'Moderate transmission — NCID-led, hospital surge plans active'
-            : 'Severe widespread transmission — system-wide surge and resource rationing',
+        label: dorsconLabel(level),
         ncidActivated: level === 'Orange' || level === 'Red' ? true : s.pandemic.ncidActivated,
-      },
-      kpis: { ...s.kpis, dorscon: level },
-    })),
-  setPpe: (pct) => set((s) => ({ pandemic: { ...s.pandemic, ppeStockpilePct: clamp(pct) } })),
-  setSurge: (pct) => set((s) => ({ pandemic: { ...s.pandemic, surgeCapacityPct: clamp(pct) } })),
-  setEdDiversion: (on) => set((s) => ({ pandemic: { ...s.pandemic, edDiversionActive: on } })),
-  setNcidActivated: (on) => set((s) => ({ pandemic: { ...s.pandemic, ncidActivated: on } })),
+      };
+      return {
+        pandemic,
+        kpis: deriveKpis(pandemic, s.run.totalCostSGD),
+      };
+    }),
+
+  setPpe: (pct) =>
+    set((s) => {
+      const pandemic = { ...s.pandemic, ppeStockpilePct: clamp(pct) };
+      return { pandemic, kpis: deriveKpis(pandemic, s.run.totalCostSGD) };
+    }),
+
+  setSurge: (pct) =>
+    set((s) => {
+      const pandemic = { ...s.pandemic, surgeCapacityPct: clamp(pct) };
+      return { pandemic, kpis: deriveKpis(pandemic, s.run.totalCostSGD) };
+    }),
+
+  setEdDiversion: (on) =>
+    set((s) => {
+      const pandemic = { ...s.pandemic, edDiversionActive: on };
+      return { pandemic, kpis: deriveKpis(pandemic, s.run.totalCostSGD) };
+    }),
+
+  setNcidActivated: (on) =>
+    set((s) => ({ pandemic: { ...s.pandemic, ncidActivated: on } })),
 
   setWardClass: (ward) => {
     const { profile, caseDef, segments } = get();
@@ -262,8 +453,9 @@ export const useGame = create<GameState>((set, get) => ({
       segments: recomputed,
       totals,
       run: { ...s.run, totalCostSGD: totals.cash },
-      kpis: { ...s.kpis, runningCostSGD: totals.cash },
+      kpis: deriveKpis(s.pandemic, totals.cash),
     }));
+    persistSnapshot(get());
   },
 
   setIntegratedShield: (on) => {
@@ -279,8 +471,9 @@ export const useGame = create<GameState>((set, get) => ({
       segments: recomputed,
       totals,
       run: { ...s.run, totalCostSGD: totals.cash },
-      kpis: { ...s.kpis, runningCostSGD: totals.cash },
+      kpis: deriveKpis(s.pandemic, totals.cash),
     }));
+    persistSnapshot(get());
   },
 
   resolveDecision: (option) => {
@@ -301,51 +494,80 @@ export const useGame = create<GameState>((set, get) => ({
     };
     bus.emit(Events.CaseDecisionResolved, { entry });
 
-    // Decisions in v0.2 can change the patient profile (ward-class option).
+    // ===== apply effects =====
     let nextProfile = profile;
-    const wardOption = option.id.startsWith('class-') ? (option.id.split('-')[1].toUpperCase() as WardClass) : null;
-    if (wardOption && decision.id === 'subsidy-class') {
-      nextProfile = { ...profile, wardClass: wardOption };
+    if (option.effects?.wardClass) {
+      nextProfile = { ...nextProfile, wardClass: option.effects.wardClass };
+    }
+    if (typeof option.effects?.integratedShield === 'boolean') {
+      nextProfile = { ...nextProfile, hasIntegratedShield: option.effects.integratedShield };
     }
 
-    const idx = caseDef.pathway.findIndex((n) => n.id === nodeId);
-    let nextNode: PathwayNode | undefined;
-    if (option.nextNode) {
-      nextNode = caseDef.pathway.find((n) => n.id === option.nextNode);
-    } else {
-      nextNode = caseDef.pathway[idx + 1];
+    let nextPandemic = get().pandemic;
+    if (option.effects?.pandemic) {
+      const p = option.effects.pandemic;
+      nextPandemic = {
+        ...nextPandemic,
+        dorscon: shiftDorscon(nextPandemic.dorscon, p.dorsconShift),
+        label: dorsconLabel(shiftDorscon(nextPandemic.dorscon, p.dorsconShift)),
+        ppeStockpilePct: clamp(nextPandemic.ppeStockpilePct + (p.ppeStockpilePctDelta ?? 0)),
+        surgeCapacityPct: clamp(nextPandemic.surgeCapacityPct + (p.surgeCapacityPctDelta ?? 0)),
+      };
     }
+
+    const flagsAfter = new Set(run.flags);
+    option.effects?.setFlags?.forEach((f) => flagsAfter.add(f));
+    option.effects?.clearFlags?.forEach((f) => flagsAfter.delete(f));
+    // Acute timer: if we've already blown past the goal, mark the missed-
+    // deadline flag so consequence nodes (deterioration, family meeting) fire.
+    if (caseDef.acuteTimer && run.elapsedGameMin > caseDef.acuteTimer.goalMin) {
+      flagsAfter.add(caseDef.acuteTimer.missedFlag);
+    }
+
+    const nextNode = pickNextNode(caseDef, nodeId, option.effects, option.nextNode, flagsAfter);
 
     if (!nextNode) {
       const recomputed = get().segments.map((s) =>
         computeSegment(nextProfile, { charge: s.charge, grossSGD: s.grossSGD, tier: s.tier }),
       );
       const totals = totalsFor(recomputed);
+      const burdenWithEffect = applyEffectBurden(get().caregiverBurden, option.effects);
       set((s) => ({
         profile: nextProfile,
         segments: recomputed,
         totals,
+        caregiverBurden: burdenWithEffect,
+        pandemic: nextPandemic,
         run: {
           ...s.run,
           status: 'completed',
           pendingDecision: null,
           log: [...s.run.log, entry],
           totalCostSGD: totals.cash,
+          flags: Array.from(flagsAfter),
         },
-        kpis: { ...s.kpis, runningCostSGD: totals.cash },
+        kpis: deriveKpis(nextPandemic, totals.cash),
       }));
       bus.emit(Events.CaseCompleted);
+      persistSnapshot(get()); // will clear, since status === 'completed'
       return;
     }
 
-    const newSegments = applyNodeFinancing(nextProfile, get().segments, nextNode, caseDef.primaryFacility);
-    const fully = newSegments.map((s) =>
+    const segmentsWithNode = applyNodeFinancing(
+      nextProfile,
+      get().segments,
+      nextNode,
+      caseDef.primaryFacility,
+    );
+    const fully = segmentsWithNode.map((s) =>
       computeSegment(nextProfile, { charge: s.charge, grossSGD: s.grossSGD, tier: s.tier }),
     );
     const totals = totalsFor(fully);
-    const burden = applyBurden(get().caregiverBurden, nextNode);
+    const burdenWithNode = applyBurden(get().caregiverBurden, nextNode);
+    const burden = applyEffectBurden(burdenWithNode, option.effects);
     const nextFacilityId = nextNode.facility ?? caseDef.primaryFacility;
-    const facilityChanged = nextFacilityId !== get().run.currentFacilityId;
+    const prevFacilityId = get().run.currentFacilityId;
+    const facilityChanged = nextFacilityId !== prevFacilityId;
 
     set((s) => ({
       profile: nextProfile,
@@ -353,23 +575,25 @@ export const useGame = create<GameState>((set, get) => ({
       totals,
       caregiverBurden: burden,
       viewedFacilityId: nextFacilityId,
+      pandemic: nextPandemic,
       run: {
         ...s.run,
-        currentNodeId: nextNode!.id,
+        currentNodeId: nextNode.id,
         currentFacilityId: nextFacilityId,
-        status: nextNode!.decision ? 'awaiting-decision' : 'running',
-        pendingDecision: nextNode!.decision
-          ? { nodeId: nextNode!.id, decision: nextNode!.decision }
+        status: nextNode.decision ? 'awaiting-decision' : 'running',
+        pendingDecision: nextNode.decision
+          ? { nodeId: nextNode.id, decision: nextNode.decision }
           : null,
         log: [...s.run.log, entry],
-        elapsedGameMin: s.run.elapsedGameMin + nextNode!.durationMin,
+        elapsedGameMin: s.run.elapsedGameMin + nextNode.durationMin,
         totalCostSGD: totals.cash,
+        flags: Array.from(flagsAfter),
       },
-      kpis: { ...s.kpis, runningCostSGD: totals.cash },
+      kpis: deriveKpis(nextPandemic, totals.cash),
     }));
+
     if (facilityChanged) {
-      const prev = get().run.currentFacilityId;
-      const fromF = prev ? getFacility(prev) : undefined;
+      const fromF = prevFacilityId ? getFacility(prevFacilityId) : undefined;
       const toF = getFacility(nextFacilityId);
       if (fromF && toF) {
         const flow = recordsFlowBetween(fromF, toF);
@@ -388,6 +612,7 @@ export const useGame = create<GameState>((set, get) => ({
         nodeId: nextNode.id,
       });
     }
+    persistSnapshot(get());
   },
 
   resetRun: () => {
@@ -400,8 +625,11 @@ export const useGame = create<GameState>((set, get) => ({
       caregiverBurden: { ...emptyBurden },
       lastTransfer: null,
       transferLog: [],
-      kpis: { ...baseKpis, dorscon: s.pandemic.dorscon },
+      kpis: deriveKpis(s.pandemic, 0),
     }));
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(SAVE_KEY);
+    }
     bus.emit(Events.CaseReset);
   },
 }));
@@ -414,4 +642,9 @@ export function getCurrentNode(): PathwayNode | undefined {
 
 export function getPendingDecision(): Decision | null {
   return useGame.getState().run.pendingDecision?.decision ?? null;
+}
+
+export function hasPersistedRun(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(SAVE_KEY) !== null;
 }

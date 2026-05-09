@@ -126,6 +126,7 @@ export const electiveTHR: CaseDefinition = {
               caregiver: 'You sigh — the bill estimate is manageable.',
               staff: 'MSW pleased; bill estimate ~S$2,200 patient share.',
             },
+            effects: { wardClass: 'C' },
           },
           {
             id: 'class-b2',
@@ -138,6 +139,7 @@ export const electiveTHR: CaseDefinition = {
               caregiver: 'You squint at the bill estimate but it works.',
               staff: 'MSW notes Class C would have been cheaper.',
             },
+            effects: { wardClass: 'B2' },
           },
           {
             id: 'class-b1',
@@ -145,6 +147,7 @@ export const electiveTHR: CaseDefinition = {
             score: 3,
             rationale: 'No clinical benefit, significantly higher OOP. Often chosen for amenity reasons only.',
             outcome: { patient: '', caregiver: '', staff: 'Family willing; MSW counsels on cost.' },
+            effects: { wardClass: 'B1', caregiverBurden: { financialWorry: 12 } },
           },
           {
             id: 'class-a',
@@ -152,6 +155,7 @@ export const electiveTHR: CaseDefinition = {
             score: -3,
             rationale: 'Punishing for a low-income MG senior with no IP rider. Avoidable financial toxicity.',
             outcome: { patient: 'A single room, but the bill at discharge is shocking.', caregiver: 'You consider Medifund application.', staff: 'MSW unhappy.' },
+            effects: { wardClass: 'A', setFlags: ['financial-distress'], caregiverBurden: { financialWorry: 28 } },
           },
         ],
       },

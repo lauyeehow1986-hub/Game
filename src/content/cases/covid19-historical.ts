@@ -64,6 +64,7 @@ export const covid19Case: CaseDefinition = {
             rationale:
               'Matches what Singapore did in February 2020 once a transmission cluster was detected. Pre-emptive escalation buys time.',
             outcome: { patient: '', caregiver: 'Schools begin home-based learning briefly.', staff: 'Hospital visitor restrictions activated within hours.' },
+            effects: { pandemic: { dorsconShift: 1, surgeCapacityPctDelta: 25 } },
           },
           {
             id: 'stay-yellow',
@@ -71,6 +72,7 @@ export const covid19Case: CaseDefinition = {
             score: -6,
             rationale: 'Misses the early-window opportunity to slow community transmission.',
             outcome: { patient: '', caregiver: '', staff: '' },
+            effects: { setFlags: ['delayed-escalation'], pandemic: { ppeStockpilePctDelta: -15, surgeCapacityPctDelta: -10 } },
           },
         ],
       },
@@ -139,6 +141,7 @@ export const covid19Case: CaseDefinition = {
             rationale:
               'What Singapore eventually did: on-site Migrant Worker Medical Centres, segregation, mass testing, vaccination. Hospital surge protected.',
             outcome: { patient: 'You receive care in your dorm; meals delivered.', caregiver: 'Family overseas video-call you nightly.', staff: 'Acute hospitals not overwhelmed by dorm referrals.' },
+            effects: { pandemic: { surgeCapacityPctDelta: 30 } },
           },
           {
             id: 'hospitalise-all',
@@ -146,6 +149,7 @@ export const covid19Case: CaseDefinition = {
             score: -8,
             rationale: 'Would have collapsed the hospital system. Community-based isolation was the right answer.',
             outcome: { patient: '', caregiver: '', staff: 'Hospitals overwhelmed.' },
+            effects: { setFlags: ['system-strain'], pandemic: { surgeCapacityPctDelta: -40, ppeStockpilePctDelta: -20 } },
           },
           {
             id: 'no-action',
@@ -153,6 +157,7 @@ export const covid19Case: CaseDefinition = {
             score: -10,
             rationale: 'Equity failure and public-health failure.',
             outcome: { patient: '', caregiver: '', staff: '' },
+            effects: { setFlags: ['system-strain'], pandemic: { surgeCapacityPctDelta: -30, dorsconShift: 1 } },
           },
         ],
       },

@@ -30,6 +30,12 @@ export const strokeThrombectomy: CaseDefinition = {
   involvedFacilities: ['nuh', 'jch'],
   profileKey: 'retiredAuntie',
   allowsWardChoice: true,
+  randomiseProfile: true,
+  acuteTimer: {
+    goalMin: 60,
+    goalLabel: 'Door-to-puncture',
+    missedFlag: 'd2p-missed',
+  },
   guidelines: [SCDF_STROKE, MOH_STROKE, ESO_2022, HEALTHIER_SG],
   pathway: [
     {
@@ -194,6 +200,7 @@ export const strokeThrombectomy: CaseDefinition = {
             rationale:
               'Means-test plus Merdeka Generation top-up gives the highest subsidy. Same neurologist, same evidence-based care.',
             outcome: { patient: 'A 6-bedder cubicle.', caregiver: 'You see the bill estimate and breathe out.', staff: 'MSW happy.' },
+            effects: { wardClass: 'C' },
           },
           {
             id: 'class-b2',
@@ -201,6 +208,7 @@ export const strokeThrombectomy: CaseDefinition = {
             score: 7,
             rationale: 'Reasonable; smaller subsidy.',
             outcome: { patient: '', caregiver: '', staff: 'OK.' },
+            effects: { wardClass: 'B2' },
           },
           {
             id: 'class-a',
@@ -208,6 +216,7 @@ export const strokeThrombectomy: CaseDefinition = {
             score: -4,
             rationale: 'Avoidable financial harm; no clinical benefit from amenity choice.',
             outcome: { patient: '', caregiver: 'Family considers Medifund.', staff: 'MSW counsels family.' },
+            effects: { wardClass: 'A', setFlags: ['financial-distress'], caregiverBurden: { financialWorry: 22 } },
           },
         ],
       },

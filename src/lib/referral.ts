@@ -111,17 +111,32 @@ export function profileForFacility(f: Facility): DataExchangeProfile {
 
 /**
  * Compute the records-flow type when a patient moves from one facility to
- * another. The simplification: if both ends contribute/consume NEHR, records
- * flow electronically; otherwise the most likely manual fallback applies.
+ * another. The simplification:
+ *  - both ends in NEHR: electronic flow.
+ *  - imaging on private CD that won't auto-import: hand-carry takes priority
+ *    even if a referral memo also accompanies the patient.
+ *  - one end NEHR-aware: memo / discharge summary flows electronically or
+ *    by email to the named clinician.
+ *  - neither: nothing flows automatically.
  */
 export function recordsFlowBetween(from: Facility, to: Facility): RecordsFlow {
   const a = profileForFacility(from);
   const b = profileForFacility(to);
+
   if (a.contributesToNehr && b.consumesFromNehr) return 'nehr';
-  if (b.consumesFromNehr && from.sector === 'public' && to.sector === 'public') return 'nehr';
+
+  // Source generates imaging on private CD and target uses cluster PACS —
+  // patient hand-carries the disc. Restricted to private-acute and
+  // private-specialist sources, where in-house imaging is the norm.
+  const imagingHandCarry =
+    (from.type === 'private-acute' || from.type === 'private-specialist') &&
+    a.imagingPacs === 'private-cd' &&
+    b.imagingPacs !== 'private-cd' &&
+    !a.contributesToNehr;
+  if (imagingHandCarry) return 'hand-carry';
+
   if (a.contributesToNehr || b.consumesFromNehr) return 'memo';
-  if (a.imagingPacs === 'private-cd' || b.imagingPacs === 'private-cd') return 'hand-carry';
-  return 'memo';
+  return 'none';
 }
 
 export function describeFlow(flow: RecordsFlow): string {

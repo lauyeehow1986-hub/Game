@@ -30,6 +30,12 @@ export const stemiAcute: CaseDefinition = {
   involvedFacilities: ['ttsh'],
   profileKey: 'taxiDriver',
   allowsWardChoice: true,
+  randomiseProfile: true,
+  acuteTimer: {
+    goalMin: 90,
+    goalLabel: 'Door-to-balloon',
+    missedFlag: 'd2b-missed',
+  },
   guidelines: [MOH_ACS, ESC_STEMI, SCDF_TRIAGE, HEALTHIER_SG],
   pathway: [
     {
@@ -75,6 +81,7 @@ export const stemiAcute: CaseDefinition = {
               caregiver: 'You arrive before the cath lab team does.',
               staff: 'Cath lab activates after your repeat ECG. Door-to-balloon clock starts late.',
             },
+            effects: { setFlags: ['delayed-activation'] },
           },
           {
             id: 'thrombolyse-prehospital',
@@ -87,6 +94,7 @@ export const stemiAcute: CaseDefinition = {
               caregiver: 'Confusion at the bedside about which step is happening.',
               staff: 'Protocol deviation flagged. Cardiology asks why thrombolysis was given when PCI was 12 min away.',
             },
+            effects: { setFlags: ['protocol-deviation', 'delayed-activation'] },
           },
         ],
       },
@@ -162,6 +170,7 @@ export const stemiAcute: CaseDefinition = {
             score: -5,
             rationale:
               'Unsafe — STEMI is a thrombotic emergency; loading must occur as early as possible.',
+            effects: { setFlags: ['delayed-activation'] },
             outcome: {
               patient: 'You are not given any tablets in the ED.',
               caregiver: '',
@@ -239,6 +248,96 @@ export const stemiAcute: CaseDefinition = {
               caregiver: '',
               staff: 'Consultant overrides — proceed to PCI.',
             },
+          },
+        ],
+      },
+    },
+    {
+      id: 'cardiogenic-shock',
+      department: 'icu',
+      requiresAnyFlag: ['delayed-activation', 'd2b-missed', 'protocol-deviation'],
+      durationMin: 60,
+      costSGD: 1800,
+      charge: 'icu',
+      caregiverBurden: { timeOffWorkHours: 6, financialWorry: 18, sleepDebt: 12 },
+      framing: {
+        patient: '(post-PCI hypotension; vasopressors started; Swan-Ganz line considered.)',
+        caregiver: 'You are pulled into the family room. The phrase "complicated" is used twice.',
+        staff: 'Post-PCI cardiogenic shock — late reperfusion; large infarct territory. IABP discussion; consider tertiary mechanical circulatory support transfer.',
+      },
+      decision: {
+        id: 'shock-management',
+        prompt:
+          'Post-PCI cardiogenic shock. SBP 78 on noradrenaline. Lactate 5.2. Echo: severe LV dysfunction. What now?',
+        weight: 1.5,
+        reference: ESC_STEMI,
+        options: [
+          {
+            id: 'iabp-mcs',
+            label: 'IABP plus consider transfer to tertiary mechanical circulatory support (NHCS / NUHCS) for VA-ECMO.',
+            score: 10,
+            rationale:
+              'Cardiogenic shock from STEMI requires haemodynamic support; ECMO/Impella centres are the appropriate venue when standard support insufficient.',
+            outcome: {
+              patient: '(transferred for advanced support.)',
+              caregiver: 'You travel to NHCS. The team there meets you.',
+              staff: 'IABP placed; NHCS accepts; transfer overnight.',
+            },
+            effects: { setFlags: ['post-shock'] },
+          },
+          {
+            id: 'maximise-medical',
+            label: 'Maximise vasopressors and inotropes; defer mechanical support.',
+            score: 4,
+            rationale:
+              'Acceptable while awaiting decision but vasopressors at high doses worsen myocardial demand; mechanical support discussion shouldn\'t wait.',
+            outcome: { patient: '', caregiver: '', staff: '' },
+            effects: { setFlags: ['post-shock'] },
+          },
+          {
+            id: 'comfort-only',
+            label: 'Comfort-only care.',
+            score: -8,
+            rationale: 'Premature; reversible mechanical complications need to be assessed first.',
+            outcome: { patient: '', caregiver: 'Family meeting requested.', staff: 'Reverted on senior review.' },
+          },
+        ],
+      },
+    },
+    {
+      id: 'family-meeting',
+      department: 'ward',
+      requiresAnyFlag: ['post-shock', 'financial-distress'],
+      durationMin: 30,
+      framing: {
+        patient: '(in bed listening; sometimes nodding.)',
+        caregiver: 'You are in the family room with the consultant, the nurse manager, and the medical social worker. Nobody is rushing.',
+        staff: 'Family meeting: prognosis, GDMT, financial counselling, cardiac rehab eligibility, secondary-prevention plan.',
+      },
+      decision: {
+        id: 'financial-mitigation',
+        prompt: 'How do you address the financial-distress signal raised earlier?',
+        weight: 1,
+        reference: HEALTHIER_SG,
+        options: [
+          {
+            id: 'msw-medifund',
+            label: 'MSW activates Medifund, downgrade ward class going forward, structured Healthier-SG GP enrolment.',
+            score: 10,
+            rationale: 'Catches financial toxicity before it derails GDMT adherence.',
+            outcome: { patient: '', caregiver: 'You feel less alone.', staff: 'Medifund + downgrade plan signed.' },
+            effects: {
+              wardClass: 'C',
+              clearFlags: ['financial-distress'],
+              caregiverBurden: { financialWorry: -16 },
+            },
+          },
+          {
+            id: 'no-mitigation',
+            label: 'Note the bill but no MSW intervention.',
+            score: -4,
+            rationale: 'Patient stops eplerenone within a month; predictable HF readmission.',
+            outcome: { patient: '', caregiver: '', staff: '' },
           },
         ],
       },
@@ -334,6 +433,7 @@ export const stemiAcute: CaseDefinition = {
               caregiver: 'Relief — you can see the figures and they are workable.',
               staff: 'MSW happy. Bill estimated S$1,400 patient share.',
             },
+            effects: { wardClass: 'C' },
           },
           {
             id: 'class-b1',
@@ -346,6 +446,10 @@ export const stemiAcute: CaseDefinition = {
               caregiver: 'You discover the bill at discharge and panic.',
               staff: 'MSW flags financial distress. Bill reduction application initiated post-discharge.',
             },
+            effects: {
+              wardClass: 'B1',
+              caregiverBurden: { financialWorry: 12, sleepDebt: 4 },
+            },
           },
           {
             id: 'class-a',
@@ -357,6 +461,11 @@ export const stemiAcute: CaseDefinition = {
               patient: 'A nice room, but the bill at discharge is devastating.',
               caregiver: 'You apply for Medifund after discharge.',
               staff: 'MSW unhappy. Avoidable financial toxicity.',
+            },
+            effects: {
+              wardClass: 'A',
+              setFlags: ['financial-distress'],
+              caregiverBurden: { financialWorry: 30, sleepDebt: 14 },
             },
           },
         ],
