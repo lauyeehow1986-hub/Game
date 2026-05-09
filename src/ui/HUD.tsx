@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '../state/gameStore';
 import { usePerspective } from '../state/perspectiveStore';
+import { useMode, type AppMode } from '../state/modeStore';
 import type { Perspective } from '../lib/types';
 import { isMuted, setMuted } from '../lib/audio';
 
@@ -27,6 +28,8 @@ export function HUD() {
   const cost = useGame((s) => s.run.totalCostSGD);
   const caseDef = useGame((s) => s.caseDef);
   const flags = useGame((s) => s.run.flags);
+  const mode = useMode((s) => s.mode);
+  const setMode = useMode((s) => s.setMode);
   const [muted, setMutedState] = useState(true);
 
   const timer = caseDef?.acuteTimer;
@@ -102,21 +105,39 @@ export function HUD() {
 
       <div className="ml-auto flex items-center gap-2">
         <div className="flex items-center gap-1 bg-clinical-bg border border-clinical-border rounded-full p-1">
-          {(['patient', 'caregiver', 'staff'] as Perspective[]).map((p) => (
+          {(['case', 'ops'] as AppMode[]).map((m) => (
             <button
-              key={p}
-              onClick={() => setPerspective(p)}
-              aria-pressed={current === p}
+              key={m}
+              onClick={() => setMode(m)}
+              aria-pressed={mode === m}
               className={`px-3 py-1 text-xs rounded-full transition ${
-                current === p
-                  ? `${labels[p].colour} text-white font-semibold`
+                mode === m
+                  ? 'bg-clinical-accent text-white font-semibold'
                   : 'text-clinical-subtle hover:text-white'
               }`}
             >
-              {labels[p].name}
+              {m === 'case' ? 'Case' : 'Hospital Ops'}
             </button>
           ))}
         </div>
+        {mode === 'case' && (
+          <div className="flex items-center gap-1 bg-clinical-bg border border-clinical-border rounded-full p-1">
+            {(['patient', 'caregiver', 'staff'] as Perspective[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPerspective(p)}
+                aria-pressed={current === p}
+                className={`px-3 py-1 text-xs rounded-full transition ${
+                  current === p
+                    ? `${labels[p].colour} text-white font-semibold`
+                    : 'text-clinical-subtle hover:text-white'
+                }`}
+              >
+                {labels[p].name}
+              </button>
+            ))}
+          </div>
+        )}
         <button
           onClick={toggleMute}
           aria-label={muted ? 'Unmute audio cues' : 'Mute audio cues'}

@@ -18,11 +18,24 @@ const SECTOR_LABELS: Record<string, string> = {
   ancillary: 'Ancillary node',
 };
 
+export interface OpsBadgePayload {
+  byDept: Record<string, { occ: number; cap: number; queue: number; open: boolean }>;
+}
+
+const OPS_BADGE_EVENT = 'ops:badges';
+
+/** Helper used by PhaserGame to push ops badge data into the scene. */
+export function pushOpsBadges(payload: OpsBadgePayload | null): void {
+  bus.emit(OPS_BADGE_EVENT, payload);
+}
+
 export class HospitalScene extends Phaser.Scene {
   private facility!: Facility;
   private patientSprite!: Phaser.GameObjects.Container;
   private deptObjects = new Map<string, {
     circle: Phaser.GameObjects.Arc;
+    badgeBg: Phaser.GameObjects.Rectangle;
+    badgeText: Phaser.GameObjects.Text;
   }>();
   private bgGraphics!: Phaser.GameObjects.Graphics;
   private currentDept: Department | null = null;
@@ -87,9 +100,31 @@ export class HospitalScene extends Phaser.Scene {
         })
         .setOrigin(0.5, 0);
 
+      const badgeBg = this.add.rectangle(
+        dept.position.x + dept.radius - 4,
+        dept.position.y - dept.radius + 4,
+        46,
+        16,
+        0x0b1320,
+        1,
+      );
+      badgeBg.setStrokeStyle(1, colour, 1);
+      badgeBg.setOrigin(0.5, 0.5);
+      badgeBg.setVisible(false);
+      const badgeText = this.add
+        .text(dept.position.x + dept.radius - 4, dept.position.y - dept.radius + 4, '', {
+          fontFamily: 'ui-monospace, monospace',
+          fontSize: '10px',
+          color: '#e2e8f0',
+        })
+        .setOrigin(0.5, 0.5);
+      badgeText.setVisible(false);
+
       root.add(circle);
       root.add(label);
-      this.deptObjects.set(dept.id, { circle });
+      root.add(badgeBg);
+      root.add(badgeText);
+      this.deptObjects.set(dept.id, { circle, badgeBg, badgeText });
     }
 
     const patientDot = this.add.circle(0, 0, 9, 0xffffff, 1);
@@ -113,10 +148,13 @@ export class HospitalScene extends Phaser.Scene {
       if (dept) this.movePatientTo(dept);
     };
     const onReset = () => this.resetPatient();
+    const onOpsBadges = (payload: unknown) => this.applyOpsBadges(payload as OpsBadgePayload | null);
     bus.on(Events.PatientMoveTo, onMoveTo);
     bus.on(Events.CaseReset, onReset);
+    bus.on(OPS_BADGE_EVENT, onOpsBadges);
     this.cleanup.push(() => bus.off(Events.PatientMoveTo, onMoveTo));
     this.cleanup.push(() => bus.off(Events.CaseReset, onReset));
+    this.cleanup.push(() => bus.off(OPS_BADGE_EVENT, onOpsBadges));
 
     this.scale.on('resize', this.handleResize, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -179,5 +217,35 @@ export class HospitalScene extends Phaser.Scene {
       const dept = this.facility.departments.find((d) => d.id === id)!;
       obj.circle.setFillStyle(Phaser.Display.Color.HexStringToColor(dept.colour).color, 0.18);
     });
+  }
+
+  private applyOpsBadges(payload: OpsBadgePayload | null) {
+    if (!payload) {
+      this.deptObjects.forEach(({ badgeBg, badgeText }) => {
+        badgeBg.setVisible(false);
+        badgeText.setVisible(false);
+      });
+      // Reset all department fills.
+      this.deptObjects.forEach((obj, id) => {
+        const dept = this.facility.departments.find((d) => d.id === id);
+        if (dept) {
+          obj.circle.setFillStyle(Phaser.Display.Color.HexStringToColor(dept.colour).color, 0.18);
+        }
+      });
+      return;
+    }
+    for (const [deptId, info] of Object.entries(payload.byDept)) {
+      const obj = this.deptObjects.get(deptId);
+      const dept = this.facility.departments.find((d) => d.id === deptId);
+      if (!obj || !dept) continue;
+      const usage = info.cap > 0 ? info.occ / info.cap : 0;
+      const baseColour = Phaser.Display.Color.HexStringToColor(dept.colour).color;
+      const fillAlpha = !info.open ? 0.08 : 0.18 + Math.min(0.5, usage * 0.5);
+      obj.circle.setFillStyle(baseColour, fillAlpha);
+      const label = `${info.occ}/${info.cap}${info.queue > 0 ? ` +${info.queue}` : ''}`;
+      obj.badgeText.setText(label);
+      obj.badgeBg.setVisible(true);
+      obj.badgeText.setVisible(true);
+    }
   }
 }
