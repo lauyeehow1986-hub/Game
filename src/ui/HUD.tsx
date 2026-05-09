@@ -4,23 +4,26 @@ import { usePerspective } from '../state/perspectiveStore';
 import { useMode, type AppMode } from '../state/modeStore';
 import type { Perspective } from '../lib/types';
 import { isMuted, setMuted } from '../lib/audio';
+import { LOCALES, useLocale, useT, type Locale } from '../lib/i18n';
+import { AboutModal } from './modals/AboutModal';
 
-const labels: Record<Perspective, { name: string; tag: string; colour: string }> = {
-  patient: { name: 'Patient', tag: 'POV', colour: 'bg-rose-500/80' },
-  caregiver: { name: 'Caregiver', tag: 'POV', colour: 'bg-amber-500/80' },
-  staff: { name: 'Staff', tag: 'POV', colour: 'bg-sky-500/80' },
+const labels: Record<Perspective, { tag: string; colour: string }> = {
+  patient: { tag: 'POV', colour: 'bg-rose-500/80' },
+  caregiver: { tag: 'POV', colour: 'bg-amber-500/80' },
+  staff: { tag: 'POV', colour: 'bg-sky-500/80' },
 };
 
-function formatGameTime(min: number): string {
+function formatGameTime(min: number, dayPrefix: string): string {
   const h = Math.floor(min / 60);
   const d = Math.floor(h / 24);
   const hr = h % 24;
   const mm = min % 60;
-  if (d > 0) return `Day ${d + 1} · ${String(hr).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+  if (d > 0) return `${dayPrefix} ${d + 1} · ${String(hr).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
   return `${String(hr).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
 }
 
 export function HUD() {
+  const t = useT();
   const current = usePerspective((s) => s.current);
   const setPerspective = usePerspective((s) => s.set);
   const elapsed = useGame((s) => s.run.elapsedGameMin);
@@ -30,7 +33,10 @@ export function HUD() {
   const flags = useGame((s) => s.run.flags);
   const mode = useMode((s) => s.mode);
   const setMode = useMode((s) => s.setMode);
+  const locale = useLocale((s) => s.locale);
+  const setLocale = useLocale((s) => s.setLocale);
   const [muted, setMutedState] = useState(true);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   const timer = caseDef?.acuteTimer;
   const exceeded = timer && elapsed > timer.goalMin;
@@ -51,24 +57,34 @@ export function HUD() {
     location.reload();
   };
 
+  const statusLabel =
+    status === 'idle'
+      ? t('hud.status.idle')
+      : status === 'running'
+      ? t('hud.status.running')
+      : status === 'awaiting-decision'
+      ? t('hud.status.awaiting')
+      : t('hud.status.completed');
+
   return (
     <header className="flex items-center gap-4 bg-clinical-panel border-b border-clinical-border px-5 py-3">
       <div className="flex items-center gap-2">
         <div className="w-7 h-7 rounded bg-sgRed grid place-items-center text-white font-bold">+</div>
         <div className="leading-tight">
-          <div className="text-sm font-semibold text-white">SG Pathway</div>
+          <div className="text-sm font-semibold text-white">{t('app.brand.short')}</div>
           <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
-            Singapore healthcare patient simulator
+            {t('app.brand.subtitle')}
           </div>
         </div>
       </div>
 
       <div className="hidden md:flex items-center gap-3 ml-4 text-xs">
         <span className="px-2 py-1 rounded bg-clinical-bg border border-clinical-border text-clinical-subtle">
-          Game time: <span className="text-white font-mono">{formatGameTime(elapsed)}</span>
+          {t('hud.gameTime')}:{' '}
+          <span className="text-white font-mono">{formatGameTime(elapsed, 'Day')}</span>
         </span>
         <span className="px-2 py-1 rounded bg-clinical-bg border border-clinical-border text-clinical-subtle">
-          Status:{' '}
+          {t('hud.status')}:{' '}
           <span
             className={
               status === 'awaiting-decision'
@@ -80,11 +96,11 @@ export function HUD() {
                 : 'text-clinical-subtle'
             }
           >
-            {status === 'idle' ? 'Idle' : status === 'running' ? 'In progress' : status === 'awaiting-decision' ? 'Decision required' : 'Completed'}
+            {statusLabel}
           </span>
         </span>
         <span className="px-2 py-1 rounded bg-clinical-bg border border-clinical-border text-clinical-subtle">
-          Cash OOP so far: <span className="text-white font-mono">S${cost.toFixed(0)}</span>
+          {t('hud.cashOop')}: <span className="text-white font-mono">S${cost.toFixed(0)}</span>
         </span>
         {timer && (
           <span
@@ -98,12 +114,12 @@ export function HUD() {
             title={timer.goalLabel}
           >
             {timer.goalLabel}: {elapsed}/{timer.goalMin} min
-            {exceeded && !flagAlreadySet && ' — exceeded'}
+            {exceeded && !flagAlreadySet && ` — ${t('hud.timer.exceeded')}`}
           </span>
         )}
       </div>
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-2 flex-wrap justify-end">
         <div className="flex items-center gap-1 bg-clinical-bg border border-clinical-border rounded-full p-1">
           {(['case', 'ops'] as AppMode[]).map((m) => (
             <button
@@ -116,7 +132,7 @@ export function HUD() {
                   : 'text-clinical-subtle hover:text-white'
               }`}
             >
-              {m === 'case' ? 'Case' : 'Hospital Ops'}
+              {m === 'case' ? t('hud.mode.case') : t('hud.mode.ops')}
             </button>
           ))}
         </div>
@@ -133,28 +149,51 @@ export function HUD() {
                     : 'text-clinical-subtle hover:text-white'
                 }`}
               >
-                {labels[p].name}
+                {t(`hud.perspective.${p}`)}
               </button>
             ))}
           </div>
         )}
+        <select
+          value={locale}
+          onChange={(e) => setLocale(e.target.value as Locale)}
+          aria-label={t('hud.language')}
+          title={t('hud.language')}
+          className="h-8 px-2 rounded border border-clinical-border bg-clinical-bg text-clinical-subtle text-[11px]"
+        >
+          {LOCALES.map((l) => (
+            <option key={l.code} value={l.code}>
+              {l.nativeName}
+            </option>
+          ))}
+        </select>
         <button
           onClick={toggleMute}
-          aria-label={muted ? 'Unmute audio cues' : 'Mute audio cues'}
-          title={muted ? 'Unmute audio cues' : 'Mute audio cues'}
+          aria-label={muted ? t('hud.audio.off') : t('hud.audio.on')}
+          title={muted ? t('hud.audio.off') : t('hud.audio.on')}
           className="hidden sm:inline-flex h-8 px-2 items-center justify-center rounded border border-clinical-border text-clinical-subtle hover:text-white text-[11px] font-medium"
         >
-          {muted ? 'Audio off' : 'Audio on'}
+          {muted ? t('hud.audio.off') : t('hud.audio.on')}
         </button>
         <button
           onClick={replayTutorial}
-          aria-label="Replay tutorial"
-          title="Replay tutorial"
+          aria-label={t('hud.tutorial')}
+          title={t('hud.tutorial')}
           className="hidden sm:inline-flex h-8 px-2 items-center justify-center rounded border border-clinical-border text-clinical-subtle hover:text-white text-[11px] font-medium"
         >
-          Tutorial
+          {t('hud.tutorial')}
+        </button>
+        <button
+          onClick={() => setAboutOpen(true)}
+          aria-label={t('hud.about')}
+          title={t('hud.about')}
+          className="hidden sm:inline-flex h-8 px-2 items-center justify-center rounded border border-clinical-border text-clinical-subtle hover:text-white text-[11px] font-medium"
+        >
+          {t('hud.about')}
         </button>
       </div>
+
+      <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
     </header>
   );
 }

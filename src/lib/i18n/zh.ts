@@ -1,0 +1,210 @@
+export const zh: Record<string, string> = {
+  // Generic
+  'common.close': '关闭',
+  'common.cancel': '取消',
+  'common.confirm': '确认',
+  'common.start': '开始',
+  'common.stop': '停止',
+  'common.pause': '暂停',
+  'common.resume': '继续',
+  'common.reset': '重置',
+  'common.import': '导入',
+  'common.export': '导出',
+  'common.share': '分享',
+  'common.delete': '删除',
+  'common.next': '下一个',
+  'common.back': '返回',
+  'common.skip': '跳过',
+  'common.gotIt': '知道了',
+  'common.score': '分数',
+  'common.decisions': '决策',
+  'common.cash': '现金',
+  'common.reputation': '声誉',
+
+  // App brand / HUD
+  'app.brand.short': '新加坡医疗路径模拟',
+  'app.brand.subtitle': '新加坡医疗系统患者旅程模拟器',
+  'hud.gameTime': '模拟时间',
+  'hud.status': '状态',
+  'hud.status.idle': '空闲',
+  'hud.status.running': '进行中',
+  'hud.status.awaiting': '需要决策',
+  'hud.status.completed': '已完成',
+  'hud.cashOop': '目前自付',
+  'hud.timer.exceeded': '已超时',
+  'hud.audio.on': '音效开',
+  'hud.audio.off': '音效关',
+  'hud.tutorial': '教程',
+  'hud.mode.case': '病例',
+  'hud.mode.ops': '医院运营',
+  'hud.perspective.patient': '患者',
+  'hud.perspective.caregiver': '看护者',
+  'hud.perspective.staff': '医护',
+  'hud.language': '语言',
+  'hud.about': '关于',
+
+  // Disclaimer
+  'disclaimer.tag': '教学用途',
+  'disclaimer.body':
+    '这是新加坡医疗路径的简化模拟。津贴、终身健保、保健储蓄和社保援助计算仅供说明,不具权威性。不能取代临床判断或现行的卫生部/国家传染病中心指南。',
+
+  // Cases panel
+  'cases.heading': '病例',
+  'cases.importJson': '导入 JSON',
+  'cases.startCase': '开始病例',
+  'cases.restart': '重新开始',
+  'cases.best': '最佳',
+  'cases.notPlayed': '未玩过',
+  'cases.badge.historical': '历史',
+  'cases.badge.custom': '自定',
+  'cases.shareToast.copied': '分享链接已复制到剪贴板。',
+  'cases.shareToast.urlImported': '已从链接导入「{{title}}」。',
+
+  // Case import modal
+  'import.heading': '从 JSON 导入病例',
+  'import.subtitle': '使用您自己的病例',
+  'import.body':
+    '在下方粘贴病例 JSON,或上传 .json 文件。结构与内置病例相同,验证器会指出错误字段。导入的病例存储在本地,会在病例列表中显示「自定」标签。',
+  'import.insertSample': '插入范例',
+  'import.placeholder': '在此粘贴病例 JSON…',
+  'import.refLink': '参考内置病例的格式 →',
+  'import.success': '已导入「{{title}}」。它现在出现在病例列表中,带有「自定」标签。',
+
+  // Tycoon dashboard
+  'tycoon.heading': '医院关键指标',
+  'tycoon.live': '{{facility}} 实时',
+  'tycoon.bedOccupancy': '床位占用率',
+  'tycoon.edWait': '急诊中位等候 (P3)',
+  'tycoon.staffFatigue': '员工疲劳指数',
+  'tycoon.dorscon': 'DORSCON 警戒等级',
+
+  // Pandemic panel
+  'pandemic.heading': '疫情引擎',
+  'pandemic.dorscon': 'DORSCON',
+  'pandemic.ppe': 'PPE 库存',
+  'pandemic.surge': '应急容量',
+  'pandemic.edDiversion': '急诊分流',
+  'pandemic.ncidActivated': '启动国家传染病中心',
+  'pandemic.active': '已启动',
+  'pandemic.off': '关闭',
+
+  // Financing panel
+  'fin.heading': '医疗费用',
+  'fin.outpatient': '门诊',
+  'fin.gross': '总费用 (私立价)',
+  'fin.subsidy': '− 政府津贴',
+  'fin.mshl': '− 终身健保理赔',
+  'fin.medisave': '− 保健储蓄扣除',
+  'fin.cash': '= 现金自付',
+  'fin.cashRatioOfGross': '总费用的 {{pct}}% 由现金支付',
+  'fin.perSegment': '逐段细分',
+  'fin.caregiverBurden': '看护者负担',
+  'fin.timeOffWork': '请假时数',
+  'fin.financialWorry': '经济焦虑',
+  'fin.sleepDebt': '睡眠负债',
+
+  // Patient panel
+  'patient.heading.empty': '患者',
+  'patient.empty': '没有进行中的病例。请在下方选择一个病例开始。',
+  'patient.citizenship': '国籍/身份',
+  'patient.chas': '社保援助',
+  'patient.income': '人均收入',
+  'patient.medisave': '保健储蓄',
+  'patient.wardClass': '病房等级',
+  'patient.ip.active': '已启用 — 综合健保附加计划补足实付',
+  'patient.ip.none': '无 — 仅终身健保',
+  'patient.ip.label': '综合健保附加计划',
+
+  // Network browser
+  'network.heading': '医疗网络',
+  'network.facilities': '{{n}} 家机构',
+  'network.lockedNote':
+    '地图跟随当前患者。停止病例后才能浏览其他机构。',
+  'network.group.acute': '急性医院 (公立)',
+  'network.group.specialty': '专科中心 (公立)',
+  'network.group.community': '社区医院 / 转诊',
+  'network.group.polyclinic': '综合诊疗所',
+  'network.group.privateAcute': '私立医院',
+  'network.group.privateSpecialist': '私立专科',
+  'network.group.gp': '私立家庭医生',
+  'network.group.telemed': '远程医疗',
+  'network.group.ancillary': '院前 / 社区辅助',
+
+  // Decisions
+  'decision.heading': '需要决策',
+  'decision.maxScore': '本题最高分',
+  'decision.commit': '确认决定',
+  'decision.hint': '↑/↓ 选择,1–9 跳转,Enter 确认。',
+
+  // Decision log
+  'log.heading': '决策记录',
+  'log.made': '已做 {{n}} 项',
+  'log.empty': '当您做出决策后,这里会列出每项的得分与理由。',
+
+  // Data exchange
+  'data.heading': '病历与数据交换',
+  'data.contributesNehr': '上传至 NEHR',
+  'data.consumesNehr': '可读取 NEHR',
+  'data.healthhub': 'HealthHub 可见',
+  'data.notOnCd': '影像非光盘',
+  'data.lastTransfer': '最近一次转诊',
+  'data.transferLog': '转诊记录 ({{n}})',
+
+  // Citations
+  'cite.heading': '参考资料',
+  'cite.tab.citations': '引用',
+  'cite.tab.glossary': '词汇表',
+  'cite.guidelines': '指南与参考',
+  'cite.histCitations': '历史情景引用',
+
+  // Leaderboard
+  'lb.heading': '个人最佳成绩',
+  'lb.runs': '{{runs}} 次 · {{decisions}} 次决策',
+  'lb.cases': '病例',
+  'lb.avg': '平均分',
+  'lb.resetConfirm': '清除所有最佳成绩和进度吗?',
+  'lb.resetButton': '重置进度',
+
+  // Ops
+  'ops.heading': '医院运营',
+  'ops.day': '第 {{day}} 天',
+  'ops.shift': '班次 {{elapsed}} / {{total}}',
+  'ops.startShift': '开始 8 小时班次',
+  'ops.nextDay': '下一天',
+  'ops.netShift': '本班净额',
+  'ops.diversionState': '急诊分流:{{state}}',
+  'ops.deptHeader': '部门 — 人员与容量',
+  'ops.dailyCost': '日均',
+  'ops.beds': '床位',
+  'ops.docs': '医生',
+  'ops.nurses': '护士',
+  'ops.onFloor': '在院',
+  'ops.discharged': '已出院',
+  'ops.arrivals': '到达',
+  'ops.deteriorated': '恶化',
+  'ops.avgLos': '平均住院时长',
+  'ops.edP3Wait': '急诊 P3 等候',
+  'ops.endOfDay': '第 {{day}} 天结束',
+  'ops.dayHistory': '日记录 ({{n}})',
+  'ops.scenarioPass': '情景通过',
+  'ops.scenarioFail': '情景未达标',
+
+  // About
+  'about.title': '关于本模拟器',
+  'about.tagline': '模型如何运作、数字来源、需要谨慎的地方。',
+  'about.financing.h': '医疗费用模型',
+  'about.financing.body':
+    '津贴比例、终身健保理赔上限、保健储蓄提取上限和 CHAS 加成均为简化启发式,不是卫生部实际公式。收入分级与立国一代/建国一代加成已简化。从总费用到现金自付的级联结构与现实一致;具体数字不具权威性。请参考卫生部官网及医院账单部门以核实任何实际数字。',
+  'about.network.h': '机构网络',
+  'about.network.body':
+    '机构清单取自卫生部 / 医疗集群 / 私立医院公开网站,非各机构正式背书。每家机构的部门布局仅作示意,非建筑实际结构。',
+  'about.cases.h': '临床内容',
+  'about.cases.body':
+    '病例是用于教学讨论的桌面情景,非经验证的决策辅助。选项依据撰写时引用的若干指南(MOH CPG、ESC、NCCN、NICE、KDIGO、ATLS、Surviving Sepsis、ESO)— 临床实际请遵循当地最新指南。SARS 2003 和 COVID-19 历史情景为基于复盘报告的重建,结果已简化。',
+  'about.privacy.h': '隐私',
+  'about.privacy.body':
+    '所有数据均在本地。没有账户、没有分析、没有遥测。localStorage 存储您的解锁病例、最佳分数、自定义导入、语言、音频和免责声明确认。您可以随时通过浏览器清除。',
+  'about.code.h': '源代码',
+  'about.code.body':
+    '在 GitHub 上开源。欢迎提交 issue、PR 和翻译贡献。',
+};

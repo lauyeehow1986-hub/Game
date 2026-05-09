@@ -1,5 +1,6 @@
 import { useOps, type OpsSpeed, SCENARIOS } from '../../state/opsStore';
 import type { OpsDepartmentId } from '../../lib/ops';
+import { useT } from '../../lib/i18n';
 
 const DEPT_DISPLAY: OpsDepartmentId[] = ['triage', 'ed', 'imaging', 'ot', 'ward'];
 
@@ -15,6 +16,7 @@ function fmtSGD(n: number): string {
 }
 
 export function OpsPanel() {
+  const t = useT();
   const state = useOps((s) => s.state);
   const mode = useOps((s) => s.mode);
   const speed = useOps((s) => s.speed);
@@ -46,9 +48,11 @@ export function OpsPanel() {
   return (
     <section className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-3">
       <header className="flex items-baseline justify-between">
-        <h3 className="text-sm font-semibold text-white">Hospital Ops · Day {state.dayNumber}</h3>
+        <h3 className="text-sm font-semibold text-white">
+          {t('ops.heading')} · {t('ops.day', { day: state.dayNumber })}
+        </h3>
         <span className="text-[10px] uppercase tracking-wider text-clinical-subtle">
-          Shift {fmtTime(state.shiftMinElapsed)} / {fmtTime(state.shiftLengthMin)}
+          {t('ops.shift', { elapsed: fmtTime(state.shiftMinElapsed), total: fmtTime(state.shiftLengthMin) })}
         </span>
       </header>
 
@@ -75,14 +79,14 @@ export function OpsPanel() {
       </div>
 
       <div className="grid grid-cols-3 gap-1 text-[11px]">
-        <Mini label="Cash" value={`S$${fmtSGD(state.budget.cashSGD)}`} colour={cashColour} />
+        <Mini label={t('common.cash')} value={`S$${fmtSGD(state.budget.cashSGD)}`} colour={cashColour} />
         <Mini
-          label="Net shift"
+          label={t('ops.netShift')}
           value={`${net >= 0 ? '+' : ''}S$${fmtSGD(net)}`}
           colour={net >= 0 ? '#4ade80' : '#f87171'}
         />
         <Mini
-          label="Reputation"
+          label={t('common.reputation')}
           value={`${state.reputation.toFixed(0)}`}
           colour={state.reputation < 50 ? '#f87171' : state.reputation < 70 ? '#facc15' : '#4ade80'}
         />
@@ -94,35 +98,35 @@ export function OpsPanel() {
             onClick={start}
             className="flex-1 px-3 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
           >
-            Start 8-h shift
+            {t('ops.startShift')}
           </button>
         ) : mode === 'running' ? (
           <button
             onClick={pause}
             className="flex-1 px-3 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
           >
-            Pause
+            {t('common.pause')}
           </button>
         ) : mode === 'paused' ? (
           <button
             onClick={resume}
             className="flex-1 px-3 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
           >
-            Resume
+            {t('common.resume')}
           </button>
         ) : (
           <button
             onClick={nextDay}
             className="flex-1 px-3 py-1.5 rounded bg-clinical-ok text-white text-xs font-semibold hover:brightness-110"
           >
-            Next day
+            {t('ops.nextDay')}
           </button>
         )}
         <button
           onClick={reset}
           className="px-3 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
         >
-          Reset
+          {t('common.reset')}
         </button>
       </div>
 
@@ -151,14 +155,14 @@ export function OpsPanel() {
             : 'border-clinical-border text-clinical-subtle hover:text-white'
         }`}
       >
-        ED diversion: {state.diversion ? 'Active' : 'Off'}
+        {t('ops.diversionState', { state: state.diversion ? t('pandemic.active') : t('pandemic.off') })}
       </button>
 
       <div className="space-y-1.5 border-t border-clinical-border pt-2">
         <div className="text-[10px] uppercase tracking-wider text-clinical-subtle flex justify-between">
-          <span>Departments — staffing & capacity</span>
+          <span>{t('ops.deptHeader')}</span>
           <span>
-            Daily S${fmtSGD(state.budget.dailyFixedCostSGD + state.budget.dailyStaffingCostSGD)}
+            {t('ops.dailyCost')} S${fmtSGD(state.budget.dailyFixedCostSGD + state.budget.dailyStaffingCostSGD)}
           </span>
         </div>
         {DEPT_DISPLAY.map((id) => {
@@ -196,7 +200,7 @@ export function OpsPanel() {
                 <div className="h-full" style={{ width: `${usagePct}%`, backgroundColor: colour }} />
               </div>
               <div className="flex items-center gap-1">
-                <span className="text-[10px] text-clinical-subtle w-8">Beds</span>
+                <span className="text-[10px] text-clinical-subtle w-8">{t('ops.beds')}</span>
                 <button
                   onClick={() => setCap(id, dept.capacity - 1)}
                   className="text-[10px] px-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
@@ -220,7 +224,7 @@ export function OpsPanel() {
                 </button>
               </div>
               <div className="flex items-center gap-1 text-[10px] text-clinical-subtle">
-                <span className="w-8">Drs</span>
+                <span className="w-8">{t('ops.docs')}</span>
                 <button onClick={() => hire(id, 'doctors', -1)} className="px-1 rounded border border-clinical-border hover:text-white">
                   −
                 </button>
@@ -228,7 +232,7 @@ export function OpsPanel() {
                 <button onClick={() => hire(id, 'doctors', 1)} className="px-1 rounded border border-clinical-border hover:text-white">
                   +
                 </button>
-                <span className="w-12 ml-2">Nurses</span>
+                <span className="w-12 ml-2">{t('ops.nurses')}</span>
                 <button onClick={() => hire(id, 'nurses', -1)} className="px-1 rounded border border-clinical-border hover:text-white">
                   −
                 </button>
@@ -243,17 +247,17 @@ export function OpsPanel() {
       </div>
 
       <div className="border-t border-clinical-border pt-2 grid grid-cols-2 gap-2 text-[11px]">
-        <Mini label="On floor" value={`${activeOnFloor}`} />
-        <Mini label="Discharged" value={`${state.kpis.discharged}`} />
-        <Mini label="Arrivals" value={`${state.kpis.arrivals}`} />
+        <Mini label={t('ops.onFloor')} value={`${activeOnFloor}`} />
+        <Mini label={t('ops.discharged')} value={`${state.kpis.discharged}`} />
+        <Mini label={t('ops.arrivals')} value={`${state.kpis.arrivals}`} />
         <Mini
-          label="Deteriorated"
+          label={t('ops.deteriorated')}
           value={`${state.kpis.deteriorations}`}
           danger={state.kpis.deteriorations > 0}
         />
-        <Mini label="Avg LOS" value={`${state.kpis.avgLosMin.toFixed(0)}m`} />
+        <Mini label={t('ops.avgLos')} value={`${state.kpis.avgLosMin.toFixed(0)}m`} />
         <Mini
-          label="ED P3 wait"
+          label={t('ops.edP3Wait')}
           value={`${state.kpis.edWaitP3Min}m`}
           danger={state.kpis.edWaitP3Min > 240}
         />
@@ -261,7 +265,7 @@ export function OpsPanel() {
 
       {mode === 'ended' && scenario && (
         <div className="border border-clinical-accent/40 rounded p-2 text-[11px] bg-clinical-accent/10 space-y-1">
-          <div className="font-semibold text-white">End of day {state.dayNumber}</div>
+          <div className="font-semibold text-white">{t('ops.endOfDay', { day: state.dayNumber })}</div>
           <div className="text-clinical-subtle leading-snug">
             Discharged {state.kpis.discharged} / {state.kpis.arrivals}. Net S${fmtSGD(net)}.
             {state.kpis.deteriorations > 0 && ` ${state.kpis.deteriorations} P1/P2 deteriorations.`}
@@ -279,7 +283,7 @@ export function OpsPanel() {
                   passed ? 'text-clinical-ok' : 'text-clinical-danger'
                 }`}
               >
-                {passed ? 'Scenario PASS' : 'Scenario FAIL'} — needs Rep ≥{c.minReputation}, Det ≤
+                {passed ? t('ops.scenarioPass') : t('ops.scenarioFail')} — Rep ≥{c.minReputation}, Det ≤
                 {c.maxDeteriorations}, Disch ≥{c.minDischarged}, Net ≥ S${fmtSGD(c.minNetSGD)}
               </div>
             );
@@ -290,7 +294,7 @@ export function OpsPanel() {
       {history.length > 0 && (
         <details className="text-[11px] border-t border-clinical-border pt-2">
           <summary className="cursor-pointer text-clinical-subtle hover:text-white">
-            Day history ({history.length})
+            {t('ops.dayHistory', { n: history.length })}
           </summary>
           <ul className="mt-1 space-y-0.5">
             {history.map((d) => (

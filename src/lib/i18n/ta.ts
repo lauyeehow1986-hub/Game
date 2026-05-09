@@ -1,0 +1,103 @@
+/**
+ * Tamil translations. Partial coverage; English fallback applies
+ * to any key omitted here.
+ */
+export const ta: Record<string, string> = {
+  'common.close': 'மூடு',
+  'common.cancel': 'ரத்து',
+  'common.confirm': 'உறுதிப்படுத்து',
+  'common.start': 'தொடங்கு',
+  'common.stop': 'நிறுத்து',
+  'common.pause': 'இடைநிறுத்து',
+  'common.resume': 'தொடரு',
+  'common.reset': 'மீட்டமை',
+  'common.import': 'இறக்குமதி',
+  'common.export': 'ஏற்றுமதி',
+  'common.share': 'பகிர்',
+  'common.delete': 'நீக்கு',
+  'common.next': 'அடுத்து',
+  'common.back': 'பின்',
+  'common.skip': 'தவிர்',
+  'common.gotIt': 'புரிந்தது',
+  'common.score': 'மதிப்பெண்',
+  'common.decisions': 'முடிவுகள்',
+  'common.cash': 'ரொக்கம்',
+  'common.reputation': 'நற்பெயர்',
+
+  'app.brand.short': 'SG Pathway',
+  'app.brand.subtitle': 'சிங்கப்பூர் மருத்துவ அமைப்பின் நோயாளர் பயண முன்மாதிரி',
+  'hud.gameTime': 'விளையாட்டு நேரம்',
+  'hud.status': 'நிலை',
+  'hud.status.idle': 'செயலற்றது',
+  'hud.status.running': 'நடைபெறுகிறது',
+  'hud.status.awaiting': 'முடிவு தேவை',
+  'hud.status.completed': 'முடிந்தது',
+  'hud.cashOop': 'இதுவரை ரொக்கம்',
+  'hud.timer.exceeded': 'மீறப்பட்டது',
+  'hud.audio.on': 'ஒலி செயல்',
+  'hud.audio.off': 'ஒலி நிறுத்தம்',
+  'hud.tutorial': 'பயிற்சி',
+  'hud.mode.case': 'வழக்கு',
+  'hud.mode.ops': 'மருத்துவமனை செயல்பாடு',
+  'hud.perspective.patient': 'நோயாளி',
+  'hud.perspective.caregiver': 'பராமரிப்பாளர்',
+  'hud.perspective.staff': 'பணியாளர்',
+  'hud.language': 'மொழி',
+  'hud.about': 'பற்றி',
+
+  'disclaimer.tag': 'கல்வி',
+  'disclaimer.body':
+    'சிங்கப்பூர் மருத்துவ பாதைகளின் எளிமைப்படுத்தப்பட்ட முன்மாதிரி. மானியம், MediShield, MediSave, CHAS கணக்கீடுகள் விளக்கத்திற்காக மட்டுமே — அதிகாரப்பூர்வமானதல்ல. மருத்துவ முடிவுக்கு மாற்றாகாது.',
+
+  'cases.heading': 'வழக்குகள்',
+  'cases.importJson': 'JSON இறக்குமதி',
+  'cases.startCase': 'வழக்கைத் தொடங்கு',
+  'cases.restart': 'மீண்டும் தொடங்கு',
+  'cases.best': 'சிறந்தது',
+  'cases.notPlayed': 'விளையாடவில்லை',
+  'cases.badge.historical': 'வரலாற்று',
+  'cases.badge.custom': 'தனிப்பயன்',
+
+  'tycoon.heading': 'மருத்துவமனை KPI',
+  'pandemic.heading': 'தொற்றுநோய் இயந்திரம்',
+  'pandemic.active': 'இயக்கத்தில்',
+  'pandemic.off': 'நிறுத்தம்',
+
+  'fin.heading': 'நிதி',
+  'fin.outpatient': 'வெளிநோயாளர்',
+  'fin.gross': 'மொத்தம் (தனியார் விகிதம்)',
+  'fin.subsidy': '− அரசு மானியம்',
+  'fin.mshl': '− MediShield Life கோரிக்கை',
+  'fin.medisave': '− MediSave எடுப்பு',
+  'fin.cash': '= ரொக்க சுயச் செலவு',
+  'fin.caregiverBurden': 'பராமரிப்பாளர் சுமை',
+
+  'network.heading': 'வலையமைப்பு',
+  'network.facilities': '{{n}} வசதிகள்',
+
+  'decision.heading': 'முடிவு தேவை',
+  'decision.commit': 'முடிவை உறுதிசெய்',
+
+  'log.heading': 'முடிவு பதிவு',
+
+  'cite.heading': 'மேற்கோள்கள்',
+  'cite.tab.citations': 'மேற்கோள்கள்',
+  'cite.tab.glossary': 'சொற்றொகுப்பு',
+
+  'lb.heading': 'தனிப்பட்ட சிறந்தது',
+  'lb.cases': 'வழக்குகள்',
+  'lb.avg': 'சராசரி மதிப்பெண்',
+
+  'ops.heading': 'மருத்துவமனை செயல்பாடு',
+  'ops.day': 'நாள் {{day}}',
+  'ops.startShift': '8-மணி பணியைத் தொடங்கு',
+  'ops.nextDay': 'அடுத்த நாள்',
+  'ops.onFloor': 'மருத்துவமனையில்',
+  'ops.discharged': 'வெளியேற்றப்பட்டது',
+  'ops.arrivals': 'வருகை',
+  'ops.deteriorated': 'மோசமடைந்தது',
+  'ops.scenarioPass': 'காட்சி தேர்ச்சி',
+  'ops.scenarioFail': 'காட்சி தோல்வி',
+
+  'about.title': 'இந்த முன்மாதிரி பற்றி',
+};

@@ -5,9 +5,11 @@ import { useProgress } from '../../state/progressStore';
 import { useCustomCases } from '../../state/customCasesStore';
 import { downloadCaseJson, encodeCaseToUrl, tryDecodeCaseFromHref } from '../../lib/case-share';
 import { CaseImportModal } from '../modals/CaseImportModal';
+import { useT } from '../../lib/i18n';
 import type { CaseDefinition } from '../../lib/types';
 
 export function CaseList() {
+  const t = useT();
   const startCase = useGame((s) => s.startCase);
   const resetRun = useGame((s) => s.resetRun);
   const status = useGame((s) => s.run.status);
@@ -27,8 +29,7 @@ export function CaseList() {
     const decoded = tryDecodeCaseFromHref(window.location.href);
     if (decoded) {
       addCustom(decoded);
-      setShareToast(`Imported "${decoded.title}" from URL.`);
-      // Strip the query so refreshes don't re-import on top of itself.
+      setShareToast(t('cases.shareToast.urlImported', { title: decoded.title }));
       const url = new URL(window.location.href);
       url.searchParams.delete('case');
       window.history.replaceState({}, '', url.toString());
@@ -45,7 +46,7 @@ export function CaseList() {
     const url = encodeCaseToUrl(c);
     try {
       await navigator.clipboard.writeText(url);
-      setShareToast(`Share link copied to clipboard.`);
+      setShareToast(t('cases.shareToast.copied'));
     } catch {
       setShareToast(url);
     }
@@ -55,12 +56,12 @@ export function CaseList() {
   return (
     <section className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-2">
       <header className="flex items-baseline justify-between">
-        <h3 className="text-sm font-semibold text-white">Cases</h3>
+        <h3 className="text-sm font-semibold text-white">{t('cases.heading')}</h3>
         <button
           onClick={() => setImportOpen(true)}
           className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
         >
-          Import JSON
+          {t('cases.importJson')}
         </button>
       </header>
 
@@ -89,12 +90,12 @@ export function CaseList() {
                   <div className="text-xs font-semibold text-white flex items-center gap-1.5 flex-wrap">
                     {c.historical && (
                       <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">
-                        Historical
+                        {t('cases.badge.historical')}
                       </span>
                     )}
                     {isCustom && (
                       <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-clinical-accent/25 text-clinical-accent">
-                        Custom
+                        {t('cases.badge.custom')}
                       </span>
                     )}
                     <span>{c.title}</span>
@@ -105,7 +106,7 @@ export function CaseList() {
                 </div>
                 {best && (
                   <span className="text-[10px] text-clinical-ok font-mono">
-                    Best {best.score.toFixed(1)} / {best.max.toFixed(1)}
+                    {t('cases.best')} {best.score.toFixed(1)} / {best.max.toFixed(1)}
                   </span>
                 )}
               </div>
@@ -119,37 +120,34 @@ export function CaseList() {
                   }}
                   className="text-[11px] px-2 py-1 rounded bg-clinical-accent text-white font-semibold disabled:opacity-40 hover:brightness-110"
                 >
-                  {isActive ? 'Restart' : 'Start case'}
+                  {isActive ? t('cases.restart') : t('cases.startCase')}
                 </button>
                 {isActive && (
                   <button
                     onClick={resetRun}
                     className="text-[11px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
                   >
-                    Stop
+                    {t('common.stop')}
                   </button>
                 )}
                 <button
                   onClick={() => handleShare(c)}
-                  title="Copy a shareable link"
                   className="text-[11px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
                 >
-                  Share
+                  {t('common.share')}
                 </button>
                 <button
                   onClick={() => downloadCaseJson(c)}
-                  title="Download this case as JSON"
                   className="text-[11px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
                 >
-                  Export
+                  {t('common.export')}
                 </button>
                 {isCustom && (
                   <button
                     onClick={() => removeCustom(c.id)}
-                    title="Remove this custom case"
                     className="text-[11px] px-2 py-1 rounded border border-clinical-danger/50 text-clinical-danger hover:bg-clinical-danger/10"
                   >
-                    Delete
+                    {t('common.delete')}
                   </button>
                 )}
               </div>

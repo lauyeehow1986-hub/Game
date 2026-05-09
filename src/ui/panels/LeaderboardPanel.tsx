@@ -2,8 +2,10 @@ import { listCases } from '../../content';
 import { useCustomCases } from '../../state/customCasesStore';
 import { useProgress } from '../../state/progressStore';
 import { gradeForRatio } from '../../lib/scoring';
+import { useT } from '../../lib/i18n';
 
 export function LeaderboardPanel() {
+  const t = useT();
   const bestScores = useProgress((s) => s.bestScores);
   const decisionsMade = useProgress((s) => s.decisionsMade);
   const casesCompleted = useProgress((s) => s.casesCompleted);
@@ -36,20 +38,20 @@ export function LeaderboardPanel() {
   return (
     <section className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-2">
       <header className="flex items-baseline justify-between">
-        <h3 className="text-sm font-semibold text-white">Personal best</h3>
+        <h3 className="text-sm font-semibold text-white">{t('lb.heading')}</h3>
         <span className="text-[10px] uppercase tracking-wider text-clinical-subtle">
-          {casesCompleted} runs · {decisionsMade} decisions
+          {t('lb.runs', { runs: casesCompleted, decisions: decisionsMade })}
         </span>
       </header>
 
       <div className="grid grid-cols-3 gap-2 text-[11px]">
-        <Mini label="Cases" value={`${completed.length}/${all.length}`} />
+        <Mini label={t('lb.cases')} value={`${completed.length}/${all.length}`} />
         <Mini
-          label="Avg score"
+          label={t('lb.avg')}
           value={`${(meanRatio * 100).toFixed(0)}%`}
           colour={meanRatio >= 0.9 ? '#4ade80' : meanRatio >= 0.75 ? '#a3e635' : meanRatio >= 0.5 ? '#facc15' : '#f87171'}
         />
-        <Mini label="Decisions" value={`${decisionsMade}`} />
+        <Mini label={t('common.decisions')} value={`${decisionsMade}`} />
       </div>
 
       <ul className="space-y-1 max-h-72 overflow-y-auto scrollbar-thin pr-1">
@@ -81,7 +83,7 @@ export function LeaderboardPanel() {
                   )}
                 </div>
               ) : (
-                <div className="text-[10px] text-clinical-subtle">Not played</div>
+                <div className="text-[10px] text-clinical-subtle">{t('cases.notPlayed')}</div>
               )}
             </li>
           );
@@ -91,11 +93,11 @@ export function LeaderboardPanel() {
       {completed.length > 0 && (
         <button
           onClick={() => {
-            if (confirm('Clear all personal bests and progress?')) reset();
+            if (confirm(t('lb.resetConfirm'))) reset();
           }}
           className="w-full text-[10px] py-1 rounded border border-clinical-border text-clinical-subtle hover:text-clinical-danger hover:border-clinical-danger/50"
         >
-          Reset progress
+          {t('lb.resetButton')}
         </button>
       )}
     </section>

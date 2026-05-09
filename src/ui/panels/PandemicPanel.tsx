@@ -1,4 +1,5 @@
 import { useGame, type Dorscon } from '../../state/gameStore';
+import { useT } from '../../lib/i18n';
 
 const dorsconColours: Record<Dorscon, string> = {
   Green: '#4ade80',
@@ -21,11 +22,12 @@ export function PandemicPanel() {
   const setSurge = useGame((s) => s.setSurge);
   const setEdDiv = useGame((s) => s.setEdDiversion);
   const setNcid = useGame((s) => s.setNcidActivated);
+  const t = useT();
 
   return (
     <section className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-3">
       <header className="flex items-baseline justify-between">
-        <h3 className="text-sm font-semibold text-white">Pandemic engine</h3>
+        <h3 className="text-sm font-semibold text-white">{t('pandemic.heading')}</h3>
         <span
           className="text-[10px] uppercase tracking-wider font-semibold"
           style={{ color: dorsconColours[p.dorscon] }}
@@ -53,14 +55,14 @@ export function PandemicPanel() {
       <p className="text-[11px] text-clinical-subtle leading-snug">{dorsconNotes[p.dorscon]}</p>
 
       <Slider
-        label="PPE stockpile"
+        label={t('pandemic.ppe')}
         value={p.ppeStockpilePct}
         onChange={setPpe}
         format={(v) => `${v}%`}
         warnBelow={30}
       />
       <Slider
-        label="Surge capacity"
+        label={t('pandemic.surge')}
         value={p.surgeCapacityPct}
         onChange={setSurge}
         format={(v) => `${v}%`}
@@ -68,8 +70,8 @@ export function PandemicPanel() {
       />
 
       <div className="grid grid-cols-2 gap-2 pt-1">
-        <Toggle label="ED diversion" on={p.edDiversionActive} onChange={setEdDiv} />
-        <Toggle label="NCID activated" on={p.ncidActivated} onChange={setNcid} />
+        <Toggle label={t('pandemic.edDiversion')} on={p.edDiversionActive} onChange={setEdDiv} activeText={t('pandemic.active')} offText={t('pandemic.off')} />
+        <Toggle label={t('pandemic.ncidActivated')} on={p.ncidActivated} onChange={setNcid} activeText={t('pandemic.active')} offText={t('pandemic.off')} />
       </div>
 
       <div className="text-[10px] text-clinical-subtle pt-1">
@@ -117,10 +119,14 @@ function Toggle({
   label,
   on,
   onChange,
+  activeText,
+  offText,
 }: {
   label: string;
   on: boolean;
   onChange: (v: boolean) => void;
+  activeText?: string;
+  offText?: string;
 }) {
   return (
     <button
@@ -132,7 +138,7 @@ function Toggle({
       }`}
     >
       <span className="block text-[9px] uppercase tracking-wider">{label}</span>
-      {on ? 'Active' : 'Off'}
+      {on ? activeText ?? 'Active' : offText ?? 'Off'}
     </button>
   );
 }

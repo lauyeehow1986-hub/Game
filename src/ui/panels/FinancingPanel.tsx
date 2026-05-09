@@ -1,4 +1,5 @@
 import { useGame } from '../../state/gameStore';
+import { useT } from '../../lib/i18n';
 
 function Money({ label, value, colour }: { label: string; value: number; colour: string }) {
   return (
@@ -12,6 +13,7 @@ function Money({ label, value, colour }: { label: string; value: number; colour:
 }
 
 export function FinancingPanel() {
+  const t = useT();
   const totals = useGame((s) => s.totals);
   const profile = useGame((s) => s.profile);
   const burden = useGame((s) => s.caregiverBurden);
@@ -20,11 +22,8 @@ export function FinancingPanel() {
   if (!profile) {
     return (
       <section className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-2">
-        <h3 className="text-sm font-semibold text-white">Financing & burden</h3>
-        <p className="text-xs text-clinical-subtle">
-          Begins tracking once a case starts. Models ward-class subsidy, MediShield Life,
-          MediSave, CHAS and Pioneer/Merdeka top-ups.
-        </p>
+        <h3 className="text-sm font-semibold text-white">{t('fin.heading')}</h3>
+        <p className="text-xs text-clinical-subtle">{t('patient.empty')}</p>
       </section>
     );
   }
@@ -35,20 +34,20 @@ export function FinancingPanel() {
   return (
     <section className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-3">
       <header className="flex items-baseline justify-between">
-        <h3 className="text-sm font-semibold text-white">Financing</h3>
+        <h3 className="text-sm font-semibold text-white">{t('fin.heading')}</h3>
         <span className="text-[10px] uppercase tracking-wider text-clinical-subtle">
-          {profile.wardClass === 'na' ? 'Outpatient' : `Class ${profile.wardClass}`} ·{' '}
+          {profile.wardClass === 'na' ? t('fin.outpatient') : `Class ${profile.wardClass}`} ·{' '}
           {profile.chasTier === 'none' ? 'No CHAS' : profile.chasTier.toUpperCase()}
         </span>
       </header>
 
       <div className="space-y-1">
-        <Money label="Gross (private rate)" value={totals.gross} colour="#cbd5f5" />
-        <Money label="− Government subsidy" value={totals.subsidy} colour="#4ade80" />
-        <Money label="− MediShield Life claim" value={totals.mediShield} colour="#3aa6ff" />
-        <Money label="− MediSave drawdown" value={totals.mediSave} colour="#a3e635" />
+        <Money label={t('fin.gross')} value={totals.gross} colour="#cbd5f5" />
+        <Money label={t('fin.subsidy')} value={totals.subsidy} colour="#4ade80" />
+        <Money label={t('fin.mshl')} value={totals.mediShield} colour="#3aa6ff" />
+        <Money label={t('fin.medisave')} value={totals.mediSave} colour="#a3e635" />
         <div className="border-t border-clinical-border pt-1 mt-1 flex justify-between text-xs">
-          <span className="text-white font-semibold">= Cash out-of-pocket</span>
+          <span className="text-white font-semibold">{t('fin.cash')}</span>
           <span
             className="font-mono font-semibold"
             style={{
@@ -59,14 +58,14 @@ export function FinancingPanel() {
           </span>
         </div>
         <div className="text-[10px] text-clinical-subtle text-right">
-          {ratio}% of gross paid in cash
+          {t('fin.cashRatioOfGross', { pct: ratio })}
         </div>
       </div>
 
       {segments.length > 0 && (
         <details className="text-[11px]">
           <summary className="cursor-pointer text-clinical-subtle hover:text-white">
-            Per-segment breakdown
+            {t('fin.perSegment')}
           </summary>
           <ul className="mt-2 space-y-1">
             {segments.map((s, i) => (
@@ -83,11 +82,11 @@ export function FinancingPanel() {
 
       <div className="border-t border-clinical-border pt-2 space-y-1">
         <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
-          Caregiver burden
+          {t('fin.caregiverBurden')}
         </div>
-        <BurdenBar label="Time off work" value={burden.timeOffWorkHours} max={48} unit="h" />
-        <BurdenBar label="Financial worry" value={burden.financialWorry} max={100} unit="" />
-        <BurdenBar label="Sleep debt" value={burden.sleepDebt} max={100} unit="" />
+        <BurdenBar label={t('fin.timeOffWork')} value={burden.timeOffWorkHours} max={48} unit="h" />
+        <BurdenBar label={t('fin.financialWorry')} value={burden.financialWorry} max={100} unit="" />
+        <BurdenBar label={t('fin.sleepDebt')} value={burden.sleepDebt} max={100} unit="" />
       </div>
     </section>
   );
