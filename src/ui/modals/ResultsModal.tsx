@@ -3,6 +3,7 @@ import { useGame } from '../../state/gameStore';
 import { useProgress } from '../../state/progressStore';
 import { gradeForRatio, totalScoreFromLog } from '../../lib/scoring';
 import { usePerspective } from '../../state/perspectiveStore';
+import { chimeCaseComplete } from '../../lib/audio';
 
 export function ResultsModal() {
   const status = useGame((s) => s.run.status);
@@ -22,6 +23,7 @@ export function ResultsModal() {
     if (status === 'completed' && caseDef) {
       const { earned, max } = totalScoreFromLog(log);
       recordCaseResult(caseDef.id, earned, max);
+      chimeCaseComplete();
     }
   }, [status, caseDef, log, recordCaseResult]);
 
