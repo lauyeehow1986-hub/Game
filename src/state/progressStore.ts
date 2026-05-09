@@ -22,6 +22,13 @@ const initial: ProgressState = {
     'urti-chas-gp',
     'private-cataract',
     'private-to-public-handover',
+    'sepsis-bundle',
+    'major-trauma',
+    'ckd-dialysis',
+    'imh-first-psychosis',
+    'obstetric-delivery',
+    'geriatric-falls',
+    'hf-outpatient',
   ],
   bestScores: {},
   decisionsMade: 0,
@@ -56,10 +63,10 @@ export const useProgress = create<ProgressStore>()(
     }),
     {
       name: 'sg-pathway-progress',
-      version: 9,
+      version: 10,
       migrate: (persisted: unknown, version) => {
         const obj = (persisted ?? {}) as Partial<ProgressState>;
-        if (version < 9) {
+        if (version < 10) {
           const merged = new Set([
             ...(obj.unlockedCaseIds ?? []),
             ...initial.unlockedCaseIds,

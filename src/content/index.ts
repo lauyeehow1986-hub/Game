@@ -61,6 +61,13 @@ import { palliativeEndOfLife } from './cases/palliative-end-of-life';
 import { urtiChasGP } from './cases/urti-chas-gp';
 import { privateCataract } from './cases/private-cataract';
 import { privateToPublicHandover } from './cases/private-to-public-handover';
+import { sepsisCase } from './cases/sepsis-bundle';
+import { majorTraumaCase } from './cases/major-trauma';
+import { ckdDialysisCase } from './cases/ckd-dialysis';
+import { imhFirstEpisodeCase } from './cases/imh-first-psychosis';
+import { obstetricDeliveryCase } from './cases/obstetric-delivery';
+import { geriatricFallsCase } from './cases/geriatric-falls';
+import { heartFailureCase } from './cases/heart-failure-clinic';
 import type { CaseDefinition, Facility } from '../lib/types';
 
 const allFacilities: Facility[] = [
@@ -102,6 +109,13 @@ export const cases: Record<string, CaseDefinition> = {
   [urtiChasGP.id]: urtiChasGP,
   [privateCataract.id]: privateCataract,
   [privateToPublicHandover.id]: privateToPublicHandover,
+  [sepsisCase.id]: sepsisCase,
+  [majorTraumaCase.id]: majorTraumaCase,
+  [ckdDialysisCase.id]: ckdDialysisCase,
+  [imhFirstEpisodeCase.id]: imhFirstEpisodeCase,
+  [obstetricDeliveryCase.id]: obstetricDeliveryCase,
+  [geriatricFallsCase.id]: geriatricFallsCase,
+  [heartFailureCase.id]: heartFailureCase,
 };
 
 export function getFacility(id: string): Facility | undefined {
