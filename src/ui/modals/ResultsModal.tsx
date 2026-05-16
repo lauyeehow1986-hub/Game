@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { compareToBestPath } from '../../lib/best-path';
 import { useT, useTr } from '../../lib/i18n';
 import { generateLessonPlan } from '../../lib/lesson-plan';
+import { openPrintableLessonPlan } from '../../lib/lesson-plan-print';
 import { encodeRunToUrl } from '../../lib/case-share';
 
 export function ResultsModal() {
@@ -327,6 +328,24 @@ function ExportButtons() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
+  const printLesson = () => {
+    openPrintableLessonPlan({
+      caseDef,
+      log,
+      elapsedGameMin: elapsed,
+      totalCostSGD: totalCost,
+      burden,
+      profile: profile
+        ? {
+            name: profile.name,
+            wardClass: profile.wardClass,
+            chasTier: profile.chasTier,
+            hasIntegratedShield: profile.hasIntegratedShield,
+          }
+        : undefined,
+    });
+  };
+
   const shareRun = async () => {
     const url = encodeRunToUrl({
       caseId: caseDef.id,
@@ -365,6 +384,12 @@ function ExportButtons() {
         className="text-[11px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
       >
         {t('results.downloadLesson')}
+      </button>
+      <button
+        onClick={printLesson}
+        className="text-[11px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+      >
+        {t('results.printLesson')}
       </button>
       <button
         onClick={shareRun}

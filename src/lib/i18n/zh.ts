@@ -224,6 +224,7 @@ export const zh: Record<string, string> = {
   'results.shareRun': '分享此次运行',
   'results.shareRunDone': '运行链接已复制到剪贴板',
   'results.downloadLesson': '下载教学纲要',
+  'results.printLesson': '打印 / 另存为 PDF',
 
   'runReview.heading': '查看共享运行',
   'runReview.subtitle': '「{{title}}」的回放。下列决策来自分享者;最佳实践列显示完美运行的选择。',
