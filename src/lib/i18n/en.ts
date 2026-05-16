@@ -169,6 +169,26 @@ export const en: Record<string, string> = {
   'lb.resetConfirm': 'Clear all personal bests and progress?',
   'lb.resetButton': 'Reset progress',
 
+  // Trends
+  'trends.heading': 'Your learning trends',
+  'trends.grade': 'Avg grade',
+  'trends.recentRuns': 'Recent runs (oldest left)',
+  'trends.byCategory': 'Strength by category',
+  'trends.recommended': 'Recommended next',
+  'trends.replay': 'Replay',
+  'trends.allCases': 'All cases',
+
+  // Case category labels (used in trends bars + lesson plans)
+  'cases.category.acute': 'Acute',
+  'cases.category.elective': 'Elective',
+  'cases.category.outpatient': 'Outpatient',
+
+  // What's-new modal
+  'whatsNew.title': "What's new",
+  'whatsNew.subtitle': 'Features added since your last visit',
+  'whatsNew.gotIt': 'Got it — close',
+  'whatsNew.dontShow': "Don't show again",
+
   // Curricula
   'curr.heading': 'Curricula',
   'curr.objectives': 'Learning objectives',

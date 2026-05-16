@@ -8,12 +8,13 @@ import { FacilityBrowser } from './ui/panels/FacilityBrowser';
 import { PandemicPanel } from './ui/panels/PandemicPanel';
 import { DataExchangePanel } from './ui/panels/DataExchangePanel';
 import { CitationsPanel } from './ui/panels/CitationsPanel';
-import { LeaderboardPanel } from './ui/panels/LeaderboardPanel';
 import { CurriculumPanel } from './ui/panels/CurriculumPanel';
+import { TrendsPanel } from './ui/panels/TrendsPanel';
 import { OpsPanel } from './ui/panels/OpsPanel';
 import { DecisionModal } from './ui/modals/DecisionModal';
 import { ResultsModal } from './ui/modals/ResultsModal';
 import { RunReviewModal } from './ui/modals/RunReviewModal';
+import { WhatsNewModal } from './ui/modals/WhatsNewModal';
 import { Tutorial } from './ui/Tutorial';
 import { ResumePrompt } from './ui/ResumePrompt';
 import { DisclaimerBanner } from './ui/DisclaimerBanner';
@@ -33,6 +34,7 @@ export default function App() {
             <>
               <CaseList />
               <CurriculumPanel />
+              <TrendsPanel />
               <FacilityBrowser />
               <PatientPanel />
             </>
@@ -56,7 +58,6 @@ export default function App() {
               <PandemicPanel />
               <TycoonDashboard />
               <DecisionLog />
-              <LeaderboardPanel />
               <CitationsPanel />
             </>
           ) : (
@@ -78,6 +79,7 @@ export default function App() {
       )}
       <Tutorial />
       <RunReviewModal />
+      <WhatsNewModal />
     </div>
   );
 }

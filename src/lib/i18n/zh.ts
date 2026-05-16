@@ -165,6 +165,23 @@ export const zh: Record<string, string> = {
   'lb.resetConfirm': '清除所有最佳成绩和进度吗?',
   'lb.resetButton': '重置进度',
 
+  'trends.heading': '您的学习趋势',
+  'trends.grade': '平均评级',
+  'trends.recentRuns': '近期运行(旧→新)',
+  'trends.byCategory': '按类别表现',
+  'trends.recommended': '推荐下一题',
+  'trends.replay': '重玩',
+  'trends.allCases': '所有病例',
+
+  'cases.category.acute': '急性',
+  'cases.category.elective': '择期',
+  'cases.category.outpatient': '门诊',
+
+  'whatsNew.title': '更新说明',
+  'whatsNew.subtitle': '自上次访问以来新增的功能',
+  'whatsNew.gotIt': '知道了 — 关闭',
+  'whatsNew.dontShow': '不再显示',
+
   // Curricula
   'curr.heading': '课程包',
   'curr.objectives': '学习目标',
