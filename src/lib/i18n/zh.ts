@@ -165,6 +165,24 @@ export const zh: Record<string, string> = {
   'lb.resetConfirm': '清除所有最佳成绩和进度吗?',
   'lb.resetButton': '重置进度',
 
+  // Curricula
+  'curr.heading': '课程包',
+  'curr.objectives': '学习目标',
+  'curr.progress': '{{done}} / {{total}} 项病例',
+  'curr.begin': '开始课程',
+  'curr.continue': '继续',
+  'curr.complete': '已完成',
+  'curr.nextLabel': '下一个:{{title}}',
+  'curr.allDone': '本课程的所有病例都已有最佳成绩。',
+
+  // Results — replay comparison
+  'results.bestPath.h': '最佳实践路径会如何选择',
+  'results.bestPath.match': '与最佳实践一致',
+  'results.bestPath.miss': '与最佳实践不同',
+  'results.bestPath.you': '您的选择',
+  'results.bestPath.best': '最佳实践选择',
+  'results.bestPath.deltaScore': '比最佳少 {{delta}} 分',
+
   // Ops
   'ops.heading': '医院运营',
   'ops.day': '第 {{day}} 天',

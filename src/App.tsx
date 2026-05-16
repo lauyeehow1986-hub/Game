@@ -9,6 +9,7 @@ import { PandemicPanel } from './ui/panels/PandemicPanel';
 import { DataExchangePanel } from './ui/panels/DataExchangePanel';
 import { CitationsPanel } from './ui/panels/CitationsPanel';
 import { LeaderboardPanel } from './ui/panels/LeaderboardPanel';
+import { CurriculumPanel } from './ui/panels/CurriculumPanel';
 import { OpsPanel } from './ui/panels/OpsPanel';
 import { DecisionModal } from './ui/modals/DecisionModal';
 import { ResultsModal } from './ui/modals/ResultsModal';
@@ -30,6 +31,7 @@ export default function App() {
           {mode === 'case' ? (
             <>
               <CaseList />
+              <CurriculumPanel />
               <FacilityBrowser />
               <PatientPanel />
             </>

@@ -4,8 +4,11 @@ import { useProgress } from '../../state/progressStore';
 import { gradeForRatio, totalScoreFromLog } from '../../lib/scoring';
 import { usePerspective } from '../../state/perspectiveStore';
 import { chimeCaseComplete } from '../../lib/audio';
+import { compareToBestPath } from '../../lib/best-path';
+import { useT } from '../../lib/i18n';
 
 export function ResultsModal() {
+  const t = useT();
   const status = useGame((s) => s.run.status);
   const log = useGame((s) => s.run.log);
   const caseDef = useGame((s) => s.caseDef);
@@ -137,6 +140,70 @@ export function ResultsModal() {
             })}
           </div>
         </section>
+
+        {(() => {
+          const diff = compareToBestPath(caseDef, log);
+          if (diff.length === 0) return null;
+          return (
+            <section className="px-5 py-4 border-b border-clinical-border space-y-2">
+              <h3 className="text-sm font-semibold text-white">{t('results.bestPath.h')}</h3>
+              <div className="grid gap-2">
+                {diff.map((row, i) => {
+                  const yours = row.yours;
+                  const delta = yours ? row.best.score - yours.score : row.best.score;
+                  return (
+                    <div
+                      key={i}
+                      className={`border rounded p-2 ${
+                        row.match
+                          ? 'border-clinical-ok/40 bg-clinical-ok/5'
+                          : 'border-clinical-warn/40 bg-clinical-warn/5'
+                      }`}
+                    >
+                      <div className="flex justify-between text-[10px] uppercase tracking-wider">
+                        <span className="text-clinical-subtle truncate flex-1">{row.prompt}</span>
+                        <span
+                          className={
+                            row.match ? 'text-clinical-ok' : 'text-clinical-warn'
+                          }
+                        >
+                          {row.match ? t('results.bestPath.match') : t('results.bestPath.miss')}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1 text-[11px]">
+                        <div>
+                          <div className="text-[9px] uppercase tracking-wider text-clinical-subtle">
+                            {t('results.bestPath.you')}
+                          </div>
+                          <div className="text-white">{yours?.label ?? '—'}</div>
+                          {yours && (
+                            <div className="font-mono text-[10px] text-clinical-subtle">
+                              {yours.score.toFixed(1)} / {yours.maxScore.toFixed(1)}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-[9px] uppercase tracking-wider text-clinical-subtle">
+                            {t('results.bestPath.best')}
+                          </div>
+                          <div className="text-white">{row.best.label}</div>
+                          <div className="font-mono text-[10px] text-clinical-subtle">
+                            {row.best.score.toFixed(1)}
+                            {!row.match && (
+                              <span className="ml-2 text-clinical-warn">
+                                {t('results.bestPath.deltaScore', { delta: delta.toFixed(1) })}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })()}
 
         {caseDef.historical && caseDef.citations && caseDef.citations.length > 0 && (
           <section className="px-5 py-4 border-b border-clinical-border space-y-2">

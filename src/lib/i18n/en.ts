@@ -169,6 +169,24 @@ export const en: Record<string, string> = {
   'lb.resetConfirm': 'Clear all personal bests and progress?',
   'lb.resetButton': 'Reset progress',
 
+  // Curricula
+  'curr.heading': 'Curricula',
+  'curr.objectives': 'Learning objectives',
+  'curr.progress': '{{done}} / {{total}} cases',
+  'curr.begin': 'Begin curriculum',
+  'curr.continue': 'Continue',
+  'curr.complete': 'Complete',
+  'curr.nextLabel': 'Next: {{title}}',
+  'curr.allDone': 'All cases in this curriculum have a personal best.',
+
+  // Results — replay comparison
+  'results.bestPath.h': 'How a best-practice run would have chosen',
+  'results.bestPath.match': 'Matched best-practice',
+  'results.bestPath.miss': 'Differs from best-practice',
+  'results.bestPath.you': 'Your choice',
+  'results.bestPath.best': 'Best-practice choice',
+  'results.bestPath.deltaScore': '{{delta}} pts vs best',
+
   // Ops
   'ops.heading': 'Hospital Ops',
   'ops.day': 'Day {{day}}',
