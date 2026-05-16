@@ -182,6 +182,12 @@ export const zh: Record<string, string> = {
   'whatsNew.gotIt': '知道了 — 关闭',
   'whatsNew.dontShow': '不再显示',
 
+  'install.tag': '安装',
+  'install.body': '将SG Pathway添加到主屏幕,可离线使用。',
+  'install.cta': '安装',
+  'install.dismiss': '暂不',
+  'hud.offline': '离线',
+
   // Curricula
   'curr.heading': '课程包',
   'curr.objectives': '学习目标',

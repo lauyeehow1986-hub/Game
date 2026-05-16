@@ -189,6 +189,13 @@ export const en: Record<string, string> = {
   'whatsNew.gotIt': 'Got it — close',
   'whatsNew.dontShow': "Don't show again",
 
+  // Install prompt + offline
+  'install.tag': 'Install',
+  'install.body': 'Install SG Pathway to your home screen for offline use.',
+  'install.cta': 'Install',
+  'install.dismiss': 'Not now',
+  'hud.offline': 'Offline',
+
   // Curricula
   'curr.heading': 'Curricula',
   'curr.objectives': 'Learning objectives',

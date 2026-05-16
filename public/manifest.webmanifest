@@ -1,0 +1,28 @@
+{
+  "name": "SG Pathway — Singapore Healthcare Pathway Sim",
+  "short_name": "SG Pathway",
+  "description": "Educational simulation of patient pathways through Singapore's healthcare network.",
+  "id": "/Game/",
+  "start_url": "/Game/",
+  "scope": "/Game/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0b1320",
+  "background_color": "#0b1320",
+  "categories": ["education", "medical"],
+  "lang": "en-SG",
+  "icons": [
+    {
+      "src": "/Game/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/Game/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

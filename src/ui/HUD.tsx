@@ -6,6 +6,7 @@ import type { Perspective } from '../lib/types';
 import { isMuted, setMuted } from '../lib/audio';
 import { LOCALES, useLocale, useT, type Locale } from '../lib/i18n';
 import { AboutModal } from './modals/AboutModal';
+import { OfflineIndicator } from './OfflineIndicator';
 
 const labels: Record<Perspective, { tag: string; colour: string }> = {
   patient: { tag: 'POV', colour: 'bg-rose-500/80' },
@@ -154,6 +155,7 @@ export function HUD() {
             ))}
           </div>
         )}
+        <OfflineIndicator />
         <select
           value={locale}
           onChange={(e) => setLocale(e.target.value as Locale)}
