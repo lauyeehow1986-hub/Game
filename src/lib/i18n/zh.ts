@@ -188,6 +188,18 @@ export const zh: Record<string, string> = {
   'install.dismiss': '暂不',
   'hud.offline': '离线',
 
+  'demo.tag': '最佳实践演示',
+  'demo.subtitle':
+    '逐步浏览本病例每个决策点的最高分选项。不记录分数,无须承诺。使用 ← → 键或按钮。',
+  'demo.stepCount': '第 {{step}} / {{total}} 步',
+  'demo.prompt': '提示',
+  'demo.bestChoice': '最佳选择',
+  'demo.reference': '参考',
+  'demo.outcome': '后续发展',
+  'demo.keyHint': '← → 键 / Esc 关闭',
+  'demo.noDecisions': '本病例没有可演示的决策点。',
+  'cases.demoBestRun': '演示最佳路径',
+
   // Curricula
   'curr.heading': '课程包',
   'curr.objectives': '学习目标',

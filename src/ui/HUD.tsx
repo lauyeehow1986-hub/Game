@@ -55,6 +55,7 @@ export function HUD() {
 
   const replayTutorial = () => {
     localStorage.removeItem('sg-pathway-tutorial-seen-v1');
+    localStorage.removeItem('sg-pathway-tutorial-seen-v2');
     location.reload();
   };
 

@@ -196,6 +196,19 @@ export const en: Record<string, string> = {
   'install.dismiss': 'Not now',
   'hud.offline': 'Offline',
 
+  // Best-path demo
+  'demo.tag': 'Best-practice walkthrough',
+  'demo.subtitle':
+    'Step through the highest-scoring option at every decision in this case. No score recorded; no commitment. Use ← → keys or the buttons.',
+  'demo.stepCount': 'Step {{step}} / {{total}}',
+  'demo.prompt': 'Prompt',
+  'demo.bestChoice': 'Best choice',
+  'demo.reference': 'Reference',
+  'demo.outcome': 'What happens next',
+  'demo.keyHint': '← → keys, Esc to close',
+  'demo.noDecisions': 'This case has no decisions to walk through.',
+  'cases.demoBestRun': 'Demo best run',
+
   // Curricula
   'curr.heading': 'Curricula',
   'curr.objectives': 'Learning objectives',

@@ -5,6 +5,7 @@ import { useProgress } from '../../state/progressStore';
 import { useCustomCases } from '../../state/customCasesStore';
 import { downloadCaseJson, encodeCaseToUrl, tryDecodeCaseFromHref } from '../../lib/case-share';
 import { CaseImportModal } from '../modals/CaseImportModal';
+import { BestPathDemoModal } from '../modals/BestPathDemoModal';
 import { useT, useTr } from '../../lib/i18n';
 import type { CaseDefinition } from '../../lib/types';
 
@@ -22,6 +23,7 @@ export function CaseList() {
   const removeCustom = useCustomCases((s) => s.remove);
 
   const [importOpen, setImportOpen] = useState(false);
+  const [demoCase, setDemoCase] = useState<CaseDefinition | null>(null);
   const [shareToast, setShareToast] = useState<string | null>(null);
 
   // Decode ?case= on first mount.
@@ -143,6 +145,12 @@ export function CaseList() {
                 >
                   {t('common.export')}
                 </button>
+                <button
+                  onClick={() => setDemoCase(c)}
+                  className="text-[11px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+                >
+                  {t('cases.demoBestRun')}
+                </button>
                 {isCustom && (
                   <button
                     onClick={() => removeCustom(c.id)}
@@ -158,6 +166,7 @@ export function CaseList() {
       </ul>
 
       <CaseImportModal open={importOpen} onClose={() => setImportOpen(false)} />
+      <BestPathDemoModal caseDef={demoCase} onClose={() => setDemoCase(null)} />
     </section>
   );
 }
