@@ -22,7 +22,7 @@ const ANTIBIOTIC_STEWARDSHIP = {
 
 export const urtiChasGP: CaseDefinition = {
   id: 'urti-chas-gp',
-  title: 'URTI — adult patient choosing telemed vs CHAS GP vs polyclinic',
+  title: { en: 'URTI — adult patient choosing telemed vs CHAS GP vs polyclinic', zh: '上呼吸道感染 — 成年患者在远程医疗 / CHAS家庭医生 / 综合诊疗所之间选择' },
   blurb:
     'Mr Rajan, 62. Long-distance lorry driver, CHAS Orange, on metformin and SGLT2i for T2DM. Two days of cough, runny nose, mild fever. Wife wants him to "see someone today".',
   category: 'outpatient',

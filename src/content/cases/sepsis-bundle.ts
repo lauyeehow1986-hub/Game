@@ -17,7 +17,7 @@ const NEWS = {
 
 export const sepsisCase: CaseDefinition = {
   id: 'sepsis-bundle',
-  title: 'Severe sepsis — 73 y/o auntie, fever and confusion',
+  title: { en: 'Severe sepsis — 73 y/o auntie, fever and confusion', zh: '严重脓毒症 — 73岁阿姨,发烧伴神志不清' },
   blurb:
     'Mdm Lim, 73, retired, frail. Fever + confusion at the void deck this morning; family carried her to a Healthway GP. GP triaged her to the nearest ED at KTPH.',
   category: 'acute',

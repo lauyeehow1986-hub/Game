@@ -17,7 +17,7 @@ const HEALTHIER_SG = {
 
 export const heartFailureCase: CaseDefinition = {
   id: 'hf-outpatient',
-  title: 'New-onset heart failure — polyclinic to NHCS HF clinic',
+  title: { en: 'New-onset heart failure — polyclinic to NHCS HF clinic', zh: '新发心衰 — 综合诊疗所转NHCS心衰门诊' },
   blurb:
     'Mr Tan, 64. Three weeks of breathlessness and ankle swelling; can\'t finish his usual NTUC walk. NHGP polyclinic flags JVP raised and bibasal crackles; refers to NHCS HF clinic urgently.',
   category: 'outpatient',

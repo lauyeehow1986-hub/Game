@@ -17,7 +17,7 @@ const HOME_HOSPICE = {
 
 export const palliativeEndOfLife: CaseDefinition = {
   id: 'palliative-eol',
-  title: 'Advanced metastatic lung cancer — end-of-life pathway',
+  title: { en: 'Advanced metastatic lung cancer — end-of-life pathway', zh: '晚期转移性肺癌 — 临终关怀路径' },
   blurb:
     'Mr Tan, 67. Stage IV NSCLC, on 3rd-line therapy, increasing dyspnoea and cachexia. Brought to TTSH ED at 2am with severe breathlessness. Wife and son frightened.',
   category: 'acute',

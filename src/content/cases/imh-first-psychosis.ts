@@ -17,7 +17,7 @@ const CMHT = {
 
 export const imhFirstEpisodeCase: CaseDefinition = {
   id: 'imh-first-psychosis',
-  title: 'First-episode psychosis — 22 y/o, family brings him to ED',
+  title: { en: 'First-episode psychosis — 22 y/o, family brings him to ED', zh: '首次精神病发作 — 22岁,家人陪同前往急诊' },
   blurb:
     'Mr Lee, 22. NS-completed. Last 3 months: withdrawal, paranoid ideation, hearing voices, sleep loss. Mum and elder sister bring him to TTSH ED at 11pm after he locked himself in his bedroom for two days.',
   category: 'acute',

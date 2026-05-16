@@ -22,7 +22,7 @@ const HEALTHIER_SG = {
 
 export const privateCataract: CaseDefinition = {
   id: 'private-cataract',
-  title: 'Cataract — public SNEC vs private (Mt Elizabeth Novena)',
+  title: { en: 'Cataract — public SNEC vs private (Mt Elizabeth Novena)', zh: '白内障 — 公立SNEC对比私立(诺维娜伊丽莎白山医院)' },
   blurb:
     'Mdm Lim, 71. Right-eye cataract, vision down to 6/24, struggling with reading and night driving. CHAS Orange + Merdeka Generation; her son insists on a private surgeon she found online. She has an IP rider on a Class B1/A plan.',
   category: 'elective',

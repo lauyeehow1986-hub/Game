@@ -1,12 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import {
   encodeCaseToUrl,
+  encodeCurriculumToUrl,
   encodeRunToUrl,
   tryDecodeCaseFromHref,
+  tryDecodeCurriculumFromHref,
   tryDecodeRunFromHref,
   type RunSnapshot,
 } from './case-share';
 import type { CaseDefinition } from './types';
+import type { CurriculumBundle } from './curriculum-schema';
 
 const minimalCase: CaseDefinition = {
   id: 'demo',
@@ -72,5 +75,32 @@ describe('encodeRunToUrl + tryDecodeRunFromHref', () => {
     // Encode an object missing caseId.
     const bad = btoa(JSON.stringify({ log: [] }));
     expect(tryDecodeRunFromHref(`http://example.test/?run=${bad}`)).toBeNull();
+  });
+});
+
+const sampleBundle: CurriculumBundle = {
+  id: 'demo-curr',
+  title: 'Demo curriculum',
+  blurb: 'Two-case demo bundle.',
+  objectives: ['Recognise X', 'Right-site Y'],
+  caseIds: ['stemi-acute', 'hf-outpatient'],
+};
+
+describe('encodeCurriculumToUrl + tryDecodeCurriculumFromHref', () => {
+  it('round-trips a curriculum bundle', () => {
+    const url = encodeCurriculumToUrl(sampleBundle, 'http://example.test/');
+    expect(url).toContain('?curr=');
+    const decoded = tryDecodeCurriculumFromHref(url);
+    expect(decoded?.id).toBe('demo-curr');
+    expect(decoded?.caseIds).toEqual(['stemi-acute', 'hf-outpatient']);
+  });
+
+  it('returns null when ?curr is missing', () => {
+    expect(tryDecodeCurriculumFromHref('http://example.test/')).toBeNull();
+  });
+
+  it('returns null when bundle is invalid', () => {
+    const bad = btoa(JSON.stringify({ id: 'x' })); // missing required fields
+    expect(tryDecodeCurriculumFromHref(`http://example.test/?curr=${bad}`)).toBeNull();
   });
 });

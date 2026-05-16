@@ -17,7 +17,7 @@ const RIBA = {
 
 export const privateToPublicHandover: CaseDefinition = {
   id: 'private-to-public-handover',
-  title: 'Renal Mass — private → public handover with hand-carry CD',
+  title: { en: 'Renal Mass — private → public handover with hand-carry CD', zh: '肾占位 — 私立转公立移交,患者自携影像光盘' },
   blurb:
     'Mr Tan, 58 (Healthway Medical CHAS Orange GP). Routine private-clinic ultrasound for low back pain incidentally found a 4 cm right renal mass. Private radiologist recommended CT urogram, then escalation to a urologist. He transfers to subsidised SGH urology to manage costs. The CT report and images live on the private radiology PACS — not on NEHR.',
   category: 'outpatient',

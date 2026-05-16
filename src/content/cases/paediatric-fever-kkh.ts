@@ -17,7 +17,7 @@ const MOH_HEALTHIER_SG = {
 
 export const paediatricFeverKKH: CaseDefinition = {
   id: 'paeds-fever-kkh',
-  title: 'Febrile Toddler — 18 mo with fever for 3 days, lethargy',
+  title: { en: 'Febrile Toddler — 18 mo with fever for 3 days, lethargy', zh: '发热幼儿 — 18个月,持续发烧3天,精神倦怠' },
   blurb:
     'Aaisha, 18 months. Fever 39.6°C for 3 days, off feeds, parents brought her to the polyclinic at 8am where the nurse advised KKH Children\'s Emergency.',
   category: 'acute',

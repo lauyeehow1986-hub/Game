@@ -17,7 +17,7 @@ const PRE_DIALYSIS = {
 
 export const ckdDialysisCase: CaseDefinition = {
   id: 'ckd-dialysis',
-  title: 'CKD progression — polyclinic → NUH renal SOC → NKF dialysis',
+  title: { en: 'CKD progression — polyclinic → NUH renal SOC → NKF dialysis', zh: '慢性肾病进展 — 综合诊疗所 → 国立大学医院肾内科 → NKF透析' },
   blurb:
     'Mr Rajan, 62. Long-distance lorry driver, T2DM x12y, CKD stage 4 (eGFR 22), HbA1c 8.2%. NHGP polyclinic flags ACR rising; refers to NUH renal SOC.',
   category: 'outpatient',

@@ -17,7 +17,7 @@ const WHO_SARS = {
 
 export const sars2003Case: CaseDefinition = {
   id: 'sars-2003-historical',
-  title: 'SARS 2003 — TTSH outbreak (historical educational scenario)',
+  title: { en: 'SARS 2003 — TTSH outbreak (historical educational scenario)', zh: '2003年SARS — 陈笃生医院疫情(历史教学情景)' },
   blurb:
     'Historical educational scenario. March 2003. A returning traveller with atypical pneumonia is admitted to TTSH general medical ward. Within days, dozens of healthcare workers are infected. Decisions modelled here are framed against MOH and WHO post-outbreak reviews.',
   category: 'acute',

@@ -22,7 +22,7 @@ const AGEING_PLAN = {
 
 export const electiveTHR: CaseDefinition = {
   id: 'elective-thr',
-  title: 'Elective Total Hip Replacement — 71 y/o female, severe right hip OA',
+  title: { en: 'Elective Total Hip Replacement — 71 y/o female, severe right hip OA', zh: '择期全髋关节置换 — 71岁女性,右髋重度骨关节炎' },
   blurb:
     'Mdm Lim, 71, retired. Right hip OA failed conservative management. Listed for elective right THR at TTSH. Lives with her daughter.',
   category: 'elective',

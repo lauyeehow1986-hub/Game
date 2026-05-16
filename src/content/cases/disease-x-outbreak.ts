@@ -17,7 +17,7 @@ const WHO_IPC = {
 
 export const diseaseXOutbreak: CaseDefinition = {
   id: 'disease-x',
-  title: 'Disease X — 34 y/o returning traveller, severe respiratory illness',
+  title: { en: 'Disease X — 34 y/o returning traveller, severe respiratory illness', zh: 'X病 — 34岁回国旅客,严重呼吸道病症' },
   blurb:
     'Mr Wong, 34. Returned from a regional outbreak hotspot 5 days ago. Now febrile, hypoxic, dry cough. Walks into TTSH ED. DORSCON status was raised to Yellow that morning.',
   category: 'acute',

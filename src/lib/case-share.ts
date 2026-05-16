@@ -1,5 +1,6 @@
 import type { CaseDefinition, DecisionLogEntry } from './types';
 import { serialiseCase, validateCase } from './case-schema';
+import { validateCurriculum, type CurriculumBundle } from './curriculum-schema';
 
 export interface RunSnapshot {
   caseId: string;
@@ -85,6 +86,41 @@ export function tryDecodeRunFromHref(href: string): RunSnapshot | null {
   } catch {
     return null;
   }
+}
+
+export function encodeCurriculumToUrl(b: CurriculumBundle, base?: string): string {
+  const json = JSON.stringify(b);
+  const b64 = utf8ToBase64Url(json);
+  const origin =
+    base ?? (typeof window !== 'undefined' ? window.location.origin + window.location.pathname : '');
+  return `${origin}?curr=${b64}`;
+}
+
+export function tryDecodeCurriculumFromHref(href: string): CurriculumBundle | null {
+  try {
+    const url = new URL(href);
+    const q = url.searchParams.get('curr');
+    if (!q) return null;
+    const json = base64UrlToUtf8(q);
+    const parsed = JSON.parse(json);
+    const v = validateCurriculum(parsed);
+    return v.ok ? v.bundle : null;
+  } catch {
+    return null;
+  }
+}
+
+export function downloadCurriculumJson(b: CurriculumBundle): void {
+  if (typeof document === 'undefined') return;
+  const blob = new Blob([JSON.stringify(b, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${b.id}.curriculum.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /**

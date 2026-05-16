@@ -22,7 +22,10 @@ const CDMP = {
 
 export const outpatientDiabetes: CaseDefinition = {
   id: 'outpatient-diabetes',
-  title: 'Outpatient T2DM — 62 y/o male, poorly controlled, polyclinic referral',
+  title: {
+    en: 'Outpatient T2DM — 62 y/o male, poorly controlled, polyclinic referral',
+    zh: '门诊2型糖尿病 — 62岁男性,控制欠佳,综合诊疗所转诊',
+  },
   blurb:
     'Mr Rajan, 62. Long-distance lorry driver. T2DM x10y, HbA1c 9.4%, on metformin only. Walked into Toa Payoh Polyclinic with painful numb feet for two weeks. The polyclinic refers him to TTSH endocrinology SOC.',
   category: 'outpatient',

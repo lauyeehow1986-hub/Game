@@ -22,7 +22,7 @@ const HEALTHIER_SG = {
 
 export const breastCancerCrossCluster: CaseDefinition = {
   id: 'breast-ca-crosscluster',
-  title: 'Cross-cluster Breast Cancer — polyclinic referral, NHG → SingHealth',
+  title: { en: 'Cross-cluster Breast Cancer — polyclinic referral, NHG → SingHealth', zh: '跨集群乳腺癌 — 综合诊疗所转诊,NHG → SingHealth' },
   blurb:
     'Mdm Lim, 54. Felt a right breast lump while showering 4 weeks ago. Visited Toa Payoh Polyclinic (NHG). Referred to SGH Breast Centre (SingHealth) for triple assessment, then NCCS for treatment.',
   category: 'outpatient',

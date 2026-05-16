@@ -22,7 +22,7 @@ const HEALTHIER_SG = {
 
 export const strokeThrombectomy: CaseDefinition = {
   id: 'stroke-thrombectomy',
-  title: 'Acute Ischaemic Stroke — 67 y/o female, large-vessel occlusion',
+  title: { en: 'Acute Ischaemic Stroke — 67 y/o female, large-vessel occlusion', zh: '急性缺血性中风 — 67岁女性,大血管闭塞' },
   blurb:
     'Mdm Lee, 67. Sudden right-sided weakness and aphasia at home in Clementi 30 min ago. Husband called 995. SCDF en route. NUH ED is the nearest stroke-capable centre.',
   category: 'acute',

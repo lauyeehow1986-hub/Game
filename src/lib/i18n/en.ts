@@ -178,6 +178,15 @@ export const en: Record<string, string> = {
   'curr.complete': 'Complete',
   'curr.nextLabel': 'Next: {{title}}',
   'curr.allDone': 'All cases in this curriculum have a personal best.',
+  'curr.import.subtitle': 'Bring your own curriculum',
+  'curr.import.heading': 'Import a curriculum bundle',
+  'curr.import.body':
+    "Paste a curriculum JSON below or upload a .json file. Bundles can include embedded custom cases — they're side-loaded automatically so caseIds resolve. Built-in case ids work too without being embedded.",
+  'curr.importCurriculum': 'Import curriculum',
+  'curr.shareCurriculum': 'Share',
+  'curr.exportCurriculum': 'Export',
+  'curr.shareToast.copied': 'Curriculum URL copied to clipboard.',
+  'curr.shareToast.urlImported': 'Imported curriculum "{{title}}" from URL.',
 
   'results.copyLesson': 'Copy lesson plan',
   'results.copyLessonDone': 'Lesson plan copied to clipboard',

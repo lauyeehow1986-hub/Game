@@ -174,6 +174,15 @@ export const zh: Record<string, string> = {
   'curr.complete': '已完成',
   'curr.nextLabel': '下一个:{{title}}',
   'curr.allDone': '本课程的所有病例都已有最佳成绩。',
+  'curr.import.subtitle': '使用您自己的课程',
+  'curr.import.heading': '导入课程包',
+  'curr.import.body':
+    '在下方粘贴课程JSON,或上传 .json 文件。课程包可以内嵌自定义病例 — 会自动一并加入,使 caseIds 可被解析。内置病例ID也可使用,无需内嵌。',
+  'curr.importCurriculum': '导入课程',
+  'curr.shareCurriculum': '分享',
+  'curr.exportCurriculum': '导出',
+  'curr.shareToast.copied': '课程链接已复制到剪贴板。',
+  'curr.shareToast.urlImported': '已从链接导入课程「{{title}}」。',
 
   'results.copyLesson': '复制教学纲要',
   'results.copyLessonDone': '教学纲要已复制到剪贴板',

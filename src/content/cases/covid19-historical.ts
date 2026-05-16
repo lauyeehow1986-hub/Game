@@ -22,7 +22,7 @@ const VAX_ROLLOUT = {
 
 export const covid19Case: CaseDefinition = {
   id: 'covid19-historical',
-  title: 'COVID-19 — multi-cluster surge (historical educational scenario)',
+  title: { en: 'COVID-19 — multi-cluster surge (historical educational scenario)', zh: 'COVID-19 — 多集群激增(历史教学情景)' },
   blurb:
     'Historical educational scenario. 2020-2022. SARS-CoV-2 multi-cluster surge in Singapore. Decisions span DORSCON escalation, NCID activation, dormitory outbreaks, ICU surge planning, and vaccine rollout — referenced to MOH and NCID public communications.',
   category: 'acute',

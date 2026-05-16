@@ -17,7 +17,7 @@ const AHHOME = {
 
 export const geriatricFallsCase: CaseDefinition = {
   id: 'geriatric-falls',
-  title: 'Falls + frailty — 81 y/o uncle, repeated falls, AH@Home pathway',
+  title: { en: 'Falls + frailty — 81 y/o uncle, repeated falls, AH@Home pathway', zh: '跌倒与衰弱 — 81岁伯伯,反复跌倒,AH@Home路径' },
   blurb:
     'Mr Chua, 81. Lives alone in a 4-room HDB. Three falls in 6 months. Latest fall last night — bruising, no fracture on AH ED radiographs. AH@Home virtual ward offered.',
   category: 'acute',

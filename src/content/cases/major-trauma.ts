@@ -17,7 +17,7 @@ const TXA = {
 
 export const majorTraumaCase: CaseDefinition = {
   id: 'major-trauma',
-  title: 'Motorcycle accident — 28 y/o, blunt abdominal trauma',
+  title: { en: 'Motorcycle accident — 28 y/o, blunt abdominal trauma', zh: '摩托车事故 — 28岁,腹部钝伤' },
   blurb:
     'Mr Lim, 28. Motorcycle vs taxi at Holland Road junction. Helmeted but thrown ~6 m. Unstable obs at scene. SCDF on scene with crew of 3.',
   category: 'acute',

@@ -17,7 +17,7 @@ const HEALTHIER_SG = {
 
 export const obstetricDeliveryCase: CaseDefinition = {
   id: 'obstetric-delivery',
-  title: 'Antenatal-to-delivery — private GP shared-care to KKH delivery',
+  title: { en: 'Antenatal-to-delivery — private GP shared-care to KKH delivery', zh: '产前到分娩 — 私立家庭医生联合护理至KKH分娩' },
   blurb:
     "Mrs Lim, 31. First pregnancy. Antenatal care shared between Healthway (GP) and a private OBGYN at Mt Elizabeth Novena. Booked for delivery at KKH (subsidised, B2 ward) given developing GDM. Waters break at 39+2 at home.",
   category: 'elective',
