@@ -179,6 +179,17 @@ export const en: Record<string, string> = {
   'curr.nextLabel': 'Next: {{title}}',
   'curr.allDone': 'All cases in this curriculum have a personal best.',
 
+  'results.copyLesson': 'Copy lesson plan',
+  'results.copyLessonDone': 'Lesson plan copied to clipboard',
+  'results.shareRun': 'Share this run',
+  'results.shareRunDone': 'Run URL copied to clipboard',
+  'results.downloadLesson': 'Download lesson plan',
+
+  // Run review (when opening a ?run= URL)
+  'runReview.heading': 'Reviewing a shared run',
+  'runReview.subtitle': 'Replay of "{{title}}". Decisions below are the shared player\'s; the best-practice column shows what a perfect run would have chosen.',
+  'runReview.notFound': 'Couldn\'t find the case "{{id}}" — the shared run links to a case that isn\'t installed.',
+
   // Results — replay comparison
   'results.bestPath.h': 'How a best-practice run would have chosen',
   'results.bestPath.match': 'Matched best-practice',

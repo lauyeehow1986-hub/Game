@@ -4,8 +4,11 @@ import { useProgress } from '../../state/progressStore';
 import { gradeForRatio, totalScoreFromLog } from '../../lib/scoring';
 import { usePerspective } from '../../state/perspectiveStore';
 import { chimeCaseComplete } from '../../lib/audio';
+import { useState } from 'react';
 import { compareToBestPath } from '../../lib/best-path';
 import { useT } from '../../lib/i18n';
+import { generateLessonPlan } from '../../lib/lesson-plan';
+import { encodeRunToUrl } from '../../lib/case-share';
 
 export function ResultsModal() {
   const t = useT();
@@ -228,12 +231,13 @@ export function ResultsModal() {
           </section>
         )}
 
-        <footer className="px-5 py-4 flex items-center justify-end gap-2">
+        <footer className="px-5 py-4 flex items-center justify-end gap-2 flex-wrap">
+          <ExportButtons />
           <button
             onClick={resetRun}
-            className="px-4 py-2 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+            className="px-4 py-2 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
           >
-            Close
+            {t('common.close')}
           </button>
         </footer>
       </div>
@@ -268,4 +272,106 @@ function fmtElapsed(min: number) {
   if (d > 0) return `${d}d ${remH}h`;
   if (h > 0) return `${h}h ${min % 60}m`;
   return `${min}m`;
+}
+
+function ExportButtons() {
+  const t = useT();
+  const caseDef = useGame((s) => s.caseDef);
+  const log = useGame((s) => s.run.log);
+  const elapsed = useGame((s) => s.run.elapsedGameMin);
+  const totalCost = useGame((s) => s.run.totalCostSGD);
+  const burden = useGame((s) => s.caregiverBurden);
+  const profile = useGame((s) => s.profile);
+  const [toast, setToast] = useState<string | null>(null);
+
+  if (!caseDef) return null;
+
+  const lesson = () =>
+    generateLessonPlan({
+      caseDef,
+      log,
+      elapsedGameMin: elapsed,
+      totalCostSGD: totalCost,
+      burden,
+      profile: profile
+        ? {
+            name: profile.name,
+            wardClass: profile.wardClass,
+            chasTier: profile.chasTier,
+            hasIntegratedShield: profile.hasIntegratedShield,
+          }
+        : undefined,
+    });
+
+  const copyLesson = async () => {
+    try {
+      await navigator.clipboard.writeText(lesson());
+      setToast(t('results.copyLessonDone'));
+    } catch {
+      setToast(t('results.copyLesson'));
+    }
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const downloadLesson = () => {
+    if (typeof document === 'undefined') return;
+    const blob = new Blob([lesson()], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${caseDef.id}.lesson.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  const shareRun = async () => {
+    const url = encodeRunToUrl({
+      caseId: caseDef.id,
+      log,
+      elapsedGameMin: elapsed,
+      totalCostSGD: totalCost,
+      burden,
+      profile: profile
+        ? {
+            name: profile.name,
+            wardClass: profile.wardClass,
+            chasTier: profile.chasTier,
+            hasIntegratedShield: profile.hasIntegratedShield,
+          }
+        : undefined,
+    });
+    try {
+      await navigator.clipboard.writeText(url);
+      setToast(t('results.shareRunDone'));
+    } catch {
+      setToast(url);
+    }
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 mr-auto">
+      <button
+        onClick={copyLesson}
+        className="text-[11px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+      >
+        {t('results.copyLesson')}
+      </button>
+      <button
+        onClick={downloadLesson}
+        className="text-[11px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+      >
+        {t('results.downloadLesson')}
+      </button>
+      <button
+        onClick={shareRun}
+        className="text-[11px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+      >
+        {t('results.shareRun')}
+      </button>
+      {toast && <span className="text-[10px] text-clinical-accent">{toast}</span>}
+    </div>
+  );
 }

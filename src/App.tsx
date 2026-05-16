@@ -13,6 +13,7 @@ import { CurriculumPanel } from './ui/panels/CurriculumPanel';
 import { OpsPanel } from './ui/panels/OpsPanel';
 import { DecisionModal } from './ui/modals/DecisionModal';
 import { ResultsModal } from './ui/modals/ResultsModal';
+import { RunReviewModal } from './ui/modals/RunReviewModal';
 import { Tutorial } from './ui/Tutorial';
 import { ResumePrompt } from './ui/ResumePrompt';
 import { DisclaimerBanner } from './ui/DisclaimerBanner';
@@ -76,6 +77,7 @@ export default function App() {
         </>
       )}
       <Tutorial />
+      <RunReviewModal />
     </div>
   );
 }

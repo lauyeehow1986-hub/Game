@@ -175,6 +175,16 @@ export const zh: Record<string, string> = {
   'curr.nextLabel': '下一个:{{title}}',
   'curr.allDone': '本课程的所有病例都已有最佳成绩。',
 
+  'results.copyLesson': '复制教学纲要',
+  'results.copyLessonDone': '教学纲要已复制到剪贴板',
+  'results.shareRun': '分享此次运行',
+  'results.shareRunDone': '运行链接已复制到剪贴板',
+  'results.downloadLesson': '下载教学纲要',
+
+  'runReview.heading': '查看共享运行',
+  'runReview.subtitle': '「{{title}}」的回放。下列决策来自分享者;最佳实践列显示完美运行的选择。',
+  'runReview.notFound': '找不到病例「{{id}}」— 此分享链接指向尚未安装的病例。',
+
   // Results — replay comparison
   'results.bestPath.h': '最佳实践路径会如何选择',
   'results.bestPath.match': '与最佳实践一致',

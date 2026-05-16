@@ -1,13 +1,33 @@
-import type { CaseDefinition } from './types';
+import type { CaseDefinition, DecisionLogEntry } from './types';
 import { serialiseCase, validateCase } from './case-schema';
+
+export interface RunSnapshot {
+  caseId: string;
+  log: DecisionLogEntry[];
+  elapsedGameMin: number;
+  totalCostSGD: number;
+  /** Optional caregiver-burden snapshot. */
+  burden?: {
+    timeOffWorkHours: number;
+    financialWorry: number;
+    sleepDebt: number;
+  };
+  /** Patient profile summary for replay context. */
+  profile?: {
+    name: string;
+    wardClass: string;
+    chasTier: string;
+    hasIntegratedShield: boolean;
+  };
+}
 
 /**
  * Pack/unpack a case to/from a base64url string for URL sharing via
  * ?case=... — kept short by skipping pretty-printing.
  */
 
+// btoa / atob exist in Node ≥ 16 and every modern browser; no need to gate.
 function utf8ToBase64Url(s: string): string {
-  if (typeof window === 'undefined') return '';
   const bytes = new TextEncoder().encode(s);
   let bin = '';
   for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
@@ -16,7 +36,6 @@ function utf8ToBase64Url(s: string): string {
 }
 
 function base64UrlToUtf8(s: string): string {
-  if (typeof window === 'undefined') return '';
   const padded = s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4);
   const bin = atob(padded);
   const bytes = new Uint8Array(bin.length);
@@ -40,6 +59,29 @@ export function tryDecodeCaseFromHref(href: string): CaseDefinition | null {
     const parsed = JSON.parse(json);
     const v = validateCase(parsed);
     return v.ok ? v.case : null;
+  } catch {
+    return null;
+  }
+}
+
+export function encodeRunToUrl(run: RunSnapshot, base?: string): string {
+  const json = JSON.stringify(run);
+  const b64 = utf8ToBase64Url(json);
+  const origin =
+    base ?? (typeof window !== 'undefined' ? window.location.origin + window.location.pathname : '');
+  return `${origin}?run=${b64}`;
+}
+
+export function tryDecodeRunFromHref(href: string): RunSnapshot | null {
+  try {
+    const url = new URL(href);
+    const q = url.searchParams.get('run');
+    if (!q) return null;
+    const json = base64UrlToUtf8(q);
+    const parsed = JSON.parse(json);
+    if (typeof parsed !== 'object' || parsed === null) return null;
+    if (typeof parsed.caseId !== 'string' || !Array.isArray(parsed.log)) return null;
+    return parsed as RunSnapshot;
   } catch {
     return null;
   }
