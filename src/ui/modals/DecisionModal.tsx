@@ -4,8 +4,10 @@ import { usePerspective } from '../../state/perspectiveStore';
 import { useProgress } from '../../state/progressStore';
 import type { DecisionOption } from '../../lib/types';
 import { chimeDecision } from '../../lib/audio';
+import { useTr } from '../../lib/i18n';
 
 export function DecisionModal() {
+  const tr = useTr();
   const pending = useGame((s) => s.run.pendingDecision);
   const status = useGame((s) => s.run.status);
   const resolve = useGame((s) => s.resolveDecision);
@@ -86,7 +88,7 @@ export function DecisionModal() {
             Decision required · {perspective} POV
           </div>
           <h2 id="decision-prompt" className="text-base font-semibold text-white mt-1">
-            {decision.prompt}
+            {tr(decision.prompt)}
           </h2>
         </header>
 
@@ -124,14 +126,14 @@ export function DecisionModal() {
                       <span className="text-[10px] text-clinical-subtle font-mono mr-1">
                         [{idx + 1}]
                       </span>
-                      {opt.label}
+                      {tr(opt.label)}
                     </div>
                   </div>
                   {selected && (
                     <div className="mt-3 ml-7 space-y-2 text-xs">
-                      <div className="text-clinical-subtle">{opt.rationale}</div>
+                      <div className="text-clinical-subtle">{tr(opt.rationale)}</div>
                       <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
-                        Reference: {decision.reference.label}
+                        Reference: {tr(decision.reference.label)}
                       </div>
                     </div>
                   )}

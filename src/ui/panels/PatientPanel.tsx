@@ -1,6 +1,7 @@
 import { useGame } from '../../state/gameStore';
 import { usePerspective } from '../../state/perspectiveStore';
 import { getFacility } from '../../content';
+import { useTr } from '../../lib/i18n';
 import type { WardClass } from '../../lib/financing';
 
 const wardLabels: Record<WardClass, string> = {
@@ -18,6 +19,7 @@ export function PatientPanel() {
   const setWardClass = useGame((s) => s.setWardClass);
   const setIp = useGame((s) => s.setIntegratedShield);
   const perspective = usePerspective((s) => s.current);
+  const tr = useTr();
 
   if (!caseDef || !profile) {
     return (
@@ -31,7 +33,7 @@ export function PatientPanel() {
   const node = caseDef.pathway.find((n) => n.id === run.currentNodeId) ?? caseDef.pathway[0];
   const facility = getFacility(node.facility ?? caseDef.primaryFacility);
   const dept = facility?.departments.find((d) => d.id === node.department);
-  const framing = node.framing[perspective];
+  const framing = tr(node.framing[perspective]);
 
   return (
     <section className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-2">

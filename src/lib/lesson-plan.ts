@@ -1,6 +1,7 @@
 import type { CaseDefinition, DecisionLogEntry } from './types';
 import { compareToBestPath } from './best-path';
 import { gradeForRatio, totalScoreFromLog } from './scoring';
+import { tr, type Locale } from './i18n';
 
 export interface LessonPlanInput {
   caseDef: CaseDefinition;
@@ -9,6 +10,8 @@ export interface LessonPlanInput {
   totalCostSGD: number;
   burden?: { timeOffWorkHours: number; financialWorry: number; sleepDebt: number };
   profile?: { name: string; wardClass: string; chasTier: string; hasIntegratedShield: boolean };
+  /** Locale to resolve LocalisedString fields with. Defaults to English. */
+  locale?: Locale;
 }
 
 /**
@@ -19,16 +22,18 @@ export interface LessonPlanInput {
  */
 export function generateLessonPlan(input: LessonPlanInput): string {
   const { caseDef, log, elapsedGameMin, totalCostSGD, burden, profile } = input;
+  const loc = input.locale ?? 'en';
+  const L = (v: unknown) => tr(v as Parameters<typeof tr>[0], loc);
   const { earned, max } = totalScoreFromLog(log);
   const ratio = max > 0 ? earned / max : 0;
   const grade = gradeForRatio(ratio);
   const diff = compareToBestPath(caseDef, log);
 
   const lines: string[] = [];
-  lines.push(`# ${caseDef.title}`);
+  lines.push(`# ${L(caseDef.title)}`);
   lines.push('');
   if (caseDef.historical) lines.push('> Historical scenario — educational reconstruction.');
-  lines.push(caseDef.blurb);
+  lines.push(L(caseDef.blurb));
   lines.push('');
   lines.push('## Summary');
   lines.push(`- **Score**: ${earned.toFixed(1)} / ${max.toFixed(1)} — **${grade.grade}** (${(ratio * 100).toFixed(0)}%)`);
@@ -52,19 +57,19 @@ export function generateLessonPlan(input: LessonPlanInput): string {
   if (diff.length > 0) {
     lines.push('## Decisions');
     diff.forEach((row, i) => {
-      lines.push(`### ${i + 1}. ${row.prompt}`);
+      lines.push(`### ${i + 1}. ${L(row.prompt)}`);
       if (row.yours) {
-        lines.push(`- **Chosen**: ${row.yours.label} — ${row.yours.score.toFixed(1)} / ${row.yours.maxScore.toFixed(1)} pts`);
+        lines.push(`- **Chosen**: ${L(row.yours.label)} — ${row.yours.score.toFixed(1)} / ${row.yours.maxScore.toFixed(1)} pts`);
       }
-      lines.push(`- **Best-practice**: ${row.best.label} — ${row.best.score.toFixed(1)} pts`);
+      lines.push(`- **Best-practice**: ${L(row.best.label)} — ${row.best.score.toFixed(1)} pts`);
       lines.push(row.match ? '- *Matched best-practice.*' : '- *Differs from best-practice.*');
-      // Append rationale by looking up the chosen option in the case.
       const node = caseDef.pathway.find((n) => n.decision?.id === row.decisionId);
-      const chosen = node?.decision?.options.find((o) => o.label === row.yours?.label);
-      const best = node?.decision?.options.find((o) => o.label === row.best.label);
-      if (chosen?.rationale) lines.push(`- Rationale for chosen: ${chosen.rationale}`);
-      if (best?.rationale && best !== chosen) lines.push(`- Rationale for best-practice: ${best.rationale}`);
-      if (node?.decision?.reference?.label) lines.push(`- Reference: *${node.decision.reference.label}*`);
+      // Match by resolved label so we find the option regardless of locale.
+      const chosen = node?.decision?.options.find((o) => L(o.label) === L(row.yours?.label));
+      const best = node?.decision?.options.find((o) => L(o.label) === L(row.best.label));
+      if (chosen?.rationale) lines.push(`- Rationale for chosen: ${L(chosen.rationale)}`);
+      if (best?.rationale && best !== chosen) lines.push(`- Rationale for best-practice: ${L(best.rationale)}`);
+      if (node?.decision?.reference?.label) lines.push(`- Reference: *${L(node.decision.reference.label)}*`);
       lines.push('');
     });
   }
@@ -72,7 +77,7 @@ export function generateLessonPlan(input: LessonPlanInput): string {
   if (caseDef.guidelines.length > 0) {
     lines.push('## References used in this case');
     for (const g of caseDef.guidelines) {
-      lines.push(`- **${g.label}** — ${g.body}`);
+      lines.push(`- **${L(g.label)}** — ${L(g.body)}`);
     }
     lines.push('');
   }

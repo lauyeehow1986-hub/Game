@@ -1,8 +1,10 @@
 import { useGame } from '../../state/gameStore';
+import { useTr } from '../../lib/i18n';
 
 export function DecisionLog() {
   const log = useGame((s) => s.run.log);
   const caseDef = useGame((s) => s.caseDef);
+  const tr = useTr();
 
   if (!caseDef) return null;
 
@@ -32,8 +34,8 @@ export function DecisionLog() {
                   borderColor: e.scoreEarned >= e.maxScore ? '#4ade80' : e.scoreEarned >= 0 ? '#facc15' : '#f87171',
                 }}
               >
-                <div className="text-white font-semibold">{decision?.prompt}</div>
-                <div className="text-clinical-subtle">{option?.label}</div>
+                <div className="text-white font-semibold">{tr(decision?.prompt)}</div>
+                <div className="text-clinical-subtle">{tr(option?.label)}</div>
                 <div className="text-[10px] mt-0.5 font-mono">
                   Score {e.scoreEarned.toFixed(1)} / {e.maxScore.toFixed(1)}
                 </div>

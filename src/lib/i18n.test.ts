@@ -1,5 +1,5 @@
 import { afterEach, describe, it, expect } from 'vitest';
-import { t, useLocale, type Locale } from './i18n';
+import { t, tr, useLocale, type Locale } from './i18n';
 
 function setLocale(l: Locale) {
   useLocale.setState({ locale: l });
@@ -50,5 +50,30 @@ describe('t()', () => {
         expect(t(key), `${l}:${key}`).not.toBe(key);
       }
     }
+  });
+});
+
+describe('tr() LocalisedString resolver', () => {
+  it('passes a plain string through unchanged', () => {
+    expect(tr('hello', 'en')).toBe('hello');
+    expect(tr('hello', 'zh')).toBe('hello');
+  });
+
+  it('returns the chosen locale when present', () => {
+    expect(tr({ en: 'cat', zh: '猫' }, 'zh')).toBe('猫');
+    expect(tr({ en: 'cat', zh: '猫' }, 'en')).toBe('cat');
+  });
+
+  it('falls back to English when the chosen locale is missing', () => {
+    expect(tr({ en: 'cat' }, 'ta')).toBe('cat');
+  });
+
+  it('falls back to the first available string when English missing', () => {
+    expect(tr({ zh: '猫' }, 'ta')).toBe('猫');
+  });
+
+  it('returns empty string for undefined / empty object', () => {
+    expect(tr(undefined, 'en')).toBe('');
+    expect(tr({}, 'en')).toBe('');
   });
 });

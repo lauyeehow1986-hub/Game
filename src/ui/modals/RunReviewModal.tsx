@@ -3,7 +3,7 @@ import { tryDecodeRunFromHref, type RunSnapshot } from '../../lib/case-share';
 import { compareToBestPath } from '../../lib/best-path';
 import { gradeForRatio, totalScoreFromLog } from '../../lib/scoring';
 import { getCase } from '../../content';
-import { useT } from '../../lib/i18n';
+import { useT, useTr } from '../../lib/i18n';
 import type { CaseDefinition } from '../../lib/types';
 
 /**
@@ -13,6 +13,7 @@ import type { CaseDefinition } from '../../lib/types';
  */
 export function RunReviewModal() {
   const t = useT();
+  const tr = useTr();
   const [snap, setSnap] = useState<RunSnapshot | null>(null);
   const [caseDef, setCaseDef] = useState<CaseDefinition | null>(null);
   const [unknownCaseId, setUnknownCaseId] = useState<string | null>(null);
@@ -86,10 +87,10 @@ export function RunReviewModal() {
               {t('runReview.heading')}
             </div>
             <h2 id="run-review-title" className="text-base font-semibold text-white mt-1">
-              {caseDef.title}
+              {tr(caseDef.title)}
             </h2>
             <p className="text-[11px] text-clinical-subtle mt-1 leading-snug">
-              {t('runReview.subtitle', { title: caseDef.title })}
+              {t('runReview.subtitle', { title: tr(caseDef.title) })}
             </p>
           </div>
           <div
@@ -136,7 +137,7 @@ export function RunReviewModal() {
                     }`}
                   >
                     <div className="flex justify-between text-[10px] uppercase tracking-wider">
-                      <span className="text-clinical-subtle truncate flex-1">{row.prompt}</span>
+                      <span className="text-clinical-subtle truncate flex-1">{tr(row.prompt)}</span>
                       <span className={row.match ? 'text-clinical-ok' : 'text-clinical-warn'}>
                         {row.match ? t('results.bestPath.match') : t('results.bestPath.miss')}
                       </span>
@@ -146,13 +147,13 @@ export function RunReviewModal() {
                         <div className="text-[9px] uppercase tracking-wider text-clinical-subtle">
                           {t('results.bestPath.you')}
                         </div>
-                        <div className="text-white">{yours?.label ?? '—'}</div>
+                        <div className="text-white">{yours ? tr(yours.label) : '—'}</div>
                       </div>
                       <div>
                         <div className="text-[9px] uppercase tracking-wider text-clinical-subtle">
                           {t('results.bestPath.best')}
                         </div>
-                        <div className="text-white">{row.best.label}</div>
+                        <div className="text-white">{tr(row.best.label)}</div>
                         {!row.match && (
                           <div className="font-mono text-[10px] text-clinical-warn">
                             {t('results.bestPath.deltaScore', { delta: delta.toFixed(1) })}

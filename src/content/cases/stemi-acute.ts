@@ -22,9 +22,14 @@ const HEALTHIER_SG = {
 
 export const stemiAcute: CaseDefinition = {
   id: 'stemi-acute',
-  title: 'Acute STEMI — 58 y/o male, central chest pain',
-  blurb:
-    'Mr Tan, 58, taxi driver. Crushing chest pain 30 min ago, radiating to the left arm. Diaphoretic. SCDF en route to TTSH.',
+  title: {
+    en: 'Acute STEMI — 58 y/o male, central chest pain',
+    zh: '急性ST段抬高心肌梗死 — 58岁男性,胸骨后疼痛',
+  },
+  blurb: {
+    en: 'Mr Tan, 58, taxi driver. Crushing chest pain 30 min ago, radiating to the left arm. Diaphoretic. SCDF en route to TTSH.',
+    zh: '陈先生,58岁,出租车司机。30分钟前发作压榨样胸痛,放射至左臂,大汗淋漓。SCDF救护车正前往陈笃生医院。',
+  },
   category: 'acute',
   primaryFacility: 'ttsh',
   involvedFacilities: ['ttsh'],
@@ -52,47 +57,90 @@ export const stemiAcute: CaseDefinition = {
       },
       decision: {
         id: 'pre-hospital-activation',
-        prompt:
-          'SCDF transmits the pre-hospital ECG en route. As ED registrar on duty, what do you do BEFORE the patient arrives?',
+        prompt: {
+          en: 'SCDF transmits the pre-hospital ECG en route. As ED registrar on duty, what do you do BEFORE the patient arrives?',
+          zh: 'SCDF途中传送院前心电图。作为值班急诊主治,患者到达之前你应该做什么?',
+        },
         weight: 1,
         reference: SCDF_TRIAGE,
         options: [
           {
             id: 'activate-cathlab',
-            label: 'Activate cath lab now; alert cardiology consultant; prepare resus bay.',
+            label: {
+              en: 'Activate cath lab now; alert cardiology consultant; prepare resus bay.',
+              zh: '立即启动导管室;通知心内科顾问;准备抢救区。',
+            },
             score: 10,
-            rationale:
-              'Pre-hospital ECG-triggered cath lab activation shaves ~25 min off door-to-balloon time. Singapore data (SHF NSTEMI/STEMI registry) supports early activation.',
+            rationale: {
+              en: 'Pre-hospital ECG-triggered cath lab activation shaves ~25 min off door-to-balloon time. Singapore data (SHF NSTEMI/STEMI registry) supports early activation.',
+              zh: '院前心电图触发的导管室启动可使门-球时间缩短约25分钟。新加坡心脏基金会NSTEMI/STEMI登记数据支持早期启动。',
+            },
             outcome: {
-              patient: 'Doors slide open. Three people in scrubs are already waiting for you.',
-              caregiver:
-                'You are still parking. By the time you reach the counter, your husband has been wheeled in.',
-              staff: 'Cath lab confirms — team in 12 min. Resus bay ready, clopidogrel/ticagrelor at the bedside.',
+              patient: {
+                en: 'Doors slide open. Three people in scrubs are already waiting for you.',
+                zh: '大门滑开。三位穿手术衣的医护人员已在等候。',
+              },
+              caregiver: {
+                en: 'You are still parking. By the time you reach the counter, your husband has been wheeled in.',
+                zh: '你还在停车。等你赶到柜台时,丈夫已被推进抢救区。',
+              },
+              staff: {
+                en: 'Cath lab confirms — team in 12 min. Resus bay ready, clopidogrel/ticagrelor at the bedside.',
+                zh: '导管室确认 — 12分钟内集结。抢救区已就绪,氯吡格雷/替格瑞洛已备好床旁。',
+              },
             },
           },
           {
             id: 'wait-arrival',
-            label: 'Wait until the patient arrives and you can repeat the ECG yourself.',
+            label: {
+              en: 'Wait until the patient arrives and you can repeat the ECG yourself.',
+              zh: '等患者到达后自己再做一次心电图。',
+            },
             score: 2,
-            rationale:
-              'Defensible but slower. Each 30 min delay to reperfusion in STEMI raises 1-year mortality by ~7.5% (Boersma et al.).',
+            rationale: {
+              en: 'Defensible but slower. Each 30 min delay to reperfusion in STEMI raises 1-year mortality by ~7.5% (Boersma et al.).',
+              zh: '可辩护但更慢。STEMI再灌注每延迟30分钟,1年死亡率上升约7.5%(Boersma等)。',
+            },
             outcome: {
-              patient: 'You are wheeled into a busy resus bay; the team only starts mobilising now.',
-              caregiver: 'You arrive before the cath lab team does.',
-              staff: 'Cath lab activates after your repeat ECG. Door-to-balloon clock starts late.',
+              patient: {
+                en: 'You are wheeled into a busy resus bay; the team only starts mobilising now.',
+                zh: '你被推进繁忙的抢救区;团队此刻才开始集结。',
+              },
+              caregiver: {
+                en: 'You arrive before the cath lab team does.',
+                zh: '你比导管室团队还早到。',
+              },
+              staff: {
+                en: 'Cath lab activates after your repeat ECG. Door-to-balloon clock starts late.',
+                zh: '复查心电图后导管室才启动。门-球计时开始得晚。',
+              },
             },
             effects: { setFlags: ['delayed-activation'] },
           },
           {
             id: 'thrombolyse-prehospital',
-            label: 'Order pre-hospital thrombolysis.',
+            label: {
+              en: 'Order pre-hospital thrombolysis.',
+              zh: '下医嘱院前溶栓。',
+            },
             score: -3,
-            rationale:
-              'Not standard in Singapore — SCDF protocols transport directly to a PCI-capable centre; thrombolysis is a fallback only when PCI is unavailable within 120 min.',
+            rationale: {
+              en: 'Not standard in Singapore — SCDF protocols transport directly to a PCI-capable centre; thrombolysis is a fallback only when PCI is unavailable within 120 min.',
+              zh: '新加坡非标准做法 — SCDF流程是直接转运至可行PCI的中心;只在120分钟内无法行PCI时溶栓才是退路。',
+            },
             outcome: {
-              patient: 'You feel a rush of medication you don\'t understand.',
-              caregiver: 'Confusion at the bedside about which step is happening.',
-              staff: 'Protocol deviation flagged. Cardiology asks why thrombolysis was given when PCI was 12 min away.',
+              patient: {
+                en: "You feel a rush of medication you don't understand.",
+                zh: '你感到一阵药物在体内涌动,但不明所以。',
+              },
+              caregiver: {
+                en: 'Confusion at the bedside about which step is happening.',
+                zh: '床旁的人在搞不清正在执行哪一步。',
+              },
+              staff: {
+                en: 'Protocol deviation flagged. Cardiology asks why thrombolysis was given when PCI was 12 min away.',
+                zh: '记录违反流程。心内科质询:PCI仅12分钟外为何先溶栓?',
+              },
             },
             effects: { setFlags: ['protocol-deviation', 'delayed-activation'] },
           },

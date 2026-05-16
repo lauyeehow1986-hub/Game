@@ -3,9 +3,22 @@ import type {
   Decision,
   DecisionEffects,
   DecisionOption,
+  LocalisedString,
   PathwayNode,
   Perspective,
 } from './types';
+
+/**
+ * A LocalisedString is either a plain string or an object keyed by locale.
+ * The validator accepts both shapes for any user-facing prose field.
+ */
+function isLocalisedString(x: unknown): x is LocalisedString {
+  if (typeof x === 'string') return true;
+  if (!isObj(x)) return false;
+  return ['en', 'zh', 'ms', 'ta'].every((k) =>
+    !(k in x) || typeof (x as Record<string, unknown>)[k] === 'string',
+  );
+}
 
 /**
  * Hand-rolled validator for CaseDefinition JSON. Avoids pulling in Zod /
@@ -41,16 +54,16 @@ function isArr(x: unknown): x is unknown[] {
 
 const PERSPECTIVES: Perspective[] = ['patient', 'caregiver', 'staff'];
 
-function validateFraming(input: unknown, path: string, errors: string[]): Record<Perspective, string> | null {
+function validateFraming(input: unknown, path: string, errors: string[]): Record<Perspective, LocalisedString> | null {
   if (!isObj(input)) {
-    errors.push(`${path}: framing must be an object with patient/caregiver/staff strings`);
+    errors.push(`${path}: framing must be an object with patient/caregiver/staff fields`);
     return null;
   }
-  const out = {} as Record<Perspective, string>;
+  const out = {} as Record<Perspective, LocalisedString>;
   for (const p of PERSPECTIVES) {
     const v = input[p];
-    if (!isStr(v)) {
-      errors.push(`${path}.${p}: must be a string (got ${typeof v})`);
+    if (!isLocalisedString(v)) {
+      errors.push(`${path}.${p}: must be a string or { en, zh, ms, ta } object`);
       return null;
     }
     out[p] = v;
@@ -151,11 +164,11 @@ function validateOption(input: unknown, path: string, errors: string[]): Decisio
     return null;
   }
   const label = input.label;
-  if (!isStr(label)) {
-    errors.push(`${path}.label: missing or non-string`);
+  if (!isLocalisedString(label)) {
+    errors.push(`${path}.label: must be a string or { en, zh, ms, ta } object`);
     return null;
   }
-  const rationale = isStr(input.rationale) ? input.rationale : '';
+  const rationale: LocalisedString = isLocalisedString(input.rationale) ? input.rationale : '';
   const score = input.score;
   if (!isNum(score)) {
     errors.push(`${path}.score: must be a number`);
@@ -181,15 +194,15 @@ function validateDecision(input: unknown, path: string, errors: string[]): Decis
     return null;
   }
   const id = isStr(input.id) ? input.id : null;
-  const prompt = isStr(input.prompt) ? input.prompt : null;
+  const prompt: LocalisedString | null = isLocalisedString(input.prompt) ? input.prompt : null;
   if (!id || !prompt) {
     errors.push(`${path}: decision needs string id + prompt`);
     return null;
   }
   const weight = isNum(input.weight) ? input.weight : 1;
   const ref = isObj(input.reference) ? input.reference : null;
-  const reference = ref && isStr(ref.label) && isStr(ref.body)
-    ? { label: ref.label, body: ref.body }
+  const reference = ref && isLocalisedString(ref.label) && isLocalisedString(ref.body)
+    ? { label: ref.label as LocalisedString, body: ref.body as LocalisedString }
     : { label: 'Reference', body: '' };
   const options = isArr(input.options)
     ? (input.options
@@ -256,10 +269,10 @@ export function validateCase(input: unknown): ValidationResult {
     return { ok: false, errors: ['Top-level: expected a JSON object'] };
   }
   const id = isStr(input.id) ? input.id : null;
-  const title = isStr(input.title) ? input.title : null;
-  const blurb = isStr(input.blurb) ? input.blurb : null;
+  const title: LocalisedString | null = isLocalisedString(input.title) ? input.title : null;
+  const blurb: LocalisedString | null = isLocalisedString(input.blurb) ? input.blurb : null;
   if (!id || !title || !blurb) {
-    errors.push('Required: id (string), title (string), blurb (string)');
+    errors.push('Required: id (string), title (string or localised), blurb (string or localised)');
   }
   const category = isStr(input.category) && ['elective', 'acute', 'outpatient'].includes(input.category)
     ? (input.category as CaseDefinition['category'])
@@ -282,8 +295,8 @@ export function validateCase(input: unknown): ValidationResult {
   const guidelines: CaseDefinition['guidelines'] = isArr(input.guidelines)
     ? input.guidelines
         .filter(isObj)
-        .filter((g) => isStr(g.label) && isStr(g.body))
-        .map((g) => ({ label: g.label as string, body: g.body as string }))
+        .filter((g) => isLocalisedString(g.label) && isLocalisedString(g.body))
+        .map((g) => ({ label: g.label as LocalisedString, body: g.body as LocalisedString }))
     : [];
   const pathwayInput = isArr(input.pathway) ? input.pathway : null;
   if (!pathwayInput || pathwayInput.length === 0) {

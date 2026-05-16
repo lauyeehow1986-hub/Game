@@ -1,12 +1,12 @@
-import type { CaseDefinition, DecisionLogEntry, DecisionOption, PathwayNode } from './types';
+import type { CaseDefinition, DecisionLogEntry, DecisionOption, LocalisedString, PathwayNode } from './types';
 import { firstVisibleNode, pickNextNode } from './pathway';
 
 export interface BestPathStep {
   nodeId: string;
   decisionId: string;
   optionId: string;
-  optionLabel: string;
-  rationale: string;
+  optionLabel: LocalisedString;
+  rationale: LocalisedString;
   score: number;
 }
 
@@ -51,9 +51,9 @@ export function bestPath(caseDef: CaseDefinition): BestPathStep[] {
 
 export interface DiffRow {
   decisionId: string;
-  prompt: string;
-  yours: { label: string; score: number; maxScore: number } | null;
-  best: { label: string; score: number };
+  prompt: LocalisedString;
+  yours: { label: LocalisedString; score: number; maxScore: number } | null;
+  best: { label: LocalisedString; score: number };
   match: boolean;
 }
 

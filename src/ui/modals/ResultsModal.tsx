@@ -6,12 +6,13 @@ import { usePerspective } from '../../state/perspectiveStore';
 import { chimeCaseComplete } from '../../lib/audio';
 import { useState } from 'react';
 import { compareToBestPath } from '../../lib/best-path';
-import { useT } from '../../lib/i18n';
+import { useT, useTr } from '../../lib/i18n';
 import { generateLessonPlan } from '../../lib/lesson-plan';
 import { encodeRunToUrl } from '../../lib/case-share';
 
 export function ResultsModal() {
   const t = useT();
+  const tr = useTr();
   const status = useGame((s) => s.run.status);
   const log = useGame((s) => s.run.log);
   const caseDef = useGame((s) => s.caseDef);
@@ -48,7 +49,7 @@ export function ResultsModal() {
         <header className="px-5 py-4 border-b border-clinical-border flex items-center justify-between">
           <div>
             <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">Case complete</div>
-            <h2 className="text-lg font-semibold text-white">{caseDef.title}</h2>
+            <h2 className="text-lg font-semibold text-white">{tr(caseDef.title)}</h2>
           </div>
           <div
             className="px-3 py-1.5 rounded font-bold text-base"
@@ -121,7 +122,7 @@ export function ResultsModal() {
                   className="border border-clinical-border rounded p-3 bg-clinical-bg/40"
                 >
                   <div className="flex justify-between text-[10px] uppercase tracking-wider text-clinical-subtle">
-                    <span>{decision.reference.label}</span>
+                    <span>{tr(decision.reference.label)}</span>
                     <span
                       className={
                         correct ? 'text-clinical-ok' : e.scoreEarned >= 0 ? 'text-clinical-warn' : 'text-clinical-danger'
@@ -130,12 +131,12 @@ export function ResultsModal() {
                       {e.scoreEarned.toFixed(1)} / {e.maxScore.toFixed(1)}
                     </span>
                   </div>
-                  <div className="text-sm text-white font-semibold mt-1">{decision.prompt}</div>
-                  <div className="text-xs text-clinical-subtle mt-1">Your choice: {option.label}</div>
-                  <div className="text-xs text-white/80 mt-1">{option.rationale}</div>
-                  {option.outcome[perspective] && (
+                  <div className="text-sm text-white font-semibold mt-1">{tr(decision.prompt)}</div>
+                  <div className="text-xs text-clinical-subtle mt-1">Your choice: {tr(option.label)}</div>
+                  <div className="text-xs text-white/80 mt-1">{tr(option.rationale)}</div>
+                  {tr(option.outcome[perspective]) && (
                     <blockquote className="mt-2 text-xs italic border-l-2 border-clinical-accent pl-2 text-white/85">
-                      {option.outcome[perspective]}
+                      {tr(option.outcome[perspective])}
                     </blockquote>
                   )}
                 </div>
@@ -164,7 +165,7 @@ export function ResultsModal() {
                       }`}
                     >
                       <div className="flex justify-between text-[10px] uppercase tracking-wider">
-                        <span className="text-clinical-subtle truncate flex-1">{row.prompt}</span>
+                        <span className="text-clinical-subtle truncate flex-1">{tr(row.prompt)}</span>
                         <span
                           className={
                             row.match ? 'text-clinical-ok' : 'text-clinical-warn'
@@ -178,7 +179,7 @@ export function ResultsModal() {
                           <div className="text-[9px] uppercase tracking-wider text-clinical-subtle">
                             {t('results.bestPath.you')}
                           </div>
-                          <div className="text-white">{yours?.label ?? '—'}</div>
+                          <div className="text-white">{yours ? tr(yours.label) : '—'}</div>
                           {yours && (
                             <div className="font-mono text-[10px] text-clinical-subtle">
                               {yours.score.toFixed(1)} / {yours.maxScore.toFixed(1)}
@@ -189,7 +190,7 @@ export function ResultsModal() {
                           <div className="text-[9px] uppercase tracking-wider text-clinical-subtle">
                             {t('results.bestPath.best')}
                           </div>
-                          <div className="text-white">{row.best.label}</div>
+                          <div className="text-white">{tr(row.best.label)}</div>
                           <div className="font-mono text-[10px] text-clinical-subtle">
                             {row.best.score.toFixed(1)}
                             {!row.match && (

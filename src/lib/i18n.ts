@@ -10,6 +10,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { LocalisedString } from './types';
 
 export type Locale = 'en' | 'zh' | 'ms' | 'ta';
 
@@ -73,4 +74,29 @@ function interpolate(s: string, vars?: Record<string, string | number>): string 
   return s.replace(/\{\{(\w+)\}\}/g, (_, k: string) =>
     String(vars[k] ?? `{{${k}}}`),
   );
+}
+
+/**
+ * Resolve a LocalisedString to a plain string for rendering.
+ *  - Plain string passes through.
+ *  - Object form: picks the current locale, falls back to English, then to
+ *    the first non-empty value, then to ''.
+ */
+export function tr(value: LocalisedString | undefined, locale?: Locale): string {
+  if (value == null) return '';
+  if (typeof value === 'string') return value;
+  const loc = locale ?? useLocale.getState().locale;
+  if (value[loc]) return value[loc] as string;
+  if (value.en) return value.en;
+  const first = Object.values(value).find((v) => typeof v === 'string' && v.length > 0);
+  return (first as string) ?? '';
+}
+
+/**
+ * React hook returning a translator that reactively re-renders on locale
+ * change. Use this inside components for LocalisedString fields on cases.
+ */
+export function useTr(): (value: LocalisedString | undefined) => string {
+  const locale = useLocale((s) => s.locale);
+  return (value) => tr(value, locale);
 }

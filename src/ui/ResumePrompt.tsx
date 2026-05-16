@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGame, loadSnapshot, clearSnapshot } from '../state/gameStore';
 import { getCase } from '../content';
+import { useTr } from '../lib/i18n';
 
 /**
  * If a persisted mid-case run exists in localStorage, prompt the player to
@@ -8,6 +9,7 @@ import { getCase } from '../content';
  */
 export function ResumePrompt() {
   const restoreRun = useGame((s) => s.restoreRun);
+  const tr = useTr();
   const [snap, setSnap] = useState<ReturnType<typeof loadSnapshot> | null>(null);
   const [dismissed, setDismissed] = useState(false);
 
@@ -45,7 +47,7 @@ export function ResumePrompt() {
             Unfinished case
           </div>
           <h2 id="resume-title" className="text-base font-semibold text-white mt-1">
-            Resume {caseDef.title.split('—')[0].trim()}?
+            Resume {tr(caseDef.title).split('—')[0].trim()}?
           </h2>
         </header>
         <div className="px-5 py-4 text-sm text-white/85 leading-relaxed space-y-2">

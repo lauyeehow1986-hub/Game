@@ -2,10 +2,11 @@ import { listCases } from '../../content';
 import { useCustomCases } from '../../state/customCasesStore';
 import { useProgress } from '../../state/progressStore';
 import { gradeForRatio } from '../../lib/scoring';
-import { useT } from '../../lib/i18n';
+import { useT, useTr } from '../../lib/i18n';
 
 export function LeaderboardPanel() {
   const t = useT();
+  const tr = useTr();
   const bestScores = useProgress((s) => s.bestScores);
   const decisionsMade = useProgress((s) => s.decisionsMade);
   const casesCompleted = useProgress((s) => s.casesCompleted);
@@ -63,7 +64,7 @@ export function LeaderboardPanel() {
               className="flex items-center gap-2 border border-clinical-border rounded px-2 py-1 text-[11px]"
             >
               <div className="flex-1 min-w-0">
-                <div className="text-white truncate">{c.title}</div>
+                <div className="text-white truncate">{tr(c.title)}</div>
                 <div className="text-[10px] text-clinical-subtle">
                   {c.category} · {c.primaryFacility.toUpperCase()}
                 </div>

@@ -1,5 +1,16 @@
 export type Perspective = 'patient' | 'caregiver' | 'staff';
 
+/**
+ * A string that may be localised. Authors can write either a plain string
+ * (the legacy form — treated as English) or an object keyed by locale code.
+ * Missing locales fall back to English, then to the first available string.
+ *
+ * Example:
+ *   "Cases"
+ *   { en: "Cases", zh: "病例", ms: "Kes" }
+ */
+export type LocalisedString = string | Partial<Record<'en' | 'zh' | 'ms' | 'ta', string>>;
+
 export type FacilityType =
   | 'acute'
   | 'specialty'
@@ -62,8 +73,8 @@ export interface Facility {
 }
 
 export type GuidelineRef = {
-  label: string;
-  body: string;
+  label: LocalisedString;
+  body: LocalisedString;
 };
 
 /**
@@ -98,12 +109,12 @@ export interface DecisionEffects {
 
 export type DecisionOption = {
   id: string;
-  label: string;
-  rationale: string;
+  label: LocalisedString;
+  rationale: LocalisedString;
   /** Score awarded by selecting this option, can be negative for harms. */
   score: number;
   /** Outcome shown briefly after selection (per perspective). */
-  outcome: Record<Perspective, string>;
+  outcome: Record<Perspective, LocalisedString>;
   /** Optional next node id; if omitted, pathway proceeds linearly. */
   nextNode?: string;
   /** Side effects fired when this option is chosen. */
@@ -112,7 +123,7 @@ export type DecisionOption = {
 
 export interface Decision {
   id: string;
-  prompt: string;
+  prompt: LocalisedString;
   options: DecisionOption[];
   reference: GuidelineRef;
   /** Multiplier on individual option scores when computing final case score. */
@@ -127,7 +138,7 @@ export interface PathwayNode {
   /** In-game minutes the patient spends here (before decision and travel). */
   durationMin: number;
   /** Per-perspective narrative shown when the patient enters this node. */
-  framing: Record<Perspective, string>;
+  framing: Record<Perspective, LocalisedString>;
   /** Optional decision presented at this node. */
   decision?: Decision;
   /** Cost incurred at this node (SGD, gross/private rate; financing engine applies subsidy etc). */
@@ -163,8 +174,8 @@ export interface PathwayNode {
 
 export interface CaseDefinition {
   id: string;
-  title: string;
-  blurb: string;
+  title: LocalisedString;
+  blurb: LocalisedString;
   category: 'elective' | 'acute' | 'outpatient';
   primaryFacility: string;
   involvedFacilities: string[];

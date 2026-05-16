@@ -5,11 +5,12 @@ import { useProgress } from '../../state/progressStore';
 import { useCustomCases } from '../../state/customCasesStore';
 import { downloadCaseJson, encodeCaseToUrl, tryDecodeCaseFromHref } from '../../lib/case-share';
 import { CaseImportModal } from '../modals/CaseImportModal';
-import { useT } from '../../lib/i18n';
+import { useT, useTr } from '../../lib/i18n';
 import type { CaseDefinition } from '../../lib/types';
 
 export function CaseList() {
   const t = useT();
+  const tr = useTr();
   const startCase = useGame((s) => s.startCase);
   const resetRun = useGame((s) => s.resetRun);
   const status = useGame((s) => s.run.status);
@@ -29,7 +30,7 @@ export function CaseList() {
     const decoded = tryDecodeCaseFromHref(window.location.href);
     if (decoded) {
       addCustom(decoded);
-      setShareToast(t('cases.shareToast.urlImported', { title: decoded.title }));
+      setShareToast(t('cases.shareToast.urlImported', { title: tr(decoded.title) }));
       const url = new URL(window.location.href);
       url.searchParams.delete('case');
       window.history.replaceState({}, '', url.toString());
@@ -98,7 +99,7 @@ export function CaseList() {
                         {t('cases.badge.custom')}
                       </span>
                     )}
-                    <span>{c.title}</span>
+                    <span>{tr(c.title)}</span>
                   </div>
                   <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
                     {c.category} · {c.primaryFacility.toUpperCase()}
@@ -110,7 +111,7 @@ export function CaseList() {
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-clinical-subtle mt-1 leading-snug">{c.blurb}</p>
+              <p className="text-[11px] text-clinical-subtle mt-1 leading-snug">{tr(c.blurb)}</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <button
                   disabled={!isUnlocked}

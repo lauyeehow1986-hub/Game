@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { listCases } from '../../content';
+import { useTr } from '../../lib/i18n';
 import type { GuidelineRef } from '../../lib/types';
 
 const GLOSSARY: Array<{ term: string; def: string }> = [
@@ -21,16 +22,17 @@ const GLOSSARY: Array<{ term: string; def: string }> = [
 ];
 
 export function CitationsPanel() {
+  const tr = useTr();
   const [tab, setTab] = useState<'citations' | 'glossary'>('citations');
   const cases = listCases();
 
-  // Deduplicate guidelines by label.
+  // Deduplicate guidelines by resolved label so duplicates across locales merge.
   const guidelines = new Map<string, GuidelineRef>();
   for (const c of cases) {
-    for (const g of c.guidelines) guidelines.set(g.label, g);
+    for (const g of c.guidelines) guidelines.set(tr(g.label), g);
   }
   const sortedGuidelines = Array.from(guidelines.values()).sort((a, b) =>
-    a.label.localeCompare(b.label),
+    tr(a.label).localeCompare(tr(b.label)),
   );
 
   const historicalCitations = cases
@@ -73,9 +75,9 @@ export function CitationsPanel() {
             </div>
             <ul className="space-y-1">
               {sortedGuidelines.map((g) => (
-                <li key={g.label} className="text-[11px] leading-snug">
-                  <div className="text-white font-medium">{g.label}</div>
-                  <div className="text-clinical-subtle">{g.body}</div>
+                <li key={tr(g.label)} className="text-[11px] leading-snug">
+                  <div className="text-white font-medium">{tr(g.label)}</div>
+                  <div className="text-clinical-subtle">{tr(g.body)}</div>
                 </li>
               ))}
             </ul>

@@ -4,10 +4,11 @@ import { useProgress } from '../../state/progressStore';
 import { useGame } from '../../state/gameStore';
 import { useCustomCases } from '../../state/customCasesStore';
 import { getCase } from '../../content';
-import { useT } from '../../lib/i18n';
+import { useT, useTr } from '../../lib/i18n';
 
 export function CurriculumPanel() {
   const t = useT();
+  const tr = useTr();
   const bestScores = useProgress((s) => s.bestScores);
   const startCase = useGame((s) => s.startCase);
   const resetRun = useGame((s) => s.resetRun);
@@ -98,7 +99,7 @@ export function CurriculumPanel() {
                           <span
                             className={`truncate ${has ? 'text-clinical-ok' : 'text-clinical-subtle'}`}
                           >
-                            {i + 1}. {c?.title ?? id}
+                            {i + 1}. {c ? tr(c.title) : id}
                           </span>
                           {has && (
                             <span className="font-mono text-[10px] text-clinical-ok">✓</span>
@@ -126,7 +127,7 @@ export function CurriculumPanel() {
                 )}
                 {nextCase && !done && (
                   <span className="text-[10px] text-clinical-subtle self-center">
-                    {t('curr.nextLabel', { title: nextCase.title })}
+                    {t('curr.nextLabel', { title: tr(nextCase.title) })}
                   </span>
                 )}
               </div>
