@@ -53,6 +53,26 @@ export function AboutModal({ open, onClose }: Props) {
           <Section title={t('about.cases.h')} body={t('about.cases.body')} />
           <Section title={t('about.privacy.h')} body={t('about.privacy.body')} />
           <Section title={t('about.code.h')} body={t('about.code.body')} />
+
+          <section className="border border-clinical-danger/30 rounded p-3 bg-clinical-danger/5">
+            <h3 className="text-sm font-semibold text-white mb-1">{t('about.reset.h')}</h3>
+            <p className="text-[12px] text-white/85 mb-2">{t('about.reset.body')}</p>
+            <button
+              onClick={() => {
+                if (!confirm(t('about.reset.confirm'))) return;
+                try {
+                  localStorage.clear();
+                } catch {
+                  /* ignore */
+                }
+                alert(t('about.reset.done'));
+                location.reload();
+              }}
+              className="px-3 py-1.5 rounded border border-clinical-danger text-clinical-danger hover:bg-clinical-danger/10 text-xs"
+            >
+              {t('about.reset.button')}
+            </button>
+          </section>
         </div>
         <footer className="px-5 py-3 border-t border-clinical-border flex items-center justify-end">
           <button

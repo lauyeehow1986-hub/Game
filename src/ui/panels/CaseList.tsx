@@ -7,6 +7,7 @@ import { downloadCaseJson, encodeCaseToUrl, tryDecodeCaseFromHref } from '../../
 import { CaseImportModal } from '../modals/CaseImportModal';
 import { BestPathDemoModal } from '../modals/BestPathDemoModal';
 import { useT, useTr } from '../../lib/i18n';
+import { EMPTY_FILTER, filterCases, filterIsEmpty, type CaseFilter } from '../../lib/case-filter';
 import type { CaseDefinition } from '../../lib/types';
 
 export function CaseList() {
@@ -25,6 +26,7 @@ export function CaseList() {
   const [importOpen, setImportOpen] = useState(false);
   const [demoCase, setDemoCase] = useState<CaseDefinition | null>(null);
   const [shareToast, setShareToast] = useState<string | null>(null);
+  const [filter, setFilter] = useState<CaseFilter>(EMPTY_FILTER);
 
   // Decode ?case= on first mount.
   useEffect(() => {
@@ -40,10 +42,15 @@ export function CaseList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const all: Array<{ c: CaseDefinition; isCustom: boolean }> = [
+  const allCases = [
     ...listCases().map((c) => ({ c, isCustom: false })),
     ...Object.values(customCases).map((c) => ({ c, isCustom: true })),
   ];
+  const allowedIds = new Set(
+    filterCases(allCases.map((x) => x.c), filter, bestScores).map((c) => c.id),
+  );
+  const all = allCases.filter((x) => allowedIds.has(x.c.id));
+  const hiddenCount = allCases.length - all.length;
 
   const handleShare = async (c: CaseDefinition) => {
     const url = encodeCaseToUrl(c);
@@ -74,6 +81,81 @@ export function CaseList() {
         </div>
       )}
 
+      <div className="space-y-1">
+        <div className="flex items-center gap-1">
+          <input
+            type="text"
+            value={filter.query}
+            onChange={(e) => setFilter({ ...filter, query: e.target.value })}
+            placeholder={t('cases.search.placeholder')}
+            className="flex-1 bg-clinical-bg border border-clinical-border rounded px-2 py-1 text-[11px] text-white"
+          />
+          {!filterIsEmpty(filter) && (
+            <button
+              onClick={() => setFilter(EMPTY_FILTER)}
+              className="text-[10px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+            >
+              {t('cases.search.clear')}
+            </button>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-1">
+          {(['acute', 'elective', 'outpatient'] as const).map((cat) => {
+            const on = filter.categories.includes(cat);
+            return (
+              <button
+                key={cat}
+                onClick={() =>
+                  setFilter({
+                    ...filter,
+                    categories: on
+                      ? filter.categories.filter((c) => c !== cat)
+                      : [...filter.categories, cat],
+                  })
+                }
+                className={`text-[10px] px-2 py-0.5 rounded-full border ${
+                  on
+                    ? 'border-clinical-accent bg-clinical-accent/15 text-clinical-accent'
+                    : 'border-clinical-border text-clinical-subtle hover:text-white'
+                }`}
+              >
+                {t(`cases.category.${cat}`)}
+              </button>
+            );
+          })}
+          <button
+            onClick={() => setFilter({ ...filter, historicalOnly: !filter.historicalOnly })}
+            className={`text-[10px] px-2 py-0.5 rounded-full border ${
+              filter.historicalOnly
+                ? 'border-amber-500 bg-amber-500/15 text-amber-300'
+                : 'border-clinical-border text-clinical-subtle hover:text-white'
+            }`}
+          >
+            {t('cases.badge.historical')}
+          </button>
+          <button
+            onClick={() => setFilter({ ...filter, unplayedOnly: !filter.unplayedOnly })}
+            className={`text-[10px] px-2 py-0.5 rounded-full border ${
+              filter.unplayedOnly
+                ? 'border-clinical-accent bg-clinical-accent/15 text-clinical-accent'
+                : 'border-clinical-border text-clinical-subtle hover:text-white'
+            }`}
+          >
+            {t('cases.search.unplayed')}
+          </button>
+        </div>
+        {hiddenCount > 0 && (
+          <div className="text-[10px] text-clinical-subtle">
+            {t('cases.search.hidden', { n: hiddenCount })}
+          </div>
+        )}
+      </div>
+
+      {all.length === 0 ? (
+        <p className="text-[11px] text-clinical-subtle italic py-2">
+          {t('cases.search.empty')}
+        </p>
+      ) : (
       <ul className="space-y-2">
         {all.map(({ c, isCustom }) => {
           const isUnlocked = isCustom || unlocked.includes(c.id);
@@ -164,6 +246,7 @@ export function CaseList() {
           );
         })}
       </ul>
+      )}
 
       <CaseImportModal open={importOpen} onClose={() => setImportOpen(false)} />
       <BestPathDemoModal caseDef={demoCase} onClose={() => setDemoCase(null)} />

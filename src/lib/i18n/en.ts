@@ -209,6 +209,22 @@ export const en: Record<string, string> = {
   'demo.noDecisions': 'This case has no decisions to walk through.',
   'cases.demoBestRun': 'Demo best run',
 
+  // Case search
+  'cases.search.placeholder': 'Search cases…',
+  'cases.search.clear': 'Clear',
+  'cases.search.empty': 'No cases match your filter.',
+  'cases.search.hidden': '{{n}} hidden by filter',
+  'cases.search.unplayed': 'Unplayed',
+
+  // About / methodology — reset button
+  'about.reset.h': 'Reset all local data',
+  'about.reset.body':
+    'Clears every locally-stored bit of state on this device: best scores, custom cases, custom curricula, language, audio settings, install/disclaimer flags, and any unfinished case.',
+  'about.reset.button': 'Reset everything',
+  'about.reset.confirm':
+    'This permanently clears every locally-stored bit of state on this device. Continue?',
+  'about.reset.done': 'Cleared. Reloading…',
+
   // Curricula
   'curr.heading': 'Curricula',
   'curr.objectives': 'Learning objectives',

@@ -200,6 +200,19 @@ export const zh: Record<string, string> = {
   'demo.noDecisions': '本病例没有可演示的决策点。',
   'cases.demoBestRun': '演示最佳路径',
 
+  'cases.search.placeholder': '搜索病例…',
+  'cases.search.clear': '清除',
+  'cases.search.empty': '没有符合筛选条件的病例。',
+  'cases.search.hidden': '已隐藏 {{n}} 项',
+  'cases.search.unplayed': '未玩过',
+
+  'about.reset.h': '重置所有本地数据',
+  'about.reset.body':
+    '清除本设备上所有本地存储:最佳成绩、自定义病例、自定义课程、语言设置、音频设置、安装/免责声明标记、未完成的病例。',
+  'about.reset.button': '全部重置',
+  'about.reset.confirm': '此操作将永久清除本设备所有本地数据。继续吗?',
+  'about.reset.done': '已清除。正在重新加载…',
+
   // Curricula
   'curr.heading': '课程包',
   'curr.objectives': '学习目标',
