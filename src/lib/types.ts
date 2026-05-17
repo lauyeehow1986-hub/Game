@@ -228,9 +228,18 @@ export interface CaseRunSnapshot {
   flags: string[];
 }
 
+export interface RunHistoryEntry {
+  score: number;
+  max: number;
+  at: number;
+}
+
 export type ProgressState = {
   unlockedCaseIds: string[];
   bestScores: Record<string, { score: number; max: number; at: number }>;
+  /** Rolling history of run results per case (most recent last). Capped per
+   *  case so localStorage stays tidy. */
+  runHistory: Record<string, RunHistoryEntry[]>;
   decisionsMade: number;
   casesCompleted: number;
 };

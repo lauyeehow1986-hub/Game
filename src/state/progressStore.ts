@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { ProgressState } from '../lib/types';
+import type { ProgressState, RunHistoryEntry } from '../lib/types';
+
+const HISTORY_CAP_PER_CASE = 10;
 
 interface ProgressStore extends ProgressState {
   unlockCase: (id: string) => void;
@@ -33,6 +35,7 @@ const initial: ProgressState = {
     'covid19-historical',
   ],
   bestScores: {},
+  runHistory: {},
   decisionsMade: 0,
   casesCompleted: 0,
 };
@@ -51,29 +54,43 @@ export const useProgress = create<ProgressStore>()(
       recordCaseResult: (caseId, score, max) => {
         const prev = get().bestScores[caseId];
         const isBetter = !prev || score > prev.score;
-        set((s) => ({
-          casesCompleted: s.casesCompleted + 1,
-          bestScores: {
-            ...s.bestScores,
-            [caseId]: isBetter
-              ? { score, max, at: Date.now() }
-              : prev,
-          },
-        }));
+        const entry: RunHistoryEntry = { score, max, at: Date.now() };
+        set((s) => {
+          const caseHistory = s.runHistory[caseId] ?? [];
+          const updatedHistory = [...caseHistory, entry].slice(-HISTORY_CAP_PER_CASE);
+          return {
+            casesCompleted: s.casesCompleted + 1,
+            bestScores: {
+              ...s.bestScores,
+              [caseId]: isBetter
+                ? { score, max, at: entry.at }
+                : prev,
+            },
+            runHistory: {
+              ...s.runHistory,
+              [caseId]: updatedHistory,
+            },
+          };
+        });
       },
       reset: () => set({ ...initial }),
     }),
     {
       name: 'sg-pathway-progress',
-      version: 11,
+      version: 12,
       migrate: (persisted: unknown, version) => {
         const obj = (persisted ?? {}) as Partial<ProgressState>;
-        if (version < 11) {
+        if (version < 12) {
           const merged = new Set([
             ...(obj.unlockedCaseIds ?? []),
             ...initial.unlockedCaseIds,
           ]);
-          return { ...initial, ...obj, unlockedCaseIds: Array.from(merged) };
+          return {
+            ...initial,
+            ...obj,
+            unlockedCaseIds: Array.from(merged),
+            runHistory: obj.runHistory ?? {},
+          };
         }
         return obj as ProgressState;
       },

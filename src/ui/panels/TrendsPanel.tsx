@@ -55,6 +55,7 @@ export function TrendsPanel() {
   const status = useGame((s) => s.run.status);
 
   const catalogue = [...listCases(), ...Object.values(customCases)];
+  const runHistory = useProgress((s) => s.runHistory);
   const trends = computePersonalTrends(bestScores, catalogue, (c) => tr(c.title));
   // Build a chronological list of ratios (oldest -> newest) for the sparkline.
   const ratiosOldFirst = [...trends.caseTrends]
@@ -157,7 +158,12 @@ export function TrendsPanel() {
             {t('trends.allCases')} ({trends.caseTrends.length})
           </summary>
           <ul className="mt-1 space-y-1 max-h-56 overflow-y-auto scrollbar-thin pr-1">
-            {trends.caseTrends.map((row) => (
+            {trends.caseTrends.map((row) => {
+              const caseHistory = runHistory[row.caseId] ?? [];
+              const historyRatios = caseHistory.map((e) =>
+                e.max > 0 ? e.score / e.max : 0,
+              );
+              return (
               <li
                 key={row.caseId}
                 className="flex items-center gap-2 border border-clinical-border rounded px-2 py-1"
@@ -171,8 +177,24 @@ export function TrendsPanel() {
                   <div className="text-white truncate">{row.title}</div>
                   <div className="text-[9px] text-clinical-subtle uppercase tracking-wider">
                     {row.category}
+                    {caseHistory.length > 1 && ` · ${caseHistory.length} runs`}
                   </div>
                 </div>
+                {historyRatios.length > 1 && (
+                  <div className="hidden sm:flex items-end gap-px h-6 mr-1">
+                    {historyRatios.slice(-6).map((r, i) => (
+                      <div
+                        key={i}
+                        className="w-1 rounded-t"
+                        style={{
+                          height: `${Math.max(8, r * 100)}%`,
+                          backgroundColor: gradeColour(r),
+                        }}
+                        title={`${(r * 100).toFixed(0)}%`}
+                      />
+                    ))}
+                  </div>
+                )}
                 <div className="text-right font-mono">
                   <div className="text-white">
                     {row.score.toFixed(1)}/{row.max.toFixed(1)}
@@ -182,7 +204,8 @@ export function TrendsPanel() {
                   </div>
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </details>
       )}
