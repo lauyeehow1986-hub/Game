@@ -10,6 +10,7 @@ import { useT, useTr } from '../../lib/i18n';
 import { generateLessonPlan } from '../../lib/lesson-plan';
 import { openPrintableLessonPlan } from '../../lib/lesson-plan-print';
 import { encodeRunToUrl } from '../../lib/case-share';
+import { GlossaryText } from '../GlossaryText';
 
 export function ResultsModal() {
   const t = useT();
@@ -132,9 +133,15 @@ export function ResultsModal() {
                       {e.scoreEarned.toFixed(1)} / {e.maxScore.toFixed(1)}
                     </span>
                   </div>
-                  <div className="text-sm text-white font-semibold mt-1">{tr(decision.prompt)}</div>
-                  <div className="text-xs text-clinical-subtle mt-1">Your choice: {tr(option.label)}</div>
-                  <div className="text-xs text-white/80 mt-1">{tr(option.rationale)}</div>
+                  <div className="text-sm text-white font-semibold mt-1">
+                    <GlossaryText>{tr(decision.prompt)}</GlossaryText>
+                  </div>
+                  <div className="text-xs text-clinical-subtle mt-1">
+                    Your choice: <GlossaryText>{tr(option.label)}</GlossaryText>
+                  </div>
+                  <div className="text-xs text-white/80 mt-1">
+                    <GlossaryText>{tr(option.rationale)}</GlossaryText>
+                  </div>
                   {tr(option.outcome[perspective]) && (
                     <blockquote className="mt-2 text-xs italic border-l-2 border-clinical-accent pl-2 text-white/85">
                       {tr(option.outcome[perspective])}
@@ -166,7 +173,7 @@ export function ResultsModal() {
                       }`}
                     >
                       <div className="flex justify-between text-[10px] uppercase tracking-wider">
-                        <span className="text-clinical-subtle truncate flex-1">{tr(row.prompt)}</span>
+                        <span className="text-clinical-subtle truncate flex-1"><GlossaryText>{tr(row.prompt)}</GlossaryText></span>
                         <span
                           className={
                             row.match ? 'text-clinical-ok' : 'text-clinical-warn'
@@ -180,7 +187,7 @@ export function ResultsModal() {
                           <div className="text-[9px] uppercase tracking-wider text-clinical-subtle">
                             {t('results.bestPath.you')}
                           </div>
-                          <div className="text-white">{yours ? tr(yours.label) : '—'}</div>
+                          <div className="text-white">{yours ? <GlossaryText>{tr(yours.label)}</GlossaryText> : '—'}</div>
                           {yours && (
                             <div className="font-mono text-[10px] text-clinical-subtle">
                               {yours.score.toFixed(1)} / {yours.maxScore.toFixed(1)}
@@ -191,7 +198,7 @@ export function ResultsModal() {
                           <div className="text-[9px] uppercase tracking-wider text-clinical-subtle">
                             {t('results.bestPath.best')}
                           </div>
-                          <div className="text-white">{tr(row.best.label)}</div>
+                          <div className="text-white"><GlossaryText>{tr(row.best.label)}</GlossaryText></div>
                           <div className="font-mono text-[10px] text-clinical-subtle">
                             {row.best.score.toFixed(1)}
                             {!row.match && (

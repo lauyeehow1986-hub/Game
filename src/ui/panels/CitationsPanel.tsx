@@ -1,25 +1,17 @@
 import { useState } from 'react';
 import { listCases } from '../../content';
 import { useTr } from '../../lib/i18n';
+import { GLOSSARY_TERMS } from '../../lib/glossary';
 import type { GuidelineRef } from '../../lib/types';
 
-const GLOSSARY: Array<{ term: string; def: string }> = [
-  { term: 'NEHR', def: 'National Electronic Health Record — Singapore-wide shared record set; all restructured public providers contribute, private participation is voluntary.' },
-  { term: 'HealthHub', def: "Patient-facing portal that shows NEHR-derived records to citizens." },
-  { term: 'DORSCON', def: 'Disease Outbreak Response System Condition — colour-coded national alert system (Green / Yellow / Orange / Red).' },
-  { term: 'CHAS', def: 'Community Health Assist Scheme — tiered subsidies (Blue / Orange / Green) at participating private GPs and dentists for citizens; PG (Pioneer Generation) and MG (Merdeka Generation) cards add further top-ups.' },
-  { term: 'MediShield Life', def: 'National basic catastrophic insurance covering inpatient and selected outpatient (oncology, dialysis) bills up to a deductible and co-payment.' },
-  { term: 'MediSave', def: 'Mandatory medical savings account; can be drawn down for selected outpatient and inpatient items within annual / lifetime caps.' },
-  { term: 'MAF', def: 'Medication Assistance Fund — subsidies for selected high-cost drugs at restructured hospitals.' },
-  { term: 'Healthier SG', def: "MOH (2023) primary-care continuity programme — citizens enrol with one GP / polyclinic doctor for chronic-disease management." },
-  { term: 'AIC', def: "Agency for Integrated Care — coordinates community / step-down / home-care for patients moving between sectors." },
-  { term: 'AH@Home', def: 'Alexandra Hospital virtual ward — hospital-level care delivered at home with home visits and remote monitoring.' },
-  { term: 'EPIP', def: "IMH Early Psychosis Intervention Programme — first-episode psychosis with assertive community follow-up." },
-  { term: 'PHPC', def: 'Public Health Preparedness Clinic — geographically distributed primary-care capacity activated during outbreaks.' },
-  { term: 'PEWS', def: "Paediatric Early Warning Score — escalation tool used at KKH and other paediatric services." },
+// Augment the shared glossary with terms that don't make sense to scan for
+// inline (e.g. 'A/B1/B2/C' would create false positives mid-prose).
+const EXTRA_GLOSSARY_ONLY: Array<{ term: string; def: string }> = [
   { term: 'A/B1/B2/C', def: 'Public-hospital ward classes; A = no subsidy, single room → C = highest means-tested subsidy, open ward.' },
-  { term: 'IP rider', def: "Integrated Shield Plan — private insurance riders that top up MediShield Life to as-charged levels (subject to co-payment rules)." },
 ];
+const GLOSSARY = [...GLOSSARY_TERMS, ...EXTRA_GLOSSARY_ONLY].sort((a, b) =>
+  a.term.localeCompare(b.term),
+);
 
 export function CitationsPanel() {
   const tr = useTr();

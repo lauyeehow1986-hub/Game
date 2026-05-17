@@ -2,6 +2,7 @@ import { useGame } from '../../state/gameStore';
 import { usePerspective } from '../../state/perspectiveStore';
 import { getFacility } from '../../content';
 import { useTr } from '../../lib/i18n';
+import { GlossaryText } from '../GlossaryText';
 import type { WardClass } from '../../lib/financing';
 
 const wardLabels: Record<WardClass, string> = {
@@ -108,7 +109,7 @@ export function PatientPanel() {
 
       {framing && (
         <blockquote className="border-l-2 border-clinical-accent pl-3 text-xs text-white/90 italic leading-relaxed">
-          {framing}
+          <GlossaryText>{framing}</GlossaryText>
         </blockquote>
       )}
     </section>

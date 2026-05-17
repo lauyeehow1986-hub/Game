@@ -5,6 +5,7 @@ import { useProgress } from '../../state/progressStore';
 import type { DecisionOption } from '../../lib/types';
 import { chimeDecision } from '../../lib/audio';
 import { useTr } from '../../lib/i18n';
+import { GlossaryText } from '../GlossaryText';
 
 export function DecisionModal() {
   const tr = useTr();
@@ -88,7 +89,7 @@ export function DecisionModal() {
             Decision required · {perspective} POV
           </div>
           <h2 id="decision-prompt" className="text-base font-semibold text-white mt-1">
-            {tr(decision.prompt)}
+            <GlossaryText>{tr(decision.prompt)}</GlossaryText>
           </h2>
         </header>
 
@@ -126,12 +127,12 @@ export function DecisionModal() {
                       <span className="text-[10px] text-clinical-subtle font-mono mr-1">
                         [{idx + 1}]
                       </span>
-                      {tr(opt.label)}
+                      <GlossaryText>{tr(opt.label)}</GlossaryText>
                     </div>
                   </div>
                   {selected && (
                     <div className="mt-3 ml-7 space-y-2 text-xs">
-                      <div className="text-clinical-subtle">{tr(opt.rationale)}</div>
+                      <div className="text-clinical-subtle"><GlossaryText>{tr(opt.rationale)}</GlossaryText></div>
                       <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
                         Reference: {tr(decision.reference.label)}
                       </div>
