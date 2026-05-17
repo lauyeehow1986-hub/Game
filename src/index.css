@@ -33,3 +33,35 @@ body {
 .pulse-soft {
   animation: pulse-soft 2s ease-in-out infinite;
 }
+
+/* Skip-to-content link: hidden until keyboard focus reveals it. */
+.skip-link {
+  position: absolute;
+  left: 0;
+  top: -40px;
+  background: #38bdf8;
+  color: #0b1320;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 12px;
+  border-radius: 0 0 6px 0;
+  z-index: 100;
+  transition: top 0.15s ease-out;
+}
+.skip-link:focus {
+  top: 0;
+  outline: 2px solid #0b1320;
+  outline-offset: -4px;
+}
+
+/* Respect prefers-reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

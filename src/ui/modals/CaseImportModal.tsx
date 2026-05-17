@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { validateCase } from '../../lib/case-schema';
 import { useCustomCases } from '../../state/customCasesStore';
 import { useAchievements } from '../../state/achievementsStore';
+import { useFocusTrap } from '../../lib/use-focus-trap';
 
 interface Props {
   open: boolean;
@@ -71,6 +72,7 @@ export function CaseImportModal({ open, onClose }: Props) {
   const [success, setSuccess] = useState<string | null>(null);
   const add = useCustomCases((s) => s.add);
   const fireAchievement = useAchievements((s) => s.fire);
+  const cardRef = useFocusTrap<HTMLDivElement>(open);
 
   if (!open) return null;
 
@@ -109,7 +111,7 @@ export function CaseImportModal({ open, onClose }: Props) {
       aria-labelledby="case-import-title"
       className="fixed inset-0 z-[55] grid place-items-center bg-black/70 p-4"
     >
-      <div className="bg-clinical-panel border border-clinical-border rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
+      <div ref={cardRef} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
         <header className="px-5 py-4 border-b border-clinical-border flex items-baseline justify-between gap-3">
           <div>
             <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">

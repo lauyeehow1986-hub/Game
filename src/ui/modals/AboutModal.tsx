@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useT } from '../../lib/i18n';
+import { useFocusTrap } from '../../lib/use-focus-trap';
 
 interface Props {
   open: boolean;
@@ -8,6 +9,7 @@ interface Props {
 
 export function AboutModal({ open, onClose }: Props) {
   const t = useT();
+  const trap = useFocusTrap<HTMLDivElement>(open);
 
   useEffect(() => {
     if (!open) return;
@@ -27,7 +29,7 @@ export function AboutModal({ open, onClose }: Props) {
       aria-labelledby="about-title"
       className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-4"
     >
-      <div className="bg-clinical-panel border border-clinical-border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
+      <div ref={trap} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
         <header className="px-5 py-4 border-b border-clinical-border flex items-baseline justify-between">
           <div>
             <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
@@ -77,6 +79,7 @@ export function AboutModal({ open, onClose }: Props) {
         <footer className="px-5 py-3 border-t border-clinical-border flex items-center justify-end">
           <button
             onClick={onClose}
+            data-autofocus
             className="px-3 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
           >
             {t('common.close')}

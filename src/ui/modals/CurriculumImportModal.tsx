@@ -3,6 +3,7 @@ import { validateCurriculum } from '../../lib/curriculum-schema';
 import { useCustomCurricula } from '../../state/customCurriculaStore';
 import { useCustomCases } from '../../state/customCasesStore';
 import { useAchievements } from '../../state/achievementsStore';
+import { useFocusTrap } from '../../lib/use-focus-trap';
 import { useT, useTr } from '../../lib/i18n';
 
 interface Props {
@@ -37,6 +38,7 @@ export function CurriculumImportModal({ open, onClose }: Props) {
   const addBundleAction = useCustomCurricula((s) => s.add);
   const addCustomCase = useCustomCases((s) => s.add);
   const fireAchievement = useAchievements((s) => s.fire);
+  const cardRef = useFocusTrap<HTMLDivElement>(open);
 
   if (!open) return null;
 
@@ -81,7 +83,7 @@ export function CurriculumImportModal({ open, onClose }: Props) {
       aria-labelledby="curr-import-title"
       className="fixed inset-0 z-[55] grid place-items-center bg-black/70 p-4"
     >
-      <div className="bg-clinical-panel border border-clinical-border rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
+      <div ref={cardRef} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
         <header className="px-5 py-4 border-b border-clinical-border flex items-baseline justify-between gap-3">
           <div>
             <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">

@@ -20,18 +20,23 @@ import { ResumePrompt } from './ui/ResumePrompt';
 import { DisclaimerBanner } from './ui/DisclaimerBanner';
 import { InstallPrompt } from './ui/InstallPrompt';
 import { AchievementToast } from './ui/AchievementToast';
+import { LiveAnnouncer } from './ui/LiveAnnouncer';
+import { KeyboardHelpModal } from './ui/modals/KeyboardHelpModal';
+import { useT } from './lib/i18n';
 import { PhaserGame } from './game/PhaserGame';
 import { useMode } from './state/modeStore';
 
 export default function App() {
   const mode = useMode((s) => s.mode);
+  const t = useT();
   return (
     <div className="h-full flex flex-col">
+      <a href="#main-content" className="skip-link">{t('a11y.skip')}</a>
       <HUD />
       <DisclaimerBanner />
       <InstallPrompt />
 
-      <main className="flex-1 grid grid-cols-1 lg:grid-cols-[300px_1fr_340px] gap-3 p-3 min-h-0 overflow-y-auto lg:overflow-hidden">
+      <main id="main-content" className="flex-1 grid grid-cols-1 lg:grid-cols-[300px_1fr_340px] gap-3 p-3 min-h-0 overflow-y-auto lg:overflow-hidden">
         <aside className="space-y-3 lg:overflow-y-auto scrollbar-thin order-2 lg:order-1">
           {mode === 'case' ? (
             <>
@@ -84,6 +89,8 @@ export default function App() {
       <RunReviewModal />
       <WhatsNewModal />
       <AchievementToast />
+      <LiveAnnouncer />
+      <KeyboardHelpModal />
     </div>
   );
 }

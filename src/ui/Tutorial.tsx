@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useFocusTrap } from '../lib/use-focus-trap';
 
 const KEY = 'sg-pathway-tutorial-seen-v2';
 
@@ -44,6 +45,7 @@ const STEPS: Array<{ title: string; body: string }> = [
 export function Tutorial() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
+  const cardRef = useFocusTrap<HTMLDivElement>(open);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -87,7 +89,7 @@ export function Tutorial() {
       aria-labelledby="tutorial-title"
       className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-4"
     >
-      <div className="bg-clinical-panel border border-clinical-border rounded-lg max-w-md w-full shadow-2xl">
+      <div ref={cardRef} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-md w-full shadow-2xl">
         <header className="px-5 py-4 border-b border-clinical-border">
           <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
             Welcome · {step + 1} / {STEPS.length}
@@ -111,6 +113,7 @@ export function Tutorial() {
             </button>
             <button
               onClick={next}
+              data-autofocus
               className="px-3 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
             >
               {step === STEPS.length - 1 ? 'Get started' : 'Next'}

@@ -3,6 +3,7 @@ import { listCases } from '../../content';
 import { useCustomCases } from '../../state/customCasesStore';
 import { useCustomCurricula } from '../../state/customCurriculaStore';
 import { useAchievements } from '../../state/achievementsStore';
+import { useFocusTrap } from '../../lib/use-focus-trap';
 import { useT, useTr } from '../../lib/i18n';
 import { validateCurriculum, type CurriculumBundle } from '../../lib/curriculum-schema';
 import type { CaseDefinition } from '../../lib/types';
@@ -27,6 +28,7 @@ export function CurriculumBuilderModal({ open, onClose }: Props) {
   const customCases = useCustomCases((s) => s.cases);
   const addBundle = useCustomCurricula((s) => s.add);
   const fireAchievement = useAchievements((s) => s.fire);
+  const cardRef = useFocusTrap<HTMLDivElement>(open);
 
   const [title, setTitle] = useState('');
   const [blurb, setBlurb] = useState('');
@@ -111,7 +113,7 @@ export function CurriculumBuilderModal({ open, onClose }: Props) {
       aria-labelledby="curr-builder-title"
       className="fixed inset-0 z-[55] grid place-items-center bg-black/70 p-4"
     >
-      <div className="bg-clinical-panel border border-clinical-border rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
+      <div ref={cardRef} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
         <header className="px-5 py-4 border-b border-clinical-border flex items-baseline justify-between gap-3">
           <div>
             <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">

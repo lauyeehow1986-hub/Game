@@ -6,6 +6,7 @@ import type { DecisionOption } from '../../lib/types';
 import { chimeDecision } from '../../lib/audio';
 import { useTr } from '../../lib/i18n';
 import { GlossaryText } from '../GlossaryText';
+import { useFocusTrap } from '../../lib/use-focus-trap';
 
 export function DecisionModal() {
   const tr = useTr();
@@ -17,6 +18,7 @@ export function DecisionModal() {
   const [picked, setPicked] = useState<DecisionOption | null>(null);
   const [focusIdx, setFocusIdx] = useState(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const cardRef = useFocusTrap<HTMLDivElement>(status === 'awaiting-decision');
 
   // Reset selection when a new decision arrives.
   useEffect(() => {
@@ -83,7 +85,7 @@ export function DecisionModal() {
       tabIndex={-1}
       className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4"
     >
-      <div className="bg-clinical-panel border border-clinical-border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
+      <div ref={cardRef} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
         <header className="px-5 py-4 border-b border-clinical-border">
           <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
             Decision required · {perspective} POV

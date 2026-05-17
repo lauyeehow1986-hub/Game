@@ -323,6 +323,26 @@ export const en: Record<string, string> = {
   'about.code.body':
     'Open source on GitHub. Issues, pull requests, and translation contributions welcome.',
 
+  // Accessibility
+  'a11y.skip': 'Skip to main content',
+  'a11y.announce.decisionRequired': 'A decision is required.',
+  'a11y.announce.caseComplete': 'Case complete: {{title}}.',
+  'a11y.announce.runReset': 'Case reset. Pick a new case to begin.',
+  'a11y.kbd.heading': 'Keyboard shortcuts',
+  'a11y.kbd.subtitle': 'Press ? at any time to reopen this list.',
+  'a11y.kbd.open': 'Keyboard shortcuts',
+  'a11y.kbd.global': 'Global',
+  'a11y.kbd.decision': 'Decision dialog',
+  'a11y.kbd.demo': 'Best-practice demo',
+  'a11y.kbd.tutorial': 'Tutorial',
+  'a11y.kbd.k.help': 'Show this help',
+  'a11y.kbd.k.esc': 'Close any open dialog',
+  'a11y.kbd.k.tab': 'Cycle focus inside a dialog',
+  'a11y.kbd.k.arrows': '↑ / ↓ to highlight an option',
+  'a11y.kbd.k.nums': '1–9 to jump to that option',
+  'a11y.kbd.k.enter': 'Enter to confirm',
+  'a11y.kbd.k.lr': '← / → to step forward / back',
+
   // Achievements
   'ach.unlocked': 'Achievement unlocked',
   'ach.heading': 'Achievements',

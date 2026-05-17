@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useGame, loadSnapshot, clearSnapshot } from '../state/gameStore';
 import { getCase } from '../content';
 import { useTr } from '../lib/i18n';
+import { useFocusTrap } from '../lib/use-focus-trap';
 
 /**
  * If a persisted mid-case run exists in localStorage, prompt the player to
@@ -12,6 +13,7 @@ export function ResumePrompt() {
   const tr = useTr();
   const [snap, setSnap] = useState<ReturnType<typeof loadSnapshot> | null>(null);
   const [dismissed, setDismissed] = useState(false);
+  const cardRef = useFocusTrap<HTMLDivElement>(snap != null && !dismissed);
 
   useEffect(() => {
     const s = loadSnapshot();
@@ -41,7 +43,7 @@ export function ResumePrompt() {
       aria-labelledby="resume-title"
       className="fixed inset-0 z-[55] grid place-items-center bg-black/70 p-4"
     >
-      <div className="bg-clinical-panel border border-clinical-border rounded-lg max-w-md w-full shadow-2xl">
+      <div ref={cardRef} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-md w-full shadow-2xl">
         <header className="px-5 py-4 border-b border-clinical-border">
           <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
             Unfinished case
@@ -70,6 +72,7 @@ export function ResumePrompt() {
           </button>
           <button
             onClick={resume}
+            data-autofocus
             className="px-4 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
           >
             Resume

@@ -5,6 +5,7 @@ import { gradeForRatio, totalScoreFromLog } from '../../lib/scoring';
 import { getCase } from '../../content';
 import { useT, useTr } from '../../lib/i18n';
 import type { CaseDefinition } from '../../lib/types';
+import { useFocusTrap } from '../../lib/use-focus-trap';
 
 /**
  * Opens automatically when the URL carries a ?run=... payload. Lets an
@@ -17,6 +18,8 @@ export function RunReviewModal() {
   const [snap, setSnap] = useState<RunSnapshot | null>(null);
   const [caseDef, setCaseDef] = useState<CaseDefinition | null>(null);
   const [unknownCaseId, setUnknownCaseId] = useState<string | null>(null);
+  const errorCardRef = useFocusTrap<HTMLDivElement>(unknownCaseId != null);
+  const cardRef = useFocusTrap<HTMLDivElement>(snap != null && caseDef != null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -48,7 +51,7 @@ export function RunReviewModal() {
         aria-modal="true"
         className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-4"
       >
-        <div className="bg-clinical-panel border border-clinical-border rounded-lg max-w-md w-full shadow-2xl p-5 space-y-3">
+        <div ref={errorCardRef} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-md w-full shadow-2xl p-5 space-y-3">
           <h2 className="text-base font-semibold text-white">{t('runReview.heading')}</h2>
           <p className="text-[12px] text-clinical-subtle">
             {t('runReview.notFound', { id: unknownCaseId })}
@@ -56,6 +59,7 @@ export function RunReviewModal() {
           <div className="flex justify-end">
             <button
               onClick={close}
+              data-autofocus
               className="px-3 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold"
             >
               {t('common.close')}
@@ -80,7 +84,7 @@ export function RunReviewModal() {
       aria-labelledby="run-review-title"
       className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-4"
     >
-      <div className="bg-clinical-panel border border-clinical-border rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
+      <div ref={cardRef} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
         <header className="px-5 py-4 border-b border-clinical-border flex items-center justify-between">
           <div>
             <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
@@ -171,6 +175,7 @@ export function RunReviewModal() {
         <footer className="px-5 py-3 border-t border-clinical-border flex items-center justify-end gap-2">
           <button
             onClick={close}
+            data-autofocus
             className="px-4 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
           >
             {t('common.close')}

@@ -3,6 +3,7 @@ import type { CaseDefinition } from '../../lib/types';
 import { bestPath, type BestPathStep } from '../../lib/best-path';
 import { useT, useTr } from '../../lib/i18n';
 import { useAchievements } from '../../state/achievementsStore';
+import { useFocusTrap } from '../../lib/use-focus-trap';
 
 interface Props {
   caseDef: CaseDefinition | null;
@@ -21,6 +22,7 @@ export function BestPathDemoModal({ caseDef, onClose }: Props) {
   const [step, setStep] = useState(0);
   const [steps, setSteps] = useState<BestPathStep[]>([]);
   const fireAchievement = useAchievements((s) => s.fire);
+  const cardRef = useFocusTrap<HTMLDivElement>(caseDef != null);
 
   useEffect(() => {
     if (!caseDef) return;
@@ -63,7 +65,7 @@ export function BestPathDemoModal({ caseDef, onClose }: Props) {
       aria-labelledby="bestpath-demo-title"
       className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-4"
     >
-      <div className="bg-clinical-panel border border-clinical-border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
+      <div ref={cardRef} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
         <header className="px-5 py-4 border-b border-clinical-border">
           <div className="flex items-baseline justify-between">
             <div>

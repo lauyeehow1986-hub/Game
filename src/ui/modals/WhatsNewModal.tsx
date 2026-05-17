@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
+import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v3-seen';
+const KEY = 'sg-pathway-whatsnew-v4-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'Keyboard + screen-reader pass',
+    body: 'Press ? at any time for the shortcuts list. Every dialog now traps focus and returns it on close, status changes are announced politely to screen readers, a skip-to-content link is the first stop on Tab, and prefers-reduced-motion is honoured.',
+  },
   {
     heading: 'Achievements',
     body: '12 unlockables for distinct play styles — first case, three distinctions, completing a curriculum, finishing an Ops shift in the black, switching language, importing custom content, scoring on every built-in case. Progress visible in the Trends panel.',
@@ -49,6 +54,7 @@ const ITEMS: Array<{ heading: string; body: string }> = [
 export function WhatsNewModal() {
   const t = useT();
   const [open, setOpen] = useState(false);
+  const cardRef = useFocusTrap<HTMLDivElement>(open);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -84,7 +90,7 @@ export function WhatsNewModal() {
       aria-labelledby="whatsnew-title"
       className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-4"
     >
-      <div className="bg-clinical-panel border border-clinical-border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
+      <div ref={cardRef} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
         <header className="px-5 py-4 border-b border-clinical-border">
           <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
             {t('whatsNew.subtitle')}
@@ -104,6 +110,7 @@ export function WhatsNewModal() {
         <footer className="px-5 py-3 border-t border-clinical-border flex items-center justify-end">
           <button
             onClick={close}
+            data-autofocus
             className="px-4 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
           >
             {t('whatsNew.gotIt')}

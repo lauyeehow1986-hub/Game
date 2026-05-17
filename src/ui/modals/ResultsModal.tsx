@@ -12,6 +12,7 @@ import { openPrintableLessonPlan } from '../../lib/lesson-plan-print';
 import { encodeRunToUrl } from '../../lib/case-share';
 import { GlossaryText } from '../GlossaryText';
 import { useAchievements } from '../../state/achievementsStore';
+import { useFocusTrap } from '../../lib/use-focus-trap';
 
 export function ResultsModal() {
   const t = useT();
@@ -30,6 +31,7 @@ export function ResultsModal() {
   const recordCaseResult = useProgress((s) => s.recordCaseResult);
   const runHistory = useProgress((s) => s.runHistory);
   const fireAchievement = useAchievements((s) => s.fire);
+  const cardRef = useFocusTrap<HTMLDivElement>(status === 'completed');
 
   useEffect(() => {
     if (status === 'completed' && caseDef) {
@@ -58,7 +60,7 @@ export function ResultsModal() {
       aria-modal="true"
       className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4"
     >
-      <div className="bg-clinical-panel border border-clinical-border rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
+      <div ref={cardRef} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
         <header className="px-5 py-4 border-b border-clinical-border flex items-center justify-between">
           <div>
             <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">Case complete</div>
@@ -255,6 +257,7 @@ export function ResultsModal() {
           <ExportButtons />
           <button
             onClick={resetRun}
+            data-autofocus
             className="px-4 py-2 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
           >
             {t('common.close')}

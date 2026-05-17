@@ -200,6 +200,16 @@ export function HUD() {
         >
           {t('hud.about')}
         </button>
+        <button
+          onClick={() => {
+            window.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }));
+          }}
+          aria-label={t('a11y.kbd.open')}
+          title={t('a11y.kbd.open')}
+          className="hidden sm:inline-flex h-8 w-8 items-center justify-center rounded border border-clinical-border text-clinical-subtle hover:text-white text-[12px] font-mono"
+        >
+          ?
+        </button>
       </div>
 
       <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
