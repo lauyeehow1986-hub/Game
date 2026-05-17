@@ -223,10 +223,26 @@ export const en: Record<string, string> = {
   'curr.import.body':
     "Paste a curriculum JSON below or upload a .json file. Bundles can include embedded custom cases — they're side-loaded automatically so caseIds resolve. Built-in case ids work too without being embedded.",
   'curr.importCurriculum': 'Import curriculum',
+  'curr.createCurriculum': 'Create curriculum',
   'curr.shareCurriculum': 'Share',
   'curr.exportCurriculum': 'Export',
   'curr.shareToast.copied': 'Curriculum URL copied to clipboard.',
   'curr.shareToast.urlImported': 'Imported curriculum "{{title}}" from URL.',
+
+  // Curriculum builder
+  'builder.heading': 'Build a curriculum',
+  'builder.subtitle': 'Compose your own syllabus',
+  'builder.title': 'Title',
+  'builder.idPreview': 'Auto-id',
+  'builder.blurb': 'Blurb',
+  'builder.author': 'Author (optional)',
+  'builder.objectives': 'Learning objectives',
+  'builder.add': 'Add',
+  'builder.pickedCases': 'Cases in this curriculum ({{n}})',
+  'builder.allCases': 'All available cases ({{n}})',
+  'builder.noCases': 'Pick at least 2 cases below to enable Save.',
+  'builder.save': 'Save curriculum',
+  'builder.saved': 'Saved "{{title}}". It now appears in the Curricula panel.',
 
   'results.copyLesson': 'Copy lesson plan',
   'results.copyLessonDone': 'Lesson plan copied to clipboard',

@@ -17,6 +17,7 @@ import {
   tryDecodeCurriculumFromHref,
 } from '../../lib/case-share';
 import { CurriculumImportModal } from '../modals/CurriculumImportModal';
+import { CurriculumBuilderModal } from '../modals/CurriculumBuilderModal';
 import type { CurriculumBundle } from '../../lib/curriculum-schema';
 
 /**
@@ -48,6 +49,7 @@ export function CurriculumPanel() {
   const removeBundle = useCustomCurricula((s) => s.remove);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [builderOpen, setBuilderOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // Decode ?curr= from the URL on mount and side-load any embedded cases.
@@ -105,12 +107,20 @@ export function CurriculumPanel() {
     <section className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-2">
       <header className="flex items-baseline justify-between">
         <h3 className="text-sm font-semibold text-white">{t('curr.heading')}</h3>
-        <button
-          onClick={() => setImportOpen(true)}
-          className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
-        >
-          {t('curr.importCurriculum')}
-        </button>
+        <div className="flex gap-1">
+          <button
+            onClick={() => setBuilderOpen(true)}
+            className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+          >
+            {t('curr.createCurriculum')}
+          </button>
+          <button
+            onClick={() => setImportOpen(true)}
+            className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+          >
+            {t('curr.importCurriculum')}
+          </button>
+        </div>
       </header>
 
       {toast && (
@@ -255,6 +265,7 @@ export function CurriculumPanel() {
       </ul>
 
       <CurriculumImportModal open={importOpen} onClose={() => setImportOpen(false)} />
+      <CurriculumBuilderModal open={builderOpen} onClose={() => setBuilderOpen(false)} />
     </section>
   );
 }
