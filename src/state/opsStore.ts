@@ -11,6 +11,7 @@ import {
 } from '../lib/ops';
 import { applyScenario, getScenario, SCENARIOS, type OpsScenario } from '../lib/ops-scenarios';
 import { useGame } from './gameStore';
+import { useAchievements } from './achievementsStore';
 
 export type OpsMode = 'idle' | 'running' | 'paused' | 'ended';
 export type OpsSpeed = 1 | 5 | 30;
@@ -103,10 +104,15 @@ export const useOps = create<OpsStore>((set, get) => ({
     if (intervalHandle !== null && typeof window !== 'undefined') {
       window.clearInterval(intervalHandle);
     }
+    const summary = summariseDay(state);
     set({
       mode: 'ended',
       intervalHandle: null,
-      history: [...history, summariseDay(state)],
+      history: [...history, summary],
+    });
+    useAchievements.getState().fire({
+      kind: 'ops-shift-ended',
+      netSGD: summary.netSGD,
     });
   },
 

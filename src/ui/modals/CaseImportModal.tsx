@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { validateCase } from '../../lib/case-schema';
 import { useCustomCases } from '../../state/customCasesStore';
+import { useAchievements } from '../../state/achievementsStore';
 
 interface Props {
   open: boolean;
@@ -69,6 +70,7 @@ export function CaseImportModal({ open, onClose }: Props) {
   const [errors, setErrors] = useState<string[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
   const add = useCustomCases((s) => s.add);
+  const fireAchievement = useAchievements((s) => s.fire);
 
   if (!open) return null;
 
@@ -88,6 +90,7 @@ export function CaseImportModal({ open, onClose }: Props) {
       return;
     }
     add(r.case);
+    fireAchievement({ kind: 'custom-content-added' });
     setErrors([]);
     setSuccess(`Imported "${r.case.title}". It now appears under Cases with a Custom badge.`);
   };

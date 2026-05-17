@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { CaseDefinition } from '../../lib/types';
 import { bestPath, type BestPathStep } from '../../lib/best-path';
 import { useT, useTr } from '../../lib/i18n';
+import { useAchievements } from '../../state/achievementsStore';
 
 interface Props {
   caseDef: CaseDefinition | null;
@@ -19,11 +20,14 @@ export function BestPathDemoModal({ caseDef, onClose }: Props) {
   const tr = useTr();
   const [step, setStep] = useState(0);
   const [steps, setSteps] = useState<BestPathStep[]>([]);
+  const fireAchievement = useAchievements((s) => s.fire);
 
   useEffect(() => {
     if (!caseDef) return;
     setSteps(bestPath(caseDef));
     setStep(0);
+    fireAchievement({ kind: 'demo-opened' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseDef]);
 
   useEffect(() => {

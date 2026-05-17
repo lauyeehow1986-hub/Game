@@ -11,6 +11,7 @@ import { generateLessonPlan } from '../../lib/lesson-plan';
 import { openPrintableLessonPlan } from '../../lib/lesson-plan-print';
 import { encodeRunToUrl } from '../../lib/case-share';
 import { GlossaryText } from '../GlossaryText';
+import { useAchievements } from '../../state/achievementsStore';
 
 export function ResultsModal() {
   const t = useT();
@@ -27,13 +28,23 @@ export function ResultsModal() {
   const perspective = usePerspective((s) => s.current);
   const setPerspective = usePerspective((s) => s.set);
   const recordCaseResult = useProgress((s) => s.recordCaseResult);
+  const runHistory = useProgress((s) => s.runHistory);
+  const fireAchievement = useAchievements((s) => s.fire);
 
   useEffect(() => {
     if (status === 'completed' && caseDef) {
       const { earned, max } = totalScoreFromLog(log);
       recordCaseResult(caseDef.id, earned, max);
       chimeCaseComplete();
+      const runsForThisCase = (runHistory[caseDef.id]?.length ?? 0) + 1;
+      fireAchievement({
+        kind: 'case-completed',
+        caseId: caseDef.id,
+        scoreRatio: max > 0 ? earned / max : 0,
+        runsForThisCase,
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, caseDef, log, recordCaseResult]);
 
   if (status !== 'completed' || !caseDef) return null;
@@ -291,9 +302,12 @@ function ExportButtons() {
   const totalCost = useGame((s) => s.run.totalCostSGD);
   const burden = useGame((s) => s.caregiverBurden);
   const profile = useGame((s) => s.profile);
+  const fireAchievement = useAchievements((s) => s.fire);
   const [toast, setToast] = useState<string | null>(null);
 
   if (!caseDef) return null;
+
+  const fireExport = () => fireAchievement({ kind: 'export-used' });
 
   const lesson = () =>
     generateLessonPlan({
@@ -319,6 +333,7 @@ function ExportButtons() {
     } catch {
       setToast(t('results.copyLesson'));
     }
+    fireExport();
     setTimeout(() => setToast(null), 3000);
   };
 
@@ -333,9 +348,11 @@ function ExportButtons() {
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+    fireExport();
   };
 
   const printLesson = () => {
+    fireExport();
     openPrintableLessonPlan({
       caseDef,
       log,
@@ -375,6 +392,7 @@ function ExportButtons() {
     } catch {
       setToast(url);
     }
+    fireExport();
     setTimeout(() => setToast(null), 4000);
   };
 

@@ -9,6 +9,7 @@ import { BestPathDemoModal } from '../modals/BestPathDemoModal';
 import { useT, useTr } from '../../lib/i18n';
 import { EMPTY_FILTER, filterCases, filterIsEmpty, type CaseFilter } from '../../lib/case-filter';
 import type { CaseDefinition } from '../../lib/types';
+import { useAchievements } from '../../state/achievementsStore';
 
 export function CaseList() {
   const t = useT();
@@ -22,6 +23,7 @@ export function CaseList() {
   const customCases = useCustomCases((s) => s.cases);
   const addCustom = useCustomCases((s) => s.add);
   const removeCustom = useCustomCases((s) => s.remove);
+  const fireAchievement = useAchievements((s) => s.fire);
 
   const [importOpen, setImportOpen] = useState(false);
   const [demoCase, setDemoCase] = useState<CaseDefinition | null>(null);
@@ -34,6 +36,7 @@ export function CaseList() {
     const decoded = tryDecodeCaseFromHref(window.location.href);
     if (decoded) {
       addCustom(decoded);
+      fireAchievement({ kind: 'custom-content-added' });
       setShareToast(t('cases.shareToast.urlImported', { title: tr(decoded.title) }));
       const url = new URL(window.location.href);
       url.searchParams.delete('case');
@@ -60,6 +63,7 @@ export function CaseList() {
     } catch {
       setShareToast(url);
     }
+    fireAchievement({ kind: 'export-used' });
     setTimeout(() => setShareToast(null), 4000);
   };
 
@@ -222,7 +226,10 @@ export function CaseList() {
                   {t('common.share')}
                 </button>
                 <button
-                  onClick={() => downloadCaseJson(c)}
+                  onClick={() => {
+                    downloadCaseJson(c);
+                    fireAchievement({ kind: 'export-used' });
+                  }}
                   className="text-[11px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
                 >
                   {t('common.export')}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { validateCurriculum } from '../../lib/curriculum-schema';
 import { useCustomCurricula } from '../../state/customCurriculaStore';
 import { useCustomCases } from '../../state/customCasesStore';
+import { useAchievements } from '../../state/achievementsStore';
 import { useT, useTr } from '../../lib/i18n';
 
 interface Props {
@@ -35,6 +36,7 @@ export function CurriculumImportModal({ open, onClose }: Props) {
   const addBundle = useCustomCurricula((s) => s.bundles);
   const addBundleAction = useCustomCurricula((s) => s.add);
   const addCustomCase = useCustomCases((s) => s.add);
+  const fireAchievement = useAchievements((s) => s.fire);
 
   if (!open) return null;
 
@@ -56,6 +58,7 @@ export function CurriculumImportModal({ open, onClose }: Props) {
     addBundleAction(r.bundle);
     // Side-load any embedded cases so the curriculum's caseIds resolve.
     for (const c of r.bundle.cases ?? []) addCustomCase(c);
+    fireAchievement({ kind: 'custom-content-added' });
     setErrors([]);
     setSuccess(
       t('import.success', { title: tr(r.bundle.title) }) +

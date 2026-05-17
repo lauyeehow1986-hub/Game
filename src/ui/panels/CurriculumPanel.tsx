@@ -19,6 +19,7 @@ import {
 import { CurriculumImportModal } from '../modals/CurriculumImportModal';
 import { CurriculumBuilderModal } from '../modals/CurriculumBuilderModal';
 import type { CurriculumBundle } from '../../lib/curriculum-schema';
+import { useAchievements } from '../../state/achievementsStore';
 
 /**
  * Bridge a CurriculumBundle into the same shape the panel renders for the
@@ -47,6 +48,7 @@ export function CurriculumPanel() {
   const customBundles = useCustomCurricula((s) => s.bundles);
   const addBundle = useCustomCurricula((s) => s.add);
   const removeBundle = useCustomCurricula((s) => s.remove);
+  const fireAchievement = useAchievements((s) => s.fire);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [builderOpen, setBuilderOpen] = useState(false);
@@ -59,6 +61,7 @@ export function CurriculumPanel() {
     if (b) {
       addBundle(b);
       for (const c of b.cases ?? []) addCustomCase(c);
+      fireAchievement({ kind: 'custom-content-added' });
       setToast(t('curr.shareToast.urlImported', { title: tr(b.title) }));
       const url = new URL(window.location.href);
       url.searchParams.delete('curr');
@@ -100,6 +103,7 @@ export function CurriculumPanel() {
     } catch {
       setToast(url);
     }
+    fireAchievement({ kind: 'export-used' });
     setTimeout(() => setToast(null), 4000);
   };
 
@@ -238,7 +242,10 @@ export function CurriculumPanel() {
                       {t('curr.shareCurriculum')}
                     </button>
                     <button
-                      onClick={() => downloadCurriculumJson(curr.bundle!)}
+                      onClick={() => {
+                        downloadCurriculumJson(curr.bundle!);
+                        fireAchievement({ kind: 'export-used' });
+                      }}
                       className="text-[11px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
                     >
                       {t('curr.exportCurriculum')}

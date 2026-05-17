@@ -7,6 +7,7 @@ import { isMuted, setMuted } from '../lib/audio';
 import { LOCALES, useLocale, useT, type Locale } from '../lib/i18n';
 import { AboutModal } from './modals/AboutModal';
 import { OfflineIndicator } from './OfflineIndicator';
+import { useAchievements } from '../state/achievementsStore';
 
 const labels: Record<Perspective, { tag: string; colour: string }> = {
   patient: { tag: 'POV', colour: 'bg-rose-500/80' },
@@ -36,6 +37,7 @@ export function HUD() {
   const setMode = useMode((s) => s.setMode);
   const locale = useLocale((s) => s.locale);
   const setLocale = useLocale((s) => s.setLocale);
+  const fireAchievement = useAchievements((s) => s.fire);
   const [muted, setMutedState] = useState(true);
   const [aboutOpen, setAboutOpen] = useState(false);
 
@@ -159,7 +161,11 @@ export function HUD() {
         <OfflineIndicator />
         <select
           value={locale}
-          onChange={(e) => setLocale(e.target.value as Locale)}
+          onChange={(e) => {
+            const next = e.target.value as Locale;
+            setLocale(next);
+            fireAchievement({ kind: 'locale-changed', locale: next });
+          }}
           aria-label={t('hud.language')}
           title={t('hud.language')}
           className="h-8 px-2 rounded border border-clinical-border bg-clinical-bg text-clinical-subtle text-[11px]"

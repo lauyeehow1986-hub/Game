@@ -19,6 +19,7 @@ import { Tutorial } from './ui/Tutorial';
 import { ResumePrompt } from './ui/ResumePrompt';
 import { DisclaimerBanner } from './ui/DisclaimerBanner';
 import { InstallPrompt } from './ui/InstallPrompt';
+import { AchievementToast } from './ui/AchievementToast';
 import { PhaserGame } from './game/PhaserGame';
 import { useMode } from './state/modeStore';
 
@@ -82,6 +83,7 @@ export default function App() {
       <Tutorial />
       <RunReviewModal />
       <WhatsNewModal />
+      <AchievementToast />
     </div>
   );
 }

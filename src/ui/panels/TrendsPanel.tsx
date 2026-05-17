@@ -2,8 +2,10 @@ import { listCases } from '../../content';
 import { useCustomCases } from '../../state/customCasesStore';
 import { useProgress } from '../../state/progressStore';
 import { useGame } from '../../state/gameStore';
+import { useAchievements } from '../../state/achievementsStore';
 import { computePersonalTrends, gradeBandLabel } from '../../lib/personal-trends';
 import { useT, useTr } from '../../lib/i18n';
+import { ACHIEVEMENTS } from '../../lib/achievements';
 
 const CATEGORY_COLOURS: Record<'acute' | 'elective' | 'outpatient', string> = {
   acute: '#f87171',
@@ -53,6 +55,7 @@ export function TrendsPanel() {
   const startCase = useGame((s) => s.startCase);
   const resetRun = useGame((s) => s.resetRun);
   const status = useGame((s) => s.run.status);
+  const unlockedAchievements = useAchievements((s) => s.unlocked);
 
   const catalogue = [...listCases(), ...Object.values(customCases)];
   const runHistory = useProgress((s) => s.runHistory);
@@ -151,6 +154,36 @@ export function TrendsPanel() {
           </div>
         </div>
       )}
+
+      <details className="text-[11px] border-t border-clinical-border pt-2">
+        <summary className="cursor-pointer text-clinical-subtle hover:text-white">
+          {t('ach.heading')} ·{' '}
+          {t('ach.progress', { done: unlockedAchievements.length, total: ACHIEVEMENTS.length })}
+        </summary>
+        <ul className="mt-2 grid grid-cols-2 gap-1">
+          {ACHIEVEMENTS.map((a) => {
+            const got = unlockedAchievements.includes(a.id);
+            return (
+              <li
+                key={a.id}
+                className={`border rounded px-2 py-1 ${
+                  got
+                    ? 'border-amber-400/50 bg-amber-500/10'
+                    : 'border-clinical-border bg-clinical-bg/30 opacity-60'
+                }`}
+                title={t(`ach.desc.${a.id}`) || a.description}
+              >
+                <div className="text-[11px] font-semibold text-white truncate">
+                  {got ? t(`ach.title.${a.id}`) || a.title : t('ach.locked')}
+                </div>
+                <div className="text-[9px] text-clinical-subtle truncate">
+                  {t(`ach.desc.${a.id}`) || a.description}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </details>
 
       {trends.caseTrends.length > 0 && (
         <details className="text-[11px]">

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { listCases } from '../../content';
 import { useCustomCases } from '../../state/customCasesStore';
 import { useCustomCurricula } from '../../state/customCurriculaStore';
+import { useAchievements } from '../../state/achievementsStore';
 import { useT, useTr } from '../../lib/i18n';
 import { validateCurriculum, type CurriculumBundle } from '../../lib/curriculum-schema';
 import type { CaseDefinition } from '../../lib/types';
@@ -25,6 +26,7 @@ export function CurriculumBuilderModal({ open, onClose }: Props) {
   const tr = useTr();
   const customCases = useCustomCases((s) => s.cases);
   const addBundle = useCustomCurricula((s) => s.add);
+  const fireAchievement = useAchievements((s) => s.fire);
 
   const [title, setTitle] = useState('');
   const [blurb, setBlurb] = useState('');
@@ -97,6 +99,7 @@ export function CurriculumBuilderModal({ open, onClose }: Props) {
       return;
     }
     addBundle(r.bundle);
+    fireAchievement({ kind: 'custom-content-added' });
     setSuccess(t('builder.saved', { title }));
     setErrors([]);
   };

@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 
-const KEY = 'sg-pathway-whatsnew-v2-seen';
+const KEY = 'sg-pathway-whatsnew-v3-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'Achievements',
+    body: '12 unlockables for distinct play styles — first case, three distinctions, completing a curriculum, finishing an Ops shift in the black, switching language, importing custom content, scoring on every built-in case. Progress visible in the Trends panel.',
+  },
   {
     heading: 'Hospital Ops mode',
     body: 'Run an 8-hour shift at TTSH. Hire doctors and nurses, set bed capacity, watch the queue under DORSCON. Switch via the Case / Hospital Ops toggle in the header.',
