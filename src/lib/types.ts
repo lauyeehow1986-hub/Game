@@ -236,6 +236,10 @@ export interface RunHistoryEntry {
   score: number;
   max: number;
   at: number;
+  /** Full decision log captured at the end of the run. Optional because
+   *  history entries persisted before v16 don't carry one; analytics
+   *  helpers should tolerate undefined. */
+  log?: DecisionLogEntry[];
 }
 
 export type ProgressState = {

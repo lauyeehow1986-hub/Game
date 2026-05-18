@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { computeDecisionWeaknesses } from './personal-trends';
 import { computePersonalTrends, divergenceFromBestPath, gradeBandLabel } from './personal-trends';
 import type { CaseDefinition, DecisionLogEntry } from './types';
 
@@ -157,6 +158,86 @@ describe('divergenceFromBestPath', () => {
     ];
     const r = divergenceFromBestPath(caseDef, log);
     expect(r.matchRate).toBe(0);
+  });
+});
+
+describe('computeDecisionWeaknesses', () => {
+  const tr = (v: unknown) => (typeof v === 'string' ? v : '');
+  const catWithDecisions = [
+    {
+      ...sampleCase('a'),
+      pathway: [
+        {
+          id: 'n1',
+          department: 'ed',
+          durationMin: 5,
+          framing: { patient: '', caregiver: '', staff: '' },
+          decision: {
+            id: 'd1',
+            prompt: 'Best loading regimen?',
+            weight: 1,
+            reference: { label: '', body: '' },
+            options: [],
+          },
+        },
+        {
+          id: 'n2',
+          department: 'ed',
+          durationMin: 5,
+          framing: { patient: '', caregiver: '', staff: '' },
+          decision: {
+            id: 'd2',
+            prompt: 'Reperfusion strategy?',
+            weight: 1,
+            reference: { label: '', body: '' },
+            options: [],
+          },
+        },
+      ],
+    },
+  ];
+
+  it('aggregates ratios per decision across multiple history entries', () => {
+    const history = {
+      a: [
+        {
+          score: 0, max: 0, at: 1,
+          log: [
+            { nodeId: 'n1', decisionId: 'd1', optionId: 'x', scoreEarned: 2, maxScore: 10 },
+            { nodeId: 'n2', decisionId: 'd2', optionId: 'y', scoreEarned: 10, maxScore: 10 },
+          ],
+        },
+        {
+          score: 0, max: 0, at: 2,
+          log: [
+            { nodeId: 'n1', decisionId: 'd1', optionId: 'x', scoreEarned: 4, maxScore: 10 },
+          ],
+        },
+      ],
+    };
+    const ws = computeDecisionWeaknesses(history, catWithDecisions, tr);
+    expect(ws).toHaveLength(1);
+    expect(ws[0].decisionId).toBe('d1');
+    expect(ws[0].attempts).toBe(2);
+    expect(ws[0].meanRatio).toBeCloseTo(0.3, 5);
+    expect(ws[0].prompt).toBe('Best loading regimen?');
+  });
+
+  it('hides decisions whose mean ratio is at or above 0.85', () => {
+    const history = {
+      a: [
+        {
+          score: 0, max: 0, at: 1,
+          log: [{ nodeId: 'n1', decisionId: 'd1', optionId: 'x', scoreEarned: 9, maxScore: 10 }],
+        },
+      ],
+    };
+    expect(computeDecisionWeaknesses(history, catWithDecisions, tr)).toEqual([]);
+  });
+
+  it('skips entries that have no log (legacy pre-v16 history)', () => {
+    const history = { a: [{ score: 5, max: 10, at: 1 }] };
+    expect(computeDecisionWeaknesses(history, catWithDecisions, tr)).toEqual([]);
   });
 });
 

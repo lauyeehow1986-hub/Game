@@ -3,7 +3,7 @@ import { useCustomCases } from '../../state/customCasesStore';
 import { useProgress } from '../../state/progressStore';
 import { useGame } from '../../state/gameStore';
 import { useAchievements } from '../../state/achievementsStore';
-import { computePersonalTrends, gradeBandLabel } from '../../lib/personal-trends';
+import { computePersonalTrends, computeDecisionWeaknesses, gradeBandLabel } from '../../lib/personal-trends';
 import { useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
 import { CURRICULA } from '../../lib/curricula';
@@ -67,6 +67,11 @@ export function TrendsPanel() {
     catalogue,
     (c) => tr(c.title),
     CURRICULA.map((cur) => ({ id: cur.id, caseIds: cur.caseIds })),
+  );
+  const decisionWeaknesses = computeDecisionWeaknesses(
+    runHistory,
+    catalogue,
+    (v) => tr(v as Parameters<typeof tr>[0]),
   );
   // Build a chronological list of ratios (oldest -> newest) for the sparkline.
   const ratiosOldFirst = [...trends.caseTrends]
@@ -187,6 +192,51 @@ export function TrendsPanel() {
           </div>
         );
       })()}
+
+      {decisionWeaknesses.length > 0 && (
+        <details className="text-[11px] border-t border-clinical-border pt-2">
+          <summary className="cursor-pointer text-clinical-subtle hover:text-white">
+            {t('trends.weak.heading')} ({decisionWeaknesses.length})
+          </summary>
+          <ul className="mt-1.5 space-y-1.5 max-h-56 overflow-y-auto scrollbar-thin pr-1">
+            {decisionWeaknesses.map((w) => {
+              const c = catalogue.find((x) => x.id === w.caseId);
+              const pct = (w.meanRatio * 100).toFixed(0);
+              const colour =
+                w.meanRatio < 0.25
+                  ? '#f87171'
+                  : w.meanRatio < 0.5
+                  ? '#facc15'
+                  : '#a3e635';
+              return (
+                <li
+                  key={`${w.caseId}|${w.decisionId}`}
+                  className="border-l-2 pl-2"
+                  style={{ borderColor: colour }}
+                >
+                  <button
+                    onClick={() => {
+                      if (!c) return;
+                      if (status !== 'idle') resetRun();
+                      startCase(c);
+                    }}
+                    disabled={!c}
+                    className="text-left w-full"
+                  >
+                    <div className="text-white hover:text-clinical-accent leading-snug">
+                      {w.prompt}
+                    </div>
+                    <div className="text-[10px] text-clinical-subtle font-mono">
+                      {c ? tr(c.title) : w.caseId} · {pct}% over {w.attempts}{' '}
+                      {w.attempts === 1 ? 'attempt' : 'attempts'}
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      )}
 
       <details className="text-[11px] border-t border-clinical-border pt-2">
         <summary className="cursor-pointer text-clinical-subtle hover:text-white">

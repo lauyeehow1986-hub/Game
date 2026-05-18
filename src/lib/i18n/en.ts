@@ -180,6 +180,7 @@ export const en: Record<string, string> = {
   'trends.rec.practice': 'Practice — your weakest',
   'trends.rec.curriculum': 'Continue curriculum',
   'trends.rec.discover': 'Discover something new',
+  'trends.weak.heading': 'Decisions to revisit',
   'trends.notes.heading': 'Your reflections',
   'trends.notes.export': 'Export notes',
   'trends.notes.clear': 'Clear all',

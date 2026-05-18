@@ -51,7 +51,7 @@ export function ResultsModal() {
   useEffect(() => {
     if (status === 'completed' && caseDef) {
       const { earned, max } = totalScoreFromLog(log);
-      recordCaseResult(caseDef.id, earned, max);
+      recordCaseResult(caseDef.id, earned, max, log);
       chimeCaseComplete();
       const runsForThisCase = (runHistory[caseDef.id]?.length ?? 0) + 1;
       fireAchievement({

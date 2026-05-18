@@ -1,4 +1,4 @@
-import type { CaseDefinition, DecisionLogEntry } from './types';
+import type { CaseDefinition, DecisionLogEntry, RunHistoryEntry } from './types';
 import { gradeForRatio, totalScoreFromLog } from './scoring';
 import { compareToBestPath } from './best-path';
 
@@ -185,3 +185,67 @@ export function gradeBandLabel(ratio: number): 'Distinction' | 'Pass' | 'Borderl
 }
 
 export { totalScoreFromLog };
+
+export interface DecisionWeakness {
+  caseId: string;
+  decisionId: string;
+  /** The decision prompt's resolved text, for the UI. */
+  prompt: string;
+  /** How many times this decision appears in the player's history. */
+  attempts: number;
+  /** Mean ratio of scoreEarned / maxScore across those attempts. */
+  meanRatio: number;
+}
+
+/**
+ * Aggregate the player's runHistory into per-decision performance, so the
+ * Trends panel can surface the decisions where they consistently miss.
+ *
+ * Decisions whose best-score is non-positive (purely punitive) are skipped
+ * because ratios aren't meaningful there. Decisions with a single attempt
+ * are kept but sort below repeat-offenders at the same ratio.
+ */
+export function computeDecisionWeaknesses(
+  runHistory: Record<string, RunHistoryEntry[]>,
+  catalogue: CaseDefinition[],
+  resolveText: (v: unknown) => string,
+  limit = 5,
+): DecisionWeakness[] {
+  const buckets = new Map<string, { sum: number; n: number; prompt: string; caseId: string; decisionId: string }>();
+  for (const [caseId, entries] of Object.entries(runHistory)) {
+    const c = catalogue.find((x) => x.id === caseId);
+    if (!c) continue;
+    for (const entry of entries) {
+      if (!entry.log) continue;
+      for (const e of entry.log) {
+        if (e.maxScore <= 0) continue;
+        const key = `${caseId}|${e.decisionId}`;
+        const ratio = Math.max(0, Math.min(1, e.scoreEarned / e.maxScore));
+        const existing = buckets.get(key);
+        if (existing) {
+          existing.sum += ratio;
+          existing.n += 1;
+        } else {
+          const node = c.pathway.find((n) => n.decision?.id === e.decisionId);
+          const prompt = node?.decision ? resolveText(node.decision.prompt) : e.decisionId;
+          buckets.set(key, { sum: ratio, n: 1, prompt, caseId, decisionId: e.decisionId });
+        }
+      }
+    }
+  }
+  const weaknesses: DecisionWeakness[] = Array.from(buckets.values())
+    .map((b) => ({
+      caseId: b.caseId,
+      decisionId: b.decisionId,
+      prompt: b.prompt,
+      attempts: b.n,
+      meanRatio: b.sum / b.n,
+    }))
+    .filter((w) => w.meanRatio < 0.85)
+    .sort((a, b) => {
+      if (a.meanRatio !== b.meanRatio) return a.meanRatio - b.meanRatio;
+      return b.attempts - a.attempts;
+    })
+    .slice(0, limit);
+  return weaknesses;
+}

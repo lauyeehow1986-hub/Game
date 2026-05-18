@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { ProgressState, RunHistoryEntry } from '../lib/types';
+import type { DecisionLogEntry, ProgressState, RunHistoryEntry } from '../lib/types';
 
 const HISTORY_CAP_PER_CASE = 10;
 
 interface ProgressStore extends ProgressState {
   unlockCase: (id: string) => void;
-  recordCaseResult: (caseId: string, score: number, max: number) => void;
+  recordCaseResult: (caseId: string, score: number, max: number, log?: DecisionLogEntry[]) => void;
   recordDecisionMade: () => void;
   setDecisionNote: (caseId: string, decisionId: string, text: string) => void;
   reset: () => void;
@@ -66,10 +66,15 @@ export const useProgress = create<ProgressStore>()(
           else next[k] = text;
           return { decisionNotes: next };
         }),
-      recordCaseResult: (caseId, score, max) => {
+      recordCaseResult: (caseId, score, max, log) => {
         const prev = get().bestScores[caseId];
         const isBetter = !prev || score > prev.score;
-        const entry: RunHistoryEntry = { score, max, at: Date.now() };
+        const entry: RunHistoryEntry = {
+          score,
+          max,
+          at: Date.now(),
+          ...(log ? { log } : {}),
+        };
         set((s) => {
           const caseHistory = s.runHistory[caseId] ?? [];
           const updatedHistory = [...caseHistory, entry].slice(-HISTORY_CAP_PER_CASE);
@@ -92,10 +97,10 @@ export const useProgress = create<ProgressStore>()(
     }),
     {
       name: 'sg-pathway-progress',
-      version: 15,
+      version: 16,
       migrate: (persisted: unknown, version) => {
         const obj = (persisted ?? {}) as Partial<ProgressState>;
-        if (version < 15) {
+        if (version < 16) {
           const merged = new Set([
             ...(obj.unlockedCaseIds ?? []),
             ...initial.unlockedCaseIds,
