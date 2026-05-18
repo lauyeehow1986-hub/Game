@@ -12,6 +12,9 @@ export interface LessonPlanInput {
   profile?: { name: string; wardClass: string; chasTier: string; hasIntegratedShield: boolean };
   /** Locale to resolve LocalisedString fields with. Defaults to English. */
   locale?: Locale;
+  /** Per-decision learner reflection notes, keyed by decisionId. Surfaced
+   *  as a blockquote after each decision in the exported lesson plan. */
+  notes?: Record<string, string>;
 }
 
 /**
@@ -70,6 +73,11 @@ export function generateLessonPlan(input: LessonPlanInput): string {
       if (chosen?.rationale) lines.push(`- Rationale for chosen: ${L(chosen.rationale)}`);
       if (best?.rationale && best !== chosen) lines.push(`- Rationale for best-practice: ${L(best.rationale)}`);
       if (node?.decision?.reference?.label) lines.push(`- Reference: *${L(node.decision.reference.label)}*`);
+      const note = input.notes?.[row.decisionId]?.trim();
+      if (note) {
+        lines.push('');
+        for (const ln of note.split(/\r?\n/)) lines.push(`> ${ln}`);
+      }
       lines.push('');
     });
   }

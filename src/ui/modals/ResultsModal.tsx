@@ -33,6 +33,7 @@ export function ResultsModal() {
   const runHistory = useProgress((s) => s.runHistory);
   const fireAchievement = useAchievements((s) => s.fire);
   const cardRef = useFocusTrap<HTMLDivElement>(status === 'completed');
+  const [notes, setNotes] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (status === 'completed' && caseDef) {
@@ -46,6 +47,7 @@ export function ResultsModal() {
         scoreRatio: max > 0 ? earned / max : 0,
         runsForThisCase,
       });
+      setNotes({});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, caseDef, log, recordCaseResult]);
@@ -161,6 +163,20 @@ export function ResultsModal() {
                       {tr(option.outcome[perspective])}
                     </blockquote>
                   )}
+                  <label className="block mt-2 text-[11px]">
+                    <span className="text-[9px] uppercase tracking-wider text-clinical-subtle">
+                      {t('results.note.label')}
+                    </span>
+                    <textarea
+                      value={notes[decision.id] ?? ''}
+                      onChange={(e) =>
+                        setNotes((prev) => ({ ...prev, [decision.id]: e.target.value }))
+                      }
+                      placeholder={t('results.note.placeholder')}
+                      rows={2}
+                      className="mt-0.5 w-full bg-clinical-bg border border-clinical-border rounded px-2 py-1 text-[11px] text-white resize-y"
+                    />
+                  </label>
                   {decision.options.length > 1 && (
                     <details className="mt-2 text-[11px]">
                       <summary className="cursor-pointer text-clinical-subtle hover:text-white">
@@ -291,7 +307,7 @@ export function ResultsModal() {
         )}
 
         <footer className="px-5 py-4 flex items-center justify-end gap-2 flex-wrap">
-          <ExportButtons />
+          <ExportButtons notes={notes} />
           <button
             onClick={() => {
               resetRun();
@@ -343,7 +359,7 @@ function fmtElapsed(min: number) {
   return `${min}m`;
 }
 
-function ExportButtons() {
+function ExportButtons({ notes }: { notes: Record<string, string> }) {
   const t = useT();
   const caseDef = useGame((s) => s.caseDef);
   const log = useGame((s) => s.run.log);
@@ -373,6 +389,7 @@ function ExportButtons() {
             hasIntegratedShield: profile.hasIntegratedShield,
           }
         : undefined,
+      notes,
     });
 
   const copyLesson = async () => {
@@ -403,6 +420,7 @@ function ExportButtons() {
   const printLesson = () => {
     fireExport();
     openPrintableLessonPlan({
+      notes,
       caseDef,
       log,
       elapsedGameMin: elapsed,

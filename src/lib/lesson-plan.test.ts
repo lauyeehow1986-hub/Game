@@ -81,6 +81,29 @@ describe('generateLessonPlan', () => {
     expect(md).toContain('off work');
   });
 
+  it('embeds per-decision reflection notes as blockquotes when provided', () => {
+    const md = generateLessonPlan({
+      caseDef,
+      log,
+      elapsedGameMin: 60,
+      totalCostSGD: 0,
+      notes: { d1: 'Forgot ticagrelor dose.\nReview ESC 2023 §6.' },
+    });
+    expect(md).toContain('> Forgot ticagrelor dose.');
+    expect(md).toContain('> Review ESC 2023 §6.');
+  });
+
+  it('omits the reflection blockquote when the note is empty whitespace', () => {
+    const md = generateLessonPlan({
+      caseDef,
+      log,
+      elapsedGameMin: 60,
+      totalCostSGD: 0,
+      notes: { d1: '   \n  ' },
+    });
+    expect(md).not.toContain('> ');
+  });
+
   it('emits citation block for historical cases', () => {
     const hist = { ...caseDef, historical: true, citations: ['MOH SARS report 2004'] };
     const md = generateLessonPlan({

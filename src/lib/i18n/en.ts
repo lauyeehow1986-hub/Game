@@ -279,6 +279,8 @@ export const en: Record<string, string> = {
   'results.downloadLesson': 'Download lesson plan',
   'results.printLesson': 'Print / Save as PDF',
   'results.replay': 'Replay case',
+  'results.note.label': 'Your reflection',
+  'results.note.placeholder': 'Optional — included in the lesson plan export.',
 
   // Run review (when opening a ?run= URL)
   'runReview.heading': 'Reviewing a shared run',
