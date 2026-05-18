@@ -124,6 +124,34 @@ export function RunReviewModal() {
           )}
         </section>
 
+        {snap.journey && snap.journey.length > 0 && (() => {
+          const stops = snap.journey
+            .map((id) => caseDef.pathway.find((n) => n.id === id))
+            .filter((n): n is NonNullable<typeof n> => n != null)
+            .filter((n) => tr(n.framing.staff).trim().length > 0);
+          if (stops.length === 0) return null;
+          return (
+            <section className="px-5 py-4 border-b border-clinical-border space-y-2">
+              <h3 className="text-sm font-semibold text-white">Patient journey</h3>
+              <ul className="space-y-1.5 text-[11px] max-h-48 overflow-y-auto scrollbar-thin pr-1">
+                {stops.map((n, i) => (
+                  <li
+                    key={`${n.id}-${i}`}
+                    className="border-l-2 border-clinical-border pl-2"
+                  >
+                    <div className="text-[9px] uppercase tracking-wider text-clinical-subtle">
+                      {n.facility ?? caseDef.primaryFacility} · {n.department}
+                    </div>
+                    <div className="text-white/85 italic leading-snug">
+                      {tr(n.framing.staff)}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })()}
+
         {diff.length > 0 && (
           <section className="px-5 py-4 border-b border-clinical-border space-y-2">
             <h3 className="text-sm font-semibold text-white">{t('results.bestPath.h')}</h3>

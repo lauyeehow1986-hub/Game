@@ -20,6 +20,9 @@ export interface RunSnapshot {
     chasTier: string;
     hasIntegratedShield: boolean;
   };
+  /** Ordered node ids the patient visited. Lets reviewers see the same
+   *  clinical narrative the original player saw, not just the decisions. */
+  journey?: string[];
 }
 
 /**

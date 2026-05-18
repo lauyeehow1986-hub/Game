@@ -456,6 +456,7 @@ function ExportButtons({ notes }: { notes: Record<string, string> }) {
     const url = encodeRunToUrl({
       caseId: caseDef.id,
       log,
+      journey,
       elapsedGameMin: elapsed,
       totalCostSGD: totalCost,
       burden,
