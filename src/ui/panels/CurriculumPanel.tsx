@@ -228,7 +228,7 @@ export function CurriculumPanel() {
                   <button
                     onClick={() => startNext(curr)}
                     disabled={!nextCase}
-                    className="text-[11px] px-2 py-1 rounded bg-clinical-accent text-white font-semibold disabled:opacity-40 hover:brightness-110"
+                    className="tap-target text-xs px-3 py-1.5 rounded bg-clinical-accent text-white font-semibold disabled:opacity-40 hover:brightness-110"
                   >
                     {p.completed === 0 ? t('curr.begin') : t('curr.continue')}
                   </button>

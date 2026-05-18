@@ -71,7 +71,7 @@ export function HUD() {
       : t('hud.status.completed');
 
   return (
-    <header className="flex items-center gap-4 bg-clinical-panel border-b border-clinical-border px-5 py-3">
+    <header className="flex flex-wrap items-center gap-2 sm:gap-4 bg-clinical-panel border-b border-clinical-border px-3 sm:px-5 py-2 sm:py-3">
       <div className="flex items-center gap-2">
         <div className="w-7 h-7 rounded bg-sgRed grid place-items-center text-white font-bold">+</div>
         <div className="leading-tight">

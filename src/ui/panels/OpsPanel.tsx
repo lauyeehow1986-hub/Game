@@ -96,35 +96,35 @@ export function OpsPanel() {
         {mode === 'idle' ? (
           <button
             onClick={start}
-            className="flex-1 px-3 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
+            className="tap-target flex-1 px-3 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
           >
             {t('ops.startShift')}
           </button>
         ) : mode === 'running' ? (
           <button
             onClick={pause}
-            className="flex-1 px-3 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
+            className="tap-target flex-1 px-3 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
           >
             {t('common.pause')}
           </button>
         ) : mode === 'paused' ? (
           <button
             onClick={resume}
-            className="flex-1 px-3 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
+            className="tap-target flex-1 px-3 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
           >
             {t('common.resume')}
           </button>
         ) : (
           <button
             onClick={nextDay}
-            className="flex-1 px-3 py-1.5 rounded bg-clinical-ok text-white text-xs font-semibold hover:brightness-110"
+            className="tap-target flex-1 px-3 py-1.5 rounded bg-clinical-ok text-white text-xs font-semibold hover:brightness-110"
           >
             {t('ops.nextDay')}
           </button>
         )}
         <button
           onClick={reset}
-          className="px-3 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
+          className="tap-target px-3 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
         >
           {t('common.reset')}
         </button>

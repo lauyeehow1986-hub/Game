@@ -54,6 +54,31 @@ body {
   outline-offset: -4px;
 }
 
+/* Touch-friendly defaults: skip the 300ms tap delay on mobile and make
+   every interactive element easier to focus with a keyboard. */
+button,
+a,
+[role='button'],
+[role='radio'],
+[role='tab'],
+input,
+select,
+textarea,
+summary {
+  touch-action: manipulation;
+}
+:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Bump primary CTAs to a comfortable thumb target. Opt-in via class
+   so visual density on dense panels is preserved. */
+.tap-target {
+  min-height: 44px;
+}
+
 /* Respect prefers-reduced-motion. */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v4-seen';
+const KEY = 'sg-pathway-whatsnew-v5-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'Mobile + touch pass',
+    body: 'Bigger thumb targets on Start case, Commit decision, Hospital Ops controls. HUD wraps gracefully on narrow phones. Phaser canvas grew on small screens. Tap delay disabled so taps register immediately.',
+  },
   {
     heading: 'Keyboard + screen-reader pass',
     body: 'Press ? at any time for the shortcuts list. Every dialog now traps focus and returns it on close, status changes are announced politely to screen readers, a skip-to-content link is the first stop on Tab, and prefers-reduced-motion is honoured.',

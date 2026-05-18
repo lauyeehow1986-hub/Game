@@ -36,8 +36,8 @@ export default function App() {
       <DisclaimerBanner />
       <InstallPrompt />
 
-      <main id="main-content" className="flex-1 grid grid-cols-1 lg:grid-cols-[300px_1fr_340px] gap-3 p-3 min-h-0 overflow-y-auto lg:overflow-hidden">
-        <aside className="space-y-3 lg:overflow-y-auto scrollbar-thin order-2 lg:order-1">
+      <main id="main-content" className="flex-1 grid grid-cols-1 lg:grid-cols-[300px_1fr_340px] gap-2 sm:gap-3 p-2 sm:p-3 min-h-0 overflow-y-auto lg:overflow-hidden">
+        <aside className="space-y-2 sm:space-y-3 lg:overflow-y-auto scrollbar-thin order-2 lg:order-1">
           {mode === 'case' ? (
             <>
               <CaseList />
@@ -54,11 +54,11 @@ export default function App() {
           )}
         </aside>
 
-        <section className="rounded-lg overflow-hidden border border-clinical-border bg-clinical-panel min-h-[320px] lg:min-h-[420px] order-1 lg:order-2">
+        <section className="rounded-lg overflow-hidden border border-clinical-border bg-clinical-panel min-h-[360px] lg:min-h-[420px] order-1 lg:order-2">
           <PhaserGame />
         </section>
 
-        <aside className="space-y-3 lg:overflow-y-auto scrollbar-thin order-3">
+        <aside className="space-y-2 sm:space-y-3 lg:overflow-y-auto scrollbar-thin order-3">
           {mode === 'case' ? (
             <>
               <FinancingPanel />

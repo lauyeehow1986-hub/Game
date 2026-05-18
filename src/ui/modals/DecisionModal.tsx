@@ -108,7 +108,7 @@ export function DecisionModal() {
                     setFocusIdx(idx);
                     setPicked(opt);
                   }}
-                  className={`w-full text-left px-5 py-3 transition outline-none ${
+                  className={`w-full text-left px-5 py-4 transition outline-none ${
                     selected
                       ? 'bg-clinical-accent/10'
                       : focused
@@ -157,7 +157,7 @@ export function DecisionModal() {
           <button
             disabled={!picked}
             onClick={handleConfirm}
-            className="px-4 py-2 rounded bg-clinical-accent text-white text-sm font-semibold disabled:opacity-40 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-clinical-accent focus:ring-offset-2 focus:ring-offset-clinical-panel"
+            className="tap-target px-4 py-2 rounded bg-clinical-accent text-white text-sm font-semibold disabled:opacity-40 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-clinical-accent focus:ring-offset-2 focus:ring-offset-clinical-panel"
           >
             Commit decision
           </button>

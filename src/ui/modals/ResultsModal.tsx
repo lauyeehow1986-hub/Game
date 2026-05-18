@@ -258,7 +258,7 @@ export function ResultsModal() {
           <button
             onClick={resetRun}
             data-autofocus
-            className="px-4 py-2 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
+            className="tap-target px-4 py-2 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
           >
             {t('common.close')}
           </button>
