@@ -226,6 +226,10 @@ export interface CaseRunSnapshot {
   totalCostSGD: number;
   /** Active flags set by decision effects; conditional nodes read these. */
   flags: string[];
+  /** Ordered list of node ids the patient has visited. The engine collapses
+   *  transit nodes into the next-decision visit; this lets the UI replay the
+   *  framing the player would otherwise miss. */
+  journey: string[];
 }
 
 export interface RunHistoryEntry {

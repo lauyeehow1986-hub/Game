@@ -114,6 +114,7 @@ const emptyRun: CaseRunSnapshot = {
   elapsedGameMin: 0,
   totalCostSGD: 0,
   flags: [],
+  journey: [],
 };
 
 const basePandemic: PandemicState = {
@@ -373,6 +374,7 @@ export const useGame = create<GameState>((set, get) => ({
         elapsedGameMin: elapsed,
         totalCostSGD: totals.cash,
         flags: [],
+        journey: chain.map((n) => n.id),
       },
       kpis: deriveKpis(s.pandemic, totals.cash),
     }));
@@ -399,7 +401,7 @@ export const useGame = create<GameState>((set, get) => ({
       viewedFacilityId: snap.viewedFacilityId,
       lastTransfer: snap.lastTransfer,
       transferLog: snap.transferLog,
-      run: snap.run,
+      run: { ...snap.run, journey: snap.run.journey ?? [] },
       pandemic: snap.pandemic,
       kpis: deriveKpis(snap.pandemic, snap.totals.cash),
     }));
@@ -619,6 +621,7 @@ export const useGame = create<GameState>((set, get) => ({
         elapsedGameMin: s.run.elapsedGameMin + elapsedDelta,
         totalCostSGD: totals.cash,
         flags: Array.from(flagsAfter),
+        journey: [...s.run.journey, ...chain.map((n) => n.id)],
       },
       kpis: deriveKpis(nextPandemic, totals.cash),
     }));

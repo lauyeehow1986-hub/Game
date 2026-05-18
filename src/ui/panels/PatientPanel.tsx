@@ -112,6 +112,39 @@ export function PatientPanel() {
           <GlossaryText>{framing}</GlossaryText>
         </blockquote>
       )}
+
+      {(() => {
+        const transit = run.journey
+          .slice(0, -1)
+          .map((id) => caseDef.pathway.find((n) => n.id === id))
+          .filter((n): n is NonNullable<typeof n> => n != null);
+        if (transit.length === 0) return null;
+        return (
+          <details className="border-t border-clinical-border pt-2 text-[11px]">
+            <summary className="cursor-pointer text-clinical-subtle hover:text-white">
+              Journey so far ({transit.length} {transit.length === 1 ? 'stop' : 'stops'})
+            </summary>
+            <ol className="mt-1 space-y-1.5 max-h-48 overflow-y-auto scrollbar-thin pr-1">
+              {transit.map((n, i) => {
+                const f = getFacility(n.facility ?? caseDef.primaryFacility);
+                const d = f?.departments.find((x) => x.id === n.department);
+                const text = tr(n.framing[perspective]);
+                if (!text) return null;
+                return (
+                  <li key={`${n.id}-${i}`} className="border-l-2 border-clinical-border pl-2">
+                    <div className="text-[9px] uppercase tracking-wider text-clinical-subtle">
+                      {f?.name ?? ''}{f && d ? ' · ' : ''}{d?.shortLabel ?? d?.name ?? n.department}
+                    </div>
+                    <div className="text-white/85 italic leading-snug">
+                      <GlossaryText>{text}</GlossaryText>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </details>
+        );
+      })()}
     </section>
   );
 }
