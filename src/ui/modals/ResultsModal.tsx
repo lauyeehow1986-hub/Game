@@ -160,6 +160,42 @@ export function ResultsModal() {
                       {tr(option.outcome[perspective])}
                     </blockquote>
                   )}
+                  {decision.options.length > 1 && (
+                    <details className="mt-2 text-[11px]">
+                      <summary className="cursor-pointer text-clinical-subtle hover:text-white">
+                        Other options ({decision.options.length - 1})
+                      </summary>
+                      <ul className="mt-1 space-y-1.5">
+                        {decision.options
+                          .filter((o) => o.id !== option.id)
+                          .sort((a, b) => b.score - a.score)
+                          .map((o) => {
+                            const ratio = e.maxScore > 0 ? (o.score * decision.weight) / e.maxScore : 0;
+                            const colour =
+                              ratio >= 0.9
+                                ? 'text-clinical-ok'
+                                : ratio >= 0.5
+                                ? 'text-clinical-warn'
+                                : 'text-clinical-danger';
+                            return (
+                              <li key={o.id} className="border-l border-clinical-border pl-2">
+                                <div className="flex justify-between gap-2">
+                                  <span className="text-white/85">
+                                    <GlossaryText>{tr(o.label)}</GlossaryText>
+                                  </span>
+                                  <span className={`font-mono shrink-0 ${colour}`}>
+                                    {(o.score * decision.weight).toFixed(1)}
+                                  </span>
+                                </div>
+                                <div className="text-clinical-subtle leading-snug">
+                                  <GlossaryText>{tr(o.rationale)}</GlossaryText>
+                                </div>
+                              </li>
+                            );
+                          })}
+                      </ul>
+                    </details>
+                  )}
                 </div>
               );
             })}
