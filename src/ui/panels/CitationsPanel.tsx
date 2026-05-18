@@ -16,6 +16,7 @@ const GLOSSARY = [...GLOSSARY_TERMS, ...EXTRA_GLOSSARY_ONLY].sort((a, b) =>
 export function CitationsPanel() {
   const tr = useTr();
   const [tab, setTab] = useState<'citations' | 'glossary'>('citations');
+  const [query, setQuery] = useState('');
   const cases = listCases();
 
   // Deduplicate guidelines by resolved label so duplicates across locales merge.
@@ -30,6 +31,21 @@ export function CitationsPanel() {
   const historicalCitations = cases
     .filter((c) => c.historical && c.citations)
     .flatMap((c) => c.citations!.map((cit) => ({ caseTitle: c.title, cit })));
+
+  const q = query.trim().toLowerCase();
+  const filteredGuidelines = q
+    ? sortedGuidelines.filter(
+        (g) => tr(g.label).toLowerCase().includes(q) || tr(g.body).toLowerCase().includes(q),
+      )
+    : sortedGuidelines;
+  const filteredCitations = q
+    ? historicalCitations.filter((c) => c.cit.toLowerCase().includes(q))
+    : historicalCitations;
+  const filteredGlossary = q
+    ? GLOSSARY.filter(
+        (g) => g.term.toLowerCase().includes(q) || g.def.toLowerCase().includes(q),
+      )
+    : GLOSSARY;
 
   return (
     <section className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-2">
@@ -59,6 +75,14 @@ export function CitationsPanel() {
         </div>
       </header>
 
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search references…"
+        className="w-full bg-clinical-bg border border-clinical-border rounded px-2 py-1 text-[11px] text-white"
+      />
+
       {tab === 'citations' && (
         <div className="space-y-3 max-h-72 overflow-y-auto scrollbar-thin pr-1">
           <div>
@@ -66,7 +90,7 @@ export function CitationsPanel() {
               Guidelines & references
             </div>
             <ul className="space-y-1">
-              {sortedGuidelines.map((g) => (
+              {filteredGuidelines.map((g) => (
                 <li key={tr(g.label)} className="text-[11px] leading-snug">
                   <div className="text-white font-medium">{tr(g.label)}</div>
                   <div className="text-clinical-subtle">{tr(g.body)}</div>
@@ -74,13 +98,13 @@ export function CitationsPanel() {
               ))}
             </ul>
           </div>
-          {historicalCitations.length > 0 && (
+          {filteredCitations.length > 0 && (
             <div>
               <div className="text-[10px] uppercase tracking-wider text-clinical-subtle mb-1">
                 Historical scenario citations
               </div>
               <ul className="space-y-1">
-                {historicalCitations.map((c, i) => (
+                {filteredCitations.map((c, i) => (
                   <li key={i} className="text-[11px] leading-snug">
                     <span className="text-white/70">[{i + 1}]</span>{' '}
                     <span className="text-clinical-subtle">{c.cit}</span>
@@ -94,7 +118,7 @@ export function CitationsPanel() {
 
       {tab === 'glossary' && (
         <ul className="space-y-1.5 max-h-72 overflow-y-auto scrollbar-thin pr-1">
-          {GLOSSARY.map((g) => (
+          {filteredGlossary.map((g) => (
             <li key={g.term} className="text-[11px] leading-snug">
               <span className="text-white font-semibold">{g.term}</span>
               <span className="text-clinical-subtle"> — {g.def}</span>

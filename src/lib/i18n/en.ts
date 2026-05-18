@@ -183,6 +183,18 @@ export const en: Record<string, string> = {
   'cases.category.elective': 'Elective',
   'cases.category.outpatient': 'Outpatient',
 
+  // Difficulty badges
+  'cases.difficulty.beginner': 'Beginner',
+  'cases.difficulty.intermediate': 'Intermediate',
+  'cases.difficulty.advanced': 'Advanced',
+  'cases.difficulty.beginner.tip': '{{decisions}} decisions · light stakes',
+  'cases.difficulty.intermediate.tip': '{{decisions}} decisions · mixed stakes',
+  'cases.difficulty.advanced.tip': '{{decisions}} decisions · high consequence',
+  'cases.search.diffAny': 'Any difficulty',
+  'cases.search.diffBeginner': 'Beginner',
+  'cases.search.diffIntermediate': 'Intermediate',
+  'cases.search.diffAdvanced': 'Advanced',
+
   // What's-new modal
   'whatsNew.title': "What's new",
   'whatsNew.subtitle': 'Features added since your last visit',

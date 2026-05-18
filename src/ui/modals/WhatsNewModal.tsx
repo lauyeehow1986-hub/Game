@@ -2,9 +2,17 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v5-seen';
+const KEY = 'sg-pathway-whatsnew-v6-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'Difficulty badges + filter',
+    body: 'Each case now shows a Beginner / Intermediate / Advanced band, derived from decision count plus the score gap between best and worst option (so high-consequence cases bump up). Filter the case list by difficulty band to focus your practice.',
+  },
+  {
+    heading: 'Search the references',
+    body: 'The References panel gets a search box that filters guidelines, historical citations, and glossary terms across all three tabs as you type.',
+  },
   {
     heading: 'Mobile + touch pass',
     body: 'Bigger thumb targets on Start case, Commit decision, Hospital Ops controls. HUD wraps gracefully on narrow phones. Phaser canvas grew on small screens. Tap delay disabled so taps register immediately.',

@@ -10,6 +10,7 @@ import { useT, useTr } from '../../lib/i18n';
 import { EMPTY_FILTER, filterCases, filterIsEmpty, type CaseFilter } from '../../lib/case-filter';
 import type { CaseDefinition } from '../../lib/types';
 import { useAchievements } from '../../state/achievementsStore';
+import { computeDifficulty, DIFFICULTY_COLOUR } from '../../lib/case-difficulty';
 
 export function CaseList() {
   const t = useT();
@@ -147,6 +148,23 @@ export function CaseList() {
           >
             {t('cases.search.unplayed')}
           </button>
+          {(['beginner', 'intermediate', 'advanced'] as const).map((band) => {
+            const on = filter.difficulty === band;
+            return (
+              <button
+                key={band}
+                onClick={() => setFilter({ ...filter, difficulty: on ? null : band })}
+                className="text-[10px] px-2 py-0.5 rounded-full border font-semibold"
+                style={{
+                  borderColor: on ? DIFFICULTY_COLOUR[band] : undefined,
+                  backgroundColor: on ? `${DIFFICULTY_COLOUR[band]}22` : undefined,
+                  color: on ? DIFFICULTY_COLOUR[band] : undefined,
+                }}
+              >
+                {t(`cases.difficulty.${band}`)}
+              </button>
+            );
+          })}
         </div>
         {hiddenCount > 0 && (
           <div className="text-[10px] text-clinical-subtle">
@@ -187,6 +205,23 @@ export function CaseList() {
                         {t('cases.badge.custom')}
                       </span>
                     )}
+                    {(() => {
+                      const d = computeDifficulty(c);
+                      return (
+                        <span
+                          className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded font-semibold"
+                          style={{
+                            backgroundColor: `${DIFFICULTY_COLOUR[d.band]}22`,
+                            color: DIFFICULTY_COLOUR[d.band],
+                          }}
+                          title={t(`cases.difficulty.${d.band}.tip`, {
+                            decisions: d.decisions,
+                          })}
+                        >
+                          {t(`cases.difficulty.${d.band}`)}
+                        </span>
+                      );
+                    })()}
                     <span>{tr(c.title)}</span>
                   </div>
                   <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">

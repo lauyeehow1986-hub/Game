@@ -73,7 +73,7 @@ describe('filterCases', () => {
   it('combines filters (AND semantics)', () => {
     const r = filterCases(
       catalogue,
-      { query: 'pain', categories: ['acute'], historicalOnly: false, unplayedOnly: false },
+      { query: 'pain', categories: ['acute'], historicalOnly: false, unplayedOnly: false, difficulty: null },
       {},
     );
     expect(r.map((x) => x.id)).toEqual(['stemi']);
@@ -86,5 +86,17 @@ describe('filterIsEmpty', () => {
   });
   it('reports false when query is set', () => {
     expect(filterIsEmpty({ ...EMPTY_FILTER, query: 'x' })).toBe(false);
+  });
+  it('reports false when difficulty is set', () => {
+    expect(filterIsEmpty({ ...EMPTY_FILTER, difficulty: 'beginner' })).toBe(false);
+  });
+});
+
+describe('filterCases difficulty', () => {
+  it('keeps only cases in the chosen band', () => {
+    // The built-in stemi-acute case has many decisions → advanced; the
+    // synthetic 1-decision urti is beginner.
+    const r = filterCases(catalogue, { ...EMPTY_FILTER, difficulty: 'beginner' }, {});
+    expect(r.every((c) => c.pathway.filter((n) => n.decision).length <= 3)).toBe(true);
   });
 });
