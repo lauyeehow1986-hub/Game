@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { applyFlagEffects, firstVisibleNode, isVisible, pickNextNode } from './pathway';
+import { applyFlagEffects, firstVisibleNode, isVisible, pickNextNode, walkToNextDecision, walkToFirstDecision } from './pathway';
 import type { CaseDefinition, PathwayNode } from './types';
 
 const node = (id: string, extra: Partial<PathwayNode> = {}): PathwayNode => ({
@@ -71,6 +71,47 @@ describe('pickNextNode', () => {
   it('returns undefined at the end of the pathway', () => {
     const next = pickNextNode(sample, 'd', undefined, undefined, new Set());
     expect(next).toBeUndefined();
+  });
+});
+
+const dec = { id: 'd', prompt: '', weight: 1, reference: { label: '', body: '' }, options: [] };
+
+describe('walkToNextDecision', () => {
+  const c: CaseDefinition = {
+    ...sample,
+    pathway: [
+      node('a', { decision: dec }),
+      node('b'), // transit
+      node('c'), // transit
+      node('d', { decision: dec }),
+      node('e'),
+    ],
+  };
+
+  it('walks past transit nodes to the next decision', () => {
+    const chain = walkToNextDecision(c, 'a', undefined, undefined, new Set());
+    expect(chain.map((n) => n.id)).toEqual(['b', 'c', 'd']);
+  });
+
+  it('collects terminal transit nodes when no decision remains', () => {
+    const chain = walkToNextDecision(c, 'd', undefined, undefined, new Set());
+    expect(chain.map((n) => n.id)).toEqual(['e']);
+  });
+
+  it('honours an explicit branchTo as the first hop', () => {
+    const chain = walkToNextDecision(c, 'a', { branchTo: 'd' }, undefined, new Set());
+    expect(chain[0].id).toBe('d');
+  });
+});
+
+describe('walkToFirstDecision', () => {
+  it('walks transits at the start of a case up to the first decision', () => {
+    const c: CaseDefinition = {
+      ...sample,
+      pathway: [node('triage'), node('imaging'), node('resus', { decision: dec })],
+    };
+    const chain = walkToFirstDecision(c);
+    expect(chain.map((n) => n.id)).toEqual(['triage', 'imaging', 'resus']);
   });
 });
 

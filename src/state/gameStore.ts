@@ -20,7 +20,7 @@ import {
 } from '../lib/financing';
 import { getFacility } from '../content';
 import { recordsFlowBetween, type RecordsFlow } from '../lib/referral';
-import { firstVisibleNode, pickNextNode } from '../lib/pathway';
+import { firstVisibleNode, pickNextNode, walkToNextDecision, walkToFirstDecision } from '../lib/pathway';
 
 interface CaregiverBurden {
   timeOffWorkHours: number;
@@ -326,15 +326,30 @@ export const useGame = create<GameState>((set, get) => ({
   kpis: deriveKpis(basePandemic, 0),
 
   startCase: (caseDef) => {
-    const first = firstVisibleNode(caseDef);
-    if (!first) return;
+    const chain = walkToFirstDecision(caseDef);
+    if (chain.length === 0) return;
     const baseProfile =
       DEFAULT_PROFILES[caseDef.profileKey] ?? DEFAULT_PROFILES.taxiDriver;
     const profile = maybeRandomiseProfile({ ...baseProfile }, caseDef.randomiseProfile);
-    const segments = applyNodeFinancing(profile, [], first, caseDef.primaryFacility);
+
+    let segments: FinancingSegmentResult[] = [];
+    let burden = { ...emptyBurden };
+    let elapsed = 0;
+    let prevFacilityId: string | null = null;
+    const facilityHops: Array<{ from: string | null; to: string }> = [];
+
+    for (const node of chain) {
+      segments = applyNodeFinancing(profile, segments, node, caseDef.primaryFacility);
+      burden = applyBurden(burden, node);
+      elapsed += node.durationMin;
+      const facilityId = node.facility ?? caseDef.primaryFacility;
+      if (facilityId !== prevFacilityId) facilityHops.push({ from: prevFacilityId, to: facilityId });
+      prevFacilityId = facilityId;
+    }
     const totals = totalsFor(segments);
-    const burden = applyBurden(emptyBurden, first);
-    const startFacilityId = first.facility ?? caseDef.primaryFacility;
+    const finalNode = chain[chain.length - 1];
+    const finalFacilityId = finalNode.facility ?? caseDef.primaryFacility;
+    const endsOnDecision = finalNode.decision != null;
 
     set((s) => ({
       caseDef,
@@ -342,30 +357,34 @@ export const useGame = create<GameState>((set, get) => ({
       segments,
       totals,
       caregiverBurden: burden,
-      viewedFacilityId: startFacilityId,
+      viewedFacilityId: finalFacilityId,
       lastTransfer: null,
       transferLog: [],
       run: {
         caseId: caseDef.id,
-        status: first.decision ? 'awaiting-decision' : 'running',
-        currentNodeId: first.id,
-        currentFacilityId: startFacilityId,
-        pendingDecision: first.decision
-          ? { nodeId: first.id, decision: first.decision }
+        status: endsOnDecision ? 'awaiting-decision' : 'completed',
+        currentNodeId: finalNode.id,
+        currentFacilityId: finalFacilityId,
+        pendingDecision: endsOnDecision && finalNode.decision
+          ? { nodeId: finalNode.id, decision: finalNode.decision }
           : null,
         log: [],
         startedAtGameMin: 0,
-        elapsedGameMin: first.durationMin,
+        elapsedGameMin: elapsed,
         totalCostSGD: totals.cash,
         flags: [],
       },
       kpis: deriveKpis(s.pandemic, totals.cash),
     }));
     bus.emit(Events.CaseStart, { caseId: caseDef.id });
-    bus.emit(Events.FacilityChanged, { facilityId: startFacilityId });
-    bus.emit(Events.PatientMoveTo, { department: first.department });
-    if (first.decision) {
-      bus.emit(Events.CaseDecisionRequested, { decision: first.decision, nodeId: first.id });
+    for (const hop of facilityHops) {
+      bus.emit(Events.FacilityChanged, { facilityId: hop.to });
+    }
+    for (const node of chain) {
+      bus.emit(Events.PatientMoveTo, { department: node.department });
+    }
+    if (endsOnDecision && finalNode.decision) {
+      bus.emit(Events.CaseDecisionRequested, { decision: finalNode.decision, nodeId: finalNode.id });
     }
     persistSnapshot(get());
   },
@@ -524,9 +543,12 @@ export const useGame = create<GameState>((set, get) => ({
       flagsAfter.add(caseDef.acuteTimer.missedFlag);
     }
 
-    const nextNode = pickNextNode(caseDef, nodeId, option.effects, option.nextNode, flagsAfter);
+    // Walk forward through transit nodes until we hit the next decision
+    // (or end of case). Each intermediate node still contributes its
+    // duration, cost, burden, and facility transition.
+    const chain = walkToNextDecision(caseDef, nodeId, option.effects, option.nextNode, new Set(run.flags));
 
-    if (!nextNode) {
+    if (chain.length === 0) {
       const recomputed = get().segments.map((s) =>
         computeSegment(nextProfile, { charge: s.charge, grossSGD: s.grossSGD, tier: s.tier }),
       );
@@ -553,48 +575,57 @@ export const useGame = create<GameState>((set, get) => ({
       return;
     }
 
-    const segmentsWithNode = applyNodeFinancing(
-      nextProfile,
-      get().segments,
-      nextNode,
-      caseDef.primaryFacility,
-    );
-    const fully = segmentsWithNode.map((s) =>
+    let segmentsAcc = get().segments;
+    let burdenAcc = applyEffectBurden(get().caregiverBurden, option.effects);
+    let elapsedDelta = 0;
+    let prevFacilityId = get().run.currentFacilityId;
+    const facilityHops: Array<{ from: string; to: string }> = [];
+
+    for (const node of chain) {
+      segmentsAcc = applyNodeFinancing(nextProfile, segmentsAcc, node, caseDef.primaryFacility);
+      burdenAcc = applyBurden(burdenAcc, node);
+      elapsedDelta += node.durationMin;
+      const facilityId = node.facility ?? caseDef.primaryFacility;
+      if (prevFacilityId && facilityId !== prevFacilityId) {
+        facilityHops.push({ from: prevFacilityId, to: facilityId });
+      }
+      prevFacilityId = facilityId;
+    }
+
+    const finalNode = chain[chain.length - 1];
+    const finalFacilityId = finalNode.facility ?? caseDef.primaryFacility;
+    const fully = segmentsAcc.map((s) =>
       computeSegment(nextProfile, { charge: s.charge, grossSGD: s.grossSGD, tier: s.tier }),
     );
     const totals = totalsFor(fully);
-    const burdenWithNode = applyBurden(get().caregiverBurden, nextNode);
-    const burden = applyEffectBurden(burdenWithNode, option.effects);
-    const nextFacilityId = nextNode.facility ?? caseDef.primaryFacility;
-    const prevFacilityId = get().run.currentFacilityId;
-    const facilityChanged = nextFacilityId !== prevFacilityId;
 
+    const endsOnDecision = finalNode.decision != null;
     set((s) => ({
       profile: nextProfile,
       segments: fully,
       totals,
-      caregiverBurden: burden,
-      viewedFacilityId: nextFacilityId,
+      caregiverBurden: burdenAcc,
+      viewedFacilityId: finalFacilityId,
       pandemic: nextPandemic,
       run: {
         ...s.run,
-        currentNodeId: nextNode.id,
-        currentFacilityId: nextFacilityId,
-        status: nextNode.decision ? 'awaiting-decision' : 'running',
-        pendingDecision: nextNode.decision
-          ? { nodeId: nextNode.id, decision: nextNode.decision }
+        currentNodeId: finalNode.id,
+        currentFacilityId: finalFacilityId,
+        status: endsOnDecision ? 'awaiting-decision' : 'completed',
+        pendingDecision: endsOnDecision && finalNode.decision
+          ? { nodeId: finalNode.id, decision: finalNode.decision }
           : null,
         log: [...s.run.log, entry],
-        elapsedGameMin: s.run.elapsedGameMin + nextNode.durationMin,
+        elapsedGameMin: s.run.elapsedGameMin + elapsedDelta,
         totalCostSGD: totals.cash,
         flags: Array.from(flagsAfter),
       },
       kpis: deriveKpis(nextPandemic, totals.cash),
     }));
 
-    if (facilityChanged) {
-      const fromF = prevFacilityId ? getFacility(prevFacilityId) : undefined;
-      const toF = getFacility(nextFacilityId);
+    for (const hop of facilityHops) {
+      const fromF = getFacility(hop.from);
+      const toF = getFacility(hop.to);
       if (fromF && toF) {
         const flow = recordsFlowBetween(fromF, toF);
         const transfer = { fromFacilityId: fromF.id, toFacilityId: toF.id, flow };
@@ -603,14 +634,19 @@ export const useGame = create<GameState>((set, get) => ({
           transferLog: [...s.transferLog, transfer],
         }));
       }
-      bus.emit(Events.FacilityChanged, { facilityId: nextFacilityId });
+      bus.emit(Events.FacilityChanged, { facilityId: hop.to });
     }
-    bus.emit(Events.PatientMoveTo, { department: nextNode.department });
-    if (nextNode.decision) {
+    for (const node of chain) {
+      bus.emit(Events.PatientMoveTo, { department: node.department });
+    }
+    if (finalNode.decision) {
       bus.emit(Events.CaseDecisionRequested, {
-        decision: nextNode.decision,
-        nodeId: nextNode.id,
+        decision: finalNode.decision,
+        nodeId: finalNode.id,
       });
+    } else {
+      // Walked off the end with no further decisions — complete the case.
+      bus.emit(Events.CaseCompleted);
     }
     persistSnapshot(get());
   },

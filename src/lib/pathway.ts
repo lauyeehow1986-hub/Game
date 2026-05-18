@@ -69,3 +69,46 @@ export function applyFlagEffects(
   effects?.clearFlags?.forEach((f) => next.delete(f));
   return next;
 }
+
+/**
+ * Walk forward from `fromNodeId`, collecting the chain of visible nodes up
+ * to and including the next decision-bearing node (or the end of the case).
+ *
+ * Cases author transit nodes (triage, imaging, ward) between decisions; the
+ * engine has no real-time tick, so without this helper the case stalls on
+ * any non-decision node. resolveDecision walks the returned chain to apply
+ * each node's duration / cost / financing / burden / facility transition
+ * and ends on the next decision (or completes the case).
+ *
+ * `effects` and `optionNextNode` apply only to the first hop (the decision
+ * that prompted this walk); subsequent hops follow linear pathway order.
+ */
+export function walkToNextDecision(
+  caseDef: CaseDefinition,
+  fromNodeId: string,
+  effects: DecisionEffects | undefined,
+  optionNextNode: string | undefined,
+  flags: Set<string>,
+): PathwayNode[] {
+  const chain: PathwayNode[] = [];
+  const flagsAfter = applyFlagEffects(flags, effects);
+  let next = pickNextNode(caseDef, fromNodeId, effects, optionNextNode, flags);
+  while (next) {
+    chain.push(next);
+    if (next.decision) return chain;
+    next = pickNextNode(caseDef, next.id, undefined, undefined, flagsAfter);
+  }
+  return chain;
+}
+
+/**
+ * Same as walkToNextDecision but starting from the beginning of the case.
+ * Used by startCase so a case whose first node is a transit doesn't stall.
+ */
+export function walkToFirstDecision(caseDef: CaseDefinition): PathwayNode[] {
+  const first = firstVisibleNode(caseDef);
+  if (!first) return [];
+  if (first.decision) return [first];
+  const rest = walkToNextDecision(caseDef, first.id, undefined, undefined, new Set());
+  return [first, ...rest];
+}
