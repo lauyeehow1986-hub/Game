@@ -6,6 +6,7 @@ import { useAchievements } from '../../state/achievementsStore';
 import { computePersonalTrends, gradeBandLabel } from '../../lib/personal-trends';
 import { useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
+import { CURRICULA } from '../../lib/curricula';
 
 const CATEGORY_COLOURS: Record<'acute' | 'elective' | 'outpatient', string> = {
   acute: '#f87171',
@@ -61,21 +62,17 @@ export function TrendsPanel() {
 
   const catalogue = [...listCases(), ...Object.values(customCases)];
   const runHistory = useProgress((s) => s.runHistory);
-  const trends = computePersonalTrends(bestScores, catalogue, (c) => tr(c.title));
+  const trends = computePersonalTrends(
+    bestScores,
+    catalogue,
+    (c) => tr(c.title),
+    CURRICULA.map((cur) => ({ id: cur.id, caseIds: cur.caseIds })),
+  );
   // Build a chronological list of ratios (oldest -> newest) for the sparkline.
   const ratiosOldFirst = [...trends.caseTrends]
     .sort((a, b) => a.at - b.at)
     .map((c) => c.ratio);
   const meanGrade = gradeBandLabel(trends.meanRatio);
-  const recommended = trends.recommendedCaseId
-    ? catalogue.find((c) => c.id === trends.recommendedCaseId)
-    : null;
-
-  const playRecommended = () => {
-    if (!recommended) return;
-    if (status !== 'idle') resetRun();
-    startCase(recommended);
-  };
 
   return (
     <section className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-3">
@@ -134,28 +131,62 @@ export function TrendsPanel() {
         })}
       </div>
 
-      {recommended && (
-        <div className="border border-clinical-accent/40 rounded p-2 bg-clinical-accent/10 text-[11px] space-y-1">
-          <div className="text-[10px] uppercase tracking-wider text-clinical-accent">
-            {t('trends.recommended')}
+      {(() => {
+        const r = trends.recommendations;
+        const cards: Array<{
+          kind: 'practice' | 'curriculum' | 'discover';
+          caseId: string;
+          colour: string;
+        }> = [];
+        if (r.practiceCaseId)
+          cards.push({ kind: 'practice', caseId: r.practiceCaseId, colour: '#facc15' });
+        if (r.curriculumCaseId)
+          cards.push({ kind: 'curriculum', caseId: r.curriculumCaseId, colour: '#38bdf8' });
+        if (r.discoverCaseId)
+          cards.push({ kind: 'discover', caseId: r.discoverCaseId, colour: '#a3e635' });
+        if (cards.length === 0) return null;
+        return (
+          <div className="space-y-1.5">
+            {cards.map(({ kind, caseId, colour }) => {
+              const c = catalogue.find((x) => x.id === caseId);
+              if (!c) return null;
+              const best = bestScores[caseId];
+              return (
+                <div
+                  key={kind}
+                  className="border rounded p-2 text-[11px] space-y-1"
+                  style={{ borderColor: `${colour}66`, backgroundColor: `${colour}1a` }}
+                >
+                  <div
+                    className="text-[10px] uppercase tracking-wider font-semibold"
+                    style={{ color: colour }}
+                  >
+                    {t(`trends.rec.${kind}`)}
+                  </div>
+                  <div className="text-white">{tr(c.title)}</div>
+                  <div className="flex gap-2 mt-1 items-center">
+                    <button
+                      onClick={() => {
+                        if (status !== 'idle') resetRun();
+                        startCase(c);
+                      }}
+                      className="tap-target text-[11px] px-2 py-1 rounded text-white font-semibold hover:brightness-110"
+                      style={{ backgroundColor: colour, color: '#0b1320' }}
+                    >
+                      {best ? t('trends.replay') : t('cases.startCase')}
+                    </button>
+                    {best && (
+                      <span className="text-[10px] text-clinical-subtle font-mono">
+                        {t('cases.best')} {best.score.toFixed(1)} / {best.max.toFixed(1)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div className="text-white">{tr(recommended.title)}</div>
-          <div className="flex gap-2 mt-1">
-            <button
-              onClick={playRecommended}
-              className="text-[11px] px-2 py-1 rounded bg-clinical-accent text-white font-semibold hover:brightness-110"
-            >
-              {bestScores[recommended.id] ? t('trends.replay') : t('cases.startCase')}
-            </button>
-            {bestScores[recommended.id] && (
-              <span className="text-[10px] text-clinical-subtle self-center font-mono">
-                {t('cases.best')} {bestScores[recommended.id].score.toFixed(1)} /{' '}
-                {bestScores[recommended.id].max.toFixed(1)}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       <details className="text-[11px] border-t border-clinical-border pt-2">
         <summary className="cursor-pointer text-clinical-subtle hover:text-white">

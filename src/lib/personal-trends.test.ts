@@ -95,6 +95,47 @@ describe('computePersonalTrends', () => {
     const t = computePersonalTrends(scores, catalogue, resolveTitle);
     expect(t.caseTrends.map((x) => x.caseId)).toEqual(['b', 'c', 'a']);
   });
+
+  it('populates recommendations.practiceCaseId when a played case is below 0.85', () => {
+    const scores = {
+      a: { score: 3, max: 10, at: 1 },
+      b: { score: 9, max: 10, at: 2 },
+    };
+    const t = computePersonalTrends(scores, catalogue, resolveTitle);
+    expect(t.recommendations.practiceCaseId).toBe('a');
+  });
+
+  it('picks a curriculum continuation when one is started but unfinished', () => {
+    const scores = { a: { score: 9, max: 10, at: 1 } };
+    const curricula = [{ id: 'cardio', caseIds: ['a', 'b', 'c'] }];
+    const t = computePersonalTrends(scores, catalogue, resolveTitle, curricula);
+    expect(t.recommendations.curriculumCaseId).toBe('b');
+  });
+
+  it('ignores a curriculum the user has not started or already finished', () => {
+    const curricula = [
+      { id: 'untouched', caseIds: ['c', 'd'] },
+      { id: 'done', caseIds: ['a', 'b'] },
+    ];
+    const scores = {
+      a: { score: 9, max: 10, at: 1 },
+      b: { score: 9, max: 10, at: 2 },
+    };
+    const t = computePersonalTrends(scores, catalogue, resolveTitle, curricula);
+    expect(t.recommendations.curriculumCaseId).toBe(null);
+  });
+
+  it('never proposes the same case across practice / curriculum / discover slots', () => {
+    const scores = { a: { score: 2, max: 10, at: 1 } };
+    const curricula = [{ id: 'cardio', caseIds: ['a', 'b'] }];
+    const t = computePersonalTrends(scores, catalogue, resolveTitle, curricula);
+    const ids = [
+      t.recommendations.practiceCaseId,
+      t.recommendations.curriculumCaseId,
+      t.recommendations.discoverCaseId,
+    ].filter(Boolean) as string[];
+    expect(new Set(ids).size).toBe(ids.length);
+  });
 });
 
 describe('divergenceFromBestPath', () => {

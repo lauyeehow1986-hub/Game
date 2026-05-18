@@ -41,8 +41,25 @@ export interface PersonalTrends {
   byCategory: CategoryStrength[];
   /** Cases never played, ordered alphabetically for a deterministic suggestion. */
   unplayed: { caseId: string; title: string }[];
-  /** A single recommended case: lowest-scoring played case, else first unplayed. */
+  /** Legacy single rec: weakest played, else first unplayed. */
   recommendedCaseId: string | null;
+  /** Categorised recs so the panel can offer practice / progress / discover.
+   *  Any field may be null when nothing applies (e.g. user is at 100%
+   *  distinction or has played every case). */
+  recommendations: {
+    /** Lowest-ratio played case below 0.85 — focus practice on a weak spot. */
+    practiceCaseId: string | null;
+    /** First unplayed case in a curriculum the user has started but not
+     *  finished — keep progressing on a coherent track. */
+    curriculumCaseId: string | null;
+    /** Any unplayed case the user hasn't touched yet — try something new. */
+    discoverCaseId: string | null;
+  };
+}
+
+export interface CurriculumLite {
+  id: string;
+  caseIds: string[];
 }
 
 interface ScoreEntry {
@@ -58,6 +75,7 @@ export function computePersonalTrends(
   bestScores: Record<string, ScoreEntry>,
   catalogue: CaseDefinition[],
   resolveTitle: (c: CaseDefinition) => string,
+  curricula: CurriculumLite[] = [],
 ): PersonalTrends {
   const totalCases = catalogue.length;
   const trends: CaseTrend[] = [];
@@ -95,13 +113,35 @@ export function computePersonalTrends(
     .map((c) => ({ caseId: c.id, title: resolveTitle(c) }))
     .sort((a, b) => a.title.localeCompare(b.title));
 
-  // Recommendation: weakest played case (lowest ratio), or first unplayed.
-  let recommendedCaseId: string | null = null;
+  // Practice: weakest played case below 0.85 ratio.
+  let practiceCaseId: string | null = null;
   if (trends.length > 0) {
     const weakest = [...trends].sort((a, b) => a.ratio - b.ratio)[0];
-    if (weakest.ratio < 0.85) recommendedCaseId = weakest.caseId;
+    if (weakest.ratio < 0.85) practiceCaseId = weakest.caseId;
   }
-  if (!recommendedCaseId && unplayed.length > 0) recommendedCaseId = unplayed[0].caseId;
+
+  // Curriculum continuation: the first unplayed case in a curriculum that
+  // the user has started (at least one case played) but not finished.
+  let curriculumCaseId: string | null = null;
+  for (const c of curricula) {
+    if (c.caseIds.length === 0) continue;
+    const played = c.caseIds.filter((id) => bestScores[id]).length;
+    if (played === 0 || played === c.caseIds.length) continue;
+    const nextId = c.caseIds.find((id) => !bestScores[id]);
+    if (nextId) {
+      curriculumCaseId = nextId;
+      break;
+    }
+  }
+
+  // Discover: first unplayed case that isn't already proposed as practice
+  // or curriculum, biased toward beginner difficulty for fresh players.
+  const usedIds = new Set([practiceCaseId, curriculumCaseId].filter(Boolean) as string[]);
+  const discoverCaseId =
+    unplayed.find((u) => !usedIds.has(u.caseId))?.caseId ?? null;
+
+  // Legacy single-value rec kept for the existing callsite.
+  const recommendedCaseId = practiceCaseId ?? curriculumCaseId ?? discoverCaseId;
 
   return {
     totalCases,
@@ -111,6 +151,11 @@ export function computePersonalTrends(
     byCategory,
     unplayed,
     recommendedCaseId,
+    recommendations: {
+      practiceCaseId,
+      curriculumCaseId,
+      discoverCaseId,
+    },
   };
 }
 
