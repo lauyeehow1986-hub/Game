@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useFocusTrap } from '../lib/use-focus-trap';
+import { useGame } from '../state/gameStore';
+import { getCase } from '../content';
 
 const KEY = 'sg-pathway-tutorial-seen-v2';
+
+/**
+ * Case that opens automatically from the final tutorial step. URTI at a
+ * CHAS GP is the lowest-stakes pathway in the catalogue (acute outpatient,
+ * three decisions, small score gaps) — a comfortable hands-on first run.
+ */
+const ONBOARDING_CASE_ID = 'urti-chas-gp';
 
 const STEPS: Array<{ title: string; body: string }> = [
   {
@@ -46,6 +55,7 @@ export function Tutorial() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const cardRef = useFocusTrap<HTMLDivElement>(open);
+  const startCase = useGame((s) => s.startCase);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -70,6 +80,11 @@ export function Tutorial() {
     // who's seeing the tutorial for the first time on v2.2.
     localStorage.setItem('sg-pathway-tutorial-seen-v1', '1');
     setOpen(false);
+  };
+  const startBeginner = () => {
+    const c = getCase(ONBOARDING_CASE_ID);
+    if (c) startCase(c);
+    close();
   };
   const next = () => {
     if (step < STEPS.length - 1) setStep(step + 1);
@@ -111,13 +126,31 @@ export function Tutorial() {
             >
               Back
             </button>
-            <button
-              onClick={next}
-              data-autofocus
-              className="px-3 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
-            >
-              {step === STEPS.length - 1 ? 'Get started' : 'Next'}
-            </button>
+            {step === STEPS.length - 1 ? (
+              <>
+                <button
+                  onClick={close}
+                  className="px-3 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
+                >
+                  Browse cases
+                </button>
+                <button
+                  onClick={startBeginner}
+                  data-autofocus
+                  className="px-3 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
+                >
+                  Start a beginner case
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={next}
+                data-autofocus
+                className="px-3 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
+              >
+                Next
+              </button>
+            )}
           </div>
         </footer>
       </div>
