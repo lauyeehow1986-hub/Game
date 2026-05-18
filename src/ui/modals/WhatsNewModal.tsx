@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v6-seen';
+const KEY = 'sg-pathway-whatsnew-v7-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'Faster first paint',
+    body: 'Phaser (~1.5 MB) and several occasional modals now load on-demand instead of up-front. The HUD + panels paint immediately; the map swaps in shortly after. Initial JS shrunk from ~387 KB gzipped to ~171 KB.',
+  },
   {
     heading: 'Difficulty badges + filter',
     body: 'Each case now shows a Beginner / Intermediate / Advanced band, derived from decision count plus the score gap between best and worst option (so high-consequence cases bump up). Filter the case list by difficulty band to focus your practice.',

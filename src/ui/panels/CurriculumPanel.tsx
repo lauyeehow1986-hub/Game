@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import {
   CURRICULA,
   curriculumProgress,
@@ -16,8 +16,13 @@ import {
   encodeCurriculumToUrl,
   tryDecodeCurriculumFromHref,
 } from '../../lib/case-share';
-import { CurriculumImportModal } from '../modals/CurriculumImportModal';
-import { CurriculumBuilderModal } from '../modals/CurriculumBuilderModal';
+
+const CurriculumImportModal = lazy(() =>
+  import('../modals/CurriculumImportModal').then((m) => ({ default: m.CurriculumImportModal })),
+);
+const CurriculumBuilderModal = lazy(() =>
+  import('../modals/CurriculumBuilderModal').then((m) => ({ default: m.CurriculumBuilderModal })),
+);
 import type { CurriculumBundle } from '../../lib/curriculum-schema';
 import { useAchievements } from '../../state/achievementsStore';
 
@@ -271,8 +276,14 @@ export function CurriculumPanel() {
         })}
       </ul>
 
-      <CurriculumImportModal open={importOpen} onClose={() => setImportOpen(false)} />
-      <CurriculumBuilderModal open={builderOpen} onClose={() => setBuilderOpen(false)} />
+      <Suspense fallback={null}>
+        {importOpen && (
+          <CurriculumImportModal open={importOpen} onClose={() => setImportOpen(false)} />
+        )}
+        {builderOpen && (
+          <CurriculumBuilderModal open={builderOpen} onClose={() => setBuilderOpen(false)} />
+        )}
+      </Suspense>
     </section>
   );
 }

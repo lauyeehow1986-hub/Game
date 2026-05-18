@@ -23,8 +23,15 @@ import { AchievementToast } from './ui/AchievementToast';
 import { LiveAnnouncer } from './ui/LiveAnnouncer';
 import { KeyboardHelpModal } from './ui/modals/KeyboardHelpModal';
 import { useT } from './lib/i18n';
-import { PhaserGame } from './game/PhaserGame';
+import { lazy, Suspense } from 'react';
 import { useMode } from './state/modeStore';
+
+// Phaser is ~1.5 MB minified. Lazy-loading it keeps the initial HTML
+// payload tiny so HUD + panels paint immediately; the canvas swaps in
+// once the chunk arrives.
+const PhaserGame = lazy(() =>
+  import('./game/PhaserGame').then((m) => ({ default: m.PhaserGame })),
+);
 
 export default function App() {
   const mode = useMode((s) => s.mode);
@@ -55,7 +62,15 @@ export default function App() {
         </aside>
 
         <section className="rounded-lg overflow-hidden border border-clinical-border bg-clinical-panel min-h-[360px] lg:min-h-[420px] order-1 lg:order-2">
-          <PhaserGame />
+          <Suspense
+            fallback={
+              <div className="w-full h-full grid place-items-center text-clinical-subtle text-xs">
+                Loading map…
+              </div>
+            }
+          >
+            <PhaserGame />
+          </Suspense>
         </section>
 
         <aside className="space-y-2 sm:space-y-3 lg:overflow-y-auto scrollbar-thin order-3">

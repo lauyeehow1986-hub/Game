@@ -1,11 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { listCases } from '../../content';
 import { useGame } from '../../state/gameStore';
 import { useProgress } from '../../state/progressStore';
 import { useCustomCases } from '../../state/customCasesStore';
 import { downloadCaseJson, encodeCaseToUrl, tryDecodeCaseFromHref } from '../../lib/case-share';
-import { CaseImportModal } from '../modals/CaseImportModal';
-import { BestPathDemoModal } from '../modals/BestPathDemoModal';
+
+const CaseImportModal = lazy(() =>
+  import('../modals/CaseImportModal').then((m) => ({ default: m.CaseImportModal })),
+);
+const BestPathDemoModal = lazy(() =>
+  import('../modals/BestPathDemoModal').then((m) => ({ default: m.BestPathDemoModal })),
+);
 import { useT, useTr } from '../../lib/i18n';
 import { EMPTY_FILTER, filterCases, filterIsEmpty, type CaseFilter } from '../../lib/case-filter';
 import type { CaseDefinition } from '../../lib/types';
@@ -290,8 +295,14 @@ export function CaseList() {
       </ul>
       )}
 
-      <CaseImportModal open={importOpen} onClose={() => setImportOpen(false)} />
-      <BestPathDemoModal caseDef={demoCase} onClose={() => setDemoCase(null)} />
+      <Suspense fallback={null}>
+        {importOpen && (
+          <CaseImportModal open={importOpen} onClose={() => setImportOpen(false)} />
+        )}
+        {demoCase && (
+          <BestPathDemoModal caseDef={demoCase} onClose={() => setDemoCase(null)} />
+        )}
+      </Suspense>
     </section>
   );
 }

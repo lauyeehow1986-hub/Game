@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { useGame } from '../state/gameStore';
 import { usePerspective } from '../state/perspectiveStore';
 import { useMode, type AppMode } from '../state/modeStore';
 import type { Perspective } from '../lib/types';
 import { isMuted, setMuted } from '../lib/audio';
 import { LOCALES, useLocale, useT, type Locale } from '../lib/i18n';
-import { AboutModal } from './modals/AboutModal';
 import { OfflineIndicator } from './OfflineIndicator';
 import { useAchievements } from '../state/achievementsStore';
+
+const AboutModal = lazy(() =>
+  import('./modals/AboutModal').then((m) => ({ default: m.AboutModal })),
+);
 
 const labels: Record<Perspective, { tag: string; colour: string }> = {
   patient: { tag: 'POV', colour: 'bg-rose-500/80' },
@@ -212,7 +215,9 @@ export function HUD() {
         </button>
       </div>
 
-      <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <Suspense fallback={null}>
+        {aboutOpen && <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />}
+      </Suspense>
     </header>
   );
 }
