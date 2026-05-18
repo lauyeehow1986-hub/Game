@@ -51,6 +51,8 @@ export class HospitalScene extends Phaser.Scene {
   private dotsGraphics!: Phaser.GameObjects.Graphics;
   private currentDept: Department | null = null;
   private moveTween: Phaser.Tweens.Tween | null = null;
+  /** Cosmetic wobble tween that runs while the figure is in motion. */
+  private walkTween: Phaser.Tweens.Tween | null = null;
   /** Queue of departments to walk through. When the engine collapses
    *  multiple transit nodes in one tick we get a burst of PatientMoveTo
    *  events; queueing keeps the sprite from teleporting to the last one. */
@@ -145,10 +147,28 @@ export class HospitalScene extends Phaser.Scene {
       this.deptObjects.set(dept.id, { circle, badgeBg, badgeText });
     }
 
-    const patientDot = this.add.circle(0, 0, 9, 0xffffff, 1);
-    patientDot.setStrokeStyle(2, 0xed2939, 1);
+    // Stylised patient figure: head + shoulders/torso, drawn with Graphics
+    // so we don't bundle any image assets. The shape reads as a human at
+    // map zoom but stays compact (~24px tall).
+    const FIG_RED = 0xed2939;
+    const FIG_FILL = 0xffffff;
+    const figure = this.add.graphics();
+    // Body / torso (rounded trapezoid).
+    figure.fillStyle(FIG_RED, 1);
+    figure.fillRoundedRect(-7, 1, 14, 13, { tl: 4, tr: 4, bl: 2, br: 2 });
+    figure.lineStyle(1.5, 0x111a2e, 1);
+    figure.strokeRoundedRect(-7, 1, 14, 13, { tl: 4, tr: 4, bl: 2, br: 2 });
+    // Head.
+    figure.fillStyle(FIG_FILL, 1);
+    figure.fillCircle(0, -5, 5);
+    figure.lineStyle(1.5, 0x111a2e, 1);
+    figure.strokeCircle(0, -5, 5);
+    // Drop-shadow under the feet so the figure sits on the map rather
+    // than floating.
+    const shadow = this.add.ellipse(0, 16, 18, 5, 0x000000, 0.35);
+
     const patientLabel = this.add
-      .text(0, 14, 'Patient', {
+      .text(0, 22, 'Patient', {
         fontFamily: 'Inter, system-ui, sans-serif',
         fontSize: '11px',
         color: '#fff',
@@ -156,7 +176,7 @@ export class HospitalScene extends Phaser.Scene {
         padding: { x: 4, y: 1 },
       })
       .setOrigin(0.5, 0);
-    this.patientSprite = this.add.container(0, 0, [patientDot, patientLabel]);
+    this.patientSprite = this.add.container(0, 0, [shadow, figure, patientLabel]);
     this.patientSprite.setVisible(false);
     root.add(this.patientSprite);
 
@@ -236,15 +256,37 @@ export class HospitalScene extends Phaser.Scene {
       onComplete: () => {
         this.currentDept = dept;
         this.moveTween = null;
+        // Stop the walking wobble so the figure rests upright at its
+        // destination.
+        if (this.walkTween) {
+          this.walkTween.stop();
+          this.walkTween = null;
+          this.patientSprite.angle = 0;
+        }
         bus.emit(Events.PatientArrived, { departmentId: dept.id });
         if (this.moveQueue.length > 0) this.dequeueNext();
       },
+    });
+    // Subtle rotation oscillation gives the figure a "walking" feel while
+    // it tweens — purely cosmetic, no gameplay effect.
+    if (this.walkTween) this.walkTween.stop();
+    this.patientSprite.angle = 0;
+    this.walkTween = this.tweens.add({
+      targets: this.patientSprite,
+      angle: { from: -4, to: 4 },
+      duration: 180,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
     });
   }
 
   private resetPatient() {
     if (this.moveTween) this.moveTween.stop();
     this.moveTween = null;
+    if (this.walkTween) this.walkTween.stop();
+    this.walkTween = null;
+    this.patientSprite.angle = 0;
     this.moveQueue = [];
     this.patientSprite.setVisible(false);
     this.currentDept = null;
