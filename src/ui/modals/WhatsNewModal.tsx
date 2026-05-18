@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v7-seen';
+const KEY = 'sg-pathway-whatsnew-v8-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'New case — Migrant worker, construction fall',
+    body: 'A foreign-worker injury scenario that exercises FWMI insurance, MOM WICA reporting, and Class-C ward financing for a non-citizen. Five decisions cover field triage, CT-vs-plain-films, ward class billing, medical-leave + WICA, and repatriation pressure.',
+  },
   {
     heading: 'Faster first paint',
     body: 'Phaser (~1.5 MB) and several occasional modals now load on-demand instead of up-front. The HUD + panels paint immediately; the map swaps in shortly after. Initial JS shrunk from ~387 KB gzipped to ~171 KB.',

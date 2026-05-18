@@ -70,6 +70,7 @@ import { geriatricFallsCase } from './cases/geriatric-falls';
 import { heartFailureCase } from './cases/heart-failure-clinic';
 import { sars2003Case } from './cases/sars-2003-historical';
 import { covid19Case } from './cases/covid19-historical';
+import { migrantWorkerInjuryCase } from './cases/migrant-worker-injury';
 import type { CaseDefinition, Facility } from '../lib/types';
 
 const allFacilities: Facility[] = [
@@ -120,6 +121,7 @@ export const cases: Record<string, CaseDefinition> = {
   [heartFailureCase.id]: heartFailureCase,
   [sars2003Case.id]: sars2003Case,
   [covid19Case.id]: covid19Case,
+  [migrantWorkerInjuryCase.id]: migrantWorkerInjuryCase,
 };
 
 export function getFacility(id: string): Facility | undefined {

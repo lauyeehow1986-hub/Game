@@ -277,4 +277,16 @@ export const DEFAULT_PROFILES: Record<string, PatientProfile> = {
     mediSaveBalanceSGD: 3100,
     notes: 'Long-distance lorry driver. T2DM x10y, HbA1c 9.4%, BP 152/92, smoker, sedentary.',
   },
+  migrantWorker: {
+    name: 'Mr Hossain, 34',
+    age: 34,
+    perCapitaIncomeSGD: 700,
+    citizenship: 'foreigner',
+    chasTier: 'none',
+    wardClass: 'C',
+    hasIntegratedShield: false,
+    mediSaveBalanceSGD: 0,
+    notes:
+      'Bangladeshi construction worker on Work Permit. 2 years in SG, lives in dorm. Foreign Worker Medical Insurance (FWMI) via employer; no MediShield Life eligibility; no MediSave.',
+  },
 };
