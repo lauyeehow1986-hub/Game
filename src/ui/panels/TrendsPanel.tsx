@@ -56,6 +56,8 @@ export function TrendsPanel() {
   const resetRun = useGame((s) => s.resetRun);
   const status = useGame((s) => s.run.status);
   const unlockedAchievements = useAchievements((s) => s.unlocked);
+  const decisionNotes = useProgress((s) => s.decisionNotes);
+  const setDecisionNote = useProgress((s) => s.setDecisionNote);
 
   const catalogue = [...listCases(), ...Object.values(customCases)];
   const runHistory = useProgress((s) => s.runHistory);
@@ -184,6 +186,117 @@ export function TrendsPanel() {
           })}
         </ul>
       </details>
+
+      {(() => {
+        const grouped = new Map<string, Array<{ decisionId: string; text: string }>>();
+        for (const [k, text] of Object.entries(decisionNotes)) {
+          const [caseId, decisionId] = k.split('|');
+          if (!caseId || !decisionId) continue;
+          const arr = grouped.get(caseId) ?? [];
+          arr.push({ decisionId, text });
+          grouped.set(caseId, arr);
+        }
+        if (grouped.size === 0) return null;
+        const total = Array.from(grouped.values()).reduce((acc, a) => acc + a.length, 0);
+
+        const exportAll = async () => {
+          const lines: string[] = ['# My SG Pathway reflection notes', ''];
+          for (const [caseId, arr] of grouped) {
+            const c = catalogue.find((x) => x.id === caseId);
+            const title = c ? tr(c.title) : caseId;
+            lines.push(`## ${title}`);
+            for (const { decisionId, text } of arr) {
+              const node = c?.pathway.find((n) => n.decision?.id === decisionId);
+              const prompt = node?.decision ? tr(node.decision.prompt) : decisionId;
+              lines.push(`### ${prompt}`);
+              for (const ln of text.split(/\r?\n/)) lines.push(`> ${ln}`);
+              lines.push('');
+            }
+          }
+          const md = lines.join('\n');
+          try {
+            await navigator.clipboard.writeText(md);
+          } catch {
+            // No clipboard (e.g. file://); fall through to download.
+          }
+          if (typeof document !== 'undefined') {
+            const blob = new Blob([md], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sg-pathway-notes.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+          }
+        };
+
+        const clearAll = () => {
+          if (!confirm('Clear every reflection note? This cannot be undone.')) return;
+          for (const k of Object.keys(decisionNotes)) {
+            const [cid, did] = k.split('|');
+            if (cid && did) setDecisionNote(cid, did, '');
+          }
+        };
+
+        return (
+          <details className="text-[11px] border-t border-clinical-border pt-2">
+            <summary className="cursor-pointer text-clinical-subtle hover:text-white">
+              {t('trends.notes.heading')} ({total})
+            </summary>
+            <div className="mt-2 space-y-2 max-h-72 overflow-y-auto scrollbar-thin pr-1">
+              {Array.from(grouped.entries()).map(([caseId, arr]) => {
+                const c = catalogue.find((x) => x.id === caseId);
+                if (!c) return null;
+                return (
+                  <div key={caseId} className="border border-clinical-border rounded p-2 bg-clinical-bg/30">
+                    <button
+                      onClick={() => {
+                        if (status !== 'idle') resetRun();
+                        startCase(c);
+                      }}
+                      className="text-[11px] text-white font-semibold hover:text-clinical-accent text-left w-full"
+                    >
+                      {tr(c.title)} <span className="text-clinical-subtle font-normal">· {arr.length}</span>
+                    </button>
+                    <ul className="mt-1 space-y-1">
+                      {arr.map(({ decisionId, text }) => {
+                        const node = c.pathway.find((n) => n.decision?.id === decisionId);
+                        const prompt = node?.decision ? tr(node.decision.prompt) : decisionId;
+                        return (
+                          <li key={decisionId} className="border-l border-clinical-border pl-2">
+                            <div className="text-[10px] uppercase tracking-wider text-clinical-subtle truncate">
+                              {prompt}
+                            </div>
+                            <div className="text-white/85 leading-snug whitespace-pre-wrap">
+                              {text}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex gap-1 mt-2">
+              <button
+                onClick={exportAll}
+                className="text-[10px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+              >
+                {t('trends.notes.export')}
+              </button>
+              <button
+                onClick={clearAll}
+                className="text-[10px] px-2 py-1 rounded border border-clinical-danger/50 text-clinical-danger hover:bg-clinical-danger/10"
+              >
+                {t('trends.notes.clear')}
+              </button>
+            </div>
+          </details>
+        );
+      })()}
 
       {trends.caseTrends.length > 0 && (
         <details className="text-[11px]">

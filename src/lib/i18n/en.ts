@@ -177,6 +177,9 @@ export const en: Record<string, string> = {
   'trends.recommended': 'Recommended next',
   'trends.replay': 'Replay',
   'trends.allCases': 'All cases',
+  'trends.notes.heading': 'Your reflections',
+  'trends.notes.export': 'Export notes',
+  'trends.notes.clear': 'Clear all',
 
   // Case category labels (used in trends bars + lesson plans)
   'cases.category.acute': 'Acute',
