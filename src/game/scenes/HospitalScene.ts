@@ -51,6 +51,10 @@ export class HospitalScene extends Phaser.Scene {
   private dotsGraphics!: Phaser.GameObjects.Graphics;
   private currentDept: Department | null = null;
   private moveTween: Phaser.Tweens.Tween | null = null;
+  /** Queue of departments to walk through. When the engine collapses
+   *  multiple transit nodes in one tick we get a burst of PatientMoveTo
+   *  events; queueing keeps the sprite from teleporting to the last one. */
+  private moveQueue: Department[] = [];
   private cleanup: Array<() => void> = [];
 
   constructor() {
@@ -159,7 +163,8 @@ export class HospitalScene extends Phaser.Scene {
     const onMoveTo = (payload: unknown) => {
       const { department } = payload as { department: string };
       const dept = this.facility.departments.find((d) => d.id === department);
-      if (dept) this.movePatientTo(dept);
+      if (!dept) return;
+      this.enqueueMove(dept);
     };
     const onReset = () => this.resetPatient();
     const onOpsBadges = (payload: unknown) => this.applyOpsBadges(payload as OpsBadgePayload | null);
@@ -199,9 +204,18 @@ export class HospitalScene extends Phaser.Scene {
     this.scene.restart({ facility: this.facility });
   }
 
-  private movePatientTo(dept: Department) {
+  private enqueueMove(dept: Department) {
+    // Skip duplicates of where we already are (or just queued).
+    const last = this.moveQueue[this.moveQueue.length - 1] ?? this.currentDept;
+    if (last && last.id === dept.id) return;
+    this.moveQueue.push(dept);
+    if (!this.moveTween) this.dequeueNext();
+  }
+
+  private dequeueNext() {
+    const dept = this.moveQueue.shift();
+    if (!dept) return;
     this.patientSprite.setVisible(true);
-    if (this.moveTween) this.moveTween.stop();
     if (!this.currentDept) {
       this.patientSprite.setPosition(dept.position.x, dept.position.y);
     }
@@ -210,21 +224,28 @@ export class HospitalScene extends Phaser.Scene {
       const colour = Phaser.Display.Color.HexStringToColor(f.colour).color;
       obj.circle.setFillStyle(colour, id === dept.id ? 0.45 : 0.18);
     });
+    // Shorter hop when there are more queued so a long chain still resolves
+    // promptly; min 350ms keeps movement perceptible.
+    const duration = Math.max(350, 900 - this.moveQueue.length * 150);
     this.moveTween = this.tweens.add({
       targets: this.patientSprite,
       x: dept.position.x,
       y: dept.position.y,
-      duration: 900,
+      duration,
       ease: 'Sine.easeInOut',
       onComplete: () => {
         this.currentDept = dept;
+        this.moveTween = null;
         bus.emit(Events.PatientArrived, { departmentId: dept.id });
+        if (this.moveQueue.length > 0) this.dequeueNext();
       },
     });
   }
 
   private resetPatient() {
     if (this.moveTween) this.moveTween.stop();
+    this.moveTween = null;
+    this.moveQueue = [];
     this.patientSprite.setVisible(false);
     this.currentDept = null;
     this.deptObjects.forEach((obj, id) => {
