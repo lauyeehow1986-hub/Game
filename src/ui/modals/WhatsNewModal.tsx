@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v8-seen';
+const KEY = 'sg-pathway-whatsnew-v9-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'New case — Suspected intimate-partner violence',
+    body: 'Ms Tan presents to a CHAS GP with somatic complaints and a "clumsy" bruise; husband waits in the car. Five decisions cover safe questioning (HEARS framework), KKH One Centre vs polyclinic referral, forensic-quality documentation, layered 72-hour safety planning, and long-term continuity with PAVe + AWARE.',
+  },
   {
     heading: 'New case — Migrant worker, construction fall',
     body: 'A foreign-worker injury scenario that exercises FWMI insurance, MOM WICA reporting, and Class-C ward financing for a non-citizen. Five decisions cover field triage, CT-vs-plain-films, ward class billing, medical-leave + WICA, and repatriation pressure.',
