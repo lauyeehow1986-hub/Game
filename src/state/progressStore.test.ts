@@ -59,3 +59,26 @@ describe('progressStore.recordCaseResult', () => {
     expect(useProgress.getState().casesCompleted).toBe(0);
   });
 });
+
+describe('progressStore.setDecisionNote', () => {
+  it('writes a note keyed by caseId|decisionId', () => {
+    useProgress.getState().reset();
+    useProgress.getState().setDecisionNote('stemi', 'd1', 'Revise ESC ticagrelor dose.');
+    expect(useProgress.getState().decisionNotes['stemi|d1']).toBe('Revise ESC ticagrelor dose.');
+  });
+
+  it('deletes the key when the text is empty / whitespace', () => {
+    useProgress.getState().reset();
+    useProgress.getState().setDecisionNote('stemi', 'd1', 'something');
+    useProgress.getState().setDecisionNote('stemi', 'd1', '   ');
+    expect(useProgress.getState().decisionNotes['stemi|d1']).toBeUndefined();
+  });
+
+  it('does not collide across cases', () => {
+    useProgress.getState().reset();
+    useProgress.getState().setDecisionNote('stemi', 'd1', 'A');
+    useProgress.getState().setDecisionNote('stroke', 'd1', 'B');
+    expect(useProgress.getState().decisionNotes['stemi|d1']).toBe('A');
+    expect(useProgress.getState().decisionNotes['stroke|d1']).toBe('B');
+  });
+});

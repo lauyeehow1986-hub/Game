@@ -8,8 +8,11 @@ interface ProgressStore extends ProgressState {
   unlockCase: (id: string) => void;
   recordCaseResult: (caseId: string, score: number, max: number) => void;
   recordDecisionMade: () => void;
+  setDecisionNote: (caseId: string, decisionId: string, text: string) => void;
   reset: () => void;
 }
+
+const noteKey = (caseId: string, decisionId: string) => `${caseId}|${decisionId}`;
 
 const initial: ProgressState = {
   unlockedCaseIds: [
@@ -38,6 +41,7 @@ const initial: ProgressState = {
   ],
   bestScores: {},
   runHistory: {},
+  decisionNotes: {},
   decisionsMade: 0,
   casesCompleted: 0,
 };
@@ -53,6 +57,15 @@ export const useProgress = create<ProgressStore>()(
             : { unlockedCaseIds: [...s.unlockedCaseIds, id] },
         ),
       recordDecisionMade: () => set((s) => ({ decisionsMade: s.decisionsMade + 1 })),
+      setDecisionNote: (caseId, decisionId, text) =>
+        set((s) => {
+          const k = noteKey(caseId, decisionId);
+          const trimmed = text.trim();
+          const next = { ...s.decisionNotes };
+          if (trimmed.length === 0) delete next[k];
+          else next[k] = text;
+          return { decisionNotes: next };
+        }),
       recordCaseResult: (caseId, score, max) => {
         const prev = get().bestScores[caseId];
         const isBetter = !prev || score > prev.score;
@@ -79,10 +92,10 @@ export const useProgress = create<ProgressStore>()(
     }),
     {
       name: 'sg-pathway-progress',
-      version: 14,
+      version: 15,
       migrate: (persisted: unknown, version) => {
         const obj = (persisted ?? {}) as Partial<ProgressState>;
-        if (version < 14) {
+        if (version < 15) {
           const merged = new Set([
             ...(obj.unlockedCaseIds ?? []),
             ...initial.unlockedCaseIds,
@@ -92,6 +105,7 @@ export const useProgress = create<ProgressStore>()(
             ...obj,
             unlockedCaseIds: Array.from(merged),
             runHistory: obj.runHistory ?? {},
+            decisionNotes: obj.decisionNotes ?? {},
           };
         }
         return obj as ProgressState;

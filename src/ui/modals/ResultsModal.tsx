@@ -31,9 +31,22 @@ export function ResultsModal() {
   const setPerspective = usePerspective((s) => s.set);
   const recordCaseResult = useProgress((s) => s.recordCaseResult);
   const runHistory = useProgress((s) => s.runHistory);
+  const decisionNotes = useProgress((s) => s.decisionNotes);
+  const setDecisionNote = useProgress((s) => s.setDecisionNote);
   const fireAchievement = useAchievements((s) => s.fire);
   const cardRef = useFocusTrap<HTMLDivElement>(status === 'completed');
-  const [notes, setNotes] = useState<Record<string, string>>({});
+
+  // Build a {decisionId -> text} view of the persisted notes for the
+  // currently-completed case, so the ExportButtons + textareas read off
+  // the same shape they used pre-persistence.
+  const caseId = caseDef?.id ?? '';
+  const notes: Record<string, string> = {};
+  if (caseId) {
+    const prefix = `${caseId}|`;
+    for (const [k, v] of Object.entries(decisionNotes)) {
+      if (k.startsWith(prefix)) notes[k.slice(prefix.length)] = v;
+    }
+  }
 
   useEffect(() => {
     if (status === 'completed' && caseDef) {
@@ -47,7 +60,6 @@ export function ResultsModal() {
         scoreRatio: max > 0 ? earned / max : 0,
         runsForThisCase,
       });
-      setNotes({});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, caseDef, log, recordCaseResult]);
@@ -170,7 +182,7 @@ export function ResultsModal() {
                     <textarea
                       value={notes[decision.id] ?? ''}
                       onChange={(e) =>
-                        setNotes((prev) => ({ ...prev, [decision.id]: e.target.value }))
+                        setDecisionNote(caseDef.id, decision.id, e.target.value)
                       }
                       placeholder={t('results.note.placeholder')}
                       rows={2}

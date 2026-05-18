@@ -244,6 +244,10 @@ export type ProgressState = {
   /** Rolling history of run results per case (most recent last). Capped per
    *  case so localStorage stays tidy. */
   runHistory: Record<string, RunHistoryEntry[]>;
+  /** Reflective notes the learner wrote per decision, latest-wins. Keyed
+   *  by `${caseId}|${decisionId}`. Surfaced in ResultsModal and embedded
+   *  in lesson-plan exports. */
+  decisionNotes: Record<string, string>;
   decisionsMade: number;
   casesCompleted: number;
 };
