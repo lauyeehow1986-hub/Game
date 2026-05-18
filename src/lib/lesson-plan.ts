@@ -15,6 +15,11 @@ export interface LessonPlanInput {
   /** Per-decision learner reflection notes, keyed by decisionId. Surfaced
    *  as a blockquote after each decision in the exported lesson plan. */
   notes?: Record<string, string>;
+  /** Ordered node ids the patient visited. When supplied, a "Patient journey"
+   *  section lists each stop with its facility + department + staff-perspective
+   *  framing so the export reads as a clinical narrative, not just a decision
+   *  list. */
+  journey?: string[];
 }
 
 /**
@@ -56,6 +61,23 @@ export function generateLessonPlan(input: LessonPlanInput): string {
     );
   }
   lines.push('');
+
+  if (input.journey && input.journey.length > 0) {
+    const stops = input.journey
+      .map((id) => caseDef.pathway.find((n) => n.id === id))
+      .filter((n): n is NonNullable<typeof n> => n != null);
+    const rendered: string[] = [];
+    for (const n of stops) {
+      const framing = L(n.framing.staff);
+      if (!framing) continue;
+      rendered.push(`- **${n.facility ?? caseDef.primaryFacility}** · ${n.department} — ${framing}`);
+    }
+    if (rendered.length > 0) {
+      lines.push('## Patient journey');
+      lines.push(...rendered);
+      lines.push('');
+    }
+  }
 
   if (diff.length > 0) {
     lines.push('## Decisions');

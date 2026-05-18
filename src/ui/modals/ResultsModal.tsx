@@ -375,6 +375,7 @@ function ExportButtons({ notes }: { notes: Record<string, string> }) {
   const t = useT();
   const caseDef = useGame((s) => s.caseDef);
   const log = useGame((s) => s.run.log);
+  const journey = useGame((s) => s.run.journey);
   const elapsed = useGame((s) => s.run.elapsedGameMin);
   const totalCost = useGame((s) => s.run.totalCostSGD);
   const burden = useGame((s) => s.caregiverBurden);
@@ -390,6 +391,7 @@ function ExportButtons({ notes }: { notes: Record<string, string> }) {
     generateLessonPlan({
       caseDef,
       log,
+      journey,
       elapsedGameMin: elapsed,
       totalCostSGD: totalCost,
       burden,
@@ -435,6 +437,7 @@ function ExportButtons({ notes }: { notes: Record<string, string> }) {
       notes,
       caseDef,
       log,
+      journey,
       elapsedGameMin: elapsed,
       totalCostSGD: totalCost,
       burden,

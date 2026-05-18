@@ -104,6 +104,47 @@ describe('generateLessonPlan', () => {
     expect(md).not.toContain('> ');
   });
 
+  it('renders a Patient journey section when journey ids are supplied', () => {
+    const cd = {
+      ...caseDef,
+      pathway: [
+        {
+          id: 'triage',
+          department: 'triage',
+          facility: 'ttsh',
+          durationMin: 5,
+          framing: {
+            patient: '',
+            caregiver: '',
+            staff: 'Vitals: BP 102/64, HR 96, SpO2 95%. Triage P1.',
+          },
+        },
+        ...caseDef.pathway,
+      ],
+    };
+    const md = generateLessonPlan({
+      caseDef: cd,
+      log,
+      elapsedGameMin: 75,
+      totalCostSGD: 500,
+      journey: ['triage', 'n1'],
+    });
+    expect(md).toContain('## Patient journey');
+    expect(md).toContain('ttsh');
+    expect(md).toContain('Vitals: BP 102/64');
+  });
+
+  it('omits the Patient journey section when every stop has empty staff framing', () => {
+    const md = generateLessonPlan({
+      caseDef,
+      log,
+      elapsedGameMin: 75,
+      totalCostSGD: 500,
+      journey: ['n1'],
+    });
+    expect(md).not.toContain('## Patient journey');
+  });
+
   it('emits citation block for historical cases', () => {
     const hist = { ...caseDef, historical: true, citations: ['MOH SARS report 2004'] };
     const md = generateLessonPlan({
