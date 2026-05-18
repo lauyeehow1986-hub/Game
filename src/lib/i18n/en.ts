@@ -63,6 +63,13 @@ export const en: Record<string, string> = {
   'cases.badge.custom': 'Custom',
   'cases.shareToast.copied': 'Share link copied to clipboard.',
   'cases.shareToast.urlImported': 'Imported "{{title}}" from URL.',
+  'cases.compareRuns': 'Compare runs',
+
+  // Run comparison
+  'compare.tag': 'Compare your runs',
+  'compare.decision': 'Decision',
+  'compare.empty': 'No runs recorded yet for this case.',
+  'compare.legacy': 'Runs recorded before v2.25 have no per-decision detail and are skipped above.',
 
   // Case import modal
   'import.heading': 'Import a case from JSON',

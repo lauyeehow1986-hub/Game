@@ -11,6 +11,9 @@ const CaseImportModal = lazy(() =>
 const BestPathDemoModal = lazy(() =>
   import('../modals/BestPathDemoModal').then((m) => ({ default: m.BestPathDemoModal })),
 );
+const RunComparisonModal = lazy(() =>
+  import('../modals/RunComparisonModal').then((m) => ({ default: m.RunComparisonModal })),
+);
 import { useT, useTr } from '../../lib/i18n';
 import { EMPTY_FILTER, filterCases, filterIsEmpty, type CaseFilter } from '../../lib/case-filter';
 import type { CaseDefinition } from '../../lib/types';
@@ -34,6 +37,7 @@ export function CaseList() {
 
   const [importOpen, setImportOpen] = useState(false);
   const [demoCase, setDemoCase] = useState<CaseDefinition | null>(null);
+  const [compareCase, setCompareCase] = useState<CaseDefinition | null>(null);
   const [shareToast, setShareToast] = useState<string | null>(null);
   const [filter, setFilter] = useState<CaseFilter>(EMPTY_FILTER);
 
@@ -246,9 +250,19 @@ export function CaseList() {
                   </div>
                 </div>
                 {best && (
-                  <span className="text-[10px] text-clinical-ok font-mono">
-                    {t('cases.best')} {best.score.toFixed(1)} / {best.max.toFixed(1)}
-                  </span>
+                  <div className="flex flex-col items-end gap-0.5 shrink-0">
+                    <span className="text-[10px] text-clinical-ok font-mono">
+                      {t('cases.best')} {best.score.toFixed(1)} / {best.max.toFixed(1)}
+                    </span>
+                    {(runHistory[c.id]?.length ?? 0) > 1 && (
+                      <button
+                        onClick={() => setCompareCase(c)}
+                        className="text-[10px] text-clinical-accent hover:underline"
+                      >
+                        {t('cases.compareRuns')}
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
               <p className="text-[11px] text-clinical-subtle mt-1 leading-snug">{tr(c.blurb)}</p>
@@ -313,6 +327,9 @@ export function CaseList() {
         )}
         {demoCase && (
           <BestPathDemoModal caseDef={demoCase} onClose={() => setDemoCase(null)} />
+        )}
+        {compareCase && (
+          <RunComparisonModal caseDef={compareCase} onClose={() => setCompareCase(null)} />
         )}
       </Suspense>
     </section>
