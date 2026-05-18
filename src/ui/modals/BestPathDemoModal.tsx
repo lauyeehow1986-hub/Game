@@ -144,6 +144,42 @@ export function BestPathDemoModal({ caseDef, onClose }: Props) {
                 </ul>
               </div>
             )}
+            {node?.decision && node.decision.options.length > 1 && option && (
+              <details className="text-[11px]">
+                <summary className="cursor-pointer text-clinical-subtle hover:text-white">
+                  Other options ({node.decision.options.length - 1})
+                </summary>
+                <ul className="mt-1 space-y-1.5">
+                  {node.decision.options
+                    .filter((o) => o.id !== option.id)
+                    .sort((a, b) => b.score - a.score)
+                    .map((o) => {
+                      const weighted = o.score * node.decision!.weight;
+                      const best = option.score * node.decision!.weight;
+                      const ratio = best > 0 ? weighted / best : 0;
+                      const colour =
+                        ratio >= 0.9
+                          ? 'text-clinical-ok'
+                          : ratio >= 0.5
+                          ? 'text-clinical-warn'
+                          : 'text-clinical-danger';
+                      return (
+                        <li key={o.id} className="border-l border-clinical-border pl-2">
+                          <div className="flex justify-between gap-2">
+                            <span className="text-white/85">{tr(o.label)}</span>
+                            <span className={`font-mono shrink-0 ${colour}`}>
+                              {weighted.toFixed(1)}
+                            </span>
+                          </div>
+                          <div className="text-clinical-subtle leading-snug">
+                            {tr(o.rationale)}
+                          </div>
+                        </li>
+                      );
+                    })}
+                </ul>
+              </details>
+            )}
           </section>
         ) : null}
 
