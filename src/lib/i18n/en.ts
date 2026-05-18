@@ -181,6 +181,19 @@ export const en: Record<string, string> = {
   'trends.rec.curriculum': 'Continue curriculum',
   'trends.rec.discover': 'Discover something new',
   'trends.weak.heading': 'Decisions to revisit',
+  'trends.weak.practice': 'Practice',
+  'trends.weak.restart': 'Restart case',
+
+  // Practice mode
+  'practice.tag': 'Practice mode',
+  'practice.hint': '↑/↓ to choose, 1–9 to jump, Enter to check.',
+  'practice.check': 'Check answer',
+  'practice.you': 'Your choice',
+  'practice.best': 'Best-practice choice',
+  'practice.allOptions': 'All options',
+  'practice.reference': 'Reference',
+  'practice.noScore': 'No score recorded — pure practice.',
+  'practice.tryAgain': 'Try again',
   'trends.notes.heading': 'Your reflections',
   'trends.notes.export': 'Export notes',
   'trends.notes.clear': 'Clear all',
@@ -286,6 +299,7 @@ export const en: Record<string, string> = {
   'results.downloadLesson': 'Download lesson plan',
   'results.printLesson': 'Print / Save as PDF',
   'results.replay': 'Replay case',
+  'results.practiceDecision': 'Practice this decision',
   'results.note.label': 'Your reflection',
   'results.note.placeholder': 'Optional — included in the lesson plan export.',
 

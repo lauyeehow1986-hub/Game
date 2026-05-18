@@ -3,10 +3,16 @@ import { useCustomCases } from '../../state/customCasesStore';
 import { useProgress } from '../../state/progressStore';
 import { useGame } from '../../state/gameStore';
 import { useAchievements } from '../../state/achievementsStore';
+import { useState, lazy, Suspense } from 'react';
 import { computePersonalTrends, computeDecisionWeaknesses, gradeBandLabel } from '../../lib/personal-trends';
 import { useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
 import { CURRICULA } from '../../lib/curricula';
+import type { CaseDefinition } from '../../lib/types';
+
+const PracticeDecisionModal = lazy(() =>
+  import('../modals/PracticeDecisionModal').then((m) => ({ default: m.PracticeDecisionModal })),
+);
 
 const CATEGORY_COLOURS: Record<'acute' | 'elective' | 'outpatient', string> = {
   acute: '#f87171',
@@ -59,6 +65,7 @@ export function TrendsPanel() {
   const unlockedAchievements = useAchievements((s) => s.unlocked);
   const decisionNotes = useProgress((s) => s.decisionNotes);
   const setDecisionNote = useProgress((s) => s.setDecisionNote);
+  const [practice, setPractice] = useState<{ caseDef: CaseDefinition; decisionId: string } | null>(null);
 
   const catalogue = [...listCases(), ...Object.values(customCases)];
   const runHistory = useProgress((s) => s.runHistory);
@@ -214,23 +221,34 @@ export function TrendsPanel() {
                   className="border-l-2 pl-2"
                   style={{ borderColor: colour }}
                 >
-                  <button
-                    onClick={() => {
-                      if (!c) return;
-                      if (status !== 'idle') resetRun();
-                      startCase(c);
-                    }}
-                    disabled={!c}
-                    className="text-left w-full"
-                  >
-                    <div className="text-white hover:text-clinical-accent leading-snug">
-                      {w.prompt}
-                    </div>
-                    <div className="text-[10px] text-clinical-subtle font-mono">
-                      {c ? tr(c.title) : w.caseId} · {pct}% over {w.attempts}{' '}
-                      {w.attempts === 1 ? 'attempt' : 'attempts'}
-                    </div>
-                  </button>
+                  <div className="text-white leading-snug">{w.prompt}</div>
+                  <div className="text-[10px] text-clinical-subtle font-mono">
+                    {c ? tr(c.title) : w.caseId} · {pct}% over {w.attempts}{' '}
+                    {w.attempts === 1 ? 'attempt' : 'attempts'}
+                  </div>
+                  <div className="flex gap-1 mt-1">
+                    <button
+                      disabled={!c}
+                      onClick={() => {
+                        if (!c) return;
+                        setPractice({ caseDef: c, decisionId: w.decisionId });
+                      }}
+                      className="text-[10px] px-2 py-0.5 rounded bg-clinical-accent text-white font-semibold disabled:opacity-40 hover:brightness-110"
+                    >
+                      {t('trends.weak.practice')}
+                    </button>
+                    <button
+                      disabled={!c}
+                      onClick={() => {
+                        if (!c) return;
+                        if (status !== 'idle') resetRun();
+                        startCase(c);
+                      }}
+                      className="text-[10px] px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white disabled:opacity-40"
+                    >
+                      {t('trends.weak.restart')}
+                    </button>
+                  </div>
                 </li>
               );
             })}
@@ -436,6 +454,15 @@ export function TrendsPanel() {
           </ul>
         </details>
       )}
+      <Suspense fallback={null}>
+        {practice && (
+          <PracticeDecisionModal
+            caseDef={practice.caseDef}
+            decisionId={practice.decisionId}
+            onClose={() => setPractice(null)}
+          />
+        )}
+      </Suspense>
     </section>
   );
 }

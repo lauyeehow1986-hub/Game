@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { useGame } from '../../state/gameStore';
 import { useProgress } from '../../state/progressStore';
 import { gradeForRatio, totalScoreFromLog } from '../../lib/scoring';
@@ -13,6 +13,10 @@ import { encodeRunToUrl } from '../../lib/case-share';
 import { GlossaryText } from '../GlossaryText';
 import { useAchievements } from '../../state/achievementsStore';
 import { useFocusTrap } from '../../lib/use-focus-trap';
+
+const PracticeDecisionModal = lazy(() =>
+  import('./PracticeDecisionModal').then((m) => ({ default: m.PracticeDecisionModal })),
+);
 
 export function ResultsModal() {
   const t = useT();
@@ -35,6 +39,7 @@ export function ResultsModal() {
   const setDecisionNote = useProgress((s) => s.setDecisionNote);
   const fireAchievement = useAchievements((s) => s.fire);
   const cardRef = useFocusTrap<HTMLDivElement>(status === 'completed');
+  const [practice, setPractice] = useState<{ decisionId: string } | null>(null);
 
   // Build a {decisionId -> text} view of the persisted notes for the
   // currently-completed case, so the ExportButtons + textareas read off
@@ -189,6 +194,12 @@ export function ResultsModal() {
                       className="mt-0.5 w-full bg-clinical-bg border border-clinical-border rounded px-2 py-1 text-[11px] text-white resize-y"
                     />
                   </label>
+                  <button
+                    onClick={() => setPractice({ decisionId: decision.id })}
+                    className="mt-1 text-[10px] px-2 py-0.5 rounded border border-clinical-accent/40 text-clinical-accent hover:bg-clinical-accent/10"
+                  >
+                    {t('results.practiceDecision')}
+                  </button>
                   {decision.options.length > 1 && (
                     <details className="mt-2 text-[11px]">
                       <summary className="cursor-pointer text-clinical-subtle hover:text-white">
@@ -338,6 +349,15 @@ export function ResultsModal() {
           </button>
         </footer>
       </div>
+      <Suspense fallback={null}>
+        {practice && (
+          <PracticeDecisionModal
+            caseDef={caseDef}
+            decisionId={practice.decisionId}
+            onClose={() => setPractice(null)}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }
