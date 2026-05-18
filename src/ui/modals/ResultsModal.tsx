@@ -26,6 +26,7 @@ export function ResultsModal() {
   const profile = useGame((s) => s.profile);
   const elapsed = useGame((s) => s.run.elapsedGameMin);
   const resetRun = useGame((s) => s.resetRun);
+  const startCase = useGame((s) => s.startCase);
   const perspective = usePerspective((s) => s.current);
   const setPerspective = usePerspective((s) => s.set);
   const recordCaseResult = useProgress((s) => s.recordCaseResult);
@@ -291,6 +292,15 @@ export function ResultsModal() {
 
         <footer className="px-5 py-4 flex items-center justify-end gap-2 flex-wrap">
           <ExportButtons />
+          <button
+            onClick={() => {
+              resetRun();
+              startCase(caseDef);
+            }}
+            className="tap-target px-4 py-2 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110"
+          >
+            {t('results.replay')}
+          </button>
           <button
             onClick={resetRun}
             data-autofocus

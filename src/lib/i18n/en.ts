@@ -278,6 +278,7 @@ export const en: Record<string, string> = {
   'results.shareRunDone': 'Run URL copied to clipboard',
   'results.downloadLesson': 'Download lesson plan',
   'results.printLesson': 'Print / Save as PDF',
+  'results.replay': 'Replay case',
 
   // Run review (when opening a ?run= URL)
   'runReview.heading': 'Reviewing a shared run',
