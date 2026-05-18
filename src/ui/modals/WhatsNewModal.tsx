@@ -2,76 +2,40 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v9-seen';
+const KEY = 'sg-pathway-whatsnew-v10-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
   {
-    heading: 'New case — Suspected intimate-partner violence',
-    body: 'Ms Tan presents to a CHAS GP with somatic complaints and a "clumsy" bruise; husband waits in the car. Five decisions cover safe questioning (HEARS framework), KKH One Centre vs polyclinic referral, forensic-quality documentation, layered 72-hour safety planning, and long-term continuity with PAVe + AWARE.',
+    heading: 'Patient journey transcript',
+    body: 'The framing for triage, imaging, transfers and ward observations no longer disappears between decisions. The PatientPanel shows a "Journey so far" log, the lesson-plan export embeds it as a clinical narrative section, and shared-run URLs carry it for educators reviewing a learner\'s path.',
   },
   {
-    heading: 'New case — Migrant worker, construction fall',
-    body: 'A foreign-worker injury scenario that exercises FWMI insurance, MOM WICA reporting, and Class-C ward financing for a non-citizen. Five decisions cover field triage, CT-vs-plain-films, ward class billing, medical-leave + WICA, and repatriation pressure.',
+    heading: 'Three-track recommendations + decisions to revisit',
+    body: 'Trends now offers Practice / Continue curriculum / Discover instead of a single nag. A new "Decisions to revisit" list aggregates your runHistory log per decision and points at the specific decisions you keep getting wrong — spaced-repetition steering.',
   },
   {
-    heading: 'Faster first paint',
-    body: 'Phaser (~1.5 MB) and several occasional modals now load on-demand instead of up-front. The HUD + panels paint immediately; the map swaps in shortly after. Initial JS shrunk from ~387 KB gzipped to ~171 KB.',
+    heading: 'Reflection notes that persist',
+    body: 'After completing a case, each decision card has a small textarea for your reasoning. Notes save automatically per case+decision (latest wins), survive across sessions, and are embedded as blockquotes in the lesson-plan export. A new Trends panel section browses + exports all your notes as markdown.',
+  },
+  {
+    heading: 'Results: other options + replay',
+    body: 'Each decision card now has an "Other options" expansion showing every sibling option not picked with its weighted score and rationale — colour-graded so you see at a glance whether alternatives would have scored higher. The footer gains a Replay case button for one-click retry.',
   },
   {
     heading: 'Difficulty badges + filter',
-    body: 'Each case now shows a Beginner / Intermediate / Advanced band, derived from decision count plus the score gap between best and worst option (so high-consequence cases bump up). Filter the case list by difficulty band to focus your practice.',
+    body: 'Beginner / Intermediate / Advanced bands derived from decision count + the largest score gap between options. Filter the case list by band to focus practice. References panel gets a search box that filters guidelines, citations, and glossary terms live.',
   },
   {
-    heading: 'Search the references',
-    body: 'The References panel gets a search box that filters guidelines, historical citations, and glossary terms across all three tabs as you type.',
+    heading: 'New case — Suspected intimate-partner violence',
+    body: 'CHAS GP → KKH One Centre with HEARS-framework disclosure, forensic-quality documentation, layered safety planning, and PAVe / AWARE continuity.',
   },
   {
-    heading: 'Mobile + touch pass',
-    body: 'Bigger thumb targets on Start case, Commit decision, Hospital Ops controls. HUD wraps gracefully on narrow phones. Phaser canvas grew on small screens. Tap delay disabled so taps register immediately.',
+    heading: 'New case — Migrant worker, construction fall',
+    body: 'Exercises FWMI insurance, MOM WICA reporting, and Class-C ward financing for a non-citizen — financing pathway no other case touched.',
   },
   {
-    heading: 'Keyboard + screen-reader pass',
-    body: 'Press ? at any time for the shortcuts list. Every dialog now traps focus and returns it on close, status changes are announced politely to screen readers, a skip-to-content link is the first stop on Tab, and prefers-reduced-motion is honoured.',
-  },
-  {
-    heading: 'Achievements',
-    body: '12 unlockables for distinct play styles — first case, three distinctions, completing a curriculum, finishing an Ops shift in the black, switching language, importing custom content, scoring on every built-in case. Progress visible in the Trends panel.',
-  },
-  {
-    heading: 'Hospital Ops mode',
-    body: 'Run an 8-hour shift at TTSH. Hire doctors and nurses, set bed capacity, watch the queue under DORSCON. Switch via the Case / Hospital Ops toggle in the header.',
-  },
-  {
-    heading: 'Curricula',
-    body: 'Six curated case sequences (Cardio, Acute emergencies, Cross-sector, End-of-life, Outbreak response, Paeds & women\'s health) with progress tracking and a Begin / Continue button on each.',
-  },
-  {
-    heading: 'Best-practice diff at the end of a case',
-    body: 'After every case, ResultsModal shows your decisions vs what a best-practice run would have chosen, with the score delta on each miss.',
-  },
-  {
-    heading: 'Share runs and curricula',
-    body: 'After a case, copy a Share-run URL — open it elsewhere and the RunReviewModal walks through the same diff. Curricula now travel as ?curr=... URLs too, bundling any custom cases inside.',
-  },
-  {
-    heading: 'Lesson-plan markdown export',
-    body: 'One-click copy / download of the run as teaching notes — patient summary, every decision with both rationales, references, and historical citations.',
-  },
-  {
-    heading: 'Personal learning trends',
-    body: 'The Trends panel (left column) now shows your recent runs as a sparkline, your strength by category, and a recommended next case based on your weakest area.',
-  },
-  {
-    heading: '4-language interface + Chinese case titles',
-    body: 'Language picker in the header — English, 中文, Bahasa Melayu, தமிழ். STEMI is fully Chinese-localised end-to-end as a proof-of-concept; every other case has a Chinese title.',
-  },
-  {
-    heading: 'BYO cases via JSON',
-    body: 'Author your own case in JSON, paste it into Cases → Import JSON, and share the URL. Validator points at any broken field.',
-  },
-  {
-    heading: 'About / methodology',
-    body: 'About button (header) describes exactly what the financing model assumes, what the case content represents, and what to be cautious about.',
+    heading: 'Pathway engine: transit nodes no longer stall',
+    body: 'A long-standing bug where cases froze after the first decision (triage → resus → next decision) is fixed. The patient sprite now visibly walks the whole route between decisions instead of teleporting.',
   },
 ];
 

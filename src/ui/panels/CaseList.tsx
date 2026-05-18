@@ -26,6 +26,7 @@ export function CaseList() {
   const activeId = useGame((s) => s.run.caseId);
   const unlocked = useProgress((s) => s.unlockedCaseIds);
   const bestScores = useProgress((s) => s.bestScores);
+  const runHistory = useProgress((s) => s.runHistory);
   const customCases = useCustomCases((s) => s.cases);
   const addCustom = useCustomCases((s) => s.add);
   const removeCustom = useCustomCases((s) => s.remove);
@@ -231,6 +232,17 @@ export function CaseList() {
                   </div>
                   <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
                     {c.category} · {c.primaryFacility.toUpperCase()}
+                    {(() => {
+                      const decisions = c.pathway.filter((n) => n.decision).length;
+                      const runs = runHistory[c.id]?.length ?? 0;
+                      return (
+                        <>
+                          {' · '}
+                          {decisions} {decisions === 1 ? 'decision' : 'decisions'}
+                          {runs > 0 && ` · ${runs} ${runs === 1 ? 'run' : 'runs'}`}
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
                 {best && (
