@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { Department, Facility } from '../../lib/types';
 import { bus, Events } from '../../lib/events';
+import { useGame } from '../../state/gameStore';
 
 const LOGICAL_W = 800;
 const LOGICAL_H = 600;
@@ -147,25 +148,18 @@ export class HospitalScene extends Phaser.Scene {
       this.deptObjects.set(dept.id, { circle, badgeBg, badgeText });
     }
 
-    // Stylised patient figure: head + shoulders/torso, drawn with Graphics
-    // so we don't bundle any image assets. The shape reads as a human at
-    // map zoom but stays compact (~24px tall).
+    // Stylised patient figure: head + torso. Built from Phaser primitive
+    // GameObjects (Arc, Rectangle, Ellipse) instead of Graphics — primitives
+    // render reliably inside a scaled/translated Container, whereas Graphics
+    // drawn at relative coords can render at unexpected positions in some
+    // Phaser builds.
     const FIG_RED = 0xed2939;
-    const FIG_FILL = 0xffffff;
-    const figure = this.add.graphics();
-    // Body / torso (rounded trapezoid).
-    figure.fillStyle(FIG_RED, 1);
-    figure.fillRoundedRect(-7, 1, 14, 13, { tl: 4, tr: 4, bl: 2, br: 2 });
-    figure.lineStyle(1.5, 0x111a2e, 1);
-    figure.strokeRoundedRect(-7, 1, 14, 13, { tl: 4, tr: 4, bl: 2, br: 2 });
-    // Head.
-    figure.fillStyle(FIG_FILL, 1);
-    figure.fillCircle(0, -5, 5);
-    figure.lineStyle(1.5, 0x111a2e, 1);
-    figure.strokeCircle(0, -5, 5);
-    // Drop-shadow under the feet so the figure sits on the map rather
-    // than floating.
-    const shadow = this.add.ellipse(0, 16, 18, 5, 0x000000, 0.35);
+    const FIG_OUTLINE = 0x111a2e;
+    const shadow = this.add.ellipse(0, 16, 22, 6, 0x000000, 0.4);
+    const body = this.add.rectangle(0, 7, 16, 14, FIG_RED);
+    body.setStrokeStyle(1.5, FIG_OUTLINE, 1);
+    const head = this.add.circle(0, -5, 6, 0xffffff);
+    head.setStrokeStyle(1.5, FIG_OUTLINE, 1);
 
     const patientLabel = this.add
       .text(0, 22, 'Patient', {
@@ -176,7 +170,7 @@ export class HospitalScene extends Phaser.Scene {
         padding: { x: 4, y: 1 },
       })
       .setOrigin(0.5, 0);
-    this.patientSprite = this.add.container(0, 0, [shadow, figure, patientLabel]);
+    this.patientSprite = this.add.container(0, 0, [shadow, body, head, patientLabel]);
     this.patientSprite.setVisible(false);
     root.add(this.patientSprite);
 
@@ -194,6 +188,23 @@ export class HospitalScene extends Phaser.Scene {
     this.cleanup.push(() => bus.off(Events.PatientMoveTo, onMoveTo));
     this.cleanup.push(() => bus.off(Events.CaseReset, onReset));
     this.cleanup.push(() => bus.off(OPS_BADGE_EVENT, onOpsBadges));
+
+    // Bootstrap: if a case is already running when the scene mounts (the
+    // Phaser chunk is lazy-loaded, so the user can start a case before
+    // listeners are attached and miss the initial PatientMoveTo), snap
+    // the figure to the current node so subsequent hops have a starting
+    // point.
+    const run = useGame.getState().run;
+    if (run.caseId && run.currentNodeId) {
+      const dept = this.facility.departments.find((d) => {
+        // currentNodeId is a pathway node id, not a department id. Look up
+        // the node's department from the case definition.
+        const caseDef = useGame.getState().caseDef;
+        const node = caseDef?.pathway.find((n) => n.id === run.currentNodeId);
+        return node?.department === d.id;
+      });
+      if (dept) this.enqueueMove(dept);
+    }
 
     this.scale.on('resize', this.handleResize, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -244,9 +255,9 @@ export class HospitalScene extends Phaser.Scene {
       const colour = Phaser.Display.Color.HexStringToColor(f.colour).color;
       obj.circle.setFillStyle(colour, id === dept.id ? 0.45 : 0.18);
     });
-    // Shorter hop when there are more queued so a long chain still resolves
-    // promptly; min 350ms keeps movement perceptible.
-    const duration = Math.max(350, 900 - this.moveQueue.length * 150);
+    // Slower hops with a smaller queue speed-up, so motion is clearly
+    // visible even on the busiest chains.
+    const duration = Math.max(550, 1100 - this.moveQueue.length * 120);
     this.moveTween = this.tweens.add({
       targets: this.patientSprite,
       x: dept.position.x,
