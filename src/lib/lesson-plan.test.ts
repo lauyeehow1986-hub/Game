@@ -156,4 +156,32 @@ describe('generateLessonPlan', () => {
     expect(md).toContain('Historical scenario');
     expect(md).toContain('MOH SARS report 2004');
   });
+
+  it('emits Chinese chrome when locale is zh', () => {
+    const md = generateLessonPlan({
+      caseDef,
+      log,
+      elapsedGameMin: 75,
+      totalCostSGD: 500,
+      locale: 'zh',
+    });
+    expect(md).toContain('## 总览');
+    expect(md).toContain('## 决策');
+    expect(md).toContain('得分');
+    expect(md).toContain('SG Pathway 教学模拟');
+    // English chrome should not appear in zh export
+    expect(md).not.toContain('## Summary');
+  });
+
+  it('emits Malay chrome when locale is ms', () => {
+    const md = generateLessonPlan({
+      caseDef,
+      log,
+      elapsedGameMin: 60,
+      totalCostSGD: 0,
+      locale: 'ms',
+    });
+    expect(md).toContain('## Ringkasan');
+    expect(md).toContain('Markah');
+  });
 });

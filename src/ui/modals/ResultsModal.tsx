@@ -6,7 +6,7 @@ import { usePerspective } from '../../state/perspectiveStore';
 import { chimeCaseComplete } from '../../lib/audio';
 import { useState } from 'react';
 import { compareToBestPath } from '../../lib/best-path';
-import { useT, useTr } from '../../lib/i18n';
+import { useT, useTr, useLocale } from '../../lib/i18n';
 import { generateLessonPlan } from '../../lib/lesson-plan';
 import { openPrintableLessonPlan } from '../../lib/lesson-plan-print';
 import { encodeRunToUrl } from '../../lib/case-share';
@@ -393,6 +393,7 @@ function fmtElapsed(min: number) {
 
 function ExportButtons({ notes }: { notes: Record<string, string> }) {
   const t = useT();
+  const locale = useLocale((s) => s.locale);
   const caseDef = useGame((s) => s.caseDef);
   const log = useGame((s) => s.run.log);
   const journey = useGame((s) => s.run.journey);
@@ -415,6 +416,7 @@ function ExportButtons({ notes }: { notes: Record<string, string> }) {
       elapsedGameMin: elapsed,
       totalCostSGD: totalCost,
       burden,
+      locale,
       profile: profile
         ? {
             name: profile.name,
@@ -461,6 +463,7 @@ function ExportButtons({ notes }: { notes: Record<string, string> }) {
       elapsedGameMin: elapsed,
       totalCostSGD: totalCost,
       burden,
+      locale,
       profile: profile
         ? {
             name: profile.name,
