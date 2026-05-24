@@ -2,9 +2,29 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v10-seen';
+const KEY = 'sg-pathway-whatsnew-v11-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'All 23 cases now fully bilingual',
+    body: 'Every case in the catalogue is now playable end-to-end in Chinese (中文) as well as English — the full pathway prose, every decision prompt, every option, every rationale, every outcome, every guideline reference. Switch language from the header to play in 中文. All six curricula — Cardio, Acute Emergencies, Cross-Sector, End-of-Life, Pandemic, Paeds & Women — are fully bilingual.',
+  },
+  {
+    heading: 'Practice mode — re-attempt single decisions',
+    body: 'The Trends panel "Decisions to revisit" list (and every decision card in Results) now has a Practice button. Opens the decision in isolation: pick, check, see your score + best-practice + every sibling option with weighted scores and rationales. Pure practice — nothing writes to your bestScores or runHistory.',
+  },
+  {
+    heading: 'Compare your runs of the same case',
+    body: 'After you have played a case more than once, the case card surfaces a "Compare runs" link. Opens a matrix view: columns are runs newest-first with score + percentage, rows are each decision, cells show the option you picked with a colour-graded score. Spot exactly which decisions you changed between attempts.',
+  },
+  {
+    heading: 'New case — Paracetamol overdose, SGH → IMH',
+    body: 'A 23rd case covering acute self-harm: P1 triage, NAC dosing, NICE NG225-style psychosocial assessment, MHCTA disposition (and its misuse), family / safety-net negotiation, and IMH C-L + Mobile Crisis Team continuity. Adds 4 new guideline references.',
+  },
+  {
+    heading: 'The patient is now a human, not a dot',
+    body: 'The map sprite is a stylised head + body figure with a walking gait between rooms instead of a coloured circle. Zero asset weight; pure visual upgrade.',
+  },
   {
     heading: 'Patient journey transcript',
     body: 'The framing for triage, imaging, transfers and ward observations no longer disappears between decisions. The PatientPanel shows a "Journey so far" log, the lesson-plan export embeds it as a clinical narrative section, and shared-run URLs carry it for educators reviewing a learner\'s path.',
@@ -16,26 +36,6 @@ const ITEMS: Array<{ heading: string; body: string }> = [
   {
     heading: 'Reflection notes that persist',
     body: 'After completing a case, each decision card has a small textarea for your reasoning. Notes save automatically per case+decision (latest wins), survive across sessions, and are embedded as blockquotes in the lesson-plan export. A new Trends panel section browses + exports all your notes as markdown.',
-  },
-  {
-    heading: 'Results: other options + replay',
-    body: 'Each decision card now has an "Other options" expansion showing every sibling option not picked with its weighted score and rationale — colour-graded so you see at a glance whether alternatives would have scored higher. The footer gains a Replay case button for one-click retry.',
-  },
-  {
-    heading: 'Difficulty badges + filter',
-    body: 'Beginner / Intermediate / Advanced bands derived from decision count + the largest score gap between options. Filter the case list by band to focus practice. References panel gets a search box that filters guidelines, citations, and glossary terms live.',
-  },
-  {
-    heading: 'New case — Suspected intimate-partner violence',
-    body: 'CHAS GP → KKH One Centre with HEARS-framework disclosure, forensic-quality documentation, layered safety planning, and PAVe / AWARE continuity.',
-  },
-  {
-    heading: 'New case — Migrant worker, construction fall',
-    body: 'Exercises FWMI insurance, MOM WICA reporting, and Class-C ward financing for a non-citizen — financing pathway no other case touched.',
-  },
-  {
-    heading: 'Pathway engine: transit nodes no longer stall',
-    body: 'A long-standing bug where cases froze after the first decision (triage → resus → next decision) is fixed. The patient sprite now visibly walks the whole route between decisions instead of teleporting.',
   },
 ];
 
