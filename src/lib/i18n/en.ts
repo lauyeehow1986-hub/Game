@@ -203,6 +203,7 @@ export const en: Record<string, string> = {
   'practice.tryAgain': 'Try again',
   'trends.notes.heading': 'Your reflections',
   'trends.notes.export': 'Export notes',
+  'trends.notes.exportHeading': 'My SG Pathway reflection notes',
   'trends.notes.clear': 'Clear all',
 
   // Case category labels (used in trends bars + lesson plans)

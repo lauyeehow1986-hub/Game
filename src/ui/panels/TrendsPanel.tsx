@@ -299,7 +299,7 @@ export function TrendsPanel() {
         const total = Array.from(grouped.values()).reduce((acc, a) => acc + a.length, 0);
 
         const exportAll = async () => {
-          const lines: string[] = ['# My SG Pathway reflection notes', ''];
+          const lines: string[] = [`# ${t('trends.notes.exportHeading')}`, ''];
           for (const [caseId, arr] of grouped) {
             const c = catalogue.find((x) => x.id === caseId);
             const title = c ? tr(c.title) : caseId;
