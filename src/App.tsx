@@ -10,7 +10,6 @@ import { DataExchangePanel } from './ui/panels/DataExchangePanel';
 import { CitationsPanel } from './ui/panels/CitationsPanel';
 import { CurriculumPanel } from './ui/panels/CurriculumPanel';
 import { TrendsPanel } from './ui/panels/TrendsPanel';
-import { OpsPanel } from './ui/panels/OpsPanel';
 import { DecisionModal } from './ui/modals/DecisionModal';
 import { ResultsModal } from './ui/modals/ResultsModal';
 import { RunReviewModal } from './ui/modals/RunReviewModal';
@@ -32,6 +31,9 @@ import { useMode } from './state/modeStore';
 // once the chunk arrives.
 const PhaserGame = lazy(() =>
   import('./game/PhaserGame').then((m) => ({ default: m.PhaserGame })),
+);
+const OpsPanel = lazy(() =>
+  import('./ui/panels/OpsPanel').then((m) => ({ default: m.OpsPanel })),
 );
 
 export default function App() {
@@ -56,7 +58,9 @@ export default function App() {
             </>
           ) : (
             <>
-              <OpsPanel />
+              <Suspense fallback={<div className="text-clinical-subtle text-xs p-2">Loading Ops…</div>}>
+                <OpsPanel />
+              </Suspense>
               <FacilityBrowser />
             </>
           )}
