@@ -54,4 +54,13 @@ describe('scanGlossary', () => {
       expect.objectContaining({ kind: 'term', text: 'DORSCON' }),
     ]);
   });
+
+  it('recognises the v2.88 SG-specific terms', () => {
+    for (const t of ['CURB-65', 'WBGT', 'FWMI', 'NAIS', 'NSF', 'RTU', 'WICA', 'MHCTA', 'SOC', 'NS1']) {
+      const tokens = scanGlossary(`Discuss ${t} now.`);
+      const found = tokens.find((tk) => tk.kind === 'term' && tk.text === t);
+      expect(found, `expected ${t} to be in the glossary`).toBeTruthy();
+      expect(found?.def).toBeTruthy();
+    }
+  });
 });
