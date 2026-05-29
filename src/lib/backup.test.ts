@@ -79,3 +79,22 @@ describe('backupFilename', () => {
     expect(name).toBe('sg-pathway-backup-2026-05-29-13-45-30.json');
   });
 });
+
+describe('backup envelope schema discipline', () => {
+  it('rejects an envelope from a different app (wrong schema)', () => {
+    const env = {
+      schema: 'some-other-app-backup',
+      version: 1,
+      exportedAt: 0,
+      entries: { [`${BACKUP_PREFIX}progress`]: 'attacker-payload' },
+    };
+    expect(applyBackup(JSON.stringify(env), memStorage()).ok).toBe(false);
+  });
+
+  it('does not break when entries is empty', () => {
+    const env = { schema: 'sg-pathway-backup', version: 1, exportedAt: 0, entries: {} };
+    const res = applyBackup(JSON.stringify(env), memStorage());
+    expect(res.ok).toBe(true);
+    if (res.ok) expect(res.restored).toBe(0);
+  });
+});
