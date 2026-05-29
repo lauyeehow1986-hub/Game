@@ -336,7 +336,9 @@ export class HospitalScene extends Phaser.Scene {
       obj.badgeText.setVisible(true);
     }
 
-    // Draw per-acuity patient dots inside each department circle.
+    // Draw per-acuity patient figures inside each department circle.
+    // Each "figure" is a tiny acuity-coloured head + body silhouette so
+    // the ops view visually matches the case-mode patient sprite.
     if (payload.dots) {
       for (const [deptId, dotCounts] of Object.entries(payload.dots)) {
         const dept = this.facility.departments.find((d) => d.id === deptId);
@@ -347,24 +349,30 @@ export class HospitalScene extends Phaser.Scene {
         for (let i = 0; i < dotCounts.p3; i++) dots.push('p3');
         for (let i = 0; i < dotCounts.p4; i++) dots.push('p4');
         const max = Math.min(dots.length, 18);
-        const r = 3;
-        const gap = 8;
+        const gapX = 9;
+        const gapY = 10;
         const cols = Math.min(max, 6);
         const rows = Math.ceil(max / cols);
-        const startX = dept.position.x - ((cols - 1) * gap) / 2;
-        const startY = dept.position.y - ((rows - 1) * gap) / 2;
+        const startX = dept.position.x - ((cols - 1) * gapX) / 2;
+        const startY = dept.position.y - ((rows - 1) * gapY) / 2;
         for (let i = 0; i < max; i++) {
           const c = i % cols;
           const r0 = Math.floor(i / cols);
-          this.dotsGraphics.fillStyle(ACUITY_COLOUR[dots[i]], 1);
-          this.dotsGraphics.fillCircle(startX + c * gap, startY + r0 * gap, r);
+          const cx = startX + c * gapX;
+          const cy = startY + r0 * gapY;
+          const colour = ACUITY_COLOUR[dots[i]];
+          // Body: rounded rect torso.
+          this.dotsGraphics.fillStyle(colour, 1);
+          this.dotsGraphics.fillRoundedRect(cx - 2, cy - 1, 4, 4, 1);
+          // Head: small circle on top.
+          this.dotsGraphics.fillCircle(cx, cy - 3, 1.5);
         }
         if (dots.length > max) {
           // Overflow indicator — small grey notch.
           this.dotsGraphics.fillStyle(0x7d8ba4, 1);
           this.dotsGraphics.fillRect(
             dept.position.x - 6,
-            dept.position.y + (rows * gap) / 2 - 2,
+            dept.position.y + (rows * gapY) / 2 - 2,
             12,
             2,
           );

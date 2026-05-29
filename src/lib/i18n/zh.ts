@@ -351,6 +351,26 @@ export const zh: Record<string, string> = {
   'about.code.body':
     '在 GitHub 上开源。欢迎提交 issue、PR 和翻译贡献。',
 
+  // Accessibility
+  'a11y.skip': '跳到主内容',
+  'a11y.announce.decisionRequired': '需要做出一个决策。',
+  'a11y.announce.caseComplete': '病例完成:{{title}}。',
+  'a11y.announce.runReset': '病例已重置。请选择新病例开始。',
+  'a11y.kbd.heading': '键盘快捷键',
+  'a11y.kbd.subtitle': '随时按 ? 重新打开此列表。',
+  'a11y.kbd.open': '键盘快捷键',
+  'a11y.kbd.global': '全局',
+  'a11y.kbd.decision': '决策对话框',
+  'a11y.kbd.demo': '最佳实践演示',
+  'a11y.kbd.tutorial': '教程',
+  'a11y.kbd.k.help': '显示此帮助',
+  'a11y.kbd.k.esc': '关闭任意打开的对话框',
+  'a11y.kbd.k.tab': '在对话框内循环焦点',
+  'a11y.kbd.k.arrows': '↑ / ↓ 高亮某选项',
+  'a11y.kbd.k.nums': '1–9 跳到该选项',
+  'a11y.kbd.k.enter': 'Enter 确认',
+  'a11y.kbd.k.lr': '← / → 向前 / 向后翻页',
+
   // Achievements
   'ach.unlocked': '成就解锁',
   'ach.heading': '成就',
