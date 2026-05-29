@@ -8,14 +8,14 @@ Hosted as a static site on GitHub Pages. Fully offline-capable once installed (P
 
 ## What's in it
 
-### 26 clinical cases across every category
-Acute STEMI · Acute ischaemic stroke (thrombectomy) · Severe sepsis · Major trauma · Febrile toddler (KKH PEWS) · Antenatal-to-delivery (KKH) · First-episode psychosis (IMH EPIP) · Paracetamol overdose + IMH C-L · Construction fall on a Work Permit (MOM WICA / FWMI) · Suspected IPV (KKH One Centre + HEARS) · Heart failure outpatient (NHCS GDMT) · CKD progression to dialysis (NKF) · Outpatient T2DM (SGLT2i, Healthier-SG) · URTI at a CHAS GP · Elective THR · Private cataract (SNEC vs Mt Elizabeth) · Cross-cluster breast cancer (NHG → SGH → NCCS) · Private-to-public handover (hand-carry CD) · End-of-life with home hospice (HCA + DPH) · Geriatric falls + AH@Home virtual ward · Disease X outbreak (NCID + DORSCON) · SARS 2003 historical · COVID-19 multi-cluster historical · Acute angle-closure glaucoma (SNEC) · Dental abscess + Ludwig screen (Healthway → NDCS) · Dengue with warning signs + dorm cluster (NTFGH + MOH/NEA/MOM)
+### 28 clinical cases across every category
+Acute STEMI · Acute ischaemic stroke (thrombectomy) · Severe sepsis · Major trauma · Febrile toddler (KKH PEWS) · Antenatal-to-delivery (KKH) · First-episode psychosis (IMH EPIP) · Paracetamol overdose + IMH C-L · Construction fall on a Work Permit (MOM WICA / FWMI) · Suspected IPV (KKH One Centre + HEARS) · Heart failure outpatient (NHCS GDMT) · CKD progression to dialysis (NKF) · Outpatient T2DM (SGLT2i, Healthier-SG) · URTI at a CHAS GP · Elective THR · Private cataract (SNEC vs Mt Elizabeth) · Cross-cluster breast cancer (NHG → SGH → NCCS) · Private-to-public handover (hand-carry CD) · End-of-life with home hospice (HCA + DPH) · Geriatric falls + AH@Home virtual ward · Disease X outbreak (NCID + DORSCON) · SARS 2003 historical · COVID-19 multi-cluster historical · Acute angle-closure glaucoma (SNEC) · Dental abscess + Ludwig screen (Healthway → NDCS) · Dengue with warning signs + dorm cluster (NTFGH + MOH/NEA/MOM) · Community-acquired pneumonia + CURB-65 + NAIS (Polyclinic → KTPH) · Exertional heat injury + SAF cool-first protocol + RTU rehab (TTSH)
 
 ### 91 facilities across the entire network
 SingHealth · NUHS · NHG clusters: every acute hospital, specialty centre, community hospital, and polyclinic. VWO partners (SLH, Ren Ci, AMKH, SACH). Primary care (Healthway, Parkway Shenton, Raffles, NEMG, IHH-Parkway, MaNaDr, Doctor Anywhere, WhiteCoat, Speedoc). Private hospitals (Mt Elizabeth, Gleneagles, Raffles, Mt Alvernia, Thomson, Farrer Park, Crawfurd). Specialist nodes (Asia Medic, Camden, Novena Medical, SMG). Ancillary (SCDF, HSA, NKF/KDF/Fresenius dialysis, HCA/Dover Park/Assisi hospice, nursing homes, pharmacies, home).
 
-### 6 curricula
-Cardio · Acute Emergencies · Cross-Sector · End-of-Life · Pandemic · Paeds & Women's Health — each with learning objectives, progress tracking, and one-click Begin / Continue.
+### 7 curricula
+Cardio · Acute Emergencies · Cross-Sector · End-of-Life · Pandemic · Primary care + Healthier SG · Paeds & Women's Health — each with learning objectives, progress tracking, and one-click Begin / Continue.
 
 ### Learning analytics
 - Personal trends panel: sparklines, category strengths, three-track recommendations (Practice / Continue curriculum / Discover something new)
@@ -43,7 +43,7 @@ Cardio · Acute Emergencies · Cross-Sector · End-of-Life · Pandemic · Paeds 
 - **Backup & restore** — Settings → Export / Import JSON moves your progress + streak + custom content between browsers
 
 ### Languages
-4 locales scaffolded. **All 26 cases fully translated end-to-end into Chinese (中文)** — every prompt, option, rationale, outcome, framing line, guideline reference. UI chrome translated for English, Chinese, Malay, Tamil.
+4 locales scaffolded. **All 28 cases fully translated end-to-end into Chinese (中文)** — every prompt, option, rationale, outcome, framing line, guideline reference. UI chrome translated for English, Chinese, Malay, Tamil.
 
 ### Quality
 - 286 unit tests, build clean
