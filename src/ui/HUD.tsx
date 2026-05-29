@@ -184,7 +184,7 @@ export function HUD() {
           <span
             title={`${t('hud.streak.tooltip')} (${t('hud.streak.best')}: ${streakBest})`}
             aria-label={`${t('hud.streak')}: ${streakNow}`}
-            className="hidden md:inline-flex h-8 items-center gap-1 px-2 rounded border border-clinical-border bg-clinical-bg text-[11px] font-medium text-clinical-warn"
+            className="inline-flex h-8 items-center gap-1 px-2 rounded border border-clinical-border bg-clinical-bg text-[11px] font-medium text-clinical-warn"
           >
             <span aria-hidden="true">🔥</span>
             <span className="font-mono">{streakNow}</span>
