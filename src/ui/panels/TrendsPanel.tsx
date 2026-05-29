@@ -3,6 +3,7 @@ import { useCustomCases } from '../../state/customCasesStore';
 import { useProgress } from '../../state/progressStore';
 import { useGame } from '../../state/gameStore';
 import { useAchievements } from '../../state/achievementsStore';
+import { useStreak, currentStreakValue, bestStreakValue } from '../../state/streakStore';
 import { useState, lazy, Suspense } from 'react';
 import { computePersonalTrends, computeDecisionWeaknesses, gradeBandLabel } from '../../lib/personal-trends';
 import { useT, useTr } from '../../lib/i18n';
@@ -68,6 +69,9 @@ export function TrendsPanel() {
   const resetRun = useGame((s) => s.resetRun);
   const status = useGame((s) => s.run.status);
   const unlockedAchievements = useAchievements((s) => s.unlocked);
+  const streakDays = useStreak((s) => s.days);
+  const streakNow = currentStreakValue({ days: streakDays });
+  const streakBest = bestStreakValue({ days: streakDays });
   const decisionNotes = useProgress((s) => s.decisionNotes);
   const setDecisionNote = useProgress((s) => s.setDecisionNote);
   const [practice, setPractice] = useState<{ caseDef: CaseDefinition; decisionId: string } | null>(null);
@@ -109,6 +113,18 @@ export function TrendsPanel() {
           colour={gradeColour(trends.meanRatio)}
         />
         <Mini label={t('trends.grade')} value={trends.totalPlayed > 0 ? meanGrade : '—'} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 text-[11px]">
+        <Mini
+          label={t('hud.streak')}
+          value={streakNow > 0 ? `🔥 ${streakNow}d` : '—'}
+          colour={streakNow > 0 ? '#facc15' : undefined}
+        />
+        <Mini
+          label={t('hud.streak.best')}
+          value={streakBest > 0 ? `${streakBest}d` : '—'}
+        />
       </div>
 
       {trends.totalPlayed > 0 && (
