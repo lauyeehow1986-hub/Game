@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { CURRICULA, curriculumProgress, getCurriculum, nextCaseInCurriculum } from './curricula';
+import { cases } from '../content';
 
 const empty: Record<string, { score: number; max: number; at: number }> = {};
 
@@ -10,6 +11,13 @@ describe('CURRICULA', () => {
   it('ids are unique', () => {
     const ids = CURRICULA.map((c) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+  it('every case id referenced by a curriculum resolves in the catalogue', () => {
+    for (const c of CURRICULA) {
+      for (const caseId of c.caseIds) {
+        expect(cases[caseId], `${c.id} → ${caseId} not in catalogue`).toBeDefined();
+      }
+    }
   });
 });
 
