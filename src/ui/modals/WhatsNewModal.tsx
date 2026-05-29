@@ -2,9 +2,25 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v12-seen';
+const KEY = 'sg-pathway-whatsnew-v13-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'Daily learning streak + heatmap',
+    body: 'Complete at least one case in a day to extend your streak — a 🔥 chip in the HUD shows how many days in a row you have played. The Trends panel adds a 12-week heatmap of your activity and surfaces both current and best-ever streaks. Streaks of 3 / 7 / 30 days each unlock an achievement.',
+  },
+  {
+    heading: 'Today\'s challenge',
+    body: 'A new ☀ Today button in the case list picks the same case for every player on a given date. Stable per-day, drawn deterministically from your unlocked catalogue — a low-friction way to keep the streak alive on busy days.',
+  },
+  {
+    heading: 'Backup & restore',
+    body: 'Settings now offers Export / Import JSON. Move your progress, streak, achievements, custom cases and curricula to another browser without losing anything.',
+  },
+  {
+    heading: 'Two more cases — dental abscess + dengue cluster',
+    body: 'A Healthway after-hours → NDCS dental emergency walks through Ludwig-angina red flags and antibiotic stewardship. A dengue with warning signs case at NTFGH covers MOH CPG fluid resuscitation, NEA / MOM dorm-cluster notification, and FWMI cost coverage for migrant workers.',
+  },
   {
     heading: 'Roadmap complete — what shipped',
     body: 'The plan\'s remaining v1.0-polish items have all landed: interactive coachmarks tutorial (point-and-explain, not text slides), Quick Quiz mode, opt-in real-time pacing for acute-timer cases, Ops-mode patient figures (no more colored dots). Hit Tutorial in the header to take the new tour.',
