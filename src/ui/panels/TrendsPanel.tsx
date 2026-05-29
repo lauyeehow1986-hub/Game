@@ -8,10 +8,14 @@ import { computePersonalTrends, computeDecisionWeaknesses, gradeBandLabel } from
 import { useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
 import { CURRICULA } from '../../lib/curricula';
+import { buildRandomQuiz, type QuizItem } from '../../lib/quiz';
 import type { CaseDefinition } from '../../lib/types';
 
 const PracticeDecisionModal = lazy(() =>
   import('../modals/PracticeDecisionModal').then((m) => ({ default: m.PracticeDecisionModal })),
+);
+const QuizModal = lazy(() =>
+  import('../modals/QuizModal').then((m) => ({ default: m.QuizModal })),
 );
 
 const CATEGORY_COLOURS: Record<'acute' | 'elective' | 'outpatient', string> = {
@@ -66,6 +70,7 @@ export function TrendsPanel() {
   const decisionNotes = useProgress((s) => s.decisionNotes);
   const setDecisionNote = useProgress((s) => s.setDecisionNote);
   const [practice, setPractice] = useState<{ caseDef: CaseDefinition; decisionId: string } | null>(null);
+  const [quiz, setQuiz] = useState<QuizItem[] | null>(null);
 
   const catalogue = [...listCases(), ...Object.values(customCases)];
   const runHistory = useProgress((s) => s.runHistory);
@@ -104,6 +109,20 @@ export function TrendsPanel() {
         />
         <Mini label={t('trends.grade')} value={trends.totalPlayed > 0 ? meanGrade : '—'} />
       </div>
+
+      {trends.totalPlayed > 0 && (
+        <button
+          onClick={() => {
+            const played = catalogue.filter((c) => bestScores[c.id]);
+            const pool = played.length > 0 ? played : catalogue;
+            const q = buildRandomQuiz(pool, 5);
+            if (q.length > 0) setQuiz(q);
+          }}
+          className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-accent/40 bg-clinical-accent/10 text-clinical-accent hover:bg-clinical-accent/20"
+        >
+          {t('quiz.startBtn')}
+        </button>
+      )}
 
       {trends.totalPlayed > 0 && (
         <div className="space-y-1">
@@ -460,6 +479,13 @@ export function TrendsPanel() {
             caseDef={practice.caseDef}
             decisionId={practice.decisionId}
             onClose={() => setPractice(null)}
+          />
+        )}
+        {quiz && (
+          <QuizModal
+            quiz={quiz}
+            resolveCase={(id) => catalogue.find((c) => c.id === id)}
+            onClose={() => setQuiz(null)}
           />
         )}
       </Suspense>

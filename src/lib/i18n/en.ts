@@ -203,6 +203,18 @@ export const en: Record<string, string> = {
   'practice.reference': 'Reference',
   'practice.noScore': 'No score recorded — pure practice.',
   'practice.tryAgain': 'Try again',
+
+  // Quiz mode
+  'quiz.tag': 'Quick quiz',
+  'quiz.startBtn': '⚡ Quick quiz — 5 random decisions',
+  'quiz.progress': 'Question {{n}} of {{total}}',
+  'quiz.runningScore': 'Total',
+  'quiz.next': 'Next question',
+  'quiz.finish': 'Finish',
+  'quiz.summaryHeading': 'Quiz complete',
+  'quiz.again': 'Quiz again',
+  'quiz.empty': 'No decisions available for a quiz yet.',
+  'quiz.brokenItem': 'This quiz item references a case that is not installed.',
   'trends.notes.heading': 'Your reflections',
   'trends.notes.export': 'Export notes',
   'trends.notes.exportHeading': 'My SG Pathway reflection notes',

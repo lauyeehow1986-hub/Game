@@ -221,6 +221,17 @@ export const zh: Record<string, string> = {
   'results.note.placeholder': '可选 — 将包含在课程教案导出中。',
   'results.practiceDecision': '练习此决策',
 
+  'quiz.tag': '快速测验',
+  'quiz.startBtn': '⚡ 快速测验 — 5道随机决策',
+  'quiz.progress': '第 {{n}} 题 / 共 {{total}}',
+  'quiz.runningScore': '总分',
+  'quiz.next': '下一题',
+  'quiz.finish': '完成',
+  'quiz.summaryHeading': '测验完成',
+  'quiz.again': '再来一轮',
+  'quiz.empty': '尚无可用于测验的决策。',
+  'quiz.brokenItem': '此测验题目引用的病例未安装。',
+
   'whatsNew.title': '更新说明',
   'whatsNew.subtitle': '自上次访问以来新增的功能',
   'whatsNew.gotIt': '知道了 — 关闭',
