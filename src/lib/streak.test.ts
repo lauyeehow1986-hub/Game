@@ -51,4 +51,24 @@ describe('streak math', () => {
   it('handles month/year rollovers', () => {
     expect(currentStreak(['2025-12-31', '2026-01-01'], '2026-01-01')).toBe(2);
   });
+
+  it('handles leap-day boundary (29 Feb → 1 Mar)', () => {
+    expect(currentStreak(['2024-02-29', '2024-03-01'], '2024-03-01')).toBe(2);
+  });
+
+  it('duplicate days are de-duped by recordDay', () => {
+    const a = recordDay(['2026-05-29'], '2026-05-29');
+    const b = recordDay(a, '2026-05-29');
+    expect(b).toEqual(['2026-05-29']);
+  });
+
+  it('best streak from a long history with gaps', () => {
+    const days = [
+      '2026-01-01', '2026-01-02', '2026-01-03',
+      '2026-01-05', // gap
+      '2026-02-01', '2026-02-02', '2026-02-03', '2026-02-04', '2026-02-05',
+      '2026-03-10',
+    ];
+    expect(bestStreak(days)).toBe(5);
+  });
 });
