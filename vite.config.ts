@@ -11,10 +11,16 @@ export default defineConfig({
     chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
-        manualChunks: {
-          phaser: ['phaser'],
-          react: ['react', 'react-dom'],
-          zustand: ['zustand'],
+        manualChunks: (id) => {
+          if (id.includes('node_modules/phaser')) return 'phaser';
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom'))
+            return 'react';
+          if (id.includes('node_modules/zustand')) return 'zustand';
+          // Co-locate all facility + case content + clusters/financing/data
+          // tables into one content chunk. React shell renders first; the
+          // content chunk loads in parallel rather than blocking the
+          // entry chunk parse.
+          if (id.includes('/src/content/')) return 'content';
         },
       },
     },
