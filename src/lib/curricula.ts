@@ -79,7 +79,7 @@ export const CURRICULA: Curriculum[] = [
       'Mobilise PHPC + dormitory on-site care during a multi-cluster surge.',
       'Use DORSCON escalation as a tool, not a label — connect to PPE, surge, ED diversion.',
     ],
-    caseIds: ['disease-x', 'sars-2003-historical', 'covid19-historical'],
+    caseIds: ['disease-x', 'sars-2003-historical', 'covid19-historical', 'dengue-surge'],
   },
   {
     id: 'paeds-and-women',
