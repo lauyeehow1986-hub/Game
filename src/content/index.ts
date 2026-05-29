@@ -76,6 +76,7 @@ import { mentalHealthCrisisCase } from './cases/mental-health-crisis-sgh-imh';
 import { acuteAngleClosureCase } from './cases/acute-angle-closure';
 import { dentalAbscessCase } from './cases/dental-abscess';
 import { dengueSurgeCase } from './cases/dengue-surge';
+import { capPneumoniaCase } from './cases/cap-pneumonia';
 import type { CaseDefinition, Facility } from '../lib/types';
 
 const allFacilities: Facility[] = [
@@ -132,6 +133,7 @@ export const cases: Record<string, CaseDefinition> = {
   [acuteAngleClosureCase.id]: acuteAngleClosureCase,
   [dentalAbscessCase.id]: dentalAbscessCase,
   [dengueSurgeCase.id]: dengueSurgeCase,
+  [capPneumoniaCase.id]: capPneumoniaCase,
 };
 
 export function getFacility(id: string): Facility | undefined {
