@@ -30,6 +30,17 @@ export const GLOSSARY_TERMS: GlossaryEntry[] = [
   { term: 'SCDF', def: 'Singapore Civil Defence Force — pre-hospital EMS provider that handles the 995 ambulance service.' },
   { term: 'MSW', def: 'Medical Social Worker — hospital-based social workers who coordinate financial counselling, Medifund applications, and discharge planning.' },
   { term: 'Medifund', def: 'Endowment fund of last resort that covers medical bills for Singaporeans who cannot afford them after subsidies and insurance.' },
+  { term: 'CURB-65', def: 'Severity score for community-acquired pneumonia (Confusion, Urea >7, RR ≥30, BP <90/60, Age ≥65) used to triage outpatient vs admission vs ICU.' },
+  { term: 'WBGT', def: 'Wet-Bulb Globe Temperature — composite heat-stress index that drives the SAF activity-modification matrix.' },
+  { term: 'FWMI', def: 'Foreign Worker Medical Insurance — employer-funded coverage for work-permit holders; replaces MediShield Life eligibility.' },
+  { term: 'NAIS', def: 'National Adult Immunisation Schedule — subsidised flu / pneumococcal / hep B / HPV / shingles vaccines for adults.' },
+  { term: 'NSF', def: 'Full-time National Serviceman — a person serving conscripted military / civil-defence / police duty.' },
+  { term: 'RTU', def: 'Return-to-Unit — Singapore military disposition allowing the serviceman to resume duties; graded re-exposure required after exertional heat injury.' },
+  { term: 'WICA', def: 'Work Injury Compensation Act — no-fault employer-funded scheme for workplace injuries.' },
+  { term: 'MHCTA', def: 'Mental Health (Care and Treatment) Act — Singapore framework for involuntary psychiatric assessment and admission.' },
+  { term: 'SOC', def: 'Specialist Outpatient Clinic — public-hospital outpatient specialist consultation with subsidised rates for citizens / PRs.' },
+  { term: 'NS1', def: 'Dengue NS1 antigen — useful for diagnosis in the first 7 days of fever.' },
+  { term: 'I-Quit', def: 'HPB national smoking-cessation hotline and programme (1800-438-2000).' },
 ];
 
 /**
