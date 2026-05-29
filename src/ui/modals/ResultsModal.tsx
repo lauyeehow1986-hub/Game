@@ -12,7 +12,7 @@ import { openPrintableLessonPlan } from '../../lib/lesson-plan-print';
 import { encodeRunToUrl } from '../../lib/case-share';
 import { GlossaryText } from '../GlossaryText';
 import { useAchievements } from '../../state/achievementsStore';
-import { useStreak } from '../../state/streakStore';
+import { useStreak, currentStreakValue } from '../../state/streakStore';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
 const PracticeDecisionModal = lazy(() =>
@@ -67,6 +67,7 @@ export function ResultsModal() {
         caseId: caseDef.id,
         scoreRatio: max > 0 ? earned / max : 0,
         runsForThisCase,
+        currentStreakDays: currentStreakValue(),
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

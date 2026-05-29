@@ -15,6 +15,9 @@ export type AchievementId =
   | 'triple-distinction'
   | 'curriculum-graduate'
   | 'streak-master'
+  | 'daily-streak-3'
+  | 'daily-streak-7'
+  | 'daily-streak-30'
   | 'tycoon'
   | 'tycoon-profit'
   | 'polyglot'
@@ -43,6 +46,9 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   { id: 'triple-distinction',  title: 'Triple Distinction',  description: 'Score 90% or higher on three different cases.' },
   { id: 'curriculum-graduate', title: 'Curriculum graduate', description: 'Complete every case in a curriculum.' },
   { id: 'streak-master',       title: 'Streak master',       description: 'Replay the same case three times.' },
+  { id: 'daily-streak-3',      title: 'Three on the trot',   description: 'Play on three consecutive days.' },
+  { id: 'daily-streak-7',      title: 'Week on call',        description: 'Play on seven consecutive days.' },
+  { id: 'daily-streak-30',     title: 'Houseman year',       description: 'Play on thirty consecutive days.' },
   { id: 'tycoon',              title: 'Tycoon',              description: 'Finish a Hospital Ops shift.' },
   { id: 'tycoon-profit',       title: 'In the black',        description: 'Finish a Hospital Ops shift with positive net SGD.' },
   { id: 'polyglot',            title: 'Polyglot',            description: 'Switch the interface language away from English.' },
@@ -57,7 +63,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
 // ──────────────────────────────────────────────────────────────────────────
 
 export type Trigger =
-  | { kind: 'case-completed'; caseId: string; scoreRatio: number; runsForThisCase: number }
+  | { kind: 'case-completed'; caseId: string; scoreRatio: number; runsForThisCase: number; currentStreakDays?: number }
   | { kind: 'ops-shift-ended'; netSGD: number }
   | { kind: 'locale-changed'; locale: Locale }
   | { kind: 'demo-opened' }
@@ -91,6 +97,9 @@ export function evaluate(
       want('distinction', trigger.scoreRatio >= 0.9);
       want('triple-distinction', snapshot.distinctionCount >= 3);
       want('streak-master', trigger.runsForThisCase >= 3);
+      want('daily-streak-3', (trigger.currentStreakDays ?? 0) >= 3);
+      want('daily-streak-7', (trigger.currentStreakDays ?? 0) >= 7);
+      want('daily-streak-30', (trigger.currentStreakDays ?? 0) >= 30);
       want('curriculum-graduate', snapshot.completedCurriculumIds.size > 0);
       want('completionist',
         snapshot.playedBuiltinCaseIds.size >= snapshot.totalBuiltinCases &&

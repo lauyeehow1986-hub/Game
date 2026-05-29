@@ -63,6 +63,25 @@ describe('evaluate — case-completed', () => {
     ).toContain('streak-master');
   });
 
+  it('unlocks daily-streak tiers as currentStreakDays rises', () => {
+    const r3 = evaluate({ ...t, currentStreakDays: 3 }, new Set(), snap());
+    expect(r3).toContain('daily-streak-3');
+    expect(r3).not.toContain('daily-streak-7');
+
+    const r7 = evaluate({ ...t, currentStreakDays: 7 }, new Set(), snap());
+    expect(r7).toEqual(expect.arrayContaining(['daily-streak-3', 'daily-streak-7']));
+
+    const r30 = evaluate({ ...t, currentStreakDays: 30 }, new Set(), snap());
+    expect(r30).toEqual(expect.arrayContaining(['daily-streak-3', 'daily-streak-7', 'daily-streak-30']));
+  });
+
+  it('does not unlock daily-streak tiers when currentStreakDays is absent or 0', () => {
+    expect(evaluate(t, new Set(), snap())).not.toContain('daily-streak-3');
+    expect(
+      evaluate({ ...t, currentStreakDays: 0 }, new Set(), snap()),
+    ).not.toContain('daily-streak-3');
+  });
+
   it('unlocks curriculum-graduate when any curriculum is complete', () => {
     expect(
       evaluate(t, new Set(), snap({ completedCurriculumIds: new Set(['cardio']) })),
