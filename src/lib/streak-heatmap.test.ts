@@ -40,4 +40,22 @@ describe('buildHeatmap', () => {
     const todays = lastCol.find((c) => c.date === '2026-05-29');
     expect(todays).toBeDefined();
   });
+
+  it('handles a Sunday boundary — today on Sunday lands in the last cell', () => {
+    // 2026-05-31 is a Sunday
+    const today = new Date(2026, 4, 31);
+    const grid = buildHeatmap(['2026-05-31'], 4, today);
+    const lastCol = grid[grid.length - 1];
+    expect(lastCol[lastCol.length - 1].date).toBe('2026-05-31');
+    expect(lastCol[lastCol.length - 1].active).toBe(true);
+  });
+
+  it('handles a Monday boundary — today on Monday lands in the first cell of the week', () => {
+    // 2026-06-01 is a Monday
+    const today = new Date(2026, 5, 1);
+    const grid = buildHeatmap(['2026-06-01'], 4, today);
+    const lastCol = grid[grid.length - 1];
+    expect(lastCol[0].date).toBe('2026-06-01');
+    expect(lastCol[0].active).toBe(true);
+  });
 });
