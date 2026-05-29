@@ -3,6 +3,7 @@ import { useT, useLocale, LOCALES, type Locale } from '../../lib/i18n';
 import { usePacing } from '../../state/pacingStore';
 import { isMuted, setMuted } from '../../lib/audio';
 import { useFocusTrap } from '../../lib/use-focus-trap';
+import { collectBackup, applyBackup, backupFilename } from '../../lib/backup';
 
 interface Props {
   open: boolean;
@@ -25,6 +26,49 @@ export function SettingsModal({ open, onClose }: Props) {
   const setSec = usePacing((s) => s.setSpeed);
   const [audio, setAudioState] = useState(false);
   const [reduced, setReduced] = useState(false);
+  const [backupMsg, setBackupMsg] = useState<string | null>(null);
+
+  const handleExport = () => {
+    try {
+      const env = collectBackup();
+      const blob = new Blob([JSON.stringify(env, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = backupFilename();
+      a.click();
+      URL.revokeObjectURL(url);
+      setBackupMsg(t('settings.backup.exported'));
+    } catch {
+      setBackupMsg(t('settings.backup.exportFailed'));
+    }
+    setTimeout(() => setBackupMsg(null), 3000);
+  };
+
+  const handleImport = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const res = applyBackup(text);
+        if (res.ok) {
+          alert(t('settings.backup.importedReload'));
+          location.reload();
+        } else {
+          setBackupMsg(t('settings.backup.importFailed'));
+          setTimeout(() => setBackupMsg(null), 3000);
+        }
+      } catch {
+        setBackupMsg(t('settings.backup.importFailed'));
+        setTimeout(() => setBackupMsg(null), 3000);
+      }
+    };
+    input.click();
+  };
 
   useEffect(() => {
     setAudioState(!isMuted());
@@ -120,6 +164,29 @@ export function SettingsModal({ open, onClose }: Props) {
               {reduced ? t('settings.motion.on') : t('settings.motion.off')}
             </span>
           </Row>
+
+          {/* Backup / restore */}
+          <section className="border border-clinical-border rounded p-3 bg-clinical-bg/30">
+            <h3 className="text-sm font-semibold text-white mb-1">{t('settings.backup.h')}</h3>
+            <p className="text-[11px] text-white/70 mb-2 leading-snug">{t('settings.backup.body')}</p>
+            <div className="flex gap-2">
+              <button
+                onClick={handleExport}
+                className="px-3 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
+              >
+                {t('settings.backup.export')}
+              </button>
+              <button
+                onClick={handleImport}
+                className="px-3 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
+              >
+                {t('settings.backup.import')}
+              </button>
+            </div>
+            {backupMsg && (
+              <div className="mt-2 text-[11px] text-clinical-accent">{backupMsg}</div>
+            )}
+          </section>
 
           {/* Reset everything */}
           <section className="border border-clinical-danger/30 rounded p-3 bg-clinical-danger/5 mt-2">
