@@ -17,6 +17,7 @@ import { WhatsNewModal } from './ui/modals/WhatsNewModal';
 import { Tutorial } from './ui/Tutorial';
 import { ResumePrompt } from './ui/ResumePrompt';
 import { DisclaimerBanner } from './ui/DisclaimerBanner';
+import { StreakDefenseBanner } from './ui/StreakDefenseBanner';
 import { InstallPrompt } from './ui/InstallPrompt';
 import { AchievementToast } from './ui/AchievementToast';
 import { LiveAnnouncer } from './ui/LiveAnnouncer';
@@ -44,6 +45,7 @@ export default function App() {
       <a href="#main-content" className="skip-link">{t('a11y.skip')}</a>
       <HUD />
       <DisclaimerBanner />
+      <StreakDefenseBanner />
       <InstallPrompt />
 
       <main id="main-content" className="flex-1 grid grid-cols-1 lg:grid-cols-[300px_1fr_340px] gap-2 sm:gap-3 p-2 sm:p-3 min-h-0 overflow-y-auto lg:overflow-hidden">
