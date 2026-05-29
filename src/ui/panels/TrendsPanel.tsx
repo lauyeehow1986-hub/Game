@@ -9,6 +9,7 @@ import { useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
 import { CURRICULA } from '../../lib/curricula';
 import { buildRandomQuiz, type QuizItem } from '../../lib/quiz';
+import { exportRunHistoryCsv } from '../../lib/csv-export';
 import type { CaseDefinition } from '../../lib/types';
 
 const PracticeDecisionModal = lazy(() =>
@@ -121,6 +122,29 @@ export function TrendsPanel() {
           className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-accent/40 bg-clinical-accent/10 text-clinical-accent hover:bg-clinical-accent/20"
         >
           {t('quiz.startBtn')}
+        </button>
+      )}
+
+      {trends.totalPlayed > 0 && (
+        <button
+          onClick={() => {
+            if (typeof document === 'undefined') return;
+            const csv = exportRunHistoryCsv(runHistory, catalogue, (v) =>
+              tr(v as Parameters<typeof tr>[0]),
+            );
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sg-pathway-runs.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+          }}
+          className="text-[10px] w-full px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+        >
+          {t('trends.exportCsv')}
         </button>
       )}
 

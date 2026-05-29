@@ -185,6 +185,7 @@ export const zh: Record<string, string> = {
   'trends.recommended': '推荐下一题',
   'trends.replay': '重玩',
   'trends.allCases': '所有病例',
+  'trends.exportCsv': '⇩ 导出运行历史(CSV 用于电子表格)',
   'trends.notes.heading': '我的反思笔记',
   'trends.notes.export': '导出笔记',
   'trends.notes.exportHeading': '我的 SG Pathway 反思笔记',

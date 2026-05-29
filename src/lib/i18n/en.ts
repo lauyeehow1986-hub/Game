@@ -199,6 +199,7 @@ export const en: Record<string, string> = {
   'trends.recommended': 'Recommended next',
   'trends.replay': 'Replay',
   'trends.allCases': 'All cases',
+  'trends.exportCsv': '⇩ Export run history (CSV for spreadsheets)',
   'trends.rec.practice': 'Practice — your weakest',
   'trends.rec.curriculum': 'Continue curriculum',
   'trends.rec.discover': 'Discover something new',
