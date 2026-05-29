@@ -40,7 +40,7 @@ export const CURRICULA: Curriculum[] = [
       'Use the SCDF major-trauma destination protocol.',
       'Recognise when delayed action triggers deterioration branches.',
     ],
-    caseIds: ['stemi-acute', 'sepsis-bundle', 'stroke-thrombectomy', 'major-trauma'],
+    caseIds: ['stemi-acute', 'sepsis-bundle', 'stroke-thrombectomy', 'major-trauma', 'heat-injury'],
   },
   {
     id: 'cross-sector',
