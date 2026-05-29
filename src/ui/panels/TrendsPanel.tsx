@@ -92,7 +92,7 @@ export function TrendsPanel() {
   const meanGrade = gradeBandLabel(trends.meanRatio);
 
   return (
-    <section className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-3">
+    <section data-tour="trends" className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-3">
       <header className="flex items-baseline justify-between">
         <h3 className="text-sm font-semibold text-white">{t('trends.heading')}</h3>
         <span className="text-[10px] uppercase tracking-wider text-clinical-subtle">

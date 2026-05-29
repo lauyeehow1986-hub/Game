@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
-import { useFocusTrap } from '../lib/use-focus-trap';
+import { useEffect, useState, useLayoutEffect } from 'react';
 import { useGame } from '../state/gameStore';
 import { getCase } from '../content';
 
-const KEY = 'sg-pathway-tutorial-seen-v2';
+const KEY = 'sg-pathway-tutorial-seen-v3';
 
 /**
  * Case that opens automatically from the final tutorial step. URTI at a
@@ -12,49 +11,114 @@ const KEY = 'sg-pathway-tutorial-seen-v2';
  */
 const ONBOARDING_CASE_ID = 'urti-chas-gp';
 
-const STEPS: Array<{ title: string; body: string }> = [
+interface Step {
+  /** data-tour attribute to highlight, or null for a centered modal step. */
+  target: string | null;
+  title: string;
+  body: string;
+}
+
+const STEPS: Step[] = [
   {
+    target: null,
     title: 'Welcome to SG Pathway',
-    body: "A simulation of patients moving through Singapore's public + private healthcare network. You'll make clinical, financing, and care-pathway decisions and see the same scenario from patient, caregiver, and staff perspectives.",
+    body: "A simulation of patients moving through Singapore's public + private healthcare network. You'll make clinical, financing, and care-pathway decisions and see the same scenario from three perspectives — patient, caregiver, staff.",
   },
   {
+    target: 'case-list',
+    title: 'Pick a case',
+    body: 'Every card here is a clinical scenario. Start one to begin; Demo best run walks you through the highest-scoring path without committing. Filter by difficulty, search by keyword, or import your own JSON.',
+  },
+  {
+    target: 'perspective',
     title: 'Three perspectives',
-    body: 'Use the toggle in the top bar to switch between Patient, Caregiver, and Staff points-of-view. The same scene re-frames under each — the cost meter, scoring, and decisions all stay shared.',
+    body: 'Same scene, three framings — Patient, Caregiver, Staff. Scoring, money, and decisions stay shared; the framing text and emphasis change so the same case teaches different lessons.',
   },
   {
-    title: 'Pick a case or follow a curriculum',
-    body: 'The left panel lists 20+ cases. Each card has a Start button — and a Demo best run button that walks you through the highest-scoring path without committing to a score. Below it, the Curricula panel groups cases into six taught sequences (cardiology, sepsis, end-of-life, etc.) with progress tracking.',
+    target: 'canvas',
+    title: 'Watch the patient walk',
+    body: 'The hospital map shows the patient figure moving between departments. In Ops mode the same canvas shows queues, bed occupancy and acuity at every department in real time.',
   },
   {
-    title: 'See the patient bill build up',
-    body: 'The Financing panel models ward-class subsidy → MediShield Life → MediSave → CHAS → Integrated Shield Plan → cash. Toggle ward class and IP rider on the Patient panel to see the cascade live.',
+    target: 'trends',
+    title: 'Your learning trends',
+    body: 'After a run, this panel surfaces recommended-next-case (Practice / Continue curriculum / Discover), the decisions you keep getting wrong, your achievements, and a quick-quiz of 5 random decisions for revision.',
   },
   {
-    title: 'Cross-sector data flow',
-    body: "The Data Exchange panel shows whether the current facility contributes to NEHR. Some private hospitals don't — the patient may need to hand-carry imaging CDs across sectors.",
+    target: 'mode-toggle',
+    title: 'Case ↔ Hospital Ops',
+    body: 'Switch to Hospital Ops mode to run an 8-hour shift at TTSH. Hire staff, set bed capacity, manage budget and DORSCON. Four scenario presets cover normal shifts and outbreak surges.',
   },
   {
-    title: 'Best-practice diff at the end of every case',
-    body: "After you commit your last decision, the Results screen shows your choices vs what a best-practice run would have chosen, with the score delta on each miss. Copy a lesson-plan markdown summary, share your run as a URL, or download it as JSON.",
+    target: 'lang',
+    title: '4 languages',
+    body: 'Switch between English, 中文, Bahasa Melayu, and தமிழ். All 23 cases play end-to-end in 中文; the rest fall back to English where translations aren\'t yet written.',
   },
   {
-    title: 'Hospital Ops mode',
-    body: "Switch the Case / Hospital Ops pill in the header to run an 8-hour shift at TTSH. Hire doctors and nurses, set bed capacity, divert ambulances, manage the budget and reputation under DORSCON. Four scenario presets cover normal shifts and outbreak surges.",
+    target: 'kbd',
+    title: 'Keyboard shortcuts',
+    body: 'Press ? at any time to see all shortcuts — arrows to pick a decision, 1–9 to jump, Enter to confirm, Esc to close. The button here opens the same help.',
   },
   {
-    title: 'Personal trends + offline',
-    body: "Your scores feed a Trends panel that recommends the next case based on your weakest area. Install SG Pathway to your phone's home screen (your browser will offer this) — it runs fully offline so you can revise on the MRT.",
-  },
-  {
-    title: '4 languages, BYO content',
-    body: "Switch between English, 中文, Bahasa Melayu, and தமிழ் via the header. Author your own cases in JSON and import via the Cases panel — or paste a shareable URL someone sent you. Curricula travel the same way.",
+    target: null,
+    title: 'Ready to start',
+    body: 'Drop into a beginner case (URTI at a CHAS GP — three small decisions) or browse the catalogue yourself.',
   },
 ];
+
+/**
+ * Tooltip placement near the target rectangle. Returns viewport-fixed
+ * position + the side the tooltip lands on (for the little arrow).
+ */
+function placeTooltip(rect: DOMRect, vw: number, vh: number) {
+  const W = Math.min(420, vw - 24);
+  const H = 220; // rough estimate; CSS clamps height anyway
+  const margin = 12;
+  // Prefer below, then right, then above, then left.
+  if (rect.bottom + H + margin < vh) {
+    return {
+      top: rect.bottom + margin,
+      left: Math.max(12, Math.min(vw - W - 12, rect.left + rect.width / 2 - W / 2)),
+      width: W,
+      side: 'top' as const,
+    };
+  }
+  if (rect.right + W + margin < vw) {
+    return {
+      top: Math.max(12, Math.min(vh - H - 12, rect.top + rect.height / 2 - H / 2)),
+      left: rect.right + margin,
+      width: W,
+      side: 'left' as const,
+    };
+  }
+  if (rect.top - H - margin > 0) {
+    return {
+      top: rect.top - H - margin,
+      left: Math.max(12, Math.min(vw - W - 12, rect.left + rect.width / 2 - W / 2)),
+      width: W,
+      side: 'bottom' as const,
+    };
+  }
+  return {
+    top: Math.max(12, Math.min(vh - H - 12, rect.top + rect.height / 2 - H / 2)),
+    left: Math.max(12, rect.left - W - margin),
+    width: W,
+    side: 'right' as const,
+  };
+}
+
+interface Placement {
+  top: number;
+  left: number;
+  width: number;
+  side: 'top' | 'right' | 'bottom' | 'left';
+}
 
 export function Tutorial() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
-  const cardRef = useFocusTrap<HTMLDivElement>(open);
+  const [rect, setRect] = useState<DOMRect | null>(null);
+  const [tip, setTip] = useState<Placement | null>(null);
   const startCase = useGame((s) => s.startCase);
 
   useEffect(() => {
@@ -62,12 +126,53 @@ export function Tutorial() {
     if (!localStorage.getItem(KEY)) setOpen(true);
   }, []);
 
+  // Re-measure the target on step change + window resize.
+  useLayoutEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const measure = () => {
+      const s = STEPS[step];
+      if (!s.target) {
+        if (!cancelled) {
+          setRect(null);
+          setTip(null);
+        }
+        return;
+      }
+      const el = document.querySelector(`[data-tour="${s.target}"]`);
+      if (!el) {
+        if (!cancelled) {
+          setRect(null);
+          setTip(null);
+        }
+        return;
+      }
+      const r = el.getBoundingClientRect();
+      if (cancelled) return;
+      setRect(r);
+      setTip(placeTooltip(r, window.innerWidth, window.innerHeight));
+      // Scroll the target into view if it's off-screen.
+      if (r.top < 0 || r.bottom > window.innerHeight) {
+        (el as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+    measure();
+    const onResize = () => measure();
+    window.addEventListener('resize', onResize);
+    window.addEventListener('scroll', onResize, true);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', onResize, true);
+    };
+  }, [open, step]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') close();
-      if (e.key === 'ArrowRight' || e.key === 'Enter') next();
-      if (e.key === 'ArrowLeft') prev();
+      else if (e.key === 'ArrowRight' || e.key === 'Enter') next();
+      else if (e.key === 'ArrowLeft') prev();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -76,9 +181,8 @@ export function Tutorial() {
 
   const close = () => {
     localStorage.setItem(KEY, '1');
-    // Also mark v1's key so the WhatsNew modal doesn't fire for someone
-    // who's seeing the tutorial for the first time on v2.2.
     localStorage.setItem('sg-pathway-tutorial-seen-v1', '1');
+    localStorage.setItem('sg-pathway-tutorial-seen-v2', '1');
     setOpen(false);
   };
   const startBeginner = () => {
@@ -96,27 +200,75 @@ export function Tutorial() {
 
   if (!open) return null;
   const s = STEPS[step];
+  const hasTarget = !!s.target && rect !== null && tip !== null;
+
+  const tooltipStyle: React.CSSProperties = hasTarget
+    ? {
+        position: 'fixed',
+        top: tip!.top,
+        left: tip!.left,
+        width: tip!.width,
+      }
+    : {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 'min(420px, calc(100vw - 24px))',
+      };
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="tutorial-title"
-      className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-4"
-    >
-      <div ref={cardRef} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-md w-full shadow-2xl">
-        <header className="px-5 py-4 border-b border-clinical-border">
+    <div role="dialog" aria-modal="true" aria-labelledby="tutorial-title" className="fixed inset-0 z-[60]">
+      {hasTarget ? (
+        <svg className="fixed inset-0 w-full h-full pointer-events-auto" onClick={close}>
+          <defs>
+            <mask id="tour-cutout">
+              <rect width="100%" height="100%" fill="white" />
+              <rect
+                x={Math.max(0, rect!.left - 6)}
+                y={Math.max(0, rect!.top - 6)}
+                width={rect!.width + 12}
+                height={rect!.height + 12}
+                rx={10}
+                ry={10}
+                fill="black"
+              />
+            </mask>
+          </defs>
+          <rect width="100%" height="100%" fill="rgba(0,0,0,0.7)" mask="url(#tour-cutout)" />
+          <rect
+            x={Math.max(0, rect!.left - 6)}
+            y={Math.max(0, rect!.top - 6)}
+            width={rect!.width + 12}
+            height={rect!.height + 12}
+            rx={10}
+            ry={10}
+            fill="none"
+            stroke="#38bdf8"
+            strokeWidth={2}
+          />
+        </svg>
+      ) : (
+        <div className="fixed inset-0 bg-black/70" onClick={close} />
+      )}
+
+      <div
+        style={tooltipStyle}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-clinical-panel border border-clinical-accent/50 rounded-lg shadow-2xl"
+      >
+        <header className="px-5 py-3 border-b border-clinical-border">
           <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
-            Welcome · {step + 1} / {STEPS.length}
+            Tour · {step + 1} / {STEPS.length}
           </div>
           <h2 id="tutorial-title" className="text-base font-semibold text-white mt-1">
             {s.title}
           </h2>
         </header>
-        <p className="px-5 py-4 text-sm text-white/90 leading-relaxed">{s.body}</p>
+        <p className="px-5 py-3 text-[13px] text-white/90 leading-relaxed">{s.body}</p>
         <footer className="px-5 py-3 border-t border-clinical-border flex items-center justify-between gap-2">
           <button onClick={close} className="text-[11px] text-clinical-subtle hover:text-white">
-            Skip
+            Skip tour
           </button>
           <div className="flex gap-2">
             <button

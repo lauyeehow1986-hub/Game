@@ -64,6 +64,7 @@ export function HUD() {
   const replayTutorial = () => {
     localStorage.removeItem('sg-pathway-tutorial-seen-v1');
     localStorage.removeItem('sg-pathway-tutorial-seen-v2');
+    localStorage.removeItem('sg-pathway-tutorial-seen-v3');
     location.reload();
   };
 
@@ -137,7 +138,7 @@ export function HUD() {
       </div>
 
       <div className="ml-auto flex items-center gap-2 flex-wrap justify-end">
-        <div className="flex items-center gap-1 bg-clinical-bg border border-clinical-border rounded-full p-1">
+        <div data-tour="mode-toggle" className="flex items-center gap-1 bg-clinical-bg border border-clinical-border rounded-full p-1">
           {(['case', 'ops'] as AppMode[]).map((m) => (
             <button
               key={m}
@@ -154,7 +155,7 @@ export function HUD() {
           ))}
         </div>
         {mode === 'case' && (
-          <div className="flex items-center gap-1 bg-clinical-bg border border-clinical-border rounded-full p-1">
+          <div data-tour="perspective" className="flex items-center gap-1 bg-clinical-bg border border-clinical-border rounded-full p-1">
             {(['patient', 'caregiver', 'staff'] as Perspective[]).map((p) => (
               <button
                 key={p}
@@ -173,6 +174,7 @@ export function HUD() {
         )}
         <OfflineIndicator />
         <select
+          data-tour="lang"
           value={locale}
           onChange={(e) => {
             const next = e.target.value as Locale;
@@ -214,6 +216,7 @@ export function HUD() {
           {t('hud.about')}
         </button>
         <button
+          data-tour="kbd"
           onClick={() => {
             window.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }));
           }}

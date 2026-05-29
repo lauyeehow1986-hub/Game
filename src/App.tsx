@@ -62,7 +62,7 @@ export default function App() {
           )}
         </aside>
 
-        <section className="rounded-lg overflow-hidden border border-clinical-border bg-clinical-panel min-h-[360px] lg:min-h-[420px] order-1 lg:order-2">
+        <section data-tour="canvas" className="rounded-lg overflow-hidden border border-clinical-border bg-clinical-panel min-h-[360px] lg:min-h-[420px] order-1 lg:order-2">
           <Suspense
             fallback={
               <div className="w-full h-full grid place-items-center text-clinical-subtle text-xs">

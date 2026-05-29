@@ -79,7 +79,7 @@ export function CaseList() {
   };
 
   return (
-    <section className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-2">
+    <section data-tour="case-list" className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-2">
       <header className="flex items-baseline justify-between">
         <h3 className="text-sm font-semibold text-white">{t('cases.heading')}</h3>
         <button
