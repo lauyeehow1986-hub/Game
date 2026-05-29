@@ -12,6 +12,9 @@ import { useAchievements } from '../state/achievementsStore';
 const AboutModal = lazy(() =>
   import('./modals/AboutModal').then((m) => ({ default: m.AboutModal })),
 );
+const SettingsModal = lazy(() =>
+  import('./modals/SettingsModal').then((m) => ({ default: m.SettingsModal })),
+);
 
 const labels: Record<Perspective, { tag: string; colour: string }> = {
   patient: { tag: 'POV', colour: 'bg-rose-500/80' },
@@ -46,6 +49,7 @@ export function HUD() {
   const setRealtime = usePacing((s) => s.setRealtime);
   const [muted, setMutedState] = useState(true);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const timer = caseDef?.acuteTimer;
   const exceeded = timer && elapsed > timer.goalMin;
@@ -208,6 +212,14 @@ export function HUD() {
           {t('hud.tutorial')}
         </button>
         <button
+          onClick={() => setSettingsOpen(true)}
+          aria-label={t('settings.heading')}
+          title={t('settings.heading')}
+          className="hidden sm:inline-flex h-8 w-8 items-center justify-center rounded border border-clinical-border text-clinical-subtle hover:text-white text-[12px]"
+        >
+          ⚙
+        </button>
+        <button
           onClick={() => setAboutOpen(true)}
           aria-label={t('hud.about')}
           title={t('hud.about')}
@@ -230,6 +242,7 @@ export function HUD() {
 
       <Suspense fallback={null}>
         {aboutOpen && <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />}
+        {settingsOpen && <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />}
       </Suspense>
     </header>
   );
