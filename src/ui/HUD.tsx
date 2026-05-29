@@ -8,6 +8,7 @@ import { isMuted, setMuted } from '../lib/audio';
 import { LOCALES, useLocale, useT, type Locale } from '../lib/i18n';
 import { OfflineIndicator } from './OfflineIndicator';
 import { useAchievements } from '../state/achievementsStore';
+import { useStreak, currentStreakValue, bestStreakValue } from '../state/streakStore';
 
 const AboutModal = lazy(() =>
   import('./modals/AboutModal').then((m) => ({ default: m.AboutModal })),
@@ -45,6 +46,9 @@ export function HUD() {
   const locale = useLocale((s) => s.locale);
   const setLocale = useLocale((s) => s.setLocale);
   const fireAchievement = useAchievements((s) => s.fire);
+  const streakDays = useStreak((s) => s.days);
+  const streakNow = currentStreakValue({ days: streakDays });
+  const streakBest = bestStreakValue({ days: streakDays });
   const realtime = usePacing((s) => s.realtime);
   const setRealtime = usePacing((s) => s.setRealtime);
   const [muted, setMutedState] = useState(true);
@@ -175,6 +179,17 @@ export function HUD() {
               </button>
             ))}
           </div>
+        )}
+        {streakNow > 0 && (
+          <span
+            title={`${t('hud.streak.tooltip')} (${t('hud.streak.best')}: ${streakBest})`}
+            aria-label={`${t('hud.streak')}: ${streakNow}`}
+            className="hidden md:inline-flex h-8 items-center gap-1 px-2 rounded border border-clinical-border bg-clinical-bg text-[11px] font-medium text-clinical-warn"
+          >
+            <span aria-hidden="true">🔥</span>
+            <span className="font-mono">{streakNow}</span>
+            <span className="text-clinical-subtle">d</span>
+          </span>
         )}
         <OfflineIndicator />
         <select

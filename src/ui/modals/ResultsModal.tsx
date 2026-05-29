@@ -12,6 +12,7 @@ import { openPrintableLessonPlan } from '../../lib/lesson-plan-print';
 import { encodeRunToUrl } from '../../lib/case-share';
 import { GlossaryText } from '../GlossaryText';
 import { useAchievements } from '../../state/achievementsStore';
+import { useStreak } from '../../state/streakStore';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
 const PracticeDecisionModal = lazy(() =>
@@ -38,6 +39,7 @@ export function ResultsModal() {
   const decisionNotes = useProgress((s) => s.decisionNotes);
   const setDecisionNote = useProgress((s) => s.setDecisionNote);
   const fireAchievement = useAchievements((s) => s.fire);
+  const recordStreakDay = useStreak((s) => s.recordToday);
   const cardRef = useFocusTrap<HTMLDivElement>(status === 'completed');
   const [practice, setPractice] = useState<{ decisionId: string } | null>(null);
 
@@ -57,6 +59,7 @@ export function ResultsModal() {
     if (status === 'completed' && caseDef) {
       const { earned, max } = totalScoreFromLog(log);
       recordCaseResult(caseDef.id, earned, max, log);
+      recordStreakDay();
       chimeCaseComplete();
       const runsForThisCase = (runHistory[caseDef.id]?.length ?? 0) + 1;
       fireAchievement({

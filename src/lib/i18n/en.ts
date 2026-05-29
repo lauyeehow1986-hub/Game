@@ -38,6 +38,9 @@ export const en: Record<string, string> = {
   'hud.timer.exceeded': 'exceeded',
   'hud.timer.realtimeOn': 'real-time pacing ON — click to pause',
   'hud.timer.realtimeOff': 'real-time pacing OFF — click to enable',
+  'hud.streak': 'Streak',
+  'hud.streak.tooltip': 'Daily learning streak. Complete at least one case today to extend it.',
+  'hud.streak.best': 'best',
 
   // Settings
   'settings.heading': 'Settings',
