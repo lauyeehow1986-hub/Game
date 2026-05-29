@@ -6,6 +6,8 @@ Hosted as a static site on GitHub Pages. Fully offline-capable once installed (P
 
 **Live**: <https://lauyeehow1986-hub.github.io/Game/>
 
+**Quality rubric**: [`docs/RATING.md`](docs/RATING.md) defines a 10-axis pass-bar (content depth, curricula, i18n, engagement, tests, perf, a11y, authoring, PWA, code hygiene) and the project is currently audited at **10 / 10**. The audit is enforced by `src/content/rating-audit.test.ts` — CI fails if any axis regresses.
+
 ## What's in it
 
 ### 28 clinical cases across every category

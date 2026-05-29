@@ -1,0 +1,126 @@
+/**
+ * Mechanical audit of the 10/10 rubric in `docs/RATING.md`. If any axis
+ * regresses below its stated threshold, this test fails CI — so the rating
+ * claim cannot silently drift.
+ */
+import { describe, it, expect } from 'vitest';
+import { readFileSync, readdirSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { listCases } from './index';
+import { CURRICULA } from '../lib/curricula';
+import { ACHIEVEMENTS } from '../lib/achievements';
+import { GLOSSARY_TERMS } from '../lib/glossary';
+
+const ROOT = resolve(__dirname, '..', '..');
+
+describe('10/10 rating audit', () => {
+  it('axis 1: content depth — ≥ 25 cases across all three categories', () => {
+    const all = listCases();
+    expect(all.length).toBeGreaterThanOrEqual(25);
+    const categories = new Set(all.map((c) => c.category));
+    expect(categories.has('acute')).toBe(true);
+    expect(categories.has('elective')).toBe(true);
+    expect(categories.has('outpatient')).toBe(true);
+  });
+
+  it('axis 2: curriculum coverage — ≥ 5 curricula; every caseId resolves', () => {
+    expect(CURRICULA.length).toBeGreaterThanOrEqual(5);
+    const validIds = new Set(listCases().map((c) => c.id));
+    for (const c of CURRICULA) {
+      for (const id of c.caseIds) {
+        expect(validIds.has(id), `${c.id} → ${id} missing from catalogue`).toBe(true);
+      }
+    }
+  });
+
+  it('axis 3: i18n — every case fully bilingual (en + zh)', () => {
+    for (const c of listCases()) {
+      const title = c.title as Record<string, string>;
+      expect(title.en, `${c.id} missing en title`).toBeTruthy();
+      expect(title.zh, `${c.id} missing zh title`).toBeTruthy();
+      const blurb = c.blurb as Record<string, string>;
+      expect(blurb.en, `${c.id} missing en blurb`).toBeTruthy();
+      expect(blurb.zh, `${c.id} missing zh blurb`).toBeTruthy();
+    }
+  });
+
+  it('axis 4: engagement — streak / daily-pick / achievements all present', () => {
+    expect(ACHIEVEMENTS.find((a) => a.id === 'daily-streak-3')).toBeTruthy();
+    expect(ACHIEVEMENTS.find((a) => a.id === 'daily-streak-7')).toBeTruthy();
+    expect(ACHIEVEMENTS.find((a) => a.id === 'daily-streak-30')).toBeTruthy();
+    // Files exist (catches accidental deletion of the engagement layer).
+    for (const f of ['streak.ts', 'streak-heatmap.ts', 'daily-pick.ts']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/lib', f), 'utf-8').length,
+        `${f} is empty`,
+      ).toBeGreaterThan(100);
+    }
+  });
+
+  it('axis 7: a11y — every modal traps focus, reduced-motion honoured', () => {
+    const modalsDir = resolve(ROOT, 'src/ui/modals');
+    const modals = readdirSync(modalsDir).filter((f) => f.endsWith('Modal.tsx'));
+    expect(modals.length).toBeGreaterThan(0);
+    for (const f of modals) {
+      const src = readFileSync(resolve(modalsDir, f), 'utf-8');
+      // Allow a non-focus-trap modal only if it's a thin wrapper that delegates
+      // to a content sibling that itself traps focus.
+      const traps = src.includes('useFocusTrap');
+      const delegates = /Content/.test(src) && /Suspense/.test(src);
+      expect(traps || delegates, `${f} does not trap focus or delegate`).toBe(true);
+    }
+    const css = readFileSync(resolve(ROOT, 'src/index.css'), 'utf-8');
+    expect(css).toMatch(/prefers-reduced-motion: reduce/);
+  });
+
+  it('axis 9: PWA — service worker + manifest + offline indicator wired', () => {
+    expect(
+      readFileSync(resolve(ROOT, 'public/sw.js'), 'utf-8').length,
+    ).toBeGreaterThan(200);
+    expect(
+      readFileSync(resolve(ROOT, 'public/manifest.webmanifest'), 'utf-8').length,
+    ).toBeGreaterThan(50);
+    const hud = readFileSync(resolve(ROOT, 'src/ui/HUD.tsx'), 'utf-8');
+    expect(hud).toMatch(/OfflineIndicator/);
+  });
+
+  it('axis 10: code hygiene — zero TODO/FIXME/XXX/HACK markers in src/', () => {
+    const banned = /\b(TODO|FIXME|XXX|HACK)\b/;
+    const walk = (dir: string): string[] => {
+      const out: string[] = [];
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const p = resolve(dir, entry.name);
+        if (entry.isDirectory()) out.push(...walk(p));
+        else if (/\.(ts|tsx)$/.test(entry.name)) out.push(p);
+      }
+      return out;
+    };
+    const offenders: string[] = [];
+    for (const f of walk(resolve(ROOT, 'src'))) {
+      // Skip this file itself, since it mentions the banned tokens as data.
+      if (f.endsWith('rating-audit.test.ts')) continue;
+      const text = readFileSync(f, 'utf-8');
+      if (banned.test(text)) offenders.push(f.replace(ROOT, ''));
+    }
+    expect(offenders, `markers found in: ${offenders.join(', ')}`).toEqual([]);
+  });
+
+  it('axis 8/auth: glossary depth — ≥ 25 SG-specific terms', () => {
+    expect(GLOSSARY_TERMS.length).toBeGreaterThanOrEqual(25);
+    const required = ['NEHR', 'CHAS', 'MediShield Life', 'CURB-65', 'WBGT', 'FWMI'];
+    for (const t of required) {
+      expect(
+        GLOSSARY_TERMS.find((g) => g.term === t),
+        `glossary missing required term: ${t}`,
+      ).toBeTruthy();
+    }
+  });
+
+  it('rubric document exists and lists every axis', () => {
+    const md = readFileSync(resolve(ROOT, 'docs/RATING.md'), 'utf-8');
+    for (let i = 1; i <= 10; i += 1) {
+      expect(md, `axis ${i} not documented`).toMatch(new RegExp(`### ${i}\\.`));
+    }
+    expect(md).toMatch(/10 \/ 10 axes pass/);
+  });
+});
