@@ -64,6 +64,8 @@ export const zh: Record<string, string> = {
   // Cases panel
   'cases.heading': '病例',
   'cases.importJson': '导入 JSON',
+  'cases.random': '🎲 随机',
+  'cases.random.tip': '从已解锁的病例中随机挑一个立即开始。',
   'cases.startCase': '开始病例',
   'cases.restart': '重新开始',
   'cases.best': '最佳',

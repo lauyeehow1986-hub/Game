@@ -70,6 +70,8 @@ export const en: Record<string, string> = {
   // Cases panel
   'cases.heading': 'Cases',
   'cases.importJson': 'Import JSON',
+  'cases.random': '🎲 Random',
+  'cases.random.tip': 'Pick a random unlocked case to play right now.',
   'cases.startCase': 'Start case',
   'cases.restart': 'Restart',
   'cases.best': 'Best',

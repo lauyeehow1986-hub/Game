@@ -80,14 +80,29 @@ export function CaseList() {
 
   return (
     <section data-tour="case-list" className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-2">
-      <header className="flex items-baseline justify-between">
+      <header className="flex items-baseline justify-between gap-1">
         <h3 className="text-sm font-semibold text-white">{t('cases.heading')}</h3>
-        <button
-          onClick={() => setImportOpen(true)}
-          className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
-        >
-          {t('cases.importJson')}
-        </button>
+        <div className="flex gap-1">
+          <button
+            onClick={() => {
+              const playable = listCases().filter((c) => unlocked.includes(c.id));
+              if (playable.length === 0) return;
+              const c = playable[Math.floor(Math.random() * playable.length)];
+              if (status !== 'idle') resetRun();
+              startCase(c);
+            }}
+            title={t('cases.random.tip')}
+            className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+          >
+            {t('cases.random')}
+          </button>
+          <button
+            onClick={() => setImportOpen(true)}
+            className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+          >
+            {t('cases.importJson')}
+          </button>
+        </div>
       </header>
 
       {shareToast && (

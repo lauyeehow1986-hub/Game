@@ -174,6 +174,7 @@ export function CurriculumPanel() {
                     style={{ color: done ? '#4ade80' : p.ratio > 0 ? '#facc15' : '#7d8ba4' }}
                   >
                     {t('curr.progress', { done: p.completed, total: p.total })}
+                    {p.total > 0 && ` · ${Math.round(p.ratio * 100)}%`}
                   </span>
                 </div>
                 <p className="text-[11px] text-clinical-subtle mt-1 leading-snug">{curr.blurb}</p>
