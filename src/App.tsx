@@ -22,6 +22,7 @@ import { InstallPrompt } from './ui/InstallPrompt';
 import { AchievementToast } from './ui/AchievementToast';
 import { LiveAnnouncer } from './ui/LiveAnnouncer';
 import { KeyboardHelpModal } from './ui/modals/KeyboardHelpModal';
+import { RealtimeTicker } from './ui/RealtimeTicker';
 import { useT } from './lib/i18n';
 import { lazy, Suspense } from 'react';
 import { useMode } from './state/modeStore';
@@ -106,6 +107,7 @@ export default function App() {
       <AchievementToast />
       <LiveAnnouncer />
       <KeyboardHelpModal />
+      <RealtimeTicker />
     </div>
   );
 }

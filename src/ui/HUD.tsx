@@ -2,6 +2,7 @@ import { useEffect, useState, lazy, Suspense } from 'react';
 import { useGame } from '../state/gameStore';
 import { usePerspective } from '../state/perspectiveStore';
 import { useMode, type AppMode } from '../state/modeStore';
+import { usePacing } from '../state/pacingStore';
 import type { Perspective } from '../lib/types';
 import { isMuted, setMuted } from '../lib/audio';
 import { LOCALES, useLocale, useT, type Locale } from '../lib/i18n';
@@ -41,6 +42,8 @@ export function HUD() {
   const locale = useLocale((s) => s.locale);
   const setLocale = useLocale((s) => s.setLocale);
   const fireAchievement = useAchievements((s) => s.fire);
+  const realtime = usePacing((s) => s.realtime);
+  const setRealtime = usePacing((s) => s.setRealtime);
   const [muted, setMutedState] = useState(true);
   const [aboutOpen, setAboutOpen] = useState(false);
 
@@ -110,19 +113,26 @@ export function HUD() {
           {t('hud.cashOop')}: <span className="text-white font-mono">S${cost.toFixed(0)}</span>
         </span>
         {timer && (
-          <span
-            className={`px-2 py-1 rounded border font-mono ${
+          <button
+            onClick={() => setRealtime(!realtime)}
+            className={`px-2 py-1 rounded border font-mono cursor-pointer text-left ${
               exceeded
                 ? 'bg-clinical-danger/20 border-clinical-danger text-clinical-danger'
                 : elapsed > timer.goalMin * 0.7
                 ? 'bg-clinical-warn/15 border-clinical-warn/50 text-clinical-warn'
                 : 'bg-clinical-bg border-clinical-border text-clinical-ok'
+            } ${realtime ? 'ring-1 ring-clinical-accent' : ''}`}
+            title={`${timer.goalLabel} — ${
+              realtime
+                ? t('hud.timer.realtimeOn')
+                : t('hud.timer.realtimeOff')
             }`}
-            title={timer.goalLabel}
+            aria-pressed={realtime}
           >
             {timer.goalLabel}: {elapsed}/{timer.goalMin} min
+            {realtime && ' ⏱'}
             {exceeded && !flagAlreadySet && ` — ${t('hud.timer.exceeded')}`}
-          </span>
+          </button>
         )}
       </div>
 

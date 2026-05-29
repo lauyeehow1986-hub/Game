@@ -36,6 +36,8 @@ export const en: Record<string, string> = {
   'hud.status.completed': 'Completed',
   'hud.cashOop': 'Cash OOP so far',
   'hud.timer.exceeded': 'exceeded',
+  'hud.timer.realtimeOn': 'real-time pacing ON — click to pause',
+  'hud.timer.realtimeOff': 'real-time pacing OFF — click to enable',
   'hud.audio.on': 'Audio on',
   'hud.audio.off': 'Audio off',
   'hud.tutorial': 'Tutorial',

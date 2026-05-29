@@ -32,6 +32,8 @@ export const zh: Record<string, string> = {
   'hud.status.completed': '已完成',
   'hud.cashOop': '目前自付',
   'hud.timer.exceeded': '已超时',
+  'hud.timer.realtimeOn': '实时计时:开 — 点击暂停',
+  'hud.timer.realtimeOff': '实时计时:关 — 点击启用',
   'hud.audio.on': '音效开',
   'hud.audio.off': '音效关',
   'hud.tutorial': '教程',

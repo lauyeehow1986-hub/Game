@@ -79,6 +79,11 @@ interface GameState {
   setWardClass: (ward: WardClass) => void;
   setIntegratedShield: (on: boolean) => void;
   resolveDecision: (option: DecisionOption) => void;
+  /** Real-time tick: advance the in-game clock by `deltaMin` while the
+   *  player is reading. Honours acuteTimer.missedFlag so consequence
+   *  branches still fire when the goal is exceeded. No-ops if no case
+   *  is running or status is not awaiting-decision. */
+  tickGameTime: (deltaMin: number) => void;
   resetRun: () => void;
   viewFacility: (facilityId: string) => void;
   setDorscon: (level: Dorscon) => void;
@@ -652,6 +657,22 @@ export const useGame = create<GameState>((set, get) => ({
       bus.emit(Events.CaseCompleted);
     }
     persistSnapshot(get());
+  },
+
+  tickGameTime: (deltaMin) => {
+    const state = get();
+    if (!state.caseDef || state.run.status !== 'awaiting-decision') return;
+    const next = state.run.elapsedGameMin + deltaMin;
+    const timer = state.caseDef.acuteTimer;
+    const flagsAfter = new Set(state.run.flags);
+    if (timer && next > timer.goalMin) flagsAfter.add(timer.missedFlag);
+    set((s) => ({
+      run: {
+        ...s.run,
+        elapsedGameMin: next,
+        flags: Array.from(flagsAfter),
+      },
+    }));
   },
 
   resetRun: () => {
