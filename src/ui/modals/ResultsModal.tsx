@@ -14,6 +14,7 @@ import { GlossaryText } from '../GlossaryText';
 import { useAchievements } from '../../state/achievementsStore';
 import { useStreak, currentStreakValue } from '../../state/streakStore';
 import { useFocusTrap } from '../../lib/use-focus-trap';
+import { Confetti } from '../Confetti';
 
 const PracticeDecisionModal = lazy(() =>
   import('./PracticeDecisionModal').then((m) => ({ default: m.PracticeDecisionModal })),
@@ -84,6 +85,7 @@ export function ResultsModal() {
       aria-modal="true"
       className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4"
     >
+      <Confetti active={ratio >= 0.9} />
       <div ref={cardRef} className="bg-clinical-panel border border-clinical-border rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin shadow-2xl">
         <header className="px-5 py-4 border-b border-clinical-border flex items-center justify-between">
           <div>
