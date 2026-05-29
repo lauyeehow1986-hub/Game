@@ -82,6 +82,19 @@ export const CURRICULA: Curriculum[] = [
     caseIds: ['disease-x', 'sars-2003-historical', 'covid19-historical', 'dengue-surge'],
   },
   {
+    id: 'primary-care',
+    title: 'Primary care + Healthier SG',
+    blurb:
+      'How the polyclinic / Healthier-SG GP front-line decides who can stay in primary care and who needs the hospital. Right-siting, chronic-disease management, vaccination, and CHAS subsidy in play.',
+    objectives: [
+      'Use CURB-65 + clinical judgement to decide polyclinic vs ED for respiratory cases.',
+      'Coordinate CHAS GP + polyclinic for URTI, chronic disease, and post-hospital follow-up.',
+      'Embed NAIS vaccination and HPB I-Quit smoking-cessation referral into convalescent visits.',
+      'Right-site stable chronic-disease patients onto Healthier-SG GP enrolment.',
+    ],
+    caseIds: ['urti-chas-gp', 'cap-pneumonia', 'outpatient-diabetes', 'hf-outpatient'],
+  },
+  {
     id: 'paeds-and-women',
     title: "Paediatrics and women's health",
     blurb:
