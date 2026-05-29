@@ -2,9 +2,21 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v13-seen';
+const KEY = 'sg-pathway-whatsnew-v14-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'Two more cases — CAP + heat injury',
+    body: 'Community-acquired pneumonia walks polyclinic CURB-65 triage → KTPH ED short-stay → convalescent NAIS vaccination + HPB I-Quit referral. Exertional heat injury at SAF training: cool-first-transport-second protocol, rhabdomyolysis + AKI ICU care, and graded return-to-unit rehab.',
+  },
+  {
+    heading: 'Streak-defense banner',
+    body: 'If you played yesterday but not yet today, a one-tap "Defend streak" prompt appears under the HUD — it launches Today\'s Challenge so you keep your streak alive without scrolling.',
+  },
+  {
+    heading: 'Confetti on distinction',
+    body: 'Score 90% or higher and a brief confetti burst celebrates the result. Honours your prefers-reduced-motion setting if you have opted out.',
+  },
   {
     heading: 'Daily learning streak + heatmap',
     body: 'Complete at least one case in a day to extend your streak — a 🔥 chip in the HUD shows how many days in a row you have played. The Trends panel adds a 12-week heatmap of your activity and surfaces both current and best-ever streaks. Streaks of 3 / 7 / 30 days each unlock an achievement.',
