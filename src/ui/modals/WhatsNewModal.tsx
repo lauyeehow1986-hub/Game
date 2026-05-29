@@ -2,12 +2,24 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v11-seen';
+const KEY = 'sg-pathway-whatsnew-v12-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
   {
-    heading: 'All 23 cases now fully bilingual',
-    body: 'Every case in the catalogue is now playable end-to-end in Chinese (中文) as well as English — the full pathway prose, every decision prompt, every option, every rationale, every outcome, every guideline reference. Switch language from the header to play in 中文. All six curricula — Cardio, Acute Emergencies, Cross-Sector, End-of-Life, Pandemic, Paeds & Women — are fully bilingual.',
+    heading: 'Roadmap complete — what shipped',
+    body: 'The plan\'s remaining v1.0-polish items have all landed: interactive coachmarks tutorial (point-and-explain, not text slides), Quick Quiz mode, opt-in real-time pacing for acute-timer cases, Ops-mode patient figures (no more colored dots). Hit Tutorial in the header to take the new tour.',
+  },
+  {
+    heading: 'Opt-in real-time pacing',
+    body: 'Acute cases like STEMI have a door-to-balloon clock that previously only ticked on decision commits — read forever, still hit the goal. Click the timer pill in the HUD to turn on real-time pacing: 1 game-minute per ~3 real seconds. STEMI\'s 90-min window becomes ~4.5 real minutes of decision time. Pauses automatically when the tab is hidden, the mode switches to Ops, or you toggle it off.',
+  },
+  {
+    heading: '⚡ Quick Quiz',
+    body: 'The Trends panel gains a Quick Quiz button. Click to walk 5 random decisions in isolation — same Check answer / your-choice / best-practice feedback as Practice mode, plus a running score across the session and a percentage summary at the end. Nothing writes to bestScores or runHistory — pure revision.',
+  },
+  {
+    heading: 'All 23 cases fully bilingual',
+    body: 'Every case in the catalogue is now playable end-to-end in Chinese (中文) as well as English — the full pathway prose, every decision prompt, every option, every rationale, every outcome, every guideline reference. Lesson-plan exports also localise their section headings to your chosen language.',
   },
   {
     heading: 'Practice mode — re-attempt single decisions',
