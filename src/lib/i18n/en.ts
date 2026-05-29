@@ -75,6 +75,8 @@ export const en: Record<string, string> = {
   'cases.importJson': 'Import JSON',
   'cases.random': '🎲 Random',
   'cases.random.tip': 'Pick a random unlocked case to play right now.',
+  'cases.today': '☀ Today',
+  'cases.today.tip': 'Today\'s daily challenge. The same case for everyone on the same date.',
   'cases.startCase': 'Start case',
   'cases.restart': 'Restart',
   'cases.best': 'Best',

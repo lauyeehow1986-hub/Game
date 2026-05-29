@@ -69,6 +69,8 @@ export const zh: Record<string, string> = {
   'cases.importJson': '导入 JSON',
   'cases.random': '🎲 随机',
   'cases.random.tip': '从已解锁的病例中随机挑一个立即开始。',
+  'cases.today': '☀ 今日挑战',
+  'cases.today.tip': '今天的每日挑战。同一日期对所有玩家相同。',
   'cases.startCase': '开始病例',
   'cases.restart': '重新开始',
   'cases.best': '最佳',

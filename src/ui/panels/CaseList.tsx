@@ -19,6 +19,8 @@ import { EMPTY_FILTER, filterCases, filterIsEmpty, type CaseFilter } from '../..
 import type { CaseDefinition } from '../../lib/types';
 import { useAchievements } from '../../state/achievementsStore';
 import { computeDifficulty, DIFFICULTY_COLOUR } from '../../lib/case-difficulty';
+import { pickDailyCaseId } from '../../lib/daily-pick';
+import { localDateKey } from '../../lib/streak';
 
 export function CaseList() {
   const t = useT();
@@ -83,6 +85,20 @@ export function CaseList() {
       <header className="flex items-baseline justify-between gap-1">
         <h3 className="text-sm font-semibold text-white">{t('cases.heading')}</h3>
         <div className="flex gap-1">
+          <button
+            onClick={() => {
+              const playable = listCases().filter((c) => unlocked.includes(c.id));
+              const pick = pickDailyCaseId(playable.map((c) => c.id), localDateKey());
+              const c = playable.find((x) => x.id === pick);
+              if (!c) return;
+              if (status !== 'idle') resetRun();
+              startCase(c);
+            }}
+            title={t('cases.today.tip')}
+            className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-amber-500/40 text-amber-300 hover:text-amber-100"
+          >
+            {t('cases.today')}
+          </button>
           <button
             onClick={() => {
               const playable = listCases().filter((c) => unlocked.includes(c.id));
