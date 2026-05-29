@@ -37,6 +37,7 @@ export const zh: Record<string, string> = {
   'hud.streak': '连续天数',
   'hud.streak.tooltip': '每日学习连胜。今天完成至少一例可继续延长。',
   'hud.streak.best': '最佳',
+  'trends.heatmap': '过去12周',
   'settings.heading': '设置',
   'settings.audio': '音效',
   'settings.audio.hint': '决策音效与病例完成提示音。',

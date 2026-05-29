@@ -4,6 +4,7 @@ import { useProgress } from '../../state/progressStore';
 import { useGame } from '../../state/gameStore';
 import { useAchievements } from '../../state/achievementsStore';
 import { useStreak, currentStreakValue, bestStreakValue } from '../../state/streakStore';
+import { buildHeatmap } from '../../lib/streak-heatmap';
 import { useState, lazy, Suspense } from 'react';
 import { computePersonalTrends, computeDecisionWeaknesses, gradeBandLabel } from '../../lib/personal-trends';
 import { useT, useTr } from '../../lib/i18n';
@@ -126,6 +127,36 @@ export function TrendsPanel() {
           value={streakBest > 0 ? `${streakBest}d` : '—'}
         />
       </div>
+
+      {streakDays.length > 0 && (
+        <div
+          className="rounded border border-clinical-border bg-clinical-bg/30 p-2"
+          aria-label={t('trends.heatmap')}
+        >
+          <div className="text-[10px] uppercase tracking-wider text-clinical-subtle mb-1">
+            {t('trends.heatmap')}
+          </div>
+          <div className="flex gap-[2px]" role="img" aria-label={t('trends.heatmap')}>
+            {buildHeatmap(streakDays, 12).map((col, i) => (
+              <div key={i} className="flex flex-col gap-[2px]">
+                {col.map((cell) => (
+                  <div
+                    key={cell.date}
+                    title={cell.date}
+                    className={`w-2 h-2 rounded-[2px] ${
+                      cell.active
+                        ? 'bg-amber-400'
+                        : cell.inWindow
+                        ? 'bg-clinical-border'
+                        : 'bg-clinical-border/30'
+                    }`}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {trends.totalPlayed > 0 && (
         <button

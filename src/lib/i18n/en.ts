@@ -41,6 +41,7 @@ export const en: Record<string, string> = {
   'hud.streak': 'Streak',
   'hud.streak.tooltip': 'Daily learning streak. Complete at least one case today to extend it.',
   'hud.streak.best': 'best',
+  'trends.heatmap': 'Last 12 weeks',
 
   // Settings
   'settings.heading': 'Settings',
