@@ -132,10 +132,11 @@ export function CaseList() {
       <div className="space-y-1">
         <div className="flex items-center gap-1">
           <input
-            type="text"
+            type="search"
             value={filter.query}
             onChange={(e) => setFilter({ ...filter, query: e.target.value })}
             placeholder={t('cases.search.placeholder')}
+            aria-label={t('cases.search.placeholder')}
             className="flex-1 bg-clinical-bg border border-clinical-border rounded px-2 py-1 text-[11px] text-white"
           />
           {!filterIsEmpty(filter) && (

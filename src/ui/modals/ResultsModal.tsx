@@ -83,6 +83,7 @@ export function ResultsModal() {
     <div
       role="dialog"
       aria-modal="true"
+      aria-labelledby="results-title"
       className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4"
     >
       <Confetti active={ratio >= 0.9} />
@@ -90,7 +91,7 @@ export function ResultsModal() {
         <header className="px-5 py-4 border-b border-clinical-border flex items-center justify-between">
           <div>
             <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">Case complete</div>
-            <h2 className="text-lg font-semibold text-white">{tr(caseDef.title)}</h2>
+            <h2 id="results-title" className="text-lg font-semibold text-white">{tr(caseDef.title)}</h2>
           </div>
           <div
             className="px-3 py-1.5 rounded font-bold text-base"
@@ -140,6 +141,7 @@ export function ResultsModal() {
                 <button
                   key={p}
                   onClick={() => setPerspective(p)}
+                  aria-pressed={perspective === p}
                   className={`px-2 py-0.5 text-[11px] rounded-full ${
                     perspective === p
                       ? 'bg-clinical-accent text-white font-semibold'

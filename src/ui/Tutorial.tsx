@@ -249,7 +249,11 @@ export function Tutorial() {
           />
         </svg>
       ) : (
-        <div className="fixed inset-0 bg-black/70" onClick={close} />
+        <button
+          aria-label="Close tour"
+          className="fixed inset-0 bg-black/70 cursor-pointer"
+          onClick={close}
+        />
       )}
 
       <div

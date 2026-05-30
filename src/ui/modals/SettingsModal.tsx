@@ -117,6 +117,7 @@ export function SettingsModal({ open, onClose }: Props) {
             <select
               value={locale}
               onChange={(e) => setLocale(e.target.value as Locale)}
+              aria-label={t('hud.language')}
               className="bg-clinical-bg border border-clinical-border rounded px-2 py-1 text-white"
             >
               {LOCALES.map((l) => (
@@ -131,6 +132,7 @@ export function SettingsModal({ open, onClose }: Props) {
           <Row label={t('settings.audio')} hint={t('settings.audio.hint')}>
             <Toggle
               checked={audio}
+              label={t('settings.audio')}
               onChange={(v) => {
                 setMuted(!v);
                 setAudioState(v);
@@ -140,7 +142,7 @@ export function SettingsModal({ open, onClose }: Props) {
 
           {/* Real-time pacing */}
           <Row label={t('settings.realtime')} hint={t('settings.realtime.hint')}>
-            <Toggle checked={realtime} onChange={setRealtime} />
+            <Toggle checked={realtime} label={t('settings.realtime')} onChange={setRealtime} />
           </Row>
 
           {realtime && (
@@ -234,11 +236,20 @@ function Row({
   );
 }
 
-function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+function Toggle({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label?: string;
+}) {
   return (
     <button
       role="switch"
       aria-checked={checked}
+      aria-label={label}
       onClick={() => onChange(!checked)}
       className={`w-10 h-5 rounded-full p-0.5 transition ${
         checked ? 'bg-clinical-accent' : 'bg-clinical-bg border border-clinical-border'
