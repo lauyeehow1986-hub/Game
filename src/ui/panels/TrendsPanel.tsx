@@ -11,6 +11,7 @@ import { useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
 import { CURRICULA } from '../../lib/curricula';
 import { buildRandomQuiz, buildQuizFromDecisions, type QuizItem } from '../../lib/quiz';
+import { buildExam, EXAM_PRESETS, type ExamConfig } from '../../lib/exam';
 import { dueItems } from '../../lib/spaced-repetition';
 import { exportRunHistoryCsv } from '../../lib/csv-export';
 import type { CaseDefinition } from '../../lib/types';
@@ -20,6 +21,9 @@ const PracticeDecisionModal = lazy(() =>
 );
 const QuizModal = lazy(() =>
   import('../modals/QuizModal').then((m) => ({ default: m.QuizModal })),
+);
+const ExamModal = lazy(() =>
+  import('../modals/ExamModal').then((m) => ({ default: m.ExamModal })),
 );
 
 const CATEGORY_COLOURS: Record<'acute' | 'elective' | 'outpatient', string> = {
@@ -78,6 +82,7 @@ export function TrendsPanel() {
   const setDecisionNote = useProgress((s) => s.setDecisionNote);
   const [practice, setPractice] = useState<{ caseDef: CaseDefinition; decisionId: string } | null>(null);
   const [quiz, setQuiz] = useState<QuizItem[] | null>(null);
+  const [exam, setExam] = useState<{ items: QuizItem[]; config: ExamConfig; preset: string } | null>(null);
 
   const runHistory = useProgress((s) => s.runHistory);
   const catalogue = useMemo(
@@ -199,6 +204,25 @@ export function TrendsPanel() {
         >
           {t('quiz.startBtn')}
         </button>
+      )}
+
+      {trends.totalPlayed > 0 && (
+        <div className="flex gap-1" data-tour="exam">
+          {(['short', 'standard', 'osce'] as const).map((preset) => (
+            <button
+              key={preset}
+              onClick={() => {
+                const config = EXAM_PRESETS[preset];
+                const items = buildExam(catalogue, config.count);
+                if (items.length > 0) setExam({ items, config, preset });
+              }}
+              title={t('exam.startTip')}
+              className="tap-target flex-1 text-[10px] uppercase tracking-wider px-1 py-1.5 rounded border border-clinical-warn/40 bg-clinical-warn/5 text-clinical-warn hover:bg-clinical-warn/15"
+            >
+              {t(`exam.preset.${preset}`)}
+            </button>
+          ))}
+        </div>
       )}
 
       {trends.totalPlayed > 0 && (
@@ -586,6 +610,15 @@ export function TrendsPanel() {
             quiz={quiz}
             resolveCase={(id) => catalogue.find((c) => c.id === id)}
             onClose={() => setQuiz(null)}
+          />
+        )}
+        {exam && (
+          <ExamModal
+            exam={exam.items}
+            config={exam.config}
+            presetName={exam.preset}
+            resolveCase={(id) => catalogue.find((c) => c.id === id)}
+            onClose={() => setExam(null)}
           />
         )}
       </Suspense>
