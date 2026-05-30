@@ -2,7 +2,7 @@ import { useEffect, useState, useLayoutEffect } from 'react';
 import { useGame } from '../state/gameStore';
 import { getCase } from '../content';
 
-const KEY = 'sg-pathway-tutorial-seen-v3';
+const KEY = 'sg-pathway-tutorial-seen-v4';
 
 /**
  * Case that opens automatically from the final tutorial step. URTI at a
@@ -38,6 +38,11 @@ const STEPS: Step[] = [
     target: 'canvas',
     title: 'Watch the patient walk',
     body: 'The hospital map shows the patient figure moving between departments. In Ops mode the same canvas shows queues, bed occupancy and acuity at every department in real time.',
+  },
+  {
+    target: 'campaign',
+    title: 'Campaign mode',
+    body: 'A new in v2.0 — shift-themed sequences play 3-4 cases back-to-back with a cumulative pass-ratio target. ED Friday night, cross-cluster oncology week, outbreak week, polyclinic morning, geriatric step-down arc. Finish them all for the Shift Survived achievement.',
   },
   {
     target: 'trends',

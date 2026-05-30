@@ -44,7 +44,7 @@ describe('10/10 rating audit', () => {
     }
   });
 
-  it('axis 4b (v2.0): campaigns + voice narration + adaptive suggestion shipped', () => {
+  it('axis 4b (v2.0): campaigns + voice narration + adaptive suggestion shipped', async () => {
     for (const f of ['campaigns.ts', 'speech.ts']) {
       expect(
         readFileSync(resolve(ROOT, 'src/lib', f), 'utf-8').length,
@@ -61,6 +61,25 @@ describe('10/10 rating audit', () => {
     const caseList = readFileSync(resolve(ROOT, 'src/ui/panels/CaseList.tsx'), 'utf-8');
     expect(caseList).toMatch(/suggestedCaseId/);
     expect(caseList).toMatch(/cases\.badge\.suggested/);
+
+    // v2.0 inventory: ≥ 5 campaigns, ResultsModal Next/Finish CTAs,
+    // SettingsModal narration toggle, HUD campaign chip, package.json
+    // version bumped to 2.x.
+    const { CAMPAIGNS } = await import('../lib/campaigns');
+    expect(CAMPAIGNS.length).toBeGreaterThanOrEqual(5);
+
+    const resultsModal = readFileSync(resolve(ROOT, 'src/ui/modals/ResultsModal.tsx'), 'utf-8');
+    expect(resultsModal).toMatch(/results\.campaignNext/);
+    expect(resultsModal).toMatch(/campaign-completed/);
+
+    const settings = readFileSync(resolve(ROOT, 'src/ui/modals/SettingsModal.tsx'), 'utf-8');
+    expect(settings).toMatch(/settings\.narration/);
+
+    const hud = readFileSync(resolve(ROOT, 'src/ui/HUD.tsx'), 'utf-8');
+    expect(hud).toMatch(/useCampaign/);
+
+    const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8')) as { version: string };
+    expect(pkg.version).toMatch(/^2\./);
   });
 
   it('axis 4: engagement — streak / daily-pick / achievements all present', () => {
