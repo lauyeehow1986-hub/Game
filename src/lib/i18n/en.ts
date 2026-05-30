@@ -50,6 +50,8 @@ export const en: Record<string, string> = {
   'campaigns.start': 'Start shift',
   'campaigns.continue': 'Continue shift',
   'campaigns.exit': 'Exit',
+  'sr.reviewBtn': '🔁 Review {{n}} due decisions',
+  'sr.reviewTip': 'Spaced retrieval: decisions you previously got wrong, resurfaced at expanding intervals (1, 3, 7, 21, 60 days). Re-practising due items is the strongest evidence-backed way to retain them.',
   'campaigns.avg': 'Avg {{avg}}% · target {{target}}%',
   'campaigns.passed': 'Shift passed (≥ {{target}}%).',
   'campaigns.missedTarget': 'Shift complete — target {{target}}% missed.',

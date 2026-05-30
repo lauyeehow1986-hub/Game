@@ -1,6 +1,7 @@
 import type { CaseDefinition, DecisionLogEntry, RunHistoryEntry } from './types';
 import { gradeForRatio, totalScoreFromLog } from './scoring';
 import { compareToBestPath } from './best-path';
+import { topDueCaseId } from './spaced-repetition';
 
 /**
  * Personal-trends analytics computed from progress + run data. Pure
@@ -54,6 +55,9 @@ export interface PersonalTrends {
     curriculumCaseId: string | null;
     /** Any unplayed case the user hasn't touched yet — try something new. */
     discoverCaseId: string | null;
+    /** Case owning the most-overdue spaced-retrieval item, when runHistory
+     *  is supplied and any review is due. Highest learning-transfer priority. */
+    spacedReviewCaseId: string | null;
   };
 }
 
@@ -76,6 +80,7 @@ export function computePersonalTrends(
   catalogue: CaseDefinition[],
   resolveTitle: (c: CaseDefinition) => string,
   curricula: CurriculumLite[] = [],
+  runHistory: Record<string, RunHistoryEntry[]> = {},
 ): PersonalTrends {
   const totalCases = catalogue.length;
   const trends: CaseTrend[] = [];
@@ -140,8 +145,15 @@ export function computePersonalTrends(
   const discoverCaseId =
     unplayed.find((u) => !usedIds.has(u.caseId))?.caseId ?? null;
 
-  // Legacy single-value rec kept for the existing callsite.
-  const recommendedCaseId = practiceCaseId ?? curriculumCaseId ?? discoverCaseId;
+  // Spaced retrieval: the most-overdue (caseId|decisionId) the player has
+  // previously gotten wrong. Highest learning-transfer priority, so it leads
+  // the recommendation chain when present.
+  const spacedReviewCaseId = topDueCaseId(runHistory);
+
+  // Legacy single-value rec kept for the existing callsite. Spaced review
+  // first, then weak-spot practice, then curriculum, then discovery.
+  const recommendedCaseId =
+    spacedReviewCaseId ?? practiceCaseId ?? curriculumCaseId ?? discoverCaseId;
 
   return {
     totalCases,
@@ -155,6 +167,7 @@ export function computePersonalTrends(
       practiceCaseId,
       curriculumCaseId,
       discoverCaseId,
+      spacedReviewCaseId,
     },
   };
 }

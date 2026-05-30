@@ -66,9 +66,10 @@ export function CaseList() {
       listCases(),
       (c) => tr(c.title),
       CURRICULA.map((cur) => ({ id: cur.id, caseIds: cur.caseIds })),
+      runHistory,
     );
     return trends.recommendedCaseId;
-  }, [bestScores, tr]);
+  }, [bestScores, runHistory, tr]);
 
   const { all, allCases, hiddenCount } = useMemo(() => {
     const allCases = [

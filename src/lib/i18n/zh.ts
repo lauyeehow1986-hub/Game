@@ -46,6 +46,8 @@ export const zh: Record<string, string> = {
   'campaigns.start': '开始值班',
   'campaigns.continue': '继续值班',
   'campaigns.exit': '退出',
+  'sr.reviewBtn': '🔁 复习 {{n}} 个到期决策',
+  'sr.reviewTip': '间隔重复:把你之前做错的决策按递增间隔(1、3、7、21、60天)重新提取。复习到期项目是循证最强的记忆保持方式。',
   'campaigns.avg': '平均 {{avg}}% · 目标 {{target}}%',
   'campaigns.passed': '值班通过(达到 {{target}}%)。',
   'campaigns.missedTarget': '值班完成 — 未达 {{target}} %目标。',

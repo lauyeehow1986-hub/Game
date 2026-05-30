@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildRandomQuiz, totalQuizScore } from './quiz';
+import { buildRandomQuiz, buildQuizFromDecisions, totalQuizScore } from './quiz';
 import type { CaseDefinition, PathwayNode } from './types';
 
 const dec = { id: 'd', prompt: '', weight: 1, reference: { label: '', body: '' }, options: [] };
@@ -56,6 +56,43 @@ describe('buildRandomQuiz', () => {
   it('returns an empty array when no decisions exist', () => {
     const cases = [mkCase('a', 0)];
     expect(buildRandomQuiz(cases, 5, 1)).toEqual([]);
+  });
+});
+
+describe('buildQuizFromDecisions', () => {
+  const cases = [mkCase('a', 2), mkCase('b', 2)];
+
+  it('keeps only pairs that resolve to a real decision, preserving order', () => {
+    const q = buildQuizFromDecisions(
+      [
+        { caseId: 'b', decisionId: 'b-d1' },
+        { caseId: 'a', decisionId: 'a-d0' },
+        { caseId: 'a', decisionId: 'nope' }, // dropped
+        { caseId: 'ghost', decisionId: 'x' }, // dropped
+      ],
+      cases,
+    );
+    expect(q).toEqual([
+      { caseId: 'b', decisionId: 'b-d1' },
+      { caseId: 'a', decisionId: 'a-d0' },
+    ]);
+  });
+
+  it('caps at count when count > 0', () => {
+    const q = buildQuizFromDecisions(
+      [
+        { caseId: 'a', decisionId: 'a-d0' },
+        { caseId: 'a', decisionId: 'a-d1' },
+        { caseId: 'b', decisionId: 'b-d0' },
+      ],
+      cases,
+      2,
+    );
+    expect(q).toHaveLength(2);
+  });
+
+  it('returns empty for no matches', () => {
+    expect(buildQuizFromDecisions([{ caseId: 'z', decisionId: 'z' }], cases)).toEqual([]);
   });
 });
 

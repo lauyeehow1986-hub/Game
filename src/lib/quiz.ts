@@ -34,6 +34,31 @@ export function buildRandomQuiz(
   return out;
 }
 
+/**
+ * Build a quiz from an explicit list of (caseId, decisionId) pairs — used by
+ * the spaced-retrieval scheduler to resurface due items. Only keeps pairs
+ * that still resolve to a real decision in the catalogue, capped at `count`
+ * (0 = no cap), preserving input order (the scheduler hands them soonest-due
+ * first).
+ */
+export function buildQuizFromDecisions(
+  pairs: Array<{ caseId: string; decisionId: string }>,
+  cases: CaseDefinition[],
+  count = 0,
+): QuizItem[] {
+  const byId = new Map(cases.map((c) => [c.id, c]));
+  const out: QuizItem[] = [];
+  for (const p of pairs) {
+    const c = byId.get(p.caseId);
+    if (!c) continue;
+    const exists = c.pathway.some((n) => n.decision?.id === p.decisionId);
+    if (!exists) continue;
+    out.push({ caseId: p.caseId, decisionId: p.decisionId });
+    if (count > 0 && out.length >= count) break;
+  }
+  return out;
+}
+
 /** Tiny seeded RNG so tests can pin behaviour. */
 function mulberry32(seed: number): () => number {
   let t = seed >>> 0;

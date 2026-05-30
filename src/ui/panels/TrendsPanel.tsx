@@ -10,7 +10,8 @@ import { computePersonalTrends, computeDecisionWeaknesses, gradeBandLabel } from
 import { useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
 import { CURRICULA } from '../../lib/curricula';
-import { buildRandomQuiz, type QuizItem } from '../../lib/quiz';
+import { buildRandomQuiz, buildQuizFromDecisions, type QuizItem } from '../../lib/quiz';
+import { dueItems } from '../../lib/spaced-repetition';
 import { exportRunHistoryCsv } from '../../lib/csv-export';
 import type { CaseDefinition } from '../../lib/types';
 
@@ -89,8 +90,9 @@ export function TrendsPanel() {
       catalogue,
       (c) => tr(c.title),
       CURRICULA.map((cur) => ({ id: cur.id, caseIds: cur.caseIds })),
+      runHistory,
     ),
-    [bestScores, catalogue, tr],
+    [bestScores, catalogue, tr, runHistory],
   );
   const decisionWeaknesses = useMemo(
     () => computeDecisionWeaknesses(
@@ -167,6 +169,23 @@ export function TrendsPanel() {
           </div>
         </div>
       )}
+
+      {(() => {
+        const due = dueItems(runHistory);
+        if (due.length === 0) return null;
+        return (
+          <button
+            onClick={() => {
+              const q = buildQuizFromDecisions(due, catalogue, 8);
+              if (q.length > 0) setQuiz(q);
+            }}
+            className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-warn/50 bg-clinical-warn/10 text-clinical-warn hover:bg-clinical-warn/20"
+            title={t('sr.reviewTip')}
+          >
+            {t('sr.reviewBtn', { n: Math.min(due.length, 8) })}
+          </button>
+        );
+      })()}
 
       {trends.totalPlayed > 0 && (
         <button
