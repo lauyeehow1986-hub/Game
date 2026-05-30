@@ -153,15 +153,29 @@ function effectiveSubsidy(p: PatientProfile, charge: FinancingSegmentInput['char
 }
 
 /** MediShield Life claim amount on subsidised bill (very simplified). */
+/**
+ * Tiered co-insurance rate introduced by the MediShield Life 2025 reform
+ * (replacing the flat 10%): co-insurance steps down from 10% to 3% as the
+ * claimable amount rises, so large bills are better covered. Simplified
+ * banding for educational use — not the exact MOH schedule.
+ */
+function coInsuranceRate(claimable: number): number {
+  if (claimable <= 5000) return 0.10;
+  if (claimable <= 10000) return 0.08;
+  if (claimable <= 25000) return 0.05;
+  return 0.03;
+}
+
 function mediShieldClaim(p: PatientProfile, charge: FinancingSegmentInput['charge'], subsidised: number): number {
   if (p.citizenship === 'foreigner') return 0;
   // MediShield Life only for inpatient + day surgery + selected outpatient (oncology, dialysis).
   const eligible = charge === 'inpatient-ward' || charge === 'inpatient-procedure' || charge === 'icu';
   if (!eligible) return 0;
-  // 90% of subsidised charge above a small deductible (simplified).
+  // Claimable amount above the deductible, then tiered co-insurance (MSHL
+  // 2025 reform). The patient retains the deductible + co-insurance share.
   const deductible = charge === 'icu' ? 800 : 400;
   const claimable = Math.max(0, subsidised - deductible);
-  const claim = claimable * 0.9;
+  const claim = claimable * (1 - coInsuranceRate(claimable));
   // IP riders top up to "as-charged" — modelled as 100% of remaining for simplicity.
   if (p.hasIntegratedShield) {
     return Math.max(claim, subsidised * 0.95);

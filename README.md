@@ -90,7 +90,7 @@ pnpm preview
 
 ## Educational disclaimer
 
-All clinical scenarios, guideline references, and Singapore healthcare-system mechanics are simplifications for educational use. The financing cascade (subsidy → MediShield Life → MediSave → CHAS → IP rider → cash) matches reality in shape, **not in number** — refer to the MOH website and your hospital's billing department for any real-world figure. Cases reflect a small set of named guidelines (MOH CPG, ESC, NCCN, NICE, KDIGO, ATLS, Surviving Sepsis, ESO) at the time of authoring — always defer to current local guidance.
+All clinical scenarios, guideline references, and Singapore healthcare-system mechanics are simplifications for educational use. The financing cascade (subsidy → MediShield Life → MediSave → CHAS → IP rider → cash) matches reality in shape, **not in number** — refer to the MOH website and your hospital's billing department for any real-world figure. MediShield Life modelling reflects the 2025 reform in shape (tiered 3–10% co-insurance, refreshed Cancer Drug List, CTGTP coverage) but the bands are illustrative. Cases reflect a small set of named guidelines (ESC 2023 ACS, ESC HF 2021/2023, ATLS 11, KDIGO 2024, NICE, Surviving Sepsis 2021, ESO/ESMINT, EGS 6th ed., Singapore National Dengue Guideline 2026, MHCTA as amended 2025) at the time of authoring — always defer to current local guidance.
 
 Historical scenarios (SARS 2003, COVID-19) are reconstructions framed by post-outbreak reviews; outcomes are stylised. Sources are listed in each historical case.
 

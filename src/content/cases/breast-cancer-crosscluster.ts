@@ -293,8 +293,8 @@ export const breastCancerCrossCluster: CaseDefinition = {
             },
             score: 10,
             rationale: {
-              en: 'Standard pathway: maximise subsidy + MediSave + MediShield + MAF for Standard Drug List agents. MSW review captures any unmet financial need; Medifund as last resort.',
-              zh: '标准路径:对标准用药清单上的药物最大限度叠加津贴 + MediSave + MediShield + MAF。医务社工评估未满足的经济需求;最后申请保健基金(Medifund)。',
+              en: 'Standard pathway: maximise subsidy + MediSave + MediShield + MAF for Standard Drug List agents. For Cancer Drug List (CDL) chemo, MediShield Life pays per-treatment claim limits (the CDL was refreshed 1 Apr 2026); cell/gene therapies have had a separate CTGTP MediShield benefit since Oct 2025. MSW review captures unmet need; Medifund as last resort.',
+              zh: '标准路径:对标准用药清单上的药物最大限度叠加津贴 + MediSave + MediShield + MAF。属癌症药物清单(CDL)的化疗,MediShield Life按每次治疗的索赔上限支付(CDL于2026年4月1日更新);细胞与基因疗法自2025年10月起有独立的CTGTP MediShield保障。医务社工评估未满足需求;最后申请保健基金(Medifund)。',
             },
             outcome: {
               patient: {

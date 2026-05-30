@@ -42,6 +42,8 @@ export const GLOSSARY_TERMS: GlossaryEntry[] = [
   { term: 'NS1', def: 'Dengue NS1 antigen — useful for diagnosis in the first 7 days of fever.' },
   { term: 'I-Quit', def: 'HPB national smoking-cessation hotline and programme (1800-438-2000).' },
   { term: 'Mindline 1771', def: 'National 24/7 mental-health helpline (call / WhatsApp / webchat), live 18 Jun 2025; replaced the IMH Mental Health Helpline. Feeds the National Mental Health Office\'s Tiered Care Model.' },
+  { term: 'CDL', def: 'Cancer Drug List — MOH list of clinically-proven, cost-effective cancer drugs claimable under MediShield Life / MediSave (per-treatment limits). Refreshed 1 Apr 2026.' },
+  { term: 'CTGTP', def: 'Cell, Tissue and Gene Therapy Products — MediShield Life extended coverage to selected CTGTP from Oct 2025.' },
 ];
 
 /**

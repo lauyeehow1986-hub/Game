@@ -13,14 +13,15 @@ const baseTaxiDriver: PatientProfile = {
 describe('computeSegment — subsidised tier', () => {
   it('applies higher subsidy for Class C than Class A', () => {
     // Use a large gross so MediShield+MediSave can't zero out the bill in
-    // both cases — keeps the cash comparison meaningful.
+    // both cases — keeps the cash comparison meaningful. (Raised after the
+    // MSHL 2025 tiered-co-insurance reform lowered patient share on big bills.)
     const c = computeSegment({ ...baseTaxiDriver, wardClass: 'C' }, {
       charge: 'inpatient-procedure',
-      grossSGD: 30000,
+      grossSGD: 100000,
     });
     const a = computeSegment({ ...baseTaxiDriver, wardClass: 'A' }, {
       charge: 'inpatient-procedure',
-      grossSGD: 30000,
+      grossSGD: 100000,
     });
     expect(c.subsidyPct).toBeGreaterThan(a.subsidyPct);
     expect(c.subsidisedSGD).toBeLessThan(a.subsidisedSGD);
@@ -59,6 +60,22 @@ describe('computeSegment — subsidised tier', () => {
     });
     expect(ip.mediShieldSGD).toBeGreaterThan(0);
     expect(op.mediShieldSGD).toBe(0);
+  });
+
+  it('MSHL 2025 tiered co-insurance: bigger bills get a higher claimable fraction', () => {
+    // A large inpatient bill should be reimbursed at a higher fraction of
+    // its claimable amount than a small one (co-insurance steps 10%->3%).
+    const small = computeSegment(
+      { ...baseTaxiDriver, wardClass: 'A' },
+      { charge: 'inpatient-procedure', grossSGD: 8000 },
+    );
+    const large = computeSegment(
+      { ...baseTaxiDriver, wardClass: 'A' },
+      { charge: 'inpatient-procedure', grossSGD: 120000 },
+    );
+    const smallFrac = small.mediShieldSGD / small.subsidisedSGD;
+    const largeFrac = large.mediShieldSGD / large.subsidisedSGD;
+    expect(largeFrac).toBeGreaterThan(smallFrac);
   });
 });
 
