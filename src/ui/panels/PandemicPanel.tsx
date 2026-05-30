@@ -8,12 +8,6 @@ const dorsconColours: Record<Dorscon, string> = {
   Red: '#f87171',
 };
 
-const dorsconNotes: Record<Dorscon, string> = {
-  Green: 'No outbreak. Routine infection control.',
-  Yellow: 'Suspected imported / sporadic cases. Heightened ED screening.',
-  Orange: 'Sustained transmission. NCID lead, ring-fenced wards, PPE escalation.',
-  Red: 'Severe overwhelmed system. Rationing, surge wards, elective shutdown.',
-};
 
 export function PandemicPanel() {
   const p = useGame((s) => s.pandemic);
@@ -52,7 +46,7 @@ export function PandemicPanel() {
           </button>
         ))}
       </div>
-      <p className="text-[11px] text-clinical-subtle leading-snug">{dorsconNotes[p.dorscon]}</p>
+      <p className="text-[11px] text-clinical-subtle leading-snug">{t(`pandemic.dorscon.note.${p.dorscon}`)}</p>
 
       <Slider
         label={t('pandemic.ppe')}

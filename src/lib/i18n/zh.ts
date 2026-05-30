@@ -118,6 +118,15 @@ export const zh: Record<string, string> = {
   'pandemic.ncidActivated': '启动国家传染病中心',
   'pandemic.active': '已启动',
   'pandemic.off': '关闭',
+  'ward.A': 'A级病房 · 单人房 · 不享津贴',
+  'ward.B1': 'B1级病房 · 4床房 · 约20%津贴',
+  'ward.B2': 'B2级病房 · 6床房 · 约65%津贴',
+  'ward.C': 'C级病房 · 大病房 · 约80%津贴',
+  'ward.na': '门诊',
+  'pandemic.dorscon.note.Green': '无疫情。常规感染控制。',
+  'pandemic.dorscon.note.Yellow': '疑似输入或零星病例。急诊加强筛查。',
+  'pandemic.dorscon.note.Orange': '持续传播。由NCID主导,病区封区,加强PPE。',
+  'pandemic.dorscon.note.Red': '系统严重超负荷。资源配给、应急病房、停择期手术。',
 
   // Financing panel
   'fin.heading': '医疗费用',

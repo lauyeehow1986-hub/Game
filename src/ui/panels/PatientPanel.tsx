@@ -1,17 +1,9 @@
 import { useGame } from '../../state/gameStore';
 import { usePerspective } from '../../state/perspectiveStore';
 import { getFacility } from '../../content';
-import { useTr } from '../../lib/i18n';
+import { useT, useTr } from '../../lib/i18n';
 import { GlossaryText } from '../GlossaryText';
 import type { WardClass } from '../../lib/financing';
-
-const wardLabels: Record<WardClass, string> = {
-  A: 'Class A · single room · no subsidy',
-  B1: 'Class B1 · 4-bedder · ~20% subsidy',
-  B2: 'Class B2 · 6-bedder · ~65% subsidy',
-  C: 'Class C · open ward · ~80% subsidy',
-  na: 'Outpatient',
-};
 
 export function PatientPanel() {
   const caseDef = useGame((s) => s.caseDef);
@@ -21,6 +13,7 @@ export function PatientPanel() {
   const setIp = useGame((s) => s.setIntegratedShield);
   const perspective = usePerspective((s) => s.current);
   const tr = useTr();
+  const t = useT();
 
   if (!caseDef || !profile) {
     return (
@@ -74,7 +67,7 @@ export function PatientPanel() {
               <button
                 key={w}
                 onClick={() => setWardClass(w)}
-                title={wardLabels[w]}
+                title={t(`ward.${w}`)}
                 className={`flex-1 text-xs py-1 rounded border transition ${
                   profile.wardClass === w
                     ? 'bg-clinical-accent text-white border-clinical-accent font-semibold'
@@ -86,7 +79,7 @@ export function PatientPanel() {
             ))}
           </div>
           <div className="text-[10px] text-clinical-subtle leading-snug">
-            {wardLabels[profile.wardClass]}
+            {t(`ward.${profile.wardClass}`)}
           </div>
         </div>
       )}

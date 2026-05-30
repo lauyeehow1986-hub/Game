@@ -131,6 +131,15 @@ export const en: Record<string, string> = {
   'pandemic.ncidActivated': 'NCID activated',
   'pandemic.active': 'Active',
   'pandemic.off': 'Off',
+  'ward.A': 'Class A · single room · no subsidy',
+  'ward.B1': 'Class B1 · 4-bedder · ~20% subsidy',
+  'ward.B2': 'Class B2 · 6-bedder · ~65% subsidy',
+  'ward.C': 'Class C · open ward · ~80% subsidy',
+  'ward.na': 'Outpatient',
+  'pandemic.dorscon.note.Green': 'No outbreak. Routine infection control.',
+  'pandemic.dorscon.note.Yellow': 'Suspected imported / sporadic cases. Heightened ED screening.',
+  'pandemic.dorscon.note.Orange': 'Sustained transmission. NCID lead, ring-fenced wards, PPE escalation.',
+  'pandemic.dorscon.note.Red': 'Severe overwhelmed system. Rationing, surge wards, elective shutdown.',
 
   // Financing panel
   'fin.heading': 'Financing',

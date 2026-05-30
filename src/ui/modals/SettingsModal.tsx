@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useT, useLocale, LOCALES, type Locale } from '../../lib/i18n';
 import { usePacing } from '../../state/pacingStore';
 import { isMuted, setMuted } from '../../lib/audio';
@@ -27,6 +27,20 @@ export function SettingsModal({ open, onClose }: Props) {
   const [audio, setAudioState] = useState(false);
   const [reduced, setReduced] = useState(false);
   const [backupMsg, setBackupMsg] = useState<string | null>(null);
+  const backupMsgTimer = useRef<number | null>(null);
+
+  // Single source of truth for clearing the backup toast — cancels any
+  // outstanding timer and schedules a new one, so the late callback from a
+  // previous toast doesn't reset a fresh one. Cleared on unmount.
+  const flashBackupMsg = (msg: string) => {
+    setBackupMsg(msg);
+    if (backupMsgTimer.current !== null) window.clearTimeout(backupMsgTimer.current);
+    backupMsgTimer.current = window.setTimeout(() => setBackupMsg(null), 3000);
+  };
+
+  useEffect(() => () => {
+    if (backupMsgTimer.current !== null) window.clearTimeout(backupMsgTimer.current);
+  }, []);
 
   const handleExport = () => {
     try {
@@ -38,11 +52,10 @@ export function SettingsModal({ open, onClose }: Props) {
       a.download = backupFilename();
       a.click();
       URL.revokeObjectURL(url);
-      setBackupMsg(t('settings.backup.exported'));
+      flashBackupMsg(t('settings.backup.exported'));
     } catch {
-      setBackupMsg(t('settings.backup.exportFailed'));
+      flashBackupMsg(t('settings.backup.exportFailed'));
     }
-    setTimeout(() => setBackupMsg(null), 3000);
   };
 
   const handleImport = () => {
@@ -59,12 +72,10 @@ export function SettingsModal({ open, onClose }: Props) {
           alert(t('settings.backup.importedReload'));
           location.reload();
         } else {
-          setBackupMsg(t('settings.backup.importFailed'));
-          setTimeout(() => setBackupMsg(null), 3000);
+          flashBackupMsg(t('settings.backup.importFailed'));
         }
       } catch {
-        setBackupMsg(t('settings.backup.importFailed'));
-        setTimeout(() => setBackupMsg(null), 3000);
+        flashBackupMsg(t('settings.backup.importFailed'));
       }
     };
     input.click();
