@@ -32,11 +32,17 @@ Cardio · Acute Emergencies · Cross-Sector · End-of-Life · Pandemic · Primar
 
 ### Game modes
 - **Case mode** — full pathway sim with patient sprite walking between departments
-- **Campaign mode** *(new in v2.0)* — shift-themed sequences (TTSH ED Friday night, cross-cluster oncology week, outbreak week, polyclinic morning) with cumulative pass-ratio targets
+- **Campaign mode** *(v2.0)* — shift-themed sequences (TTSH ED Friday night, cross-cluster oncology week, outbreak week, polyclinic morning, geriatric step-down, reform week) with cumulative pass-ratio targets
+- **Exam / OSCE mode** *(v3.0)* — timed papers (8/15/20 questions), no feedback until the end, pass/fail + printable certificate
 - **Hospital Ops mode** — 8-hour tycoon shift at TTSH: hire staff, set bed capacity, manage budget + DORSCON
 - **Practice mode** — re-attempt a single decision in isolation (no score recorded)
 - **Quick Quiz** — 5 random decisions in sequence with running score
+- **Spaced retrieval** *(v2.1)* — missed decisions resurface at expanding intervals (1/3/7/21/60 days)
 - **Demo best-path** — walk through the highest-scoring choices for revision
+
+### Authoring & teaching *(v2.3–v3.0)*
+- **Case Authoring Studio** — a guided form (✎ Build) that assembles a valid case without writing JSON; save locally or export
+- **Educator tools** — create an assignment link (exam or curriculum + pass mark), share with a cohort, collect completion tokens into a roster with CSV export. No server, no accounts.
 
 ### Exports + sharing (URL-encoded, no server)
 - Run snapshot → share URL with journey + decisions + financing

@@ -2,7 +2,7 @@ import { useEffect, useState, useLayoutEffect } from 'react';
 import { useGame } from '../state/gameStore';
 import { getCase } from '../content';
 
-const KEY = 'sg-pathway-tutorial-seen-v4';
+const KEY = 'sg-pathway-tutorial-seen-v5';
 
 /**
  * Case that opens automatically from the final tutorial step. URTI at a
@@ -48,6 +48,11 @@ const STEPS: Step[] = [
     target: 'trends',
     title: 'Your learning trends',
     body: 'After a run, this panel surfaces recommended-next-case (Practice / Continue curriculum / Discover), the decisions you keep getting wrong, your achievements, and a quick-quiz of 5 random decisions for revision.',
+  },
+  {
+    target: 'exam',
+    title: 'Exams + educator tools',
+    body: 'New in v3.0: timed Exam / OSCE papers (8/15/20 questions) with a pass mark and a printable certificate — no feedback until you submit. Below them, Educator tools let a teacher share an assignment link and collect a class roster, all without a server.',
   },
   {
     target: 'mode-toggle',

@@ -79,7 +79,29 @@ describe('10/10 rating audit', () => {
     expect(hud).toMatch(/useCampaign/);
 
     const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8')) as { version: string };
-    expect(pkg.version).toMatch(/^2\./);
+    expect(pkg.version).toMatch(/^[23]\./);
+  });
+
+  it('axis 4c (v2.2-2.5): exam, case-builder, educator, spaced-retrieval shipped', () => {
+    for (const f of ['exam.ts', 'case-builder.ts', 'assignment.ts', 'spaced-repetition.ts', 'certificate-print.ts']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/lib', f), 'utf-8').length,
+        `${f} missing or empty`,
+      ).toBeGreaterThan(100);
+    }
+    for (const f of ['ExamModal.tsx', 'CaseBuilderModal.tsx', 'EducatorModal.tsx']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/ui/modals', f), 'utf-8').length,
+        `${f} missing or empty`,
+      ).toBeGreaterThan(100);
+    }
+    // AssignmentBanner wired into App for ?assign= links.
+    const app = readFileSync(resolve(ROOT, 'src/App.tsx'), 'utf-8');
+    expect(app).toMatch(/AssignmentBanner/);
+    // Spaced-retrieval review surface in Trends.
+    const trends = readFileSync(resolve(ROOT, 'src/ui/panels/TrendsPanel.tsx'), 'utf-8');
+    expect(trends).toMatch(/dueItems/);
+    expect(trends).toMatch(/buildExam/);
   });
 
   it('axis 4: engagement — streak / daily-pick / achievements all present', () => {

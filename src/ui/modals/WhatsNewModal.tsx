@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v21-seen';
+const KEY = 'sg-pathway-whatsnew-v30-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'v3.0 — Exams, a case builder, and educator tools',
+    body: 'The classroom milestone. Timed Exam / OSCE mode (8/15/20-question papers, countdown, pass/fail, printable certificate) lives in the Trends panel. A guided Case Authoring Studio (the ✎ Build button) lets anyone compose a valid scenario through a form — no JSON required. Educator tools turn the game into a teaching platform: build an assignment link, share it with a cohort, and collect the completion tokens learners send back into a roster with CSV export — all without a server or accounts.',
+  },
   {
     heading: 'v2.1 — Spaced retrieval, current guidelines, three new cases',
     body: 'A deep-research pass refreshed the whole game. New: a spaced-retrieval scheduler resurfaces decisions you got wrong at expanding intervals (1/3/7/21/60 days) — see the "🔁 Review due decisions" button in Trends. Clinical guidelines updated to 2025-26 (ATLS 11 xABCDE, ESC 2023 ACS prasugrel, SGLT2i across all HF, KDIGO 2024 finerenone, ESO large-core thrombectomy, the 2026 Singapore National Dengue Guideline). The facility map was cleaned against current MOH sources (now 94, incl. Serangoon/Tengah/Eunos polyclinics + SACH Bedok). Three new cases exercise the latest reforms: Mindline 1771 + Tiered Care, Age Well SG / HPC+ ageing-in-place, and cancer financing under the MediShield Life 2025 changes.',
