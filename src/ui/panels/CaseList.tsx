@@ -8,6 +8,9 @@ import { downloadCaseJson, encodeCaseToUrl, tryDecodeCaseFromHref } from '../../
 const CaseImportModal = lazy(() =>
   import('../modals/CaseImportModal').then((m) => ({ default: m.CaseImportModal })),
 );
+const CaseBuilderModal = lazy(() =>
+  import('../modals/CaseBuilderModal').then((m) => ({ default: m.CaseBuilderModal })),
+);
 const BestPathDemoModal = lazy(() =>
   import('../modals/BestPathDemoModal').then((m) => ({ default: m.BestPathDemoModal })),
 );
@@ -40,6 +43,7 @@ export function CaseList() {
   const fireAchievement = useAchievements((s) => s.fire);
 
   const [importOpen, setImportOpen] = useState(false);
+  const [builderOpen, setBuilderOpen] = useState(false);
   const [demoCase, setDemoCase] = useState<CaseDefinition | null>(null);
   const [compareCase, setCompareCase] = useState<CaseDefinition | null>(null);
   const [shareToast, setShareToast] = useState<string | null>(null);
@@ -126,6 +130,12 @@ export function CaseList() {
             className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
           >
             {t('cases.random')}
+          </button>
+          <button
+            onClick={() => setBuilderOpen(true)}
+            className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-clinical-accent/40 text-clinical-accent hover:text-clinical-accent/80"
+          >
+            {t('cases.build')}
           </button>
           <button
             onClick={() => setImportOpen(true)}
@@ -379,6 +389,9 @@ export function CaseList() {
       <Suspense fallback={null}>
         {importOpen && (
           <CaseImportModal open={importOpen} onClose={() => setImportOpen(false)} />
+        )}
+        {builderOpen && (
+          <CaseBuilderModal open={builderOpen} onClose={() => setBuilderOpen(false)} />
         )}
         {demoCase && (
           <BestPathDemoModal caseDef={demoCase} onClose={() => setDemoCase(null)} />
