@@ -40,8 +40,8 @@ export function PatientPanel() {
   if (!caseDef || !profile) {
     return (
       <section className="bg-clinical-panel border border-clinical-border rounded-lg p-3 space-y-2">
-        <h3 className="text-sm font-semibold text-white">Patient</h3>
-        <p className="text-xs text-clinical-subtle">No active case. Pick a case below to begin.</p>
+        <h3 className="text-sm font-semibold text-white">{t('patient.heading')}</h3>
+        <p className="text-xs text-clinical-subtle">{t('patient.empty')}</p>
       </section>
     );
   }

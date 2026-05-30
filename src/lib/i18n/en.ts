@@ -172,8 +172,8 @@ export const en: Record<string, string> = {
   'fin.sleepDebt': 'Sleep debt',
 
   // Patient panel
-  'patient.heading.empty': 'Patient',
-  'patient.empty': 'No active case. Pick a case below to begin.',
+  'patient.heading': 'Patient',
+  'patient.empty': 'No active case yet. Open the Cases panel at the top of this column and tap Start on any card.',
   'patient.citizenship': 'Citizenship',
   'patient.chas': 'CHAS',
   'patient.income': 'Per-capita income',

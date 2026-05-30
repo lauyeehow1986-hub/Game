@@ -159,8 +159,8 @@ export const zh: Record<string, string> = {
   'fin.sleepDebt': '睡眠负债',
 
   // Patient panel
-  'patient.heading.empty': '患者',
-  'patient.empty': '没有进行中的病例。请在下方选择一个病例开始。',
+  'patient.heading': '病人',
+  'patient.empty': '尚未开始病例。打开本栏顶部的「病例」面板,在任一卡片上点击「开始」。',
   'patient.citizenship': '国籍/身份',
   'patient.chas': '社保援助',
   'patient.income': '人均收入',
