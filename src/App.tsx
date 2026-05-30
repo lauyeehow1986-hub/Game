@@ -10,12 +10,6 @@ import { DataExchangePanel } from './ui/panels/DataExchangePanel';
 import { CitationsPanel } from './ui/panels/CitationsPanel';
 import { CurriculumPanel } from './ui/panels/CurriculumPanel';
 import { TrendsPanel } from './ui/panels/TrendsPanel';
-import { DecisionModal } from './ui/modals/DecisionModal';
-import { ResultsModal } from './ui/modals/ResultsModal';
-import { RunReviewModal } from './ui/modals/RunReviewModal';
-import { WhatsNewModal } from './ui/modals/WhatsNewModal';
-import { Tutorial } from './ui/Tutorial';
-import { ResumePrompt } from './ui/ResumePrompt';
 import { DisclaimerBanner } from './ui/DisclaimerBanner';
 import { StreakDefenseBanner } from './ui/StreakDefenseBanner';
 import { InstallPrompt } from './ui/InstallPrompt';
@@ -35,6 +29,29 @@ const PhaserGame = lazy(() =>
 );
 const OpsPanel = lazy(() =>
   import('./ui/panels/OpsPanel').then((m) => ({ default: m.OpsPanel })),
+);
+
+// Modals that are mounted unconditionally but self-gate on state — they
+// only render when their trigger fires (case complete, awaiting decision,
+// ?run= URL, returning user, never-seen-tutorial). Lazy-loading moves
+// their cost from initial paint to first show.
+const DecisionModal = lazy(() =>
+  import('./ui/modals/DecisionModal').then((m) => ({ default: m.DecisionModal })),
+);
+const ResultsModal = lazy(() =>
+  import('./ui/modals/ResultsModal').then((m) => ({ default: m.ResultsModal })),
+);
+const RunReviewModal = lazy(() =>
+  import('./ui/modals/RunReviewModal').then((m) => ({ default: m.RunReviewModal })),
+);
+const WhatsNewModal = lazy(() =>
+  import('./ui/modals/WhatsNewModal').then((m) => ({ default: m.WhatsNewModal })),
+);
+const Tutorial = lazy(() =>
+  import('./ui/Tutorial').then((m) => ({ default: m.Tutorial })),
+);
+const ResumePrompt = lazy(() =>
+  import('./ui/ResumePrompt').then((m) => ({ default: m.ResumePrompt })),
 );
 
 export default function App() {
@@ -100,16 +117,18 @@ export default function App() {
         </aside>
       </main>
 
-      {mode === 'case' && (
-        <>
-          <DecisionModal />
-          <ResultsModal />
-          <ResumePrompt />
-        </>
-      )}
-      <Tutorial />
-      <RunReviewModal />
-      <WhatsNewModal />
+      <Suspense fallback={null}>
+        {mode === 'case' && (
+          <>
+            <DecisionModal />
+            <ResultsModal />
+            <ResumePrompt />
+          </>
+        )}
+        <Tutorial />
+        <RunReviewModal />
+        <WhatsNewModal />
+      </Suspense>
       <AchievementToast />
       <LiveAnnouncer />
       <KeyboardHelpModal />
