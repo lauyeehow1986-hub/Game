@@ -9,7 +9,6 @@ import { PandemicPanel } from './ui/panels/PandemicPanel';
 import { DataExchangePanel } from './ui/panels/DataExchangePanel';
 import { CitationsPanel } from './ui/panels/CitationsPanel';
 import { CurriculumPanel } from './ui/panels/CurriculumPanel';
-import { TrendsPanel } from './ui/panels/TrendsPanel';
 import { DisclaimerBanner } from './ui/DisclaimerBanner';
 import { StreakDefenseBanner } from './ui/StreakDefenseBanner';
 import { InstallPrompt } from './ui/InstallPrompt';
@@ -53,6 +52,12 @@ const Tutorial = lazy(() =>
 const ResumePrompt = lazy(() =>
   import('./ui/ResumePrompt').then((m) => ({ default: m.ResumePrompt })),
 );
+// TrendsPanel pulls in personal-trends + quiz + decision-weakness analytics.
+// It's a side panel — rendering it a beat after first paint is invisible to
+// the user and saves ~30KB raw / ~12KB gzip off the index chunk.
+const TrendsPanel = lazy(() =>
+  import('./ui/panels/TrendsPanel').then((m) => ({ default: m.TrendsPanel })),
+);
 
 export default function App() {
   const mode = useMode((s) => s.mode);
@@ -71,7 +76,15 @@ export default function App() {
             <>
               <CaseList />
               <CurriculumPanel />
-              <TrendsPanel />
+              <Suspense
+                fallback={
+                  <div className="bg-clinical-panel border border-clinical-border rounded-lg p-3 text-clinical-subtle text-xs">
+                    Loading trends…
+                  </div>
+                }
+              >
+                <TrendsPanel />
+              </Suspense>
               <FacilityBrowser />
               <PatientPanel />
             </>
