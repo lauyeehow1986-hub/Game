@@ -11,6 +11,7 @@ import { CitationsPanel } from './ui/panels/CitationsPanel';
 import { CurriculumPanel } from './ui/panels/CurriculumPanel';
 import { DisclaimerBanner } from './ui/DisclaimerBanner';
 import { StreakDefenseBanner } from './ui/StreakDefenseBanner';
+import { AssignmentBanner } from './ui/AssignmentBanner';
 import { InstallPrompt } from './ui/InstallPrompt';
 import { AchievementToast } from './ui/AchievementToast';
 import { LiveAnnouncer } from './ui/LiveAnnouncer';
@@ -73,6 +74,7 @@ export default function App() {
       <a href="#main-content" className="skip-link">{t('a11y.skip')}</a>
       <HUD />
       <DisclaimerBanner />
+      <AssignmentBanner />
       <StreakDefenseBanner />
       <InstallPrompt />
 

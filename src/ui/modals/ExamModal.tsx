@@ -12,6 +12,7 @@ import {
 } from '../../lib/exam';
 import type { QuizItem } from '../../lib/quiz';
 import { openPrintableCertificate } from '../../lib/certificate-print';
+import { encodeCompletion } from '../../lib/assignment';
 import { Confetti } from '../Confetti';
 
 interface Props {
@@ -20,6 +21,9 @@ interface Props {
   presetName: string;
   resolveCase: (id: string) => CaseDefinition | undefined;
   onClose: () => void;
+  /** When launched from an educator assignment link, the assignment ref so a
+   *  completion token can be generated for the learner to return. */
+  assignmentRef?: string;
 }
 
 /**
@@ -28,7 +32,7 @@ interface Props {
  * grades pass/fail and offers a printable certificate. Nothing writes to
  * progress — this is assessment, not a logged run.
  */
-export function ExamModal({ exam, config, presetName, resolveCase, onClose }: Props) {
+export function ExamModal({ exam, config, presetName, resolveCase, onClose, assignmentRef }: Props) {
   const t = useT();
   const tr = useTr();
   const cardRef = useFocusTrap<HTMLDivElement>(true);
@@ -38,6 +42,7 @@ export function ExamModal({ exam, config, presetName, resolveCase, onClose }: Pr
   const [remaining, setRemaining] = useState(config.durationSec);
   const [finished, setFinished] = useState(false);
   const [name, setName] = useState('');
+  const [tokenCopied, setTokenCopied] = useState(false);
 
   const item = exam[index];
   const caseDef = item ? resolveCase(item.caseId) : null;
@@ -219,6 +224,29 @@ export function ExamModal({ exam, config, presetName, resolveCase, onClose }: Pr
               >
                 {t('exam.certificate')}
               </button>
+              {assignmentRef && (
+                <button
+                  onClick={async () => {
+                    const token = encodeCompletion({
+                      ref: assignmentRef,
+                      name: name.trim(),
+                      scorePct: Math.round(result.ratio * 100),
+                      passed: result.passed,
+                      at: Date.now(),
+                    });
+                    try {
+                      await navigator.clipboard.writeText(token);
+                      setTokenCopied(true);
+                      setTimeout(() => setTokenCopied(false), 1800);
+                    } catch {
+                      window.prompt(t('exam.tokenManual'), token);
+                    }
+                  }}
+                  className="tap-target px-4 py-2 rounded border border-clinical-warn text-clinical-warn text-xs"
+                >
+                  {tokenCopied ? t('exam.tokenCopied') : t('exam.copyToken')}
+                </button>
+              )}
               <button
                 onClick={onClose}
                 data-autofocus

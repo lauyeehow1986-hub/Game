@@ -25,6 +25,9 @@ const QuizModal = lazy(() =>
 const ExamModal = lazy(() =>
   import('../modals/ExamModal').then((m) => ({ default: m.ExamModal })),
 );
+const EducatorModal = lazy(() =>
+  import('../modals/EducatorModal').then((m) => ({ default: m.EducatorModal })),
+);
 
 const CATEGORY_COLOURS: Record<'acute' | 'elective' | 'outpatient', string> = {
   acute: '#f87171',
@@ -83,6 +86,7 @@ export function TrendsPanel() {
   const [practice, setPractice] = useState<{ caseDef: CaseDefinition; decisionId: string } | null>(null);
   const [quiz, setQuiz] = useState<QuizItem[] | null>(null);
   const [exam, setExam] = useState<{ items: QuizItem[]; config: ExamConfig; preset: string } | null>(null);
+  const [educatorOpen, setEducatorOpen] = useState(false);
 
   const runHistory = useProgress((s) => s.runHistory);
   const catalogue = useMemo(
@@ -224,6 +228,13 @@ export function TrendsPanel() {
           ))}
         </div>
       )}
+
+      <button
+        onClick={() => setEducatorOpen(true)}
+        className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+      >
+        {t('educator.open')}
+      </button>
 
       {trends.totalPlayed > 0 && (
         <button
@@ -620,6 +631,9 @@ export function TrendsPanel() {
             resolveCase={(id) => catalogue.find((c) => c.id === id)}
             onClose={() => setExam(null)}
           />
+        )}
+        {educatorOpen && (
+          <EducatorModal open={educatorOpen} onClose={() => setEducatorOpen(false)} />
         )}
       </Suspense>
     </section>
