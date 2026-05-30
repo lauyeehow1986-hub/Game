@@ -46,6 +46,7 @@ export const zh: Record<string, string> = {
   'campaigns.start': '开始值班',
   'campaigns.continue': '继续值班',
   'campaigns.exit': '退出',
+  'campaigns.avg': '平均 {{avg}}% · 目标 {{target}}%',
   'campaigns.passed': '值班通过(达到 {{target}}%)。',
   'campaigns.missedTarget': '值班完成 — 未达 {{target}} %目标。',
   'streak.defense.body': '你的{{days}}天连胜即将中断 — 今天完成一例可保住。',

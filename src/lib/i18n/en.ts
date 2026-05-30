@@ -50,6 +50,7 @@ export const en: Record<string, string> = {
   'campaigns.start': 'Start shift',
   'campaigns.continue': 'Continue shift',
   'campaigns.exit': 'Exit',
+  'campaigns.avg': 'Avg {{avg}}% · target {{target}}%',
   'campaigns.passed': 'Shift passed (≥ {{target}}%).',
   'campaigns.missedTarget': 'Shift complete — target {{target}}% missed.',
   'streak.defense.body': 'Your {{days}}-day streak is on the line — finish one case today to keep it alive.',

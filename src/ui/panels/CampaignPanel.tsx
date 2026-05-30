@@ -92,6 +92,14 @@ export function CampaignPanel() {
                   </span>
                 ))}
               </div>
+              {p.completed > 0 && (
+                <div className="mt-1 text-[10px] text-clinical-subtle font-mono">
+                  {t('campaigns.avg', {
+                    avg: Math.round((p.cumulativeScoreRatio / p.completed) * 100),
+                    target: Math.round(c.passRatio * 100),
+                  })}
+                </div>
+              )}
               {done ? (
                 <div
                   className={`mt-2 text-[11px] ${

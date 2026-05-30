@@ -9,7 +9,6 @@ import { PandemicPanel } from './ui/panels/PandemicPanel';
 import { DataExchangePanel } from './ui/panels/DataExchangePanel';
 import { CitationsPanel } from './ui/panels/CitationsPanel';
 import { CurriculumPanel } from './ui/panels/CurriculumPanel';
-import { CampaignPanel } from './ui/panels/CampaignPanel';
 import { DisclaimerBanner } from './ui/DisclaimerBanner';
 import { StreakDefenseBanner } from './ui/StreakDefenseBanner';
 import { InstallPrompt } from './ui/InstallPrompt';
@@ -59,6 +58,12 @@ const ResumePrompt = lazy(() =>
 const TrendsPanel = lazy(() =>
   import('./ui/panels/TrendsPanel').then((m) => ({ default: m.TrendsPanel })),
 );
+// New in v2.0: the Campaigns panel only matters to players who care about
+// multi-case shifts. Lazy so it doesn't bloat the index for first-time
+// players who just want to open one case.
+const CampaignPanel = lazy(() =>
+  import('./ui/panels/CampaignPanel').then((m) => ({ default: m.CampaignPanel })),
+);
 
 export default function App() {
   const mode = useMode((s) => s.mode);
@@ -76,7 +81,15 @@ export default function App() {
           {mode === 'case' ? (
             <>
               <CaseList />
-              <CampaignPanel />
+              <Suspense
+                fallback={
+                  <div className="bg-clinical-panel border border-clinical-border rounded-lg p-3 text-clinical-subtle text-xs">
+                    Loading campaigns…
+                  </div>
+                }
+              >
+                <CampaignPanel />
+              </Suspense>
               <CurriculumPanel />
               <Suspense
                 fallback={
