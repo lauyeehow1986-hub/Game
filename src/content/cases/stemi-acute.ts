@@ -1,13 +1,13 @@
 import type { CaseDefinition } from '../../lib/types';
 
 const MOH_ACS = {
-  label: 'MOH CPG 2/2014: Acute Coronary Syndrome',
-  body: 'Singapore Ministry of Health Clinical Practice Guidelines, ACS 2014.',
+  label: 'MOH CPG 2/2014: Acute Coronary Syndrome (superseded by ESC 2023 ACS)',
+  body: 'Singapore Ministry of Health Clinical Practice Guidelines, ACS 2014 — largely superseded by the unified ESC 2023 ACS guideline; retained for historical context.',
 };
 
 const ESC_STEMI = {
-  label: 'ESC 2023 STEMI Guidelines',
-  body: 'European Society of Cardiology guidelines on the management of ST-segment elevation MI.',
+  label: 'ESC 2023 ACS Guidelines',
+  body: 'European Society of Cardiology 2023 guideline on acute coronary syndromes (unified STEMI + NSTE-ACS). Routine P2Y12 pre-treatment before angiography is now Class IIb-B (not routinely recommended). For ACS proceeding to PCI, prasugrel is preferred over ticagrelor (ISAR-REACT 5).',
 };
 
 const SCDF_TRIAGE = {
@@ -177,11 +177,23 @@ export const stemiAcute: CaseDefinition = {
         reference: ESC_STEMI,
         options: [
           {
-            id: 'asa-tica',
-            label: 'Aspirin 300 mg + Ticagrelor 180 mg loading.',
+            id: 'asa-prasugrel',
+            label: 'Aspirin 300 mg + Prasugrel 60 mg loading.',
             score: 10,
             rationale:
-              'Aspirin + ticagrelor is the preferred regimen for primary PCI in current ESC guidance. PLATO and Singapore real-world data favour ticagrelor over clopidogrel for ischaemic outcomes.',
+              'For ACS proceeding to primary PCI, ESC 2023 prefers prasugrel over ticagrelor (Class IIa, based on ISAR-REACT 5). Aspirin + a potent P2Y12 inhibitor loaded at diagnosis remains standard for STEMI going straight to the cath lab. Avoid prasugrel if prior stroke/TIA, age ≥75, or weight <60 kg.',
+            outcome: {
+              patient: 'You are told to chew the tablets. Bitter.',
+              caregiver: 'A nurse explains the medications and writes them on the board for you.',
+              staff: 'DAPT loaded. You sign the cath lab transfer note.',
+            },
+          },
+          {
+            id: 'asa-tica',
+            label: 'Aspirin 300 mg + Ticagrelor 180 mg loading.',
+            score: 9,
+            rationale:
+              'Aspirin + ticagrelor is a guideline-endorsed regimen for primary PCI and the right choice when prasugrel is contraindicated (prior stroke/TIA, age ≥75, low body weight). ESC 2023 now ranks prasugrel ahead of ticagrelor for ACS-PCI, but ticagrelor remains a strong option.',
             outcome: {
               patient: 'You are told to chew two tablets. Bitter.',
               caregiver: 'A nurse explains the medications and writes them on the board for you.',

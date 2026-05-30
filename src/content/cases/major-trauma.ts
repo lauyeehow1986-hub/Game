@@ -1,10 +1,10 @@
 import type { CaseDefinition } from '../../lib/types';
 
 const ATLS = {
-  label: { en: 'ATLS 10th Edition', zh: '高级创伤生命支持(ATLS)第10版' },
+  label: { en: 'ATLS 11th Edition (2025)', zh: '高级创伤生命支持(ATLS)第11版(2025)' },
   body: {
-    en: 'Advanced Trauma Life Support: ABCDE primary survey, FAST, massive haemorrhage protocol.',
-    zh: '高级创伤生命支持:ABCDE初次评估、床旁创伤超声FAST、大量出血方案。',
+    en: 'Advanced Trauma Life Support 11th edition: primary survey reordered to xABCDE — control exsanguinating external haemorrhage (tourniquet / wound packing) before airway. FAST, damage-control resuscitation, massive haemorrhage protocol.',
+    zh: '高级创伤生命支持第11版:初次评估改为xABCDE — 先控制致命性外出血(止血带/伤口填塞)再处理气道。FAST、损伤控制复苏、大量出血方案。',
   },
 };
 
@@ -145,8 +145,8 @@ export const majorTraumaCase: CaseDefinition = {
           zh: '太太15分钟后到达;被带到安静的家属室。',
         },
         staff: {
-          en: 'Trauma team: ABCDE; FAST positive — free fluid Morrison\'s pouch + pelvis. Activate massive haemorrhage protocol.',
-          zh: '创伤团队执行ABCDE;FAST阳性 — 莫氏窝及盆腔可见游离液。启动大量出血方案。',
+          en: 'Trauma team: xABCDE (catastrophic external haemorrhage controlled first); FAST positive — free fluid Morrison\'s pouch + pelvis. Activate massive haemorrhage protocol.',
+          zh: '创伤团队执行xABCDE(先控制致命性外出血);FAST阳性 — 莫氏窝及盆腔可见游离液。启动大量出血方案。',
         },
       },
       decision: {

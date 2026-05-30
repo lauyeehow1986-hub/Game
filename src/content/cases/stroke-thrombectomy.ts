@@ -17,10 +17,10 @@ const MOH_STROKE = {
 };
 
 const ESO_2022 = {
-  label: { en: 'ESO 2022 Mechanical Thrombectomy', zh: '欧洲中风组织(ESO)2022机械取栓指南' },
+  label: { en: 'ESO / ESMINT Mechanical Thrombectomy (2022, updated 2024-25)', zh: '欧洲中风组织 / ESMINT机械取栓指南(2022,2024-25更新)' },
   body: {
-    en: 'European Stroke Organisation guidelines on endovascular treatment of large-vessel occlusion stroke.',
-    zh: '欧洲中风组织对大血管闭塞性中风血管内治疗的指南。',
+    en: 'European Stroke Organisation guidelines on endovascular treatment of large-vessel occlusion stroke. Standard window 0-6h, and 6-24h with perfusion-mismatch selection (DAWN / DEFUSE-3). 2024-25 evidence extends thrombectomy to large established cores (ASPECTS 3-5, per SELECT2 and RESCUE-Japan LIMIT) and supports selected patients beyond 24h — a fixed 24h cut-off is now too restrictive.',
+    zh: '欧洲中风组织对大血管闭塞性中风血管内治疗的指南。标准时间窗0-6小时,并可在6-24小时依灌注错配筛选(DAWN / DEFUSE-3)。2024-25证据将取栓扩展至大面积已形成梗死核心(ASPECTS 3-5,依SELECT2与RESCUE-Japan LIMIT),并支持部分超过24小时的患者 — 固定的24小时界限已过于保守。',
   },
 };
 

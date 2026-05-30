@@ -2,8 +2,8 @@ import type { CaseDefinition } from '../../lib/types';
 
 const MOH_DENGUE_CPG = {
   label: {
-    en: 'MOH Clinical Practice Guidelines on Dengue',
-    zh: '卫生部登革热临床实践指南',
+    en: 'Singapore National Dengue Clinical Guideline (NCID / ACE, Mar 2026)',
+    zh: '新加坡国家登革热临床指南(NCID / ACE,2026年3月)',
   },
   body: {
     en: 'Probable dengue: acute febrile illness + ≥2 of headache, retro-orbital pain, myalgia, arthralgia, rash, haemorrhagic manifestations, leukopenia. Warning signs (abdominal pain/tenderness, persistent vomiting, mucosal bleeding, lethargy, hepatomegaly, rising HCT with rapidly falling platelets) mandate admission. Severe dengue criteria = ICU.',

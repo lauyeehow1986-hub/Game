@@ -3,8 +3,8 @@ import type { CaseDefinition } from '../../lib/types';
 const SSC = {
   label: { en: 'Surviving Sepsis Campaign 2021', zh: '拯救脓毒症运动指南 2021(SSC 2021)' },
   body: {
-    en: 'International guidance: hour-1 bundle, lactate, broad-spectrum antibiotics within 1h, fluids, vasopressors.',
-    zh: '国际指南:一小时集束化措施 — 测乳酸、1小时内启动广谱抗生素、补液、必要时升压药。',
+    en: 'International guidance: measure lactate, blood cultures before antibiotics, fluids, vasopressors. Antibiotic timing is risk-stratified — within 1h when shock or sepsis is probable (this patient is hypotensive with lactate 4.1, so the 1h target applies); when sepsis is possible but shock absent, a rapid assessment within up to 3h is acceptable to avoid over-treatment.',
+    zh: '国际指南:测乳酸、用药前留血培养、补液、必要时升压药。抗生素时机按风险分层 — 出现休克或高度疑似脓毒症时应1小时内给药(本例低血压伴乳酸4.1,适用1小时目标);若疑似但无休克,可在3小时内快速评估后给药,避免过度治疗。',
   },
 };
 
@@ -177,8 +177,8 @@ export const sepsisCase: CaseDefinition = {
             },
             score: 10,
             rationale: {
-              en: 'Hour-1 bundle is the cornerstone of early sepsis care; each hour\'s delay in antibiotics raises mortality.',
-              zh: '一小时集束化措施是早期脓毒症救治的核心;每延迟一小时启用抗生素,死亡率上升。',
+              en: 'This patient is in septic shock (hypotensive, lactate 4.1) — SSC 2021 mandates antibiotics within 1h. Cultures-before-antibiotics is preserved because drawing them does not delay the drug. Each hour\'s delay in shock raises mortality.',
+              zh: '本例为脓毒性休克(低血压、乳酸4.1)— SSC 2021要求1小时内给抗生素。先留培养再用药,因留取不延误给药。休克状态下每延迟一小时,死亡率上升。',
             },
             outcome: {
               patient: {

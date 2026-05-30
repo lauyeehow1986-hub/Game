@@ -1,10 +1,10 @@
 import type { CaseDefinition } from '../../lib/types';
 
 const ESC_HF = {
-  label: { en: 'ESC HF Guidelines 2023', zh: '欧洲心脏病学会(ESC)心衰指南2023' },
+  label: { en: 'ESC HF Guidelines 2021 + 2023 Focused Update', zh: '欧洲心脏病学会(ESC)心衰指南2021 + 2023重点更新' },
   body: {
-    en: 'European HF guidelines: four-pillar therapy (ACE-i / ARB / ARNI + beta-blocker + MRA + SGLT2i).',
-    zh: '欧洲心衰指南:四大支柱疗法(ACE抑制剂 / ARB / ARNI + β受体阻断剂 + MRA + SGLT2抑制剂)。',
+    en: 'European HF guidelines: four-pillar therapy for HFrEF (ACE-i / ARB / ARNI + beta-blocker + MRA + SGLT2i), with rapid simultaneous initiation and up-titration over ~6 weeks (STRONG-HF). The 2023 Focused Update makes SGLT2i (dapagliflozin / empagliflozin) a Class I-A recommendation across the full ejection-fraction spectrum — HFrEF, HFmrEF and HFpEF — not HFrEF alone.',
+    zh: '欧洲心衰指南:HFrEF的四大支柱疗法(ACE抑制剂 / ARB / ARNI + β受体阻断剂 + MRA + SGLT2抑制剂),主张快速同时起始并在约6周内加量(STRONG-HF)。2023重点更新将SGLT2抑制剂(达格列净 / 恩格列净)列为覆盖全射血分数谱(HFrEF、HFmrEF、HFpEF)的I-A类推荐,而非仅限HFrEF。',
   },
 };
 

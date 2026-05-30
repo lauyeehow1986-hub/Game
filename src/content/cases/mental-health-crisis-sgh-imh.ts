@@ -9,10 +9,10 @@ const NICE_SH = {
 };
 
 const MHCTA = {
-  label: { en: 'Mental Health (Care & Treatment) Act 2008', zh: '心理卫生(照护与治疗)法令(2008年)' },
+  label: { en: 'Mental Health (Care & Treatment) Act 2008 (as amended 1 Jan 2025)', zh: '心理卫生(照护与治疗)法令(2008年,2025年1月1日修订)' },
   body: {
-    en: 'Singapore statute governing involuntary admission for assessment (up to 72 h) and treatment (up to 1 month, renewable). Designated medical practitioners sign Forms 1 / 2 / 3. To be used only when voluntary care is refused and risk to self / others is high.',
-    zh: '新加坡关于非自愿评估住院(至多72小时)与治疗(至多1个月,可续期)的法令。由指定医师签署表1 / 表2 / 表3。仅当患者拒绝自愿照护且对自身或他人有高风险时方可使用。',
+    en: 'Singapore statute governing involuntary admission for assessment (up to 72 h) and treatment (up to 1 month, renewable). Designated medical practitioners sign Forms 1 / 2 / 3. To be used only when voluntary care is refused and risk to self / others is high. Since the 1 Jan 2025 amendment, police may apprehend a person believed to have a mental disorder where they are "reasonably likely" to cause harm — the previous "imminent danger" threshold was relaxed.',
+    zh: '新加坡关于非自愿评估住院(至多72小时)与治疗(至多1个月,可续期)的法令。由指定医师签署表1 / 表2 / 表3。仅当患者拒绝自愿照护且对自身或他人有高风险时方可使用。2025年1月1日修订后,警方在认为疑似精神障碍者"有合理可能"造成伤害时即可拘留 — 此前的"迫切危险"门槛已放宽。',
   },
 };
 

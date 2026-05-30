@@ -92,13 +92,13 @@ export const ckdDialysisCase: CaseDefinition = {
           {
             id: 'sglt2-erythropoietin',
             label: {
-              en: 'Add SGLT2i (dapagliflozin) at renal-protective dose; iron + erythropoietin for anaemia; phosphate binder; counselling on AVF creation.',
-              zh: '加SGLT2抑制剂(达格列净)用肾保护剂量;补铁 + 促红细胞生成素纠正贫血;磷结合剂;并就AVF(动静脉瘘)建立进行咨询。',
+              en: 'Add SGLT2i (dapagliflozin) at renal-protective dose; consider finerenone for residual albuminuria; iron + erythropoietin for anaemia; phosphate binder; counselling on AVF creation.',
+              zh: '加SGLT2抑制剂(达格列净)用肾保护剂量;残余蛋白尿可考虑非奈利酮(finerenone);补铁 + 促红细胞生成素纠正贫血;磷结合剂;并就AVF(动静脉瘘)建立进行咨询。',
             },
             score: 10,
             rationale: {
-              en: 'KDIGO 2024 supports SGLT2i down to eGFR 20 for renal + cardiovascular benefit. EPO + iron for symptomatic anaemia. Early AVF planning prevents temporary catheter dialysis.',
-              zh: 'KDIGO 2024支持SGLT2i用至eGFR 20,带来肾脏与心血管双重获益。症状性贫血给予EPO + 铁剂。提前规划AVF可避免使用临时导管透析。',
+              en: 'KDIGO 2024 supports SGLT2i down to eGFR 20 (continue below 20 once started) for renal + cardiovascular benefit, and adds finerenone for T2DM CKD with persistent albuminuria (ACR 92 here) despite maximally-tolerated RASi — monitor potassium. EPO + iron for symptomatic anaemia. Early AVF planning prevents temporary catheter dialysis.',
+              zh: 'KDIGO 2024支持SGLT2i用至eGFR 20(已起始者可在低于20时继续),带来肾脏与心血管双重获益;对已用足量RASi但仍有蛋白尿(本例ACR 92)的2型糖尿病CKD患者加用非奈利酮,需监测血钾。症状性贫血给予EPO + 铁剂。提前规划AVF可避免使用临时导管透析。',
             },
             outcome: {
               patient: {

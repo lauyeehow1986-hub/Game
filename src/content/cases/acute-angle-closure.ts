@@ -1,7 +1,7 @@
 import type { CaseDefinition } from '../../lib/types';
 
 const EGS_AACG = {
-  label: { en: 'European Glaucoma Society — Acute angle closure', zh: '欧洲青光眼学会 — 急性闭角型青光眼' },
+  label: { en: 'EGS Terminology & Guidelines for Glaucoma, 6th edition (2024) — Acute angle closure', zh: '欧洲青光眼学会《青光眼术语与指南》第6版(2024) — 急性闭角型青光眼' },
   body: {
     en: 'Acute primary angle closure: rapid IOP lowering with topical + systemic agents, laser peripheral iridotomy as definitive treatment, prophylactic iridotomy in the fellow eye.',
     zh: '急性原发性闭角型青光眼:迅速以局部+全身药物降眼压,激光周边虹膜切开术为根治治疗,对侧眼行预防性虹膜切开。',
