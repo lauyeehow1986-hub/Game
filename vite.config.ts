@@ -16,10 +16,14 @@ export default defineConfig({
           if (id.includes('node_modules/react') || id.includes('node_modules/react-dom'))
             return 'react';
           if (id.includes('node_modules/zustand')) return 'zustand';
-          // Co-locate all facility + case content + clusters/financing/data
-          // tables into one content chunk. React shell renders first; the
-          // content chunk loads in parallel rather than blocking the
-          // entry chunk parse.
+          // Split the static content tree by sub-domain so the two largest
+          // groups (cases, facilities) parallelise on HTTP/2 instead of
+          // serialising as one fat 360 KB chunk. Historical cases pull in a
+          // lot of citation text, so they get their own chunk too.
+          if (id.includes('/src/content/cases/sars-2003-historical')) return 'content-historical';
+          if (id.includes('/src/content/cases/covid19-historical')) return 'content-historical';
+          if (id.includes('/src/content/cases/')) return 'content-cases';
+          if (id.includes('/src/content/facilities/')) return 'content-facilities';
           if (id.includes('/src/content/')) return 'content';
         },
       },
