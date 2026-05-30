@@ -20,10 +20,15 @@ describe('ACHIEVEMENTS catalogue', () => {
     const ids = ACHIEVEMENTS.map((a) => a.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
-  it('every achievement has a title + description', () => {
+  it('every achievement has a non-trivial title + description', () => {
     for (const a of ACHIEVEMENTS) {
-      expect(a.title).toBeTruthy();
-      expect(a.description).toBeTruthy();
+      // A non-empty string of at least 3 characters — catches accidental
+      // truncation (e.g. someone replacing description with a single
+      // character) that the old truthy check would have missed.
+      expect(a.title.length, `${a.id} title too short`).toBeGreaterThanOrEqual(3);
+      expect(a.description.length, `${a.id} description too short`).toBeGreaterThanOrEqual(10);
+      // Description should end with a sentence-terminator.
+      expect(a.description, `${a.id} description not a sentence`).toMatch(/[.!?]$/);
     }
   });
 });

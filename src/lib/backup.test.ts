@@ -34,16 +34,19 @@ describe('collectBackup', () => {
 });
 
 describe('applyBackup', () => {
-  it('round-trips via collectBackup', () => {
+  it('round-trips via collectBackup (every key restored byte-for-byte)', () => {
     const a = memStorage();
-    a.setItem(`${BACKUP_PREFIX}progress`, '{"v":1}');
+    a.setItem(`${BACKUP_PREFIX}progress`, '{"unlocked":["stemi","stroke"],"bestScores":{"stemi":{"score":9,"max":10}}}');
+    a.setItem(`${BACKUP_PREFIX}streak-v1`, '{"days":["2026-05-28","2026-05-29"]}');
+    a.setItem(`${BACKUP_PREFIX}achievements-v1`, '{"unlocked":["first-case","distinction"]}');
     const env = collectBackup(a);
 
     const b = memStorage();
     const res = applyBackup(JSON.stringify(env), b);
     expect(res.ok).toBe(true);
-    if (res.ok) expect(res.restored).toBe(1);
-    expect(b.dump()[`${BACKUP_PREFIX}progress`]).toBe('{"v":1}');
+    if (res.ok) expect(res.restored).toBe(3);
+    // Strong assertion: every key + value matches, no silent drops.
+    expect(b.dump()).toEqual(a.dump());
   });
 
   it('rejects malformed JSON', () => {
