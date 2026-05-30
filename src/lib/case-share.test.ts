@@ -76,6 +76,29 @@ describe('encodeRunToUrl + tryDecodeRunFromHref', () => {
     const bad = btoa(JSON.stringify({ log: [] }));
     expect(tryDecodeRunFromHref(`http://example.test/?run=${bad}`)).toBeNull();
   });
+
+  it('rejects a journey that is not a string array', () => {
+    const bad = btoa(JSON.stringify({ caseId: 'x', log: [], journey: [1, 2, 3] }));
+    expect(tryDecodeRunFromHref(`http://example.test/?run=${bad}`)).toBeNull();
+  });
+
+  it('rejects a malformed burden object', () => {
+    const bad = btoa(
+      JSON.stringify({ caseId: 'x', log: [], burden: { timeOffWorkHours: 'x' } }),
+    );
+    expect(tryDecodeRunFromHref(`http://example.test/?run=${bad}`)).toBeNull();
+  });
+
+  it('rejects a malformed profile (boolean masquerading as string)', () => {
+    const bad = btoa(
+      JSON.stringify({
+        caseId: 'x',
+        log: [],
+        profile: { name: 'x', wardClass: 'C', chasTier: 'none', hasIntegratedShield: 'no' },
+      }),
+    );
+    expect(tryDecodeRunFromHref(`http://example.test/?run=${bad}`)).toBeNull();
+  });
 });
 
 const sampleBundle: CurriculumBundle = {

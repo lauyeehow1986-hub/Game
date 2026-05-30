@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useMemo, useState, lazy, Suspense } from 'react';
 import { listCases } from '../../content';
 import { useGame } from '../../state/gameStore';
 import { useProgress } from '../../state/progressStore';
@@ -58,15 +58,17 @@ export function CaseList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const allCases = [
-    ...listCases().map((c) => ({ c, isCustom: false })),
-    ...Object.values(customCases).map((c) => ({ c, isCustom: true })),
-  ];
-  const allowedIds = new Set(
-    filterCases(allCases.map((x) => x.c), filter, bestScores).map((c) => c.id),
-  );
-  const all = allCases.filter((x) => allowedIds.has(x.c.id));
-  const hiddenCount = allCases.length - all.length;
+  const { all, allCases, hiddenCount } = useMemo(() => {
+    const allCases = [
+      ...listCases().map((c) => ({ c, isCustom: false })),
+      ...Object.values(customCases).map((c) => ({ c, isCustom: true })),
+    ];
+    const allowedIds = new Set(
+      filterCases(allCases.map((x) => x.c), filter, bestScores).map((c) => c.id),
+    );
+    const all = allCases.filter((x) => allowedIds.has(x.c.id));
+    return { all, allCases, hiddenCount: allCases.length - all.length };
+  }, [customCases, filter, bestScores]);
 
   const handleShare = async (c: CaseDefinition) => {
     const url = encodeCaseToUrl(c);

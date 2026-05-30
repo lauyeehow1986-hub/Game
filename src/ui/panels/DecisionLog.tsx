@@ -31,7 +31,7 @@ export function DecisionLog() {
                 key={`${e.nodeId}-${i}`}
                 className="text-[11px] border-l-2 pl-2 leading-snug"
                 style={{
-                  borderColor: e.scoreEarned >= e.maxScore ? '#4ade80' : e.scoreEarned >= 0 ? '#facc15' : '#f87171',
+                  borderColor: e.scoreEarned >= e.maxScore - 0.01 ? '#4ade80' : e.scoreEarned >= 0 ? '#facc15' : '#f87171',
                 }}
               >
                 <div className="text-white font-semibold">{tr(decision?.prompt)}</div>

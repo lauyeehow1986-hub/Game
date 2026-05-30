@@ -153,9 +153,10 @@ export function ResultsModal() {
           </div>
           <div className="grid gap-2">
             {log.map((e, i) => {
-              const node = caseDef.pathway.find((n) => n.id === e.nodeId)!;
-              const decision = node.decision!;
-              const option = decision.options.find((o) => o.id === e.optionId)!;
+              const node = caseDef.pathway.find((n) => n.id === e.nodeId);
+              const decision = node?.decision;
+              const option = decision?.options.find((o) => o.id === e.optionId);
+              if (!node || !decision || !option) return null;
               const correct = e.scoreEarned >= e.maxScore - 0.01;
               return (
                 <div

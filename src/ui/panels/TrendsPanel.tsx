@@ -5,7 +5,7 @@ import { useGame } from '../../state/gameStore';
 import { useAchievements } from '../../state/achievementsStore';
 import { useStreak, currentStreakValue, bestStreakValue } from '../../state/streakStore';
 import { buildHeatmap } from '../../lib/streak-heatmap';
-import { useState, lazy, Suspense } from 'react';
+import { useMemo, useState, lazy, Suspense } from 'react';
 import { computePersonalTrends, computeDecisionWeaknesses, gradeBandLabel } from '../../lib/personal-trends';
 import { useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
@@ -78,23 +78,33 @@ export function TrendsPanel() {
   const [practice, setPractice] = useState<{ caseDef: CaseDefinition; decisionId: string } | null>(null);
   const [quiz, setQuiz] = useState<QuizItem[] | null>(null);
 
-  const catalogue = [...listCases(), ...Object.values(customCases)];
   const runHistory = useProgress((s) => s.runHistory);
-  const trends = computePersonalTrends(
-    bestScores,
-    catalogue,
-    (c) => tr(c.title),
-    CURRICULA.map((cur) => ({ id: cur.id, caseIds: cur.caseIds })),
+  const catalogue = useMemo(
+    () => [...listCases(), ...Object.values(customCases)],
+    [customCases],
   );
-  const decisionWeaknesses = computeDecisionWeaknesses(
-    runHistory,
-    catalogue,
-    (v) => tr(v as Parameters<typeof tr>[0]),
+  const trends = useMemo(
+    () => computePersonalTrends(
+      bestScores,
+      catalogue,
+      (c) => tr(c.title),
+      CURRICULA.map((cur) => ({ id: cur.id, caseIds: cur.caseIds })),
+    ),
+    [bestScores, catalogue, tr],
+  );
+  const decisionWeaknesses = useMemo(
+    () => computeDecisionWeaknesses(
+      runHistory,
+      catalogue,
+      (v) => tr(v as Parameters<typeof tr>[0]),
+    ),
+    [runHistory, catalogue, tr],
   );
   // Build a chronological list of ratios (oldest -> newest) for the sparkline.
-  const ratiosOldFirst = [...trends.caseTrends]
-    .sort((a, b) => a.at - b.at)
-    .map((c) => c.ratio);
+  const ratiosOldFirst = useMemo(
+    () => [...trends.caseTrends].sort((a, b) => a.at - b.at).map((c) => c.ratio),
+    [trends.caseTrends],
+  );
   const meanGrade = gradeBandLabel(trends.meanRatio);
 
   return (

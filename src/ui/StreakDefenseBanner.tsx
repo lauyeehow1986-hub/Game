@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { listCases } from '../content';
 import { useProgress } from '../state/progressStore';
 import { useGame } from '../state/gameStore';
@@ -20,8 +19,10 @@ export function StreakDefenseBanner() {
   const resetRun = useGame((s) => s.resetRun);
   const status = useGame((s) => s.run.status);
 
+  // localDateKey() is cheap — recomputing it each render is fine and saves
+  // a useMemo whose dep (today) would change every render anyway.
   const today = localDateKey();
-  const cur = useMemo(() => currentStreak(days, today), [days, today]);
+  const cur = currentStreak(days, today);
   const playedToday = days.includes(today);
 
   if (playedToday || cur < 2) return null;

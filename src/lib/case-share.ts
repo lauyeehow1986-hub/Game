@@ -85,6 +85,32 @@ export function tryDecodeRunFromHref(href: string): RunSnapshot | null {
     const parsed = JSON.parse(json);
     if (typeof parsed !== 'object' || parsed === null) return null;
     if (typeof parsed.caseId !== 'string' || !Array.isArray(parsed.log)) return null;
+    // Defensive shape check on optional nested fields — a malicious URL can
+    // serve any JSON shape; downstream UI must not see surprises.
+    if (parsed.journey !== undefined) {
+      if (!Array.isArray(parsed.journey) || !parsed.journey.every((x: unknown) => typeof x === 'string')) {
+        return null;
+      }
+    }
+    if (parsed.burden !== undefined) {
+      const b = parsed.burden;
+      if (
+        typeof b !== 'object' || b === null ||
+        typeof b.timeOffWorkHours !== 'number' ||
+        typeof b.financialWorry !== 'number' ||
+        typeof b.sleepDebt !== 'number'
+      ) return null;
+    }
+    if (parsed.profile !== undefined) {
+      const p = parsed.profile;
+      if (
+        typeof p !== 'object' || p === null ||
+        typeof p.name !== 'string' ||
+        typeof p.wardClass !== 'string' ||
+        typeof p.chasTier !== 'string' ||
+        typeof p.hasIntegratedShield !== 'boolean'
+      ) return null;
+    }
     return parsed as RunSnapshot;
   } catch {
     return null;
