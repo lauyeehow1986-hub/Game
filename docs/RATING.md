@@ -74,8 +74,13 @@ verify the claim instead of accepting it on faith. Each axis lists its
 - Threshold: Phaser (the largest dependency) loads on demand; the initial
   index chunk is < 250 KB raw / < 80 KB gzip.
 - Check: `pnpm build` and inspect `dist/assets/`.
-- Current: index chunk **206 KB raw / 65 KB gzip**; content chunk split off;
-  Phaser, OpsPanel, KeyboardHelpContent, and every modal lazy-loaded.
+- Current: index chunk **125 KB raw / 37 KB gzip** (was 206 KB / 65 KB at
+  the v2.98 audit baseline — v3.00 through v3.08 split off six modals,
+  TrendsPanel, the content tree into four parallel chunks, and the three
+  non-English i18n catalogues). Phaser, OpsPanel, KeyboardHelpContent,
+  every modal, every non-en locale, and the heatmap analytics are all
+  lazy-loaded. Hot chunks (Phaser, Decision/Results modals, Trends) are
+  prefetched during `requestIdleCallback` so they're warm before triggered.
 - **Verdict: PASS** ✅
 
 ### 7. Accessibility — pass-bar focus traps, keyboard help, reduced-motion, skip link
