@@ -25,14 +25,16 @@ function makePolyclinic(id: string, name: string): Facility {
   };
 }
 
-export const NUP_BUKIT_BATOK = makePolyclinic('nup-bukit-batok', 'Bukit Batok Polyclinic (NUP)');
+export const NUP_BUKIT_BATOK = makePolyclinic('nup-bukit-batok', 'Bukit Batok Polyclinic');
 export const NUP_CHOA_CHU_KANG = makePolyclinic('nup-choa-chu-kang', 'Choa Chu Kang Polyclinic');
 export const NUP_CLEMENTI = makePolyclinic('nup-clementi', 'Clementi Polyclinic');
 export const NUP_JURONG = makePolyclinic('nup-jurong', 'Jurong Polyclinic');
 export const NUP_PIONEER = makePolyclinic('nup-pioneer', 'Pioneer Polyclinic');
 export const NUP_QUEENSTOWN = makePolyclinic('nup-queenstown', 'Queenstown Polyclinic');
-export const NUP_TAMAN_JURONG = makePolyclinic('nup-taman-jurong', 'Taman Jurong Polyclinic');
 export const NUP_BUKIT_PANJANG = makePolyclinic('nup-bukit-panjang', 'Bukit Panjang Polyclinic');
+// Tengah opened 28 Feb 2026 — NUP's 8th polyclinic. (Taman Jurong is an
+// announced future site, not yet operational, so it is not listed.)
+export const NUP_TENGAH = makePolyclinic('nup-tengah', 'Tengah Polyclinic');
 
 export const NUP_ALL: Facility[] = [
   NUP_BUKIT_BATOK,
@@ -41,6 +43,6 @@ export const NUP_ALL: Facility[] = [
   NUP_JURONG,
   NUP_PIONEER,
   NUP_QUEENSTOWN,
-  NUP_TAMAN_JURONG,
   NUP_BUKIT_PANJANG,
+  NUP_TENGAH,
 ];

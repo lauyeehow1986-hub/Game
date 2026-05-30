@@ -34,6 +34,8 @@ export const SHP_PUNGGOL = makePolyclinic('shp-punggol', 'Punggol Polyclinic');
 export const SHP_SENGKANG = makePolyclinic('shp-sengkang', 'Sengkang Polyclinic');
 export const SHP_TAMPINES = makePolyclinic('shp-tampines', 'Tampines Polyclinic');
 export const SHP_TAMPINES_NORTH = makePolyclinic('shp-tampines-north', 'Tampines North Polyclinic');
+// Eunos opened Dec 2021 — SingHealth Polyclinics' 10th polyclinic.
+export const SHP_EUNOS = makePolyclinic('shp-eunos', 'Eunos Polyclinic');
 
 export const SHP_ALL: Facility[] = [
   SHP_BEDOK,
@@ -45,4 +47,5 @@ export const SHP_ALL: Facility[] = [
   SHP_SENGKANG,
   SHP_TAMPINES,
   SHP_TAMPINES_NORTH,
+  SHP_EUNOS,
 ];

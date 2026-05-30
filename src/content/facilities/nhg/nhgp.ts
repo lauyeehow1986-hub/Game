@@ -26,7 +26,6 @@ function makePolyclinic(id: string, name: string): Facility {
 }
 
 export const NHGP_AMK = makePolyclinic('nhgp-amk', 'Ang Mo Kio Polyclinic');
-export const NHGP_BUKIT_BATOK = makePolyclinic('nhgp-bukit-batok', 'Bukit Batok Polyclinic');
 export const NHGP_HOUGANG = makePolyclinic('nhgp-hougang', 'Hougang Polyclinic');
 export const NHGP_TOA_PAYOH = makePolyclinic('nhgp-toa-payoh', 'Toa Payoh Polyclinic');
 export const NHGP_WOODLANDS = makePolyclinic('nhgp-woodlands', 'Woodlands Polyclinic');
@@ -34,11 +33,14 @@ export const NHGP_YISHUN = makePolyclinic('nhgp-yishun', 'Yishun Polyclinic');
 export const NHGP_GEYLANG = makePolyclinic('nhgp-geylang', 'Geylang Polyclinic');
 export const NHGP_KALLANG = makePolyclinic('nhgp-kallang', 'Kallang Polyclinic');
 export const NHGP_KHATIB = makePolyclinic('nhgp-khatib', 'Khatib Polyclinic');
-export const NHGP_NEE_SOON = makePolyclinic('nhgp-nee-soon', 'Nee Soon Polyclinic');
+// Sembawang opened Nov 2023 (Bukit Canberra); Serangoon opened 29 Nov 2025 —
+// NHG Health's 10th polyclinic. (Bukit Batok is run by NUP, not NHG; the
+// fictional "Nee Soon Polyclinic" never existed and was removed.)
+export const NHGP_SEMBAWANG = makePolyclinic('nhgp-sembawang', 'Sembawang Polyclinic');
+export const NHGP_SERANGOON = makePolyclinic('nhgp-serangoon', 'Serangoon Polyclinic');
 
 export const NHGP_ALL: Facility[] = [
   NHGP_AMK,
-  NHGP_BUKIT_BATOK,
   NHGP_HOUGANG,
   NHGP_TOA_PAYOH,
   NHGP_WOODLANDS,
@@ -46,5 +48,6 @@ export const NHGP_ALL: Facility[] = [
   NHGP_GEYLANG,
   NHGP_KALLANG,
   NHGP_KHATIB,
-  NHGP_NEE_SOON,
+  NHGP_SEMBAWANG,
+  NHGP_SERANGOON,
 ];

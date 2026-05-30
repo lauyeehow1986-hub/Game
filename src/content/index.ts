@@ -35,7 +35,7 @@ import { NUP_ALL } from './facilities/nuhs/nup';
 import { SLH } from './facilities/vwo/slh';
 import { RenCi } from './facilities/vwo/renci';
 import { AMKH } from './facilities/vwo/amkh';
-import { SACH } from './facilities/vwo/sach';
+import { SACH, SACH_BEDOK } from './facilities/vwo/sach';
 
 import { SCDF } from './facilities/ancillary/scdf';
 import { HSA } from './facilities/ancillary/hsa';
@@ -88,7 +88,7 @@ const allFacilities: Facility[] = [
   // NUHS
   NUH, NTFGH, AH, NCIS, NUHCS, NUCOHS, JCH, ...NUP_ALL,
   // VWO partner hospitals
-  SLH, RenCi, AMKH, SACH,
+  SLH, RenCi, AMKH, SACH, SACH_BEDOK,
   // Ancillary / pre-hospital / community
   SCDF, HSA,
   NKF, KDF, FRESENIUS,

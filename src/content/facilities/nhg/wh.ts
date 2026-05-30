@@ -1,8 +1,9 @@
 import type { Facility } from '../../../lib/types';
 
 /**
- * Woodlands Health — opened 2023. Newest NHG acute hospital, integrated
- * acute + community + long-term care campus.
+ * Woodlands Health — fully operational since 2024 (ED + 680 inpatient beds).
+ * NHG Health's newest acute hospital, an integrated acute + community +
+ * long-term care campus.
  */
 export const WH: Facility = {
   id: 'wh',
@@ -11,7 +12,7 @@ export const WH: Facility = {
   sector: 'public',
   cluster: 'nhg',
   departments: [
-    { id: 'entrance', name: 'Main Lobby', shortLabel: 'Lobby', position: { x: 110, y: 510 }, radius: 32, colour: '#3aa6ff', description: 'New campus opened 2023. Integrated acute, community and long-term-care wings.' },
+    { id: 'entrance', name: 'Main Lobby', shortLabel: 'Lobby', position: { x: 110, y: 510 }, radius: 32, colour: '#3aa6ff', description: 'Fully open since 2024 (~680 beds). Integrated acute, community and long-term-care wings.' },
     { id: 'triage', name: 'Emergency Triage', shortLabel: 'Triage', position: { x: 240, y: 470 }, radius: 30, colour: '#facc15', description: '24/7 ED triage.' },
     { id: 'ed', name: 'Emergency Department', shortLabel: 'A&E', position: { x: 380, y: 430 }, radius: 36, colour: '#f87171', description: 'Acute ED for the north-west; integrated geriatric and observation areas.' },
     { id: 'imaging', name: 'Diagnostic Imaging', shortLabel: 'Imaging', position: { x: 520, y: 360 }, radius: 28, colour: '#8b5cf6', description: 'CT, MR, ultrasound, X-ray.' },
