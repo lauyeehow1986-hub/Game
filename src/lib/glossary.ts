@@ -41,6 +41,7 @@ export const GLOSSARY_TERMS: GlossaryEntry[] = [
   { term: 'SOC', def: 'Specialist Outpatient Clinic — public-hospital outpatient specialist consultation with subsidised rates for citizens / PRs.' },
   { term: 'NS1', def: 'Dengue NS1 antigen — useful for diagnosis in the first 7 days of fever.' },
   { term: 'I-Quit', def: 'HPB national smoking-cessation hotline and programme (1800-438-2000).' },
+  { term: 'Mindline 1771', def: 'National 24/7 mental-health helpline (call / WhatsApp / webchat), live 18 Jun 2025; replaced the IMH Mental Health Helpline. Feeds the National Mental Health Office\'s Tiered Care Model.' },
 ];
 
 /**

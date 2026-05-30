@@ -32,6 +32,14 @@ const IMH_LIAISON = {
   },
 };
 
+const MINDLINE_1771 = {
+  label: { en: 'National Mindline 1771 + Tiered Care Model', zh: '全国心理卫生热线Mindline 1771 + 分层照护模式' },
+  body: {
+    en: 'National Mindline 1771 (live 18 Jun 2025) is Singapore\'s 24/7 mental-health helpline — call, WhatsApp, or webchat, staffed by trained counsellors. It replaced the IMH Mental Health Helpline (6389-2222). The National Mental Health Office\'s Tiered Care Model routes callers to self-help, community providers, or IMH/tertiary care by severity.',
+    zh: '全国心理卫生热线Mindline 1771(2025年6月18日启用)是新加坡24小时心理卫生热线 — 可电话、WhatsApp或网络聊天,由受训辅导员接听。它取代了IMH心理健康热线(6389-2222)。全国心理卫生办公室的分层照护模式按严重程度将来电者分流至自助、社区服务或IMH/三级照护。',
+  },
+};
+
 export const mentalHealthCrisisCase: CaseDefinition = {
   id: 'mental-health-crisis-sgh-imh',
   title: {
@@ -47,7 +55,7 @@ export const mentalHealthCrisisCase: CaseDefinition = {
   involvedFacilities: ['sgh', 'imh', 'home', 'shp-outram'],
   profileKey: 'taxiDriver',
   allowsWardChoice: false,
-  guidelines: [NICE_SH, MHCTA, PARACETAMOL_OD, IMH_LIAISON],
+  guidelines: [NICE_SH, MHCTA, PARACETAMOL_OD, IMH_LIAISON, MINDLINE_1771],
   pathway: [
     {
       id: 'ed-triage',
@@ -450,8 +458,8 @@ export const mentalHealthCrisisCase: CaseDefinition = {
           {
             id: 'autonomy-collaborative',
             label: {
-              en: 'Respect autonomy. Explore her concerns about disclosure. Negotiate a safety-net contact she trusts (older sibling, cousin, school counsellor) and seek consent to contact them. Provide SOS hotline + Samaritans 1800-221-4444 + IMH Mental Health Helpline 6389-2222.',
-              zh: '尊重自主。了解她对告知的顾虑。协商一位她信任的安全网络联系人(年长的兄姐、表亲、学校辅导员)并征得同意联系。提供SOS热线 + 撒玛利亚(Samaritans)1800-221-4444 + IMH心理健康热线6389-2222。',
+              en: 'Respect autonomy. Explore her concerns about disclosure. Negotiate a safety-net contact she trusts (older sibling, cousin, school counsellor) and seek consent to contact them. Provide National Mindline 1771 (24/7 call / WhatsApp / webchat) + Samaritans of Singapore 1-767. (The old IMH Mental Health Helpline 6389-2222 was retired on 18 Jun 2025 when 1771 launched.)',
+              zh: '尊重自主。了解她对告知的顾虑。协商一位她信任的安全网络联系人(年长的兄姐、表亲、学校辅导员)并征得同意联系。提供全国心理卫生热线Mindline 1771(24小时电话 / WhatsApp / 网络聊天)+ 新加坡援人协会(SOS)1-767。(旧的IMH心理健康热线6389-2222已于2025年6月18日1771启用时停用。)',
             },
             score: 10,
             rationale: {
@@ -535,8 +543,8 @@ export const mentalHealthCrisisCase: CaseDefinition = {
           {
             id: 'integrated-followup',
             label: {
-              en: 'IMH psychiatry outpatient in 7 days + IMH Mobile Crisis Team home visit within 72 h + safety plan card with hotlines + Healthier-SG enrolment at her polyclinic for primary-care continuity.',
-              zh: '7天内安排IMH精神科门诊 + 72小时内IMH流动危机团队上门 + 写着热线的安全计划卡 + 在综合诊疗所登记Healthier SG以维持基层照护连续性。',
+              en: 'IMH psychiatry outpatient in 7 days + IMH Mobile Crisis Team home visit within 72 h + safety plan card with National Mindline 1771 + Healthier-SG enrolment at her polyclinic for primary-care continuity. Under the Tiered Care Model, 1771 triages future crises to community services or IMH as severity dictates.',
+              zh: '7天内安排IMH精神科门诊 + 72小时内IMH流动危机团队上门 + 写着全国心理卫生热线Mindline 1771的安全计划卡 + 在综合诊疗所登记Healthier SG以维持基层照护连续性。在分层照护模式下,1771会按严重程度把日后的危机分流至社区服务或IMH。',
             },
             score: 10,
             rationale: {
