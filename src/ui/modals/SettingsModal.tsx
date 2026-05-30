@@ -4,6 +4,7 @@ import { usePacing } from '../../state/pacingStore';
 import { isMuted, setMuted } from '../../lib/audio';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 import { collectBackup, applyBackup, backupFilename } from '../../lib/backup';
+import { isNarrationEnabled, isSpeechSupported, setNarrationEnabled } from '../../lib/speech';
 
 interface Props {
   open: boolean;
@@ -25,6 +26,7 @@ export function SettingsModal({ open, onClose }: Props) {
   const sec = usePacing((s) => s.secondsPerGameMin);
   const setSec = usePacing((s) => s.setSpeed);
   const [audio, setAudioState] = useState(false);
+  const [narration, setNarration] = useState(false);
   const [reduced, setReduced] = useState(false);
   const [backupMsg, setBackupMsg] = useState<string | null>(null);
   const backupMsgTimer = useRef<number | null>(null);
@@ -83,6 +85,7 @@ export function SettingsModal({ open, onClose }: Props) {
 
   useEffect(() => {
     setAudioState(!isMuted());
+    setNarration(isNarrationEnabled());
     if (typeof window !== 'undefined') {
       setReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     }
@@ -155,6 +158,20 @@ export function SettingsModal({ open, onClose }: Props) {
           <Row label={t('settings.realtime')} hint={t('settings.realtime.hint')}>
             <Toggle checked={realtime} label={t('settings.realtime')} onChange={setRealtime} />
           </Row>
+
+          {/* Voice narration */}
+          {isSpeechSupported() && (
+            <Row label={t('settings.narration')} hint={t('settings.narration.hint')}>
+              <Toggle
+                checked={narration}
+                label={t('settings.narration')}
+                onChange={(v) => {
+                  setNarrationEnabled(v);
+                  setNarration(v);
+                }}
+              />
+            </Row>
+          )}
 
           {realtime && (
             <Row label={t('settings.realtime.speed')} hint={t('settings.realtime.speedHint')}>

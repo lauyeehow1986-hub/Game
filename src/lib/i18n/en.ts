@@ -63,6 +63,8 @@ export const en: Record<string, string> = {
   'settings.realtime.hint': 'For acute-timer cases (STEMI, stroke, sepsis): advance the in-game clock while you read. Click the timer pill to toggle from the HUD.',
   'settings.realtime.speed': 'Pacing speed',
   'settings.realtime.speedHint': 'Real seconds per in-game minute. Lower = more pressure.',
+  'settings.narration': 'Voice narration',
+  'settings.narration.hint': 'Read every patient/caregiver/staff framing aloud via the Web Speech API. Uses the active locale; cancels stale utterances when the scene changes. Falls back silently in browsers without speech synthesis.',
   'settings.backup.h': 'Backup & restore',
   'settings.backup.body': 'Save your progress, streak, achievements, and custom cases to a JSON file. Import on another browser to continue where you left off.',
   'settings.backup.export': '⬇ Export JSON',

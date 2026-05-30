@@ -53,6 +53,16 @@ export const CAMPAIGNS: Campaign[] = [
     passRatio: 0.7,
   },
   {
+    id: 'step-down-arc',
+    title: 'Geriatric step-down arc',
+    blurb:
+      'A frail senior falls, lands in the ED, transitions to a community hospital for rehab, then home with virtual-ward support. Heart failure waits at the polyclinic on the back end. Care continuity is the whole point.',
+    shiftRole: 'Geriatrician',
+    caseIds: ['geriatric-falls', 'palliative-eol', 'hf-outpatient'],
+    tags: ['geriatric', 'community-hospital', 'continuity'],
+    passRatio: 0.7,
+  },
+  {
     id: 'primary-care-day',
     title: 'Polyclinic morning clinic',
     blurb:

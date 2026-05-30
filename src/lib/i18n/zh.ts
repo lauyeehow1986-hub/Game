@@ -57,6 +57,8 @@ export const zh: Record<string, string> = {
   'settings.realtime.hint': '用于有时间限制的急性病例(STEMI、中风、脓毒症):阅读时游戏时钟会推进。点击 HUD 中的计时栏也可切换。',
   'settings.realtime.speed': '推进速度',
   'settings.realtime.speedHint': '每个游戏内分钟对应多少现实秒。越低压力越大。',
+  'settings.narration': '语音旁白',
+  'settings.narration.hint': '通过Web Speech API朗读每个病人/陪护/工作人员视角的旁白。使用当前语言;切换场景时取消上一段。浏览器不支持时静默回落。',
   'settings.backup.h': '备份与恢复',
   'settings.backup.body': '将进度、连胜、成就和自定义病例保存为 JSON 文件,可在其他浏览器导入继续。',
   'settings.backup.export': '⬇ 导出 JSON',

@@ -9,6 +9,9 @@ import { LOCALES, useLocale, useT, type Locale } from '../lib/i18n';
 import { OfflineIndicator } from './OfflineIndicator';
 import { useAchievements } from '../state/achievementsStore';
 import { useStreak, currentStreakValue, bestStreakValue } from '../state/streakStore';
+import { useCampaign } from '../state/campaignStore';
+import { getCampaign, campaignProgress } from '../lib/campaigns';
+import { useProgress } from '../state/progressStore';
 
 const AboutModal = lazy(() =>
   import('./modals/AboutModal').then((m) => ({ default: m.AboutModal })),
@@ -49,6 +52,10 @@ export function HUD() {
   const streakDays = useStreak((s) => s.days);
   const streakNow = currentStreakValue({ days: streakDays });
   const streakBest = bestStreakValue({ days: streakDays });
+  const activeCampaignId = useCampaign((s) => s.activeId);
+  const bestScores = useProgress((s) => s.bestScores);
+  const activeCampaign = activeCampaignId ? getCampaign(activeCampaignId) : null;
+  const cp = activeCampaign ? campaignProgress(activeCampaign, bestScores) : null;
   const realtime = usePacing((s) => s.realtime);
   const setRealtime = usePacing((s) => s.setRealtime);
   const [muted, setMutedState] = useState(true);
@@ -179,6 +186,16 @@ export function HUD() {
               </button>
             ))}
           </div>
+        )}
+        {cp && activeCampaign && (
+          <span
+            title={`${activeCampaign.title} — ${cp.completed}/${cp.total}`}
+            aria-label={`${t('campaigns.heading')}: ${cp.completed}/${cp.total}`}
+            className="inline-flex h-8 items-center gap-1 px-2 rounded border border-clinical-accent/40 bg-clinical-accent/10 text-[11px] font-medium text-clinical-accent"
+          >
+            <span aria-hidden="true">🩺</span>
+            <span className="font-mono">{cp.completed}/{cp.total}</span>
+          </span>
         )}
         {streakNow > 0 && (
           <span
