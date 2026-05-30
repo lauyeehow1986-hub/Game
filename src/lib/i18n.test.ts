@@ -1,5 +1,11 @@
-import { afterEach, describe, it, expect } from 'vitest';
-import { t, tr, useLocale, type Locale } from './i18n';
+import { afterEach, beforeAll, describe, it, expect } from 'vitest';
+import { loadLocale, t, tr, useLocale, type Locale } from './i18n';
+
+// Non-en catalogues are lazy in production. Preload them here so the
+// synchronous t() assertions below see the dicts immediately.
+beforeAll(async () => {
+  await Promise.all([loadLocale('zh'), loadLocale('ms'), loadLocale('ta')]);
+});
 
 function setLocale(l: Locale) {
   useLocale.setState({ locale: l });

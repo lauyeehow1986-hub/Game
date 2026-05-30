@@ -21,13 +21,36 @@ export const LOCALES: Array<{ code: Locale; nativeName: string; englishName: str
   { code: 'ta', nativeName: 'தமிழ்', englishName: 'Tamil' },
 ];
 
+// English is the fallback chain and is always needed, so it stays in the
+// main bundle. The other locales' catalogues are lazy — they only get
+// fetched when the user actually switches (or rehydrates a non-en preference).
 import { en } from './i18n/en';
-import { zh } from './i18n/zh';
-import { ms } from './i18n/ms';
-import { ta } from './i18n/ta';
 
 export type Dictionary = Record<string, string>;
-const DICTS: Record<Locale, Dictionary> = { en, zh, ms, ta };
+const DICTS: Partial<Record<Locale, Dictionary>> = { en };
+
+const LOADERS: Record<Exclude<Locale, 'en'>, () => Promise<{ default?: Dictionary } & Record<string, Dictionary>>> = {
+  zh: () => import('./i18n/zh'),
+  ms: () => import('./i18n/ms'),
+  ta: () => import('./i18n/ta'),
+};
+
+/**
+ * Async-loads a locale catalogue and parks it in DICTS. Returns once the
+ * dict is available so subsequent t() calls hit the new locale.
+ *
+ * Subscribers re-render via useLocale changing — after the dict lands we
+ * nudge useLocale to trigger that re-render even though the value is the
+ * same (zustand bails on === so we round-trip through a stale object).
+ */
+export async function loadLocale(l: Locale): Promise<void> {
+  if (l === 'en' || DICTS[l]) return;
+  const mod = await LOADERS[l]();
+  // The catalogues are exported as named bindings whose name matches the locale.
+  DICTS[l] = (mod as Record<string, Dictionary>)[l];
+  // Force a re-render of components subscribing to useLocale.
+  useLocale.setState({ locale: useLocale.getState().locale });
+}
 
 interface LocaleState {
   locale: Locale;
@@ -38,9 +61,18 @@ export const useLocale = create<LocaleState>()(
   persist(
     (set) => ({
       locale: 'en',
-      setLocale: (l) => set({ locale: l }),
+      setLocale: (l) => {
+        set({ locale: l });
+        // Fire and forget — t() falls back to English until the chunk arrives.
+        void loadLocale(l);
+      },
     }),
-    { name: 'sg-pathway-locale-v1' },
+    {
+      name: 'sg-pathway-locale-v1',
+      onRehydrateStorage: () => (state) => {
+        if (state && state.locale !== 'en') void loadLocale(state.locale);
+      },
+    },
   ),
 );
 
@@ -52,7 +84,7 @@ export const useLocale = create<LocaleState>()(
  */
 export function t(key: string, vars?: Record<string, string | number>): string {
   const locale = useLocale.getState().locale;
-  const raw = DICTS[locale]?.[key] ?? DICTS.en[key] ?? key;
+  const raw = DICTS[locale]?.[key] ?? DICTS.en?.[key] ?? key;
   return interpolate(raw, vars);
 }
 
@@ -64,7 +96,7 @@ export function t(key: string, vars?: Record<string, string | number>): string {
 export function useT(): (key: string, vars?: Record<string, string | number>) => string {
   const locale = useLocale((s) => s.locale);
   return (key: string, vars?: Record<string, string | number>) => {
-    const raw = DICTS[locale]?.[key] ?? DICTS.en[key] ?? key;
+    const raw = DICTS[locale]?.[key] ?? DICTS.en?.[key] ?? key;
     return interpolate(raw, vars);
   };
 }
