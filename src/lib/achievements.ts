@@ -18,6 +18,8 @@ export type AchievementId =
   | 'daily-streak-3'
   | 'daily-streak-7'
   | 'daily-streak-30'
+  | 'shift-complete'
+  | 'shift-passed'
   | 'tycoon'
   | 'tycoon-profit'
   | 'polyglot'
@@ -49,6 +51,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   { id: 'daily-streak-3',      title: 'Three on the trot',   description: 'Play on three consecutive days.' },
   { id: 'daily-streak-7',      title: 'Week on call',        description: 'Play on seven consecutive days.' },
   { id: 'daily-streak-30',     title: 'Houseman year',       description: 'Play on thirty consecutive days.' },
+  { id: 'shift-complete',      title: 'Shift survived',      description: 'Complete every case in a campaign.' },
+  { id: 'shift-passed',        title: 'Shift passed',        description: 'Hit a campaign\'s pass-ratio target.' },
   { id: 'tycoon',              title: 'Tycoon',              description: 'Finish a Hospital Ops shift.' },
   { id: 'tycoon-profit',       title: 'In the black',        description: 'Finish a Hospital Ops shift with positive net SGD.' },
   { id: 'polyglot',            title: 'Polyglot',            description: 'Switch the interface language away from English.' },
@@ -64,6 +68,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
 
 export type Trigger =
   | { kind: 'case-completed'; caseId: string; scoreRatio: number; runsForThisCase: number; currentStreakDays?: number }
+  | { kind: 'campaign-completed'; campaignId: string; passed: boolean }
   | { kind: 'ops-shift-ended'; netSGD: number }
   | { kind: 'locale-changed'; locale: Locale }
   | { kind: 'demo-opened' }
@@ -105,6 +110,10 @@ export function evaluate(
         snapshot.playedBuiltinCaseIds.size >= snapshot.totalBuiltinCases &&
           snapshot.totalBuiltinCases > 0,
       );
+      break;
+    case 'campaign-completed':
+      want('shift-complete', true);
+      want('shift-passed', trigger.passed);
       break;
     case 'ops-shift-ended':
       want('tycoon', true);

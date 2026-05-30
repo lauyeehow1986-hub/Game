@@ -65,6 +65,8 @@ const GLYPHS: Record<AchievementId, string> = {
   'daily-streak-3': '3',
   'daily-streak-7': '7',
   'daily-streak-30': '30',
+  'shift-complete': '✓',
+  'shift-passed': '★',
   'tycoon': '$',
   'tycoon-profit': '+',
   'polyglot': 'L',

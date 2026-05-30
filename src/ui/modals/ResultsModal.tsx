@@ -15,6 +15,9 @@ import { useAchievements } from '../../state/achievementsStore';
 import { useStreak, currentStreakValue } from '../../state/streakStore';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 import { Confetti } from '../Confetti';
+import { useCampaign } from '../../state/campaignStore';
+import { getCampaign, nextCaseInCampaign } from '../../lib/campaigns';
+import { getCase } from '../../content';
 
 const PracticeDecisionModal = lazy(() =>
   import('./PracticeDecisionModal').then((m) => ({ default: m.PracticeDecisionModal })),
@@ -37,6 +40,10 @@ export function ResultsModal() {
   const setPerspective = usePerspective((s) => s.set);
   const recordCaseResult = useProgress((s) => s.recordCaseResult);
   const runHistory = useProgress((s) => s.runHistory);
+  const bestScores = useProgress((s) => s.bestScores);
+  const activeCampaignId = useCampaign((s) => s.activeId);
+  const advanceCampaign = useCampaign((s) => s.advance);
+  const resetCampaign = useCampaign((s) => s.reset);
   const decisionNotes = useProgress((s) => s.decisionNotes);
   const setDecisionNote = useProgress((s) => s.setDecisionNote);
   const fireAchievement = useAchievements((s) => s.fire);
@@ -70,6 +77,27 @@ export function ResultsModal() {
         runsForThisCase,
         currentStreakDays: currentStreakValue(),
       });
+      // If a campaign is active and this was its final case, fire the
+      // campaign-completed achievement with pass/fail vs the target ratio.
+      if (activeCampaignId) {
+        const campaign = getCampaign(activeCampaignId);
+        if (campaign) {
+          const scoredWithCurrent = {
+            ...useProgress.getState().bestScores,
+            [caseDef.id]: useProgress.getState().bestScores[caseDef.id] ?? { score: earned, max },
+          };
+          const remaining = nextCaseInCampaign(campaign, scoredWithCurrent);
+          if (remaining === null) {
+            let cumulative = 0;
+            for (const id of campaign.caseIds) {
+              const s = scoredWithCurrent[id];
+              if (s && s.max > 0) cumulative += s.score / s.max;
+            }
+            const passed = cumulative / campaign.caseIds.length >= campaign.passRatio;
+            fireAchievement({ kind: 'campaign-completed', campaignId: campaign.id, passed });
+          }
+        }
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, caseDef, log, recordCaseResult]);
@@ -340,6 +368,45 @@ export function ResultsModal() {
 
         <footer className="px-5 py-4 flex items-center justify-end gap-2 flex-wrap">
           <ExportButtons notes={notes} />
+          {(() => {
+            // Surface campaign next-case CTA when a shift is active and has
+            // at least one case remaining. Auto-advances the campaign step
+            // and starts the next case in one click.
+            if (!activeCampaignId) return null;
+            const campaign = getCampaign(activeCampaignId);
+            if (!campaign) return null;
+            // Treat the just-finished case as scored so we look at the truly
+            // next one rather than re-running the current.
+            const scoredWithCurrent = { ...bestScores, [caseDef.id]: bestScores[caseDef.id] ?? { score: earned, max } };
+            const nextId = nextCaseInCampaign(campaign, scoredWithCurrent);
+            if (!nextId) {
+              return (
+                <button
+                  onClick={() => {
+                    resetCampaign();
+                    resetRun();
+                  }}
+                  className="tap-target px-4 py-2 rounded border border-clinical-ok text-clinical-ok text-xs"
+                >
+                  {t('results.campaignFinish')}
+                </button>
+              );
+            }
+            const next = getCase(nextId);
+            if (!next) return null;
+            return (
+              <button
+                onClick={() => {
+                  advanceCampaign();
+                  resetRun();
+                  startCase(next);
+                }}
+                className="tap-target px-4 py-2 rounded bg-clinical-warn text-clinical-bg text-xs font-semibold hover:brightness-110"
+              >
+                {t('results.campaignNext')}
+              </button>
+            );
+          })()}
           <button
             onClick={() => {
               resetRun();

@@ -101,6 +101,26 @@ describe('evaluate — case-completed', () => {
   });
 });
 
+describe('evaluate — campaign-completed', () => {
+  it('completing any campaign unlocks shift-complete', () => {
+    const u = evaluate(
+      { kind: 'campaign-completed', campaignId: 'ed-night-shift', passed: false },
+      new Set(),
+      snap(),
+    );
+    expect(u).toContain('shift-complete');
+    expect(u).not.toContain('shift-passed');
+  });
+  it('passing the target ratio also unlocks shift-passed', () => {
+    const u = evaluate(
+      { kind: 'campaign-completed', campaignId: 'x', passed: true },
+      new Set(),
+      snap(),
+    );
+    expect(u).toEqual(expect.arrayContaining(['shift-complete', 'shift-passed']));
+  });
+});
+
 describe('evaluate — ops + locale + content triggers', () => {
   it('ops-shift-ended unlocks tycoon; profit > 0 unlocks tycoon-profit too', () => {
     const u = evaluate({ kind: 'ops-shift-ended', netSGD: 1 }, new Set(), snap());
