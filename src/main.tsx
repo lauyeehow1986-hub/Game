@@ -16,3 +16,21 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </ErrorBoundary>
   </React.StrictMode>,
 );
+
+// Once the first paint is done, prefetch the lazy chunks the user is most
+// likely to hit next: starting a case fires DecisionModal then ResultsModal,
+// and the canvas mount loads PhaserGame. Browsers cache the requests so when
+// the React lazy() triggers, the module is already in the HTTP cache and
+// resolves synchronously. Skipped on data-saver connections.
+const idle =
+  typeof window !== 'undefined' && 'requestIdleCallback' in window
+    ? window.requestIdleCallback
+    : (cb: () => void) => window.setTimeout(cb, 1500);
+idle(() => {
+  const conn = (navigator as { connection?: { saveData?: boolean } }).connection;
+  if (conn?.saveData) return;
+  void import('./game/PhaserGame');
+  void import('./ui/modals/DecisionModal');
+  void import('./ui/modals/ResultsModal');
+  void import('./ui/panels/TrendsPanel');
+});
