@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v20-seen';
+const KEY = 'sg-pathway-whatsnew-v21-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'v2.1 — Spaced retrieval, current guidelines, three new cases',
+    body: 'A deep-research pass refreshed the whole game. New: a spaced-retrieval scheduler resurfaces decisions you got wrong at expanding intervals (1/3/7/21/60 days) — see the "🔁 Review due decisions" button in Trends. Clinical guidelines updated to 2025-26 (ATLS 11 xABCDE, ESC 2023 ACS prasugrel, SGLT2i across all HF, KDIGO 2024 finerenone, ESO large-core thrombectomy, the 2026 Singapore National Dengue Guideline). The facility map was cleaned against current MOH sources (now 94, incl. Serangoon/Tengah/Eunos polyclinics + SACH Bedok). Three new cases exercise the latest reforms: Mindline 1771 + Tiered Care, Age Well SG / HPC+ ageing-in-place, and cancer financing under the MediShield Life 2025 changes.',
+  },
   {
     heading: 'v2.0 — Campaigns, voice narration, smart suggestions',
     body: 'A new Campaigns panel groups cases into shift-themed sequences (TTSH Friday-night ED, Cross-cluster oncology week, Outbreak week — NCID lead, Polyclinic morning clinic). Each shift tracks cumulative score and a pass-ratio target. The PatientPanel framing now has 🔊 Speak + 🎙 Auto-narrate buttons that use the Web Speech API to read each scene aloud in the active locale — accessibility win, zero asset weight. The case list surfaces a Suggested badge on whichever case is your best next step: a weak spot to practice, an unfinished curriculum, or a discovery pick.',

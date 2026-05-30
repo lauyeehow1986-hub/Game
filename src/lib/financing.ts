@@ -303,4 +303,28 @@ export const DEFAULT_PROFILES: Record<string, PatientProfile> = {
     notes:
       'Bangladeshi construction worker on Work Permit. 2 years in SG, lives in dorm. Foreign Worker Medical Insurance (FWMI) via employer; no MediShield Life eligibility; no MediSave.',
   },
+  youngAdult: {
+    name: 'Ms Nurul, 28',
+    age: 28,
+    perCapitaIncomeSGD: 1500,
+    citizenship: 'citizen',
+    chasTier: 'green',
+    wardClass: 'na',
+    hasIntegratedShield: true,
+    mediSaveBalanceSGD: 6500,
+    notes:
+      'Logistics executive, lives with parents in a rental flat. Recently retrenched; financial stress. CHAS Green; has a basic Integrated Shield rider. ComLink+ household (Healthier SG extends to 25-39 from 2027).',
+  },
+  frailSenior: {
+    name: 'Mdm Chua, 79',
+    age: 79,
+    perCapitaIncomeSGD: 650,
+    citizenship: 'citizen',
+    chasTier: 'pg',
+    wardClass: 'C',
+    hasIntegratedShield: false,
+    mediSaveBalanceSGD: 5200,
+    notes:
+      'Lives alone in a rental flat (wireless alert alarm installed 2025). Pioneer Generation. Frailty, prior falls, early dementia. Daughter overseas; befriender visits weekly. Candidate for Age Well SG / HPC+.',
+  },
 };

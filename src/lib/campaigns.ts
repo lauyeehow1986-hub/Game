@@ -63,6 +63,16 @@ export const CAMPAIGNS: Campaign[] = [
     passRatio: 0.7,
   },
   {
+    id: 'reform-week',
+    title: 'Healthcare reform week (2025-26)',
+    blurb:
+      'The system as it stands after the latest reforms: a young adult routed through Mindline 1771 and Tiered Care, a frail senior kept home by Age Well SG / HPC+, and a cancer patient financed under the 2025 MediShield Life changes.',
+    shiftRole: 'System navigator',
+    caseIds: ['mindline-young-adult', 'agewell-hpc', 'oncology-mshl-2025'],
+    tags: ['policy', 'financing', 'community'],
+    passRatio: 0.7,
+  },
+  {
     id: 'primary-care-day',
     title: 'Polyclinic morning clinic',
     blurb:

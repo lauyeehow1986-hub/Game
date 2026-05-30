@@ -78,6 +78,9 @@ import { dentalAbscessCase } from './cases/dental-abscess';
 import { dengueSurgeCase } from './cases/dengue-surge';
 import { capPneumoniaCase } from './cases/cap-pneumonia';
 import { heatInjuryCase } from './cases/heat-injury';
+import { mindlineYoungAdultCase } from './cases/mindline-young-adult';
+import { ageWellHpcCase } from './cases/agewell-hpc';
+import { oncologyMshl2025Case } from './cases/oncology-mshl-2025';
 import type { CaseDefinition, Facility } from '../lib/types';
 
 const allFacilities: Facility[] = [
@@ -136,6 +139,9 @@ export const cases: Record<string, CaseDefinition> = {
   [dengueSurgeCase.id]: dengueSurgeCase,
   [capPneumoniaCase.id]: capPneumoniaCase,
   [heatInjuryCase.id]: heatInjuryCase,
+  [mindlineYoungAdultCase.id]: mindlineYoungAdultCase,
+  [ageWellHpcCase.id]: ageWellHpcCase,
+  [oncologyMshl2025Case.id]: oncologyMshl2025Case,
 };
 
 export function getFacility(id: string): Facility | undefined {

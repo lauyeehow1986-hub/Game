@@ -53,7 +53,7 @@ export const CURRICULA: Curriculum[] = [
       'Coordinate across NHG / SingHealth / NUHS for a cancer pathway.',
       'Choose primary-care entry routing (CHAS GP vs telemed vs polyclinic vs ED).',
     ],
-    caseIds: ['breast-ca-crosscluster', 'private-to-public-handover', 'private-cataract', 'urti-chas-gp'],
+    caseIds: ['breast-ca-crosscluster', 'oncology-mshl-2025', 'private-to-public-handover', 'private-cataract', 'urti-chas-gp'],
   },
   {
     id: 'end-of-life',
@@ -63,10 +63,10 @@ export const CURRICULA: Curriculum[] = [
     objectives: [
       'Honour an Advance Care Plan when the patient presents acutely.',
       'Build a home-hospice anticipatory medication kit + 24/7 plan.',
-      'Use AH@Home virtual ward for a community-dwelling frail senior.',
+      'Use Age Well SG / HPC+ to keep a frail senior ageing in place.',
       'Engage AIC and step-down to St Luke\'s / OCH / SLH after acute care.',
     ],
-    caseIds: ['palliative-eol', 'geriatric-falls', 'elective-thr', 'ckd-dialysis'],
+    caseIds: ['palliative-eol', 'geriatric-falls', 'agewell-hpc', 'elective-thr', 'ckd-dialysis'],
   },
   {
     id: 'pandemic',
