@@ -100,4 +100,23 @@ export const ta: Record<string, string> = {
   'ops.scenarioFail': 'காட்சி தோல்வி',
 
   'about.title': 'இந்த முன்மாதிரி பற்றி',
+
+  // v2.x feature entry points (UI chrome)
+  'cases.build': '✎ உருவாக்கு',
+  'cases.random': '🎲 சீரற்ற',
+  'cases.today': '☀ இன்று',
+  'campaigns.heading': 'பிரச்சாரங்கள்',
+  'campaigns.start': 'பணியைத் தொடங்கு',
+  'campaigns.continue': 'பணியைத் தொடரு',
+  'exam.heading': 'மருத்துவ முடிவுத் தேர்வு',
+  'exam.preset.short': 'குறுகிய · 8',
+  'exam.preset.standard': 'நிலையான · 15',
+  'exam.preset.osce': 'OSCE · 20',
+  'exam.passed': 'தேர்ச்சி',
+  'exam.failed': 'இன்னும் தேர்ச்சியில்லை',
+  'educator.open': '👩‍🏫 ஆசிரியர் கருவிகள்',
+  'educator.heading': 'ஆசிரியர் கருவிகள்',
+  'narration.speak': '🔊 படி',
+  'narration.auto': '🎙 தானியங்கி',
+  'assignment.start': 'தொடங்கு',
 };

@@ -107,4 +107,23 @@ export const ms: Record<string, string> = {
   'about.title': 'Mengenai simulator ini',
   'about.tagline':
     'Cara model berfungsi, sumber nombor, dan perkara untuk berhati-hati.',
+
+  // v2.x feature entry points (UI chrome)
+  'cases.build': '✎ Bina',
+  'cases.random': '🎲 Rawak',
+  'cases.today': '☀ Hari ini',
+  'campaigns.heading': 'Kempen',
+  'campaigns.start': 'Mula syif',
+  'campaigns.continue': 'Sambung syif',
+  'exam.heading': 'Peperiksaan Keputusan Klinikal',
+  'exam.preset.short': 'Pendek · 8',
+  'exam.preset.standard': 'Standard · 15',
+  'exam.preset.osce': 'OSCE · 20',
+  'exam.passed': 'LULUS',
+  'exam.failed': 'BELUM LULUS',
+  'educator.open': '👩‍🏫 Alat pendidik',
+  'educator.heading': 'Alat pendidik',
+  'narration.speak': '🔊 Baca',
+  'narration.auto': '🎙 Auto-baca',
+  'assignment.start': 'Mula',
 };
