@@ -9,6 +9,7 @@ import { PandemicPanel } from './ui/panels/PandemicPanel';
 import { DataExchangePanel } from './ui/panels/DataExchangePanel';
 import { CitationsPanel } from './ui/panels/CitationsPanel';
 import { CurriculumPanel } from './ui/panels/CurriculumPanel';
+import { CampaignPanel } from './ui/panels/CampaignPanel';
 import { DisclaimerBanner } from './ui/DisclaimerBanner';
 import { StreakDefenseBanner } from './ui/StreakDefenseBanner';
 import { InstallPrompt } from './ui/InstallPrompt';
@@ -75,6 +76,7 @@ export default function App() {
           {mode === 'case' ? (
             <>
               <CaseList />
+              <CampaignPanel />
               <CurriculumPanel />
               <Suspense
                 fallback={

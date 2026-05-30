@@ -21,6 +21,8 @@ import { useAchievements } from '../../state/achievementsStore';
 import { computeDifficulty, DIFFICULTY_COLOUR } from '../../lib/case-difficulty';
 import { pickDailyCaseId } from '../../lib/daily-pick';
 import { localDateKey } from '../../lib/streak';
+import { computePersonalTrends } from '../../lib/personal-trends';
+import { CURRICULA } from '../../lib/curricula';
 
 export function CaseList() {
   const t = useT();
@@ -57,6 +59,16 @@ export function CaseList() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const suggestedCaseId = useMemo(() => {
+    const trends = computePersonalTrends(
+      bestScores,
+      listCases(),
+      (c) => tr(c.title),
+      CURRICULA.map((cur) => ({ id: cur.id, caseIds: cur.caseIds })),
+    );
+    return trends.recommendedCaseId;
+  }, [bestScores, tr]);
 
   const { all, allCases, hiddenCount } = useMemo(() => {
     const allCases = [
@@ -239,6 +251,14 @@ export function CaseList() {
               <div className="flex items-baseline justify-between gap-2">
                 <div>
                   <div className="text-xs font-semibold text-white flex items-center gap-1.5 flex-wrap">
+                    {c.id === suggestedCaseId && (
+                      <span
+                        className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-clinical-accent/20 text-clinical-accent"
+                        title={t('cases.badge.suggested.tip')}
+                      >
+                        {t('cases.badge.suggested')}
+                      </span>
+                    )}
                     {c.historical && (
                       <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">
                         {t('cases.badge.historical')}

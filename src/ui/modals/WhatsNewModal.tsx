@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v14-seen';
+const KEY = 'sg-pathway-whatsnew-v20-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'v2.0 — Campaigns, voice narration, smart suggestions',
+    body: 'A new Campaigns panel groups cases into shift-themed sequences (TTSH Friday-night ED, Cross-cluster oncology week, Outbreak week — NCID lead, Polyclinic morning clinic). Each shift tracks cumulative score and a pass-ratio target. The PatientPanel framing now has 🔊 Speak + 🎙 Auto-narrate buttons that use the Web Speech API to read each scene aloud in the active locale — accessibility win, zero asset weight. The case list surfaces a Suggested badge on whichever case is your best next step: a weak spot to practice, an unfinished curriculum, or a discovery pick.',
+  },
   {
     heading: 'Two more cases — CAP + heat injury',
     body: 'Community-acquired pneumonia walks polyclinic CURB-65 triage → KTPH ED short-stay → convalescent NAIS vaccination + HPB I-Quit referral. Exertional heat injury at SAF training: cool-first-transport-second protocol, rhabdomyolysis + AKI ICU care, and graded return-to-unit rehab.',

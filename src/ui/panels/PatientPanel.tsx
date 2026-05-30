@@ -1,8 +1,17 @@
 import { useGame } from '../../state/gameStore';
 import { usePerspective } from '../../state/perspectiveStore';
 import { getFacility } from '../../content';
-import { useT, useTr } from '../../lib/i18n';
+import { useT, useTr, useLocale } from '../../lib/i18n';
 import { GlossaryText } from '../GlossaryText';
+import {
+  cancelSpeech,
+  isNarrationEnabled,
+  isSpeechSupported,
+  localeToBcp47,
+  setNarrationEnabled,
+  speak,
+} from '../../lib/speech';
+import { useEffect, useState } from 'react';
 import type { WardClass } from '../../lib/financing';
 
 export function PatientPanel() {
@@ -14,6 +23,19 @@ export function PatientPanel() {
   const perspective = usePerspective((s) => s.current);
   const tr = useTr();
   const t = useT();
+  const locale = useLocale((s) => s.locale);
+  const [narration, setNarration] = useState(false);
+  useEffect(() => {
+    setNarration(isNarrationEnabled());
+    return () => cancelSpeech();
+  }, []);
+  // Auto-narrate whenever the framing changes IF the user has opted in.
+  useEffect(() => {
+    if (!narration || !caseDef || !profile) return;
+    const node = caseDef.pathway.find((n) => n.id === run.currentNodeId) ?? caseDef.pathway[0];
+    const t = tr(node.framing[perspective]);
+    if (t) speak(t, localeToBcp47(locale));
+  }, [narration, run.currentNodeId, perspective, locale, caseDef, profile, tr]);
 
   if (!caseDef || !profile) {
     return (
@@ -101,8 +123,36 @@ export function PatientPanel() {
       </div>
 
       {framing && (
-        <blockquote className="border-l-2 border-clinical-accent pl-3 text-xs text-white/90 italic leading-relaxed">
+        <blockquote className="border-l-2 border-clinical-accent pl-3 text-xs text-white/90 italic leading-relaxed relative">
           <GlossaryText>{framing}</GlossaryText>
+          {isSpeechSupported() && (
+            <div className="flex gap-2 mt-1 not-italic">
+              <button
+                onClick={() => speak(framing, localeToBcp47(locale))}
+                aria-label={t('narration.speak')}
+                title={t('narration.speak')}
+                className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+              >
+                {t('narration.speak')}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !narration;
+                  setNarrationEnabled(next);
+                  setNarration(next);
+                }}
+                aria-pressed={narration}
+                title={t('narration.auto')}
+                className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border ${
+                  narration
+                    ? 'border-clinical-accent text-clinical-accent'
+                    : 'border-clinical-border text-clinical-subtle hover:text-white'
+                }`}
+              >
+                {t('narration.auto')}
+              </button>
+            </div>
+          )}
         </blockquote>
       )}
 

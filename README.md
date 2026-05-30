@@ -26,10 +26,13 @@ Cardio · Acute Emergencies · Cross-Sector · End-of-Life · Pandemic · Primar
 - Persistent reflection notes per decision — survive sessions, embed into lesson plan exports, browsable in Trends
 - Daily learning streak (🔥) — 12-week heatmap in Trends, 3 / 7 / 30-day achievements
 - Today's challenge — same case for every player on the same date
+- **Suggested next case badge** *(new in v2.0)* — surfaces the personalised pick (weak spot / unfinished curriculum / discovery) in the case list
+- **Voice narration** *(new in v2.0)* — 🔊 Speak + 🎙 Auto-narrate buttons read each scene's framing in the active locale via Web Speech API
 - 15 achievements
 
 ### Game modes
 - **Case mode** — full pathway sim with patient sprite walking between departments
+- **Campaign mode** *(new in v2.0)* — shift-themed sequences (TTSH ED Friday night, cross-cluster oncology week, outbreak week, polyclinic morning) with cumulative pass-ratio targets
 - **Hospital Ops mode** — 8-hour tycoon shift at TTSH: hire staff, set bed capacity, manage budget + DORSCON
 - **Practice mode** — re-attempt a single decision in isolation (no score recorded)
 - **Quick Quiz** — 5 random decisions in sequence with running score

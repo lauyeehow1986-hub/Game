@@ -44,6 +44,25 @@ describe('10/10 rating audit', () => {
     }
   });
 
+  it('axis 4b (v2.0): campaigns + voice narration + adaptive suggestion shipped', () => {
+    for (const f of ['campaigns.ts', 'speech.ts']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/lib', f), 'utf-8').length,
+        `${f} missing or empty`,
+      ).toBeGreaterThan(100);
+    }
+    expect(
+      readFileSync(resolve(ROOT, 'src/ui/panels/CampaignPanel.tsx'), 'utf-8').length,
+    ).toBeGreaterThan(100);
+    expect(
+      readFileSync(resolve(ROOT, 'src/state/campaignStore.ts'), 'utf-8').length,
+    ).toBeGreaterThan(100);
+    // CaseList must render a Suggested badge wired off the personal-trends recommendation.
+    const caseList = readFileSync(resolve(ROOT, 'src/ui/panels/CaseList.tsx'), 'utf-8');
+    expect(caseList).toMatch(/suggestedCaseId/);
+    expect(caseList).toMatch(/cases\.badge\.suggested/);
+  });
+
   it('axis 4: engagement — streak / daily-pick / achievements all present', () => {
     expect(ACHIEVEMENTS.find((a) => a.id === 'daily-streak-3')).toBeTruthy();
     expect(ACHIEVEMENTS.find((a) => a.id === 'daily-streak-7')).toBeTruthy();
