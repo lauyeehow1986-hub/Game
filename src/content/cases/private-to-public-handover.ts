@@ -231,6 +231,7 @@ export const privateToPublicHandover: CaseDefinition = {
               en: 'Often works but sometimes the disc is unreadable; if SGH cannot load images they may need to repeat the CT — duplication of cost and radiation.',
               zh: '通常可行,但光盘偶尔会读不出来;若SGH无法读取就需要重做CT — 重复费用与辐射。',
             },
+            effects: { setFlags: ['records-friction'] },
             outcome: {
               patient: {
                 en: 'CD won\'t load on the first workstation.',
@@ -251,6 +252,7 @@ export const privateToPublicHandover: CaseDefinition = {
               en: 'Loss of detail; inevitable repeat imaging at unnecessary cost.',
               zh: '细节流失;影像必然要重做,造成不必要的费用。',
             },
+            effects: { setFlags: ['records-missing', 'ct-repeated'] },
             outcome: {
               patient: { en: '', zh: '' },
               caregiver: { en: '', zh: '' },
@@ -261,6 +263,33 @@ export const privateToPublicHandover: CaseDefinition = {
             },
           },
         ],
+      },
+    },
+    // Conditional friction node: only fires if the player skimped on the
+    // records hand-over. Concrete consequence of the cross-sector NEHR gap
+    // — patient pays for a repeat CT plus extra SGH waiting room time.
+    {
+      id: 'sgh-records-friction',
+      department: 'imaging',
+      facility: 'sgh',
+      durationMin: 90,
+      costSGD: 400,
+      charge: 'imaging',
+      requiresAnyFlag: ['records-missing', 'records-friction'],
+      caregiverBurden: { timeOffWorkHours: 2, financialWorry: 4, sleepDebt: 1 },
+      framing: {
+        patient: {
+          en: 'SGH front desk: "We can\'t open your CT. We\'ll need to repeat it before the doctor sees you." Another 90 minutes in the queue.',
+          zh: 'SGH前台:"我们打不开您的CT,需要重做一次才能让医生看诊。"再排队等90分钟。',
+        },
+        caregiver: {
+          en: 'You realise the morning is gone. Another S$400 on the bill.',
+          zh: '你意识到整个早上都报销了。账单又多了S$400。',
+        },
+        staff: {
+          en: 'Records gap manifest: private-sector CT not in NEHR + disc unreadable / not brought = repeat scan, repeat radiation dose, repeat consult delay.',
+          zh: '资料缺口显现:私立CT不在NEHR + 光盘无法读取或未带 = 重做扫描、重复辐射、再次延迟会诊。',
+        },
       },
     },
     {

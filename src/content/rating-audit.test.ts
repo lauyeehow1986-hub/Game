@@ -123,4 +123,29 @@ describe('10/10 rating audit', () => {
     }
     expect(md).toMatch(/10 \/ 10 axes pass/);
   });
+
+  it('axis 6 — perf budget: index chunk ≤ 250 KB raw / ≤ 80 KB gzip if dist exists', () => {
+    const dist = resolve(ROOT, 'dist/assets');
+    let entries: string[];
+    try {
+      entries = readdirSync(dist);
+    } catch {
+      // No build yet — fine in dev. CI runs build before tests.
+      return;
+    }
+    const indexJs = entries.filter((f) => /^index-.*\.js$/.test(f));
+    if (indexJs.length === 0) return;
+    const path = resolve(dist, indexJs[0]);
+    const raw = readFileSync(path);
+    const { gzipSync } = require('node:zlib') as typeof import('node:zlib');
+    const gz = gzipSync(raw);
+    expect(
+      raw.length,
+      `index raw ${(raw.length / 1024).toFixed(1)} KB exceeds 250 KB budget`,
+    ).toBeLessThanOrEqual(250 * 1024);
+    expect(
+      gz.length,
+      `index gzip ${(gz.length / 1024).toFixed(1)} KB exceeds 80 KB budget`,
+    ).toBeLessThanOrEqual(80 * 1024);
+  });
 });

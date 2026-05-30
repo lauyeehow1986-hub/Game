@@ -62,3 +62,16 @@ export function chimeCaseComplete(): void {
 export function chimeArrive(): void {
   playTone(880, 90, 0.04);
 }
+
+/**
+ * Low-frequency pulse used by the acute-timer "heartbeat" — quieter than
+ * the decision chime, brief enough not to mask narration if the player
+ * has voice-over assistive tech running.
+ */
+export function chimePulse(intensity: number = 0.5): void {
+  // intensity 0..1 — quieter and lower at the start, louder and higher as
+  // time pressure mounts.
+  const gain = 0.025 + 0.04 * Math.min(1, Math.max(0, intensity));
+  const freq = 140 + 60 * Math.min(1, Math.max(0, intensity));
+  playTone(freq, 70, gain);
+}
