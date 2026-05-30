@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { listCases } from '../../content';
 import { useTr } from '../../lib/i18n';
 import { GLOSSARY_TERMS } from '../../lib/glossary';
-import type { GuidelineRef } from '../../lib/types';
+import type { CaseDefinition, GuidelineRef } from '../../lib/types';
 
 // Augment the shared glossary with terms that don't make sense to scan for
 // inline (e.g. 'A/B1/B2/C' would create false positives mid-prose).
@@ -19,18 +19,28 @@ export function CitationsPanel() {
   const [query, setQuery] = useState('');
   const cases = listCases();
 
-  // Deduplicate guidelines by resolved label so duplicates across locales merge.
-  const guidelines = new Map<string, GuidelineRef>();
-  for (const c of cases) {
-    for (const g of c.guidelines) guidelines.set(tr(g.label), g);
-  }
-  const sortedGuidelines = Array.from(guidelines.values()).sort((a, b) =>
-    tr(a.label).localeCompare(tr(b.label)),
-  );
-
-  const historicalCitations = cases
-    .filter((c) => c.historical && c.citations)
-    .flatMap((c) => c.citations!.map((cit) => ({ caseTitle: c.title, cit })));
+  // Build the inverted index: guideline-label → {ref, cases that use it}.
+  // Memoized so re-renders on `query` don't re-walk every case.
+  const { sortedGuidelines, refsByLabel, historicalCitations } = useMemo(() => {
+    const guidelines = new Map<string, GuidelineRef>();
+    const refsByLabel = new Map<string, CaseDefinition[]>();
+    for (const c of cases) {
+      for (const g of c.guidelines) {
+        const key = tr(g.label);
+        guidelines.set(key, g);
+        const list = refsByLabel.get(key) ?? [];
+        if (!list.includes(c)) list.push(c);
+        refsByLabel.set(key, list);
+      }
+    }
+    const sorted = Array.from(guidelines.values()).sort((a, b) =>
+      tr(a.label).localeCompare(tr(b.label)),
+    );
+    const historical = cases
+      .filter((c) => c.historical && c.citations)
+      .flatMap((c) => c.citations!.map((cit) => ({ caseTitle: c.title, cit })));
+    return { sortedGuidelines: sorted, refsByLabel, historicalCitations: historical };
+  }, [cases, tr]);
 
   const q = query.trim().toLowerCase();
   const filteredGuidelines = q
@@ -89,13 +99,22 @@ export function CitationsPanel() {
             <div className="text-[10px] uppercase tracking-wider text-clinical-subtle mb-1">
               Guidelines & references
             </div>
-            <ul className="space-y-1">
-              {filteredGuidelines.map((g) => (
-                <li key={tr(g.label)} className="text-[11px] leading-snug">
-                  <div className="text-white font-medium">{tr(g.label)}</div>
-                  <div className="text-clinical-subtle">{tr(g.body)}</div>
-                </li>
-              ))}
+            <ul className="space-y-2">
+              {filteredGuidelines.map((g) => {
+                const key = tr(g.label);
+                const refs = refsByLabel.get(key) ?? [];
+                return (
+                  <li key={key} className="text-[11px] leading-snug">
+                    <div className="text-white font-medium">{key}</div>
+                    <div className="text-clinical-subtle">{tr(g.body)}</div>
+                    {refs.length > 0 && (
+                      <div className="mt-0.5 text-[10px] text-clinical-subtle/80">
+                        Cited in: {refs.map((r) => tr(r.title)).join(' · ')}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
           {filteredCitations.length > 0 && (
