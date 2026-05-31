@@ -82,6 +82,9 @@ import { mindlineYoungAdultCase } from './cases/mindline-young-adult';
 import { ageWellHpcCase } from './cases/agewell-hpc';
 import { oncologyMshl2025Case } from './cases/oncology-mshl-2025';
 import { chestPainTriageCase } from './cases/chest-pain-triage';
+import { electiveKneeTkrCase } from './cases/elective-knee-tkr';
+import { copdAecCase } from './cases/copd-exacerbation';
+import { anaphylaxisEdCase } from './cases/anaphylaxis-ed';
 import type { CaseDefinition, Facility } from '../lib/types';
 
 const allFacilities: Facility[] = [
@@ -144,6 +147,9 @@ export const cases: Record<string, CaseDefinition> = {
   [ageWellHpcCase.id]: ageWellHpcCase,
   [oncologyMshl2025Case.id]: oncologyMshl2025Case,
   [chestPainTriageCase.id]: chestPainTriageCase,
+  [electiveKneeTkrCase.id]: electiveKneeTkrCase,
+  [copdAecCase.id]: copdAecCase,
+  [anaphylaxisEdCase.id]: anaphylaxisEdCase,
 };
 
 export function getFacility(id: string): Facility | undefined {
