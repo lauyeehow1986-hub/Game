@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v30-seen';
+const KEY = 'sg-pathway-whatsnew-v40-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'v4.0 — Branching cases, vitals, generator, analytics, Sandbox',
+    body: 'The sandbox milestone. The pathway engine now ships a genuinely branching case (chest-pain triage forks three ways then reconverges). A derived 0-100 stability chip in the HUD shows how the patient is doing because of your choices. The case list gains ✨ Generate — a Sandbox where you pick a patient + condition (or leave them random) to compose a bespoke encounter. The Trends panel gains 📊 Analytics — score-distribution + 8-week activity dashboards over your run history. 32 cases, 94 facilities, 440+ tests.',
+  },
   {
     heading: 'v3.0 — Exams, a case builder, and educator tools',
     body: 'The classroom milestone. Timed Exam / OSCE mode (8/15/20-question papers, countdown, pass/fail, printable certificate) lives in the Trends panel. A guided Case Authoring Studio (the ✎ Build button) lets anyone compose a valid scenario through a form — no JSON required. Educator tools turn the game into a teaching platform: build an assignment link, share it with a cohort, and collect the completion tokens learners send back into a roster with CSV export — all without a server or accounts.',

@@ -79,7 +79,32 @@ describe('10/10 rating audit', () => {
     expect(hud).toMatch(/useCampaign/);
 
     const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8')) as { version: string };
-    expect(pkg.version).toMatch(/^[23]\./);
+    expect(pkg.version).toMatch(/^[234]\./);
+  });
+
+  it('axis 4d (v3.1-v4.0): branching, vitals, generator, analytics, sandbox shipped', () => {
+    for (const f of ['patient-state.ts', 'scenario-generator.ts', 'analytics.ts']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/lib', f), 'utf-8').length,
+        `${f} missing or empty`,
+      ).toBeGreaterThan(100);
+    }
+    for (const f of ['AnalyticsModal.tsx', 'SandboxModal.tsx']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/ui/modals', f), 'utf-8').length,
+        `${f} missing or empty`,
+      ).toBeGreaterThan(100);
+    }
+    // Branching case present + tested.
+    expect(
+      readFileSync(resolve(ROOT, 'src/content/cases/chest-pain-triage.ts'), 'utf-8').length,
+    ).toBeGreaterThan(100);
+    // HUD wires the derived stability chip.
+    const hud = readFileSync(resolve(ROOT, 'src/ui/HUD.tsx'), 'utf-8');
+    expect(hud).toMatch(/computeStability/);
+    // CaseList opens the Sandbox.
+    const caseList = readFileSync(resolve(ROOT, 'src/ui/panels/CaseList.tsx'), 'utf-8');
+    expect(caseList).toMatch(/SandboxModal/);
   });
 
   it('axis 4c (v2.2-2.5): exam, case-builder, educator, spaced-retrieval shipped', () => {

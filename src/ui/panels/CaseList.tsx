@@ -11,6 +11,9 @@ const CaseImportModal = lazy(() =>
 const CaseBuilderModal = lazy(() =>
   import('../modals/CaseBuilderModal').then((m) => ({ default: m.CaseBuilderModal })),
 );
+const SandboxModal = lazy(() =>
+  import('../modals/SandboxModal').then((m) => ({ default: m.SandboxModal })),
+);
 const BestPathDemoModal = lazy(() =>
   import('../modals/BestPathDemoModal').then((m) => ({ default: m.BestPathDemoModal })),
 );
@@ -23,7 +26,6 @@ import type { CaseDefinition } from '../../lib/types';
 import { useAchievements } from '../../state/achievementsStore';
 import { computeDifficulty, DIFFICULTY_COLOUR } from '../../lib/case-difficulty';
 import { pickDailyCaseId } from '../../lib/daily-pick';
-import { generateScenario } from '../../lib/scenario-generator';
 import { localDateKey } from '../../lib/streak';
 import { computePersonalTrends } from '../../lib/personal-trends';
 import { CURRICULA } from '../../lib/curricula';
@@ -45,6 +47,7 @@ export function CaseList() {
 
   const [importOpen, setImportOpen] = useState(false);
   const [builderOpen, setBuilderOpen] = useState(false);
+  const [sandboxOpen, setSandboxOpen] = useState(false);
   const [demoCase, setDemoCase] = useState<CaseDefinition | null>(null);
   const [compareCase, setCompareCase] = useState<CaseDefinition | null>(null);
   const [shareToast, setShareToast] = useState<string | null>(null);
@@ -133,10 +136,7 @@ export function CaseList() {
             {t('cases.random')}
           </button>
           <button
-            onClick={() => {
-              if (status !== 'idle') resetRun();
-              startCase(generateScenario());
-            }}
+            onClick={() => setSandboxOpen(true)}
             title={t('cases.generate.tip')}
             className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-clinical-accent/40 text-clinical-accent hover:text-clinical-accent/80"
           >
@@ -403,6 +403,9 @@ export function CaseList() {
         )}
         {builderOpen && (
           <CaseBuilderModal open={builderOpen} onClose={() => setBuilderOpen(false)} />
+        )}
+        {sandboxOpen && (
+          <SandboxModal open={sandboxOpen} onClose={() => setSandboxOpen(false)} />
         )}
         {demoCase && (
           <BestPathDemoModal caseDef={demoCase} onClose={() => setDemoCase(null)} />

@@ -34,6 +34,7 @@ Cardio · Acute Emergencies · Cross-Sector · End-of-Life · Pandemic · Primar
 - **Case mode** — full pathway sim with patient sprite walking between departments
 - **Campaign mode** *(v2.0)* — shift-themed sequences (TTSH ED Friday night, cross-cluster oncology week, outbreak week, polyclinic morning, geriatric step-down, reform week) with cumulative pass-ratio targets
 - **Exam / OSCE mode** *(v3.0)* — timed papers (8/15/20 questions), no feedback until the end, pass/fail + printable certificate
+- **Sandbox** *(v4.0)* — pick a patient profile + clinical condition (or leave random) and generate a bespoke encounter; analytics dashboard surfaces score-distribution + 8-week activity
 - **Hospital Ops mode** — 8-hour tycoon shift at TTSH: hire staff, set bed capacity, manage budget + DORSCON
 - **Practice mode** — re-attempt a single decision in isolation (no score recorded)
 - **Quick Quiz** — 5 random decisions in sequence with running score

@@ -121,10 +121,43 @@ function mulberry32(seed: number): () => number {
 
 const PROFILE_KEYS = Object.keys(DEFAULT_PROFILES);
 
+/** Condition options for the Sandbox picker (id + bilingual label). */
+export function conditionOptions(): Array<{ key: string; title: LocalisedString }> {
+  return CONDITIONS.map((c) => ({ key: c.key, title: c.title }));
+}
+
+/** Profile options for the Sandbox picker (key + display name). */
+export function profileOptions(): Array<{ key: string; name: string }> {
+  return PROFILE_KEYS.map((key) => ({ key, name: DEFAULT_PROFILES[key].name }));
+}
+
+export interface GenerateOpts {
+  conditionKey?: string;
+  profileKey?: string;
+  seed?: number;
+}
+
+/** Configurable generator used by Sandbox mode. Unknown keys fall back to random. */
+export function generateScenarioFrom(opts: GenerateOpts = {}): CaseDefinition {
+  const rng = opts.seed !== undefined ? mulberry32(opts.seed) : Math.random;
+  const cond =
+    CONDITIONS.find((c) => c.key === opts.conditionKey) ??
+    CONDITIONS[Math.floor(rng() * CONDITIONS.length)];
+  const profileKey =
+    opts.profileKey && DEFAULT_PROFILES[opts.profileKey]
+      ? opts.profileKey
+      : PROFILE_KEYS[Math.floor(rng() * PROFILE_KEYS.length)];
+  return assemble(cond, profileKey, rng);
+}
+
 export function generateScenario(seed?: number): CaseDefinition {
   const rng = seed !== undefined ? mulberry32(seed) : Math.random;
   const cond = CONDITIONS[Math.floor(rng() * CONDITIONS.length)];
   const profileKey = PROFILE_KEYS[Math.floor(rng() * PROFILE_KEYS.length)];
+  return assemble(cond, profileKey, rng);
+}
+
+function assemble(cond: ConditionTemplate, profileKey: string, rng: () => number): CaseDefinition {
   const profile = DEFAULT_PROFILES[profileKey];
   const uid = Math.floor(rng() * 1e6).toString(36);
 

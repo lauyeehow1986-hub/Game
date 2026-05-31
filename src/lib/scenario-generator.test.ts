@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { generateScenario, SCENARIO_CONDITION_COUNT } from './scenario-generator';
+import {
+  generateScenario,
+  generateScenarioFrom,
+  conditionOptions,
+  profileOptions,
+  SCENARIO_CONDITION_COUNT,
+} from './scenario-generator';
 import { maxScoreForCase } from './scoring';
 
 describe('generateScenario', () => {
@@ -39,5 +45,25 @@ describe('generateScenario', () => {
 
   it('exposes a non-trivial condition library', () => {
     expect(SCENARIO_CONDITION_COUNT).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('generateScenarioFrom (Sandbox)', () => {
+  it('honours an explicit condition + profile pick', () => {
+    const cond = conditionOptions()[0].key;
+    const prof = profileOptions()[0].key;
+    const c = generateScenarioFrom({ conditionKey: cond, profileKey: prof, seed: 3 });
+    expect(c.id).toContain(`gen-${cond}-`);
+    expect(c.profileKey).toBe(prof);
+  });
+
+  it('falls back to random for unknown keys', () => {
+    const c = generateScenarioFrom({ conditionKey: 'nope', profileKey: 'nope', seed: 1 });
+    expect(c.pathway).toHaveLength(2);
+  });
+
+  it('condition + profile option lists are non-empty', () => {
+    expect(conditionOptions().length).toBeGreaterThanOrEqual(3);
+    expect(profileOptions().length).toBeGreaterThanOrEqual(3);
   });
 });
