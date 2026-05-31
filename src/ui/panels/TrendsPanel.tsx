@@ -31,6 +31,9 @@ const EducatorModal = lazy(() =>
 const AnalyticsModal = lazy(() =>
   import('../modals/AnalyticsModal').then((m) => ({ default: m.AnalyticsModal })),
 );
+const DuelModal = lazy(() =>
+  import('../modals/DuelModal').then((m) => ({ default: m.DuelModal })),
+);
 
 const CATEGORY_COLOURS: Record<'acute' | 'elective' | 'outpatient', string> = {
   acute: '#f87171',
@@ -91,6 +94,7 @@ export function TrendsPanel() {
   const [exam, setExam] = useState<{ items: QuizItem[]; config: ExamConfig; preset: string } | null>(null);
   const [educatorOpen, setEducatorOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
+  const [duelOpen, setDuelOpen] = useState(false);
 
   const runHistory = useProgress((s) => s.runHistory);
   const catalogue = useMemo(
@@ -241,6 +245,13 @@ export function TrendsPanel() {
           {t('analytics.open')}
         </button>
       )}
+
+      <button
+        onClick={() => setDuelOpen(true)}
+        className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-amber-500/40 bg-amber-500/5 text-amber-300 hover:bg-amber-500/15"
+      >
+        {t('duel.open')}
+      </button>
 
       <button
         onClick={() => setEducatorOpen(true)}
@@ -650,6 +661,9 @@ export function TrendsPanel() {
         )}
         {analyticsOpen && (
           <AnalyticsModal open={analyticsOpen} onClose={() => setAnalyticsOpen(false)} />
+        )}
+        {duelOpen && (
+          <DuelModal pool={catalogue} onClose={() => setDuelOpen(false)} />
         )}
       </Suspense>
     </section>
