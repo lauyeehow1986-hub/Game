@@ -12,6 +12,7 @@ import { useStreak, currentStreakValue, bestStreakValue } from '../state/streakS
 import { useCampaign } from '../state/campaignStore';
 import { getCampaign, campaignProgress } from '../lib/campaigns';
 import { useProgress } from '../state/progressStore';
+import { computeStability, type StabilityBand } from '../lib/patient-state';
 
 const AboutModal = lazy(() =>
   import('./modals/AboutModal').then((m) => ({ default: m.AboutModal })),
@@ -44,6 +45,7 @@ export function HUD() {
   const cost = useGame((s) => s.run.totalCostSGD);
   const caseDef = useGame((s) => s.caseDef);
   const flags = useGame((s) => s.run.flags);
+  const log = useGame((s) => s.run.log);
   const mode = useMode((s) => s.mode);
   const setMode = useMode((s) => s.setMode);
   const locale = useLocale((s) => s.locale);
@@ -65,6 +67,17 @@ export function HUD() {
   const timer = caseDef?.acuteTimer;
   const exceeded = timer && elapsed > timer.goalMin;
   const flagAlreadySet = timer && flags.includes(timer.missedFlag);
+
+  // Derived clinical-stability index from the decisions made so far.
+  const showVitals = mode === 'case' && caseDef && (status === 'running' || status === 'awaiting-decision') && log.length > 0;
+  const stability = computeStability(log, {
+    acuteTimerMissed: !!(timer && flags.includes(timer.missedFlag)),
+  });
+  const vitalsColour: Record<StabilityBand, string> = {
+    stable: 'text-clinical-ok border-clinical-ok/50',
+    guarded: 'text-clinical-warn border-clinical-warn/50',
+    critical: 'text-clinical-danger border-clinical-danger/60',
+  };
 
   useEffect(() => {
     setMutedState(isMuted());
@@ -130,6 +143,15 @@ export function HUD() {
         <span className="px-2 py-1 rounded bg-clinical-bg border border-clinical-border text-clinical-subtle">
           {t('hud.cashOop')}: <span className="text-white font-mono">S${cost.toFixed(0)}</span>
         </span>
+        {showVitals && (
+          <span
+            className={`px-2 py-1 rounded bg-clinical-bg border font-mono ${vitalsColour[stability.band]}`}
+            title={t(`hud.vitals.${stability.band}`)}
+            aria-label={`${t('hud.vitals')}: ${stability.value}`}
+          >
+            {t('hud.vitals')}: {stability.value} · {t(`hud.vitals.${stability.band}`)}
+          </span>
+        )}
         {timer && (
           <button
             onClick={() => setRealtime(!realtime)}
