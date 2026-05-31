@@ -65,6 +65,12 @@ const TrendsPanel = lazy(() =>
 const CampaignPanel = lazy(() =>
   import('./ui/panels/CampaignPanel').then((m) => ({ default: m.CampaignPanel })),
 );
+// New in v4.1: the adaptive study plan composes spaced retrieval, weakest
+// practice, curriculum continuity, daily challenge and discovery into 5
+// ranked things to do. Lazy + skeleton so first paint isn't blocked.
+const StudyPlanPanel = lazy(() =>
+  import('./ui/panels/StudyPlanPanel').then((m) => ({ default: m.StudyPlanPanel })),
+);
 
 export default function App() {
   const mode = useMode((s) => s.mode);
@@ -83,6 +89,9 @@ export default function App() {
           {mode === 'case' ? (
             <>
               <CaseList />
+              <Suspense fallback={null}>
+                <StudyPlanPanel />
+              </Suspense>
               <Suspense
                 fallback={
                   <div className="bg-clinical-panel border border-clinical-border rounded-lg p-3 text-clinical-subtle text-xs">
