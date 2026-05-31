@@ -23,6 +23,7 @@ import type { CaseDefinition } from '../../lib/types';
 import { useAchievements } from '../../state/achievementsStore';
 import { computeDifficulty, DIFFICULTY_COLOUR } from '../../lib/case-difficulty';
 import { pickDailyCaseId } from '../../lib/daily-pick';
+import { generateScenario } from '../../lib/scenario-generator';
 import { localDateKey } from '../../lib/streak';
 import { computePersonalTrends } from '../../lib/personal-trends';
 import { CURRICULA } from '../../lib/curricula';
@@ -130,6 +131,16 @@ export function CaseList() {
             className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
           >
             {t('cases.random')}
+          </button>
+          <button
+            onClick={() => {
+              if (status !== 'idle') resetRun();
+              startCase(generateScenario());
+            }}
+            title={t('cases.generate.tip')}
+            className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-clinical-accent/40 text-clinical-accent hover:text-clinical-accent/80"
+          >
+            {t('cases.generate')}
           </button>
           <button
             onClick={() => setBuilderOpen(true)}

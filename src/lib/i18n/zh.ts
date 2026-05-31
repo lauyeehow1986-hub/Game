@@ -142,6 +142,8 @@ export const zh: Record<string, string> = {
   'cases.heading': '病例',
   'cases.importJson': '导入 JSON',
   'cases.build': '✎ 创建',
+  'cases.generate': '✨ 生成',
+  'cases.generate.tip': '将患者档案与临床病况组合,生成全新的练习情境。无穷无尽,每次不同。',
   'casebuilder.heading': '病例创作工作室',
   'casebuilder.title': '标题',
   'casebuilder.blurb': '情境简介',

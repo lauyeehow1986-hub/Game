@@ -148,6 +148,8 @@ export const en: Record<string, string> = {
   'cases.heading': 'Cases',
   'cases.importJson': 'Import JSON',
   'cases.build': '✎ Build',
+  'cases.generate': '✨ Generate',
+  'cases.generate.tip': 'Generate a fresh practice scenario by combining a patient profile with a clinical condition. Endless, never the same twice.',
   'casebuilder.heading': 'Case authoring studio',
   'casebuilder.title': 'Title',
   'casebuilder.blurb': 'Scenario intro (blurb)',
