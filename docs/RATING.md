@@ -1,4 +1,4 @@
-# SG Pathway — 10/10 rubric (v4.0)
+# SG Pathway — 10/10 rubric (v5.0)
 
 An explicit, auditable definition of what a 10/10 rating means for this project,
 plus the current measured state. Every threshold below is mechanically checkable

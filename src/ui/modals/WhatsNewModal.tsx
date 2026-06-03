@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v40-seen';
+const KEY = 'sg-pathway-whatsnew-v50-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'v5.0 — Personalised practice: study plan, duel, specialty cases, high-contrast',
+    body: 'The personalised-experience milestone. A new "Today\'s plan" panel composes 5 ranked things to do — spaced-retrieval review, weakest practice, curriculum continuity, daily challenge, discovery — so you always have a next click. ⚔ Duel mode lets two players share the device with alternating questions and a head-to-head verdict. Three new specialty cases fill catalogue gaps: an ERAS knee TKR, an AECOPD with targeted oxygen, and an IV-antibiotic anaphylaxis with the IM-adrenaline-first rule. Settings gains a high-contrast theme (AAA palette, OS prefers-contrast also honoured). 35 cases, 450+ tests.',
+  },
   {
     heading: 'v4.0 — Branching cases, vitals, generator, analytics, Sandbox',
     body: 'The sandbox milestone. The pathway engine now ships a genuinely branching case (chest-pain triage forks three ways then reconverges). A derived 0-100 stability chip in the HUD shows how the patient is doing because of your choices. The case list gains ✨ Generate — a Sandbox where you pick a patient + condition (or leave them random) to compose a bespoke encounter. The Trends panel gains 📊 Analytics — score-distribution + 8-week activity dashboards over your run history. 32 cases, 94 facilities, 440+ tests.',

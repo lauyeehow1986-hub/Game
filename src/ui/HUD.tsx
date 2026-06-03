@@ -95,6 +95,7 @@ export function HUD() {
     localStorage.removeItem('sg-pathway-tutorial-seen-v3');
     localStorage.removeItem('sg-pathway-tutorial-seen-v4');
     localStorage.removeItem('sg-pathway-tutorial-seen-v5');
+    localStorage.removeItem('sg-pathway-tutorial-seen-v6');
     location.reload();
   };
 

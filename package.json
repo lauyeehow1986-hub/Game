@@ -1,7 +1,7 @@
 {
   "name": "sg-healthcare-pathway-game",
   "private": true,
-  "version": "4.0.0",
+  "version": "5.0.0",
   "type": "module",
   "description": "Educational simulation game of patient pathways through Singapore's healthcare network.",
   "scripts": {

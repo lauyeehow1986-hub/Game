@@ -2,7 +2,7 @@ import { useEffect, useState, useLayoutEffect } from 'react';
 import { useGame } from '../state/gameStore';
 import { getCase } from '../content';
 
-const KEY = 'sg-pathway-tutorial-seen-v5';
+const KEY = 'sg-pathway-tutorial-seen-v6';
 
 /**
  * Case that opens automatically from the final tutorial step. URTI at a
@@ -48,6 +48,11 @@ const STEPS: Step[] = [
     target: 'trends',
     title: 'Your learning trends',
     body: 'After a run, this panel surfaces recommended-next-case (Practice / Continue curriculum / Discover), the decisions you keep getting wrong, your achievements, and a quick-quiz of 5 random decisions for revision.',
+  },
+  {
+    target: 'study-plan',
+    title: "Today's plan",
+    body: 'New in v5.0: an adaptive 5-item list of what to do next, composing spaced retrieval, weakest practice, curriculum continuity, the daily challenge, and a discovery pick. Click any row to start the case.',
   },
   {
     target: 'exam',

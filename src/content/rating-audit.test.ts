@@ -79,7 +79,40 @@ describe('10/10 rating audit', () => {
     expect(hud).toMatch(/useCampaign/);
 
     const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8')) as { version: string };
-    expect(pkg.version).toMatch(/^[234]\./);
+    expect(pkg.version).toMatch(/^[2345]\./);
+  });
+
+  it('axis 4e (v4.1-v5.0): study planner, duel, specialty pack, high-contrast shipped', () => {
+    for (const f of ['study-plan.ts', 'duel.ts', 'contrast.ts']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/lib', f), 'utf-8').length,
+        `${f} missing or empty`,
+      ).toBeGreaterThan(100);
+    }
+    expect(
+      readFileSync(resolve(ROOT, 'src/ui/panels/StudyPlanPanel.tsx'), 'utf-8').length,
+    ).toBeGreaterThan(100);
+    expect(
+      readFileSync(resolve(ROOT, 'src/ui/modals/DuelModal.tsx'), 'utf-8').length,
+    ).toBeGreaterThan(100);
+    // v4.3 specialty pack present.
+    for (const f of ['elective-knee-tkr.ts', 'copd-exacerbation.ts', 'anaphylaxis-ed.ts']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/content/cases', f), 'utf-8').length,
+        `${f} missing or empty`,
+      ).toBeGreaterThan(100);
+    }
+    // High-contrast wired: applied before React mounts + Settings toggle.
+    const main = readFileSync(resolve(ROOT, 'src/main.tsx'), 'utf-8');
+    expect(main).toMatch(/applyPersistedContrast/);
+    const settings = readFileSync(resolve(ROOT, 'src/ui/modals/SettingsModal.tsx'), 'utf-8');
+    expect(settings).toMatch(/setContrast/);
+    // App mounts the StudyPlanPanel.
+    const app = readFileSync(resolve(ROOT, 'src/App.tsx'), 'utf-8');
+    expect(app).toMatch(/StudyPlanPanel/);
+    // TrendsPanel exposes Duel + Analytics launchers.
+    const trends = readFileSync(resolve(ROOT, 'src/ui/panels/TrendsPanel.tsx'), 'utf-8');
+    expect(trends).toMatch(/DuelModal/);
   });
 
   it('axis 4d (v3.1-v4.0): branching, vitals, generator, analytics, sandbox shipped', () => {
