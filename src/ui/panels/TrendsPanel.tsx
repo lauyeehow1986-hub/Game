@@ -9,6 +9,8 @@ import { useMemo, useState, lazy, Suspense } from 'react';
 import { computePersonalTrends, computeDecisionWeaknesses, gradeBandLabel } from '../../lib/personal-trends';
 import { coachSuggestion } from '../../lib/coach';
 import { competency } from '../../lib/competency';
+import { computeWeekReport } from '../../lib/learning-goals';
+import { useLearningGoals } from '../../state/learningGoalsStore';
 import { useLocale, useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
 import { CURRICULA } from '../../lib/curricula';
@@ -98,6 +100,9 @@ export function TrendsPanel() {
   const [educatorOpen, setEducatorOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [duelOpen, setDuelOpen] = useState(false);
+  const [goalsOpen, setGoalsOpen] = useState(false);
+  const goalTargets = useLearningGoals((s) => s.targets);
+  const setGoalTargets = useLearningGoals((s) => s.setTargets);
 
   const runHistory = useProgress((s) => s.runHistory);
   const catalogue = useMemo(
@@ -167,6 +172,91 @@ export function TrendsPanel() {
               <div className="h-full bg-current" style={{ width: `${Math.round(c.progress * 100)}%` }} />
             </div>
             <p className="text-[11px] leading-snug">{t(c.reason)}</p>
+          </div>
+        );
+      })()}
+
+      {(() => {
+        const w = computeWeekReport(runHistory, goalTargets);
+        const bar = (p: number) => (
+          <div className="h-1.5 bg-clinical-bg rounded overflow-hidden">
+            <div
+              className="h-full"
+              style={{
+                width: `${Math.round(p * 100)}%`,
+                backgroundColor: p >= 1 ? '#4ade80' : p >= 0.6 ? '#facc15' : '#f87171',
+              }}
+            />
+          </div>
+        );
+        return (
+          <div className="rounded border border-clinical-border bg-clinical-bg/30 p-2 space-y-1">
+            <div className="flex items-baseline justify-between">
+              <span className="text-[10px] uppercase tracking-wider text-clinical-subtle">
+                {t('goals.label')}
+              </span>
+              <button
+                type="button"
+                className="text-[10px] underline text-clinical-accent hover:text-clinical-ok"
+                onClick={() => setGoalsOpen((o) => !o)}
+              >
+                {goalsOpen ? t('goals.close') : t('goals.edit')}
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-[11px]">
+              <div className="space-y-0.5">
+                <div className="flex justify-between"><span className="text-clinical-subtle">{t('goals.cases')}</span><span>{w.casesCompleted}/{goalTargets.casesPerWeek}</span></div>
+                {bar(w.progress.cases)}
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex justify-between"><span className="text-clinical-subtle">{t('goals.distinctions')}</span><span>{w.distinctions}/{goalTargets.distinctionsPerWeek}</span></div>
+                {bar(w.progress.distinctions)}
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex justify-between"><span className="text-clinical-subtle">{t('goals.mean')}</span><span>{(w.meanRatio * 100).toFixed(0)}/{(goalTargets.meanRatio * 100).toFixed(0)}%</span></div>
+                {bar(w.progress.meanRatio)}
+              </div>
+            </div>
+            {w.allMet && (
+              <p className="text-[11px] text-clinical-ok">{t('goals.allMet')}</p>
+            )}
+            {goalsOpen && (
+              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-clinical-border/50 text-[11px]">
+                <label className="flex flex-col gap-0.5">
+                  <span className="text-clinical-subtle">{t('goals.cases')}</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={50}
+                    value={goalTargets.casesPerWeek}
+                    onChange={(e) => setGoalTargets({ casesPerWeek: Number(e.target.value) })}
+                    className="bg-clinical-bg border border-clinical-border rounded px-1 py-0.5"
+                  />
+                </label>
+                <label className="flex flex-col gap-0.5">
+                  <span className="text-clinical-subtle">{t('goals.distinctions')}</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={50}
+                    value={goalTargets.distinctionsPerWeek}
+                    onChange={(e) => setGoalTargets({ distinctionsPerWeek: Number(e.target.value) })}
+                    className="bg-clinical-bg border border-clinical-border rounded px-1 py-0.5"
+                  />
+                </label>
+                <label className="flex flex-col gap-0.5">
+                  <span className="text-clinical-subtle">{t('goals.mean')} %</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={Math.round(goalTargets.meanRatio * 100)}
+                    onChange={(e) => setGoalTargets({ meanRatio: Number(e.target.value) / 100 })}
+                    className="bg-clinical-bg border border-clinical-border rounded px-1 py-0.5"
+                  />
+                </label>
+              </div>
+            )}
           </div>
         );
       })()}
