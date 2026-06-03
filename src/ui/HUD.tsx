@@ -184,7 +184,7 @@ export function HUD() {
               key={m}
               onClick={() => setMode(m)}
               aria-pressed={mode === m}
-              className={`px-3 py-1 text-xs rounded-full transition ${
+              className={`px-3 py-1 min-h-[36px] sm:min-h-0 text-xs rounded-full transition ${
                 mode === m
                   ? 'bg-clinical-accent text-white font-semibold'
                   : 'text-clinical-subtle hover:text-white'
@@ -201,7 +201,7 @@ export function HUD() {
                 key={p}
                 onClick={() => setPerspective(p)}
                 aria-pressed={current === p}
-                className={`px-3 py-1 text-xs rounded-full transition ${
+                className={`px-3 py-1 min-h-[36px] sm:min-h-0 text-xs rounded-full transition ${
                   current === p
                     ? `${labels[p].colour} text-white font-semibold`
                     : 'text-clinical-subtle hover:text-white'
