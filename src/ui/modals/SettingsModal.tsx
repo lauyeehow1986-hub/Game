@@ -6,6 +6,8 @@ import { useFocusTrap } from '../../lib/use-focus-trap';
 import { collectBackup, applyBackup, backupFilename } from '../../lib/backup';
 import { isNarrationEnabled, isSpeechSupported, setNarrationEnabled } from '../../lib/speech';
 import { getContrast, setContrast } from '../../lib/contrast';
+import { useGame } from '../../state/gameStore';
+import { buildHandoff, decodeHandoff, encodeHandoff } from '../../lib/handoff';
 
 interface Props {
   open: boolean;
@@ -210,6 +212,9 @@ export function SettingsModal({ open, onClose }: Props) {
             </span>
           </Row>
 
+          {/* Handoff / resume */}
+          <HandoffSection />
+
           {/* Backup / restore */}
           <section className="border border-clinical-border rounded p-3 bg-clinical-bg/30">
             <h3 className="text-sm font-semibold text-white mb-1">{t('settings.backup.h')}</h3>
@@ -304,5 +309,78 @@ function Toggle({
         }`}
       />
     </button>
+  );
+}
+
+function HandoffSection() {
+  const t = useT();
+  const run = useGame((s) => s.run);
+  const resumeFromHandoff = useGame((s) => s.resumeFromHandoff);
+  const [paste, setPaste] = useState('');
+  const [toast, setToast] = useState<string | null>(null);
+  const inProgress = run.caseId != null && (run.status === 'running' || run.status === 'awaiting-decision');
+
+  const flash = (m: string) => {
+    setToast(m);
+    setTimeout(() => setToast(null), 2000);
+  };
+
+  const copyCurrent = async () => {
+    const h = buildHandoff(run);
+    if (!h) {
+      flash(t('handoff.none'));
+      return;
+    }
+    const tok = encodeHandoff(h);
+    try {
+      await navigator.clipboard.writeText(tok);
+      flash(t('handoff.copied'));
+    } catch {
+      window.prompt(t('handoff.copyManual'), tok);
+    }
+  };
+
+  const resume = () => {
+    const h = decodeHandoff(paste.trim());
+    if (!h) {
+      flash(t('handoff.invalid'));
+      return;
+    }
+    if (!resumeFromHandoff(h)) {
+      flash(t('handoff.unknownCase'));
+      return;
+    }
+    flash(t('handoff.resumed'));
+    setPaste('');
+  };
+
+  return (
+    <section className="border border-clinical-border rounded p-3 bg-clinical-bg/30 space-y-2">
+      <h3 className="text-sm font-semibold text-white">{t('handoff.heading')}</h3>
+      <p className="text-[11px] text-white/70 leading-snug">{t('handoff.body')}</p>
+      <button
+        onClick={copyCurrent}
+        disabled={!inProgress}
+        className="px-3 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs disabled:opacity-40"
+      >
+        {t('handoff.copyCurrent')}
+      </button>
+      <textarea
+        rows={2}
+        value={paste}
+        onChange={(e) => setPaste(e.target.value)}
+        placeholder="SGH1.…"
+        aria-label={t('handoff.resumeBtn')}
+        className="w-full bg-clinical-bg border border-clinical-border rounded px-2 py-1 text-[12px] text-white"
+      />
+      <button
+        onClick={resume}
+        disabled={!paste.trim()}
+        className="px-3 py-1.5 rounded bg-clinical-accent text-white text-xs font-semibold hover:brightness-110 disabled:opacity-40"
+      >
+        {t('handoff.resumeBtn')}
+      </button>
+      {toast && <div className="text-[11px] text-clinical-accent">{toast}</div>}
+    </section>
   );
 }

@@ -18,7 +18,7 @@ import {
   type WardClass,
   type ChasTier,
 } from '../lib/financing';
-import { getFacility } from '../content';
+import { getCase, getFacility } from '../content';
 import { recordsFlowBetween, type RecordsFlow } from '../lib/referral';
 import { firstVisibleNode, pickNextNode, walkToNextDecision, walkToFirstDecision } from '../lib/pathway';
 
@@ -85,6 +85,7 @@ interface GameState {
    *  is running or status is not awaiting-decision. */
   tickGameTime: (deltaMin: number) => void;
   resetRun: () => void;
+  resumeFromHandoff: (h: import('../lib/handoff').Handoff) => boolean;
   viewFacility: (facilityId: string) => void;
   setDorscon: (level: Dorscon) => void;
   setPpe: (pct: number) => void;
@@ -691,6 +692,52 @@ export const useGame = create<GameState>((set, get) => ({
       localStorage.removeItem(SAVE_KEY);
     }
     bus.emit(Events.CaseReset);
+  },
+
+  resumeFromHandoff: (h) => {
+    const caseDef = getCase(h.caseId) ?? null;
+    if (!caseDef) return false;
+    const baseProfile = DEFAULT_PROFILES[caseDef.profileKey] ?? DEFAULT_PROFILES.taxiDriver;
+    const profile = maybeRandomiseProfile({ ...baseProfile }, caseDef.randomiseProfile);
+
+    // Determine the current node + whether it carries a decision.
+    const currentNode = h.currentNodeId
+      ? caseDef.pathway.find((n) => n.id === h.currentNodeId) ?? null
+      : null;
+    const endsOnDecision = currentNode?.decision != null;
+    const facilityId = h.currentFacilityId ?? caseDef.primaryFacility;
+
+    set((s) => ({
+      caseDef,
+      profile,
+      segments: [],
+      totals: { ...emptyTotals, cash: h.totalCostSGD },
+      caregiverBurden: { ...emptyBurden },
+      viewedFacilityId: facilityId,
+      lastTransfer: null,
+      transferLog: [],
+      run: {
+        caseId: caseDef.id,
+        status: endsOnDecision ? 'awaiting-decision' : 'running',
+        currentNodeId: h.currentNodeId,
+        currentFacilityId: facilityId,
+        pendingDecision: endsOnDecision && currentNode?.decision
+          ? { nodeId: currentNode.id, decision: currentNode.decision }
+          : null,
+        log: h.log.slice(),
+        startedAtGameMin: 0,
+        elapsedGameMin: h.elapsedGameMin,
+        totalCostSGD: h.totalCostSGD,
+        flags: h.flags.slice(),
+        journey: h.journey.slice(),
+      },
+      kpis: deriveKpis(s.pandemic, h.totalCostSGD),
+    }));
+    bus.emit(Events.CaseStart, { caseId: caseDef.id });
+    if (endsOnDecision && currentNode?.decision) {
+      bus.emit(Events.CaseDecisionRequested, { decision: currentNode.decision, nodeId: currentNode.id });
+    }
+    return true;
   },
 }));
 
