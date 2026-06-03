@@ -7,6 +7,7 @@ import { useStreak, currentStreakValue, bestStreakValue } from '../../state/stre
 import { buildHeatmap } from '../../lib/streak-heatmap';
 import { useMemo, useState, lazy, Suspense } from 'react';
 import { computePersonalTrends, computeDecisionWeaknesses, gradeBandLabel } from '../../lib/personal-trends';
+import { coachSuggestion } from '../../lib/coach';
 import { useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
 import { CURRICULA } from '../../lib/curricula';
@@ -320,6 +321,42 @@ export function TrendsPanel() {
           );
         })}
       </div>
+
+      {(() => {
+        const s = coachSuggestion({
+          bestScores,
+          catalogue,
+          byCategory: trends.byCategory,
+        });
+        if (!s) return null;
+        return (
+          <section className="rounded border border-clinical-warn/40 bg-clinical-warn/5 p-2 space-y-1">
+            <div className="text-[10px] uppercase tracking-wider text-clinical-warn">
+              {t('coach.heading', { category: t(`cases.category.${s.category}`) })}
+            </div>
+            <p className="text-[11px] text-clinical-subtle leading-snug">{t(s.reason)}</p>
+            <ul className="space-y-0.5">
+              {s.caseIds.map((id) => {
+                const c = catalogue.find((x) => x.id === id);
+                if (!c) return null;
+                return (
+                  <li key={id}>
+                    <button
+                      onClick={() => {
+                        if (status !== 'idle') resetRun();
+                        startCase(c);
+                      }}
+                      className="w-full text-left text-[11px] px-2 py-1 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+                    >
+                      → {tr(c.title)}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        );
+      })()}
 
       {(() => {
         const r = trends.recommendations;
