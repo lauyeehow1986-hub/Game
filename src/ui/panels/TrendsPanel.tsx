@@ -11,6 +11,7 @@ import { coachSuggestion } from '../../lib/coach';
 import { competency } from '../../lib/competency';
 import { computeWeekReport } from '../../lib/learning-goals';
 import { useLearningGoals } from '../../state/learningGoalsStore';
+import { useBookmarks } from '../../state/bookmarksStore';
 import { useLocale, useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
 import { CURRICULA } from '../../lib/curricula';
@@ -103,6 +104,8 @@ export function TrendsPanel() {
   const [goalsOpen, setGoalsOpen] = useState(false);
   const goalTargets = useLearningGoals((s) => s.targets);
   const setGoalTargets = useLearningGoals((s) => s.setTargets);
+  const bookmarks = useBookmarks((s) => s.items);
+  const removeBookmark = useBookmarks((s) => s.remove);
 
   const runHistory = useProgress((s) => s.runHistory);
   const catalogue = useMemo(
@@ -607,6 +610,54 @@ export function TrendsPanel() {
           </ul>
         </details>
       )}
+
+      {(() => {
+        const list = Object.values(bookmarks).sort((a, b) => b.addedAt - a.addedAt);
+        if (list.length === 0) return null;
+        return (
+          <details className="text-[11px] border-t border-clinical-border pt-2">
+            <summary className="cursor-pointer text-clinical-subtle hover:text-white">
+              {t('bookmark.heading')} ({list.length})
+            </summary>
+            <ul className="mt-1.5 space-y-1.5 max-h-56 overflow-y-auto scrollbar-thin pr-1">
+              {list.map((b) => {
+                const c = catalogue.find((x) => x.id === b.caseId);
+                const node = c?.pathway.find((n) => n.decision?.id === b.decisionId);
+                const prompt = node?.decision ? tr(node.decision.prompt) : b.decisionId;
+                return (
+                  <li
+                    key={`${b.caseId}|${b.decisionId}`}
+                    className="border-l-2 border-amber-400/60 pl-2"
+                  >
+                    <div className="text-white leading-snug">{prompt}</div>
+                    <div className="text-[10px] text-clinical-subtle font-mono">
+                      {c ? tr(c.title) : b.caseId}
+                    </div>
+                    <div className="flex gap-1 mt-1">
+                      <button
+                        disabled={!c}
+                        onClick={() => {
+                          if (!c) return;
+                          setPractice({ caseDef: c, decisionId: b.decisionId });
+                        }}
+                        className="text-[10px] px-2 py-0.5 rounded bg-clinical-accent text-white font-semibold disabled:opacity-40 hover:brightness-110"
+                      >
+                        {t('trends.weak.practice')}
+                      </button>
+                      <button
+                        onClick={() => removeBookmark(b.caseId, b.decisionId)}
+                        className="text-[10px] px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+                      >
+                        {t('bookmark.remove')}
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </details>
+        );
+      })()}
 
       <details className="text-[11px] border-t border-clinical-border pt-2">
         <summary className="cursor-pointer text-clinical-subtle hover:text-white">

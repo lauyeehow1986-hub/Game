@@ -1,6 +1,7 @@
 import { useEffect, lazy, Suspense } from 'react';
 import { useGame } from '../../state/gameStore';
 import { useProgress } from '../../state/progressStore';
+import { useBookmarks } from '../../state/bookmarksStore';
 import { gradeForRatio, totalScoreFromLog } from '../../lib/scoring';
 import { usePerspective } from '../../state/perspectiveStore';
 import { chimeCaseComplete } from '../../lib/audio';
@@ -49,6 +50,8 @@ export function ResultsModal() {
   const resetCampaign = useCampaign((s) => s.reset);
   const decisionNotes = useProgress((s) => s.decisionNotes);
   const setDecisionNote = useProgress((s) => s.setDecisionNote);
+  const bookmarks = useBookmarks((s) => s.items);
+  const toggleBookmark = useBookmarks((s) => s.toggle);
   const fireAchievement = useAchievements((s) => s.fire);
   const recordStreakDay = useStreak((s) => s.recordToday);
   const cardRef = useFocusTrap<HTMLDivElement>(status === 'completed');
@@ -235,12 +238,30 @@ export function ResultsModal() {
                       className="mt-0.5 w-full bg-clinical-bg border border-clinical-border rounded px-2 py-1 text-[11px] text-white resize-y"
                     />
                   </label>
-                  <button
-                    onClick={() => setPractice({ decisionId: decision.id })}
-                    className="mt-1 text-[10px] px-2 py-0.5 rounded border border-clinical-accent/40 text-clinical-accent hover:bg-clinical-accent/10"
-                  >
-                    {t('results.practiceDecision')}
-                  </button>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    <button
+                      onClick={() => setPractice({ decisionId: decision.id })}
+                      className="text-[10px] px-2 py-0.5 rounded border border-clinical-accent/40 text-clinical-accent hover:bg-clinical-accent/10"
+                    >
+                      {t('results.practiceDecision')}
+                    </button>
+                    {(() => {
+                      const marked = !!bookmarks[`${caseDef.id}|${decision.id}`];
+                      return (
+                        <button
+                          onClick={() => toggleBookmark(caseDef.id, decision.id)}
+                          className={`text-[10px] px-2 py-0.5 rounded border ${
+                            marked
+                              ? 'border-amber-400/60 text-amber-300 bg-amber-400/10'
+                              : 'border-clinical-border text-clinical-subtle hover:text-white'
+                          }`}
+                          aria-pressed={marked}
+                        >
+                          {marked ? t('bookmark.saved') : t('bookmark.save')}
+                        </button>
+                      );
+                    })()}
+                  </div>
                   {decision.options.length > 1 && (
                     <details className="mt-2 text-[11px]">
                       <summary className="cursor-pointer text-clinical-subtle hover:text-white">
