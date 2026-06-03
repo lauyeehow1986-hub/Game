@@ -19,6 +19,7 @@ import { buildRandomQuiz, buildQuizFromDecisions, type QuizItem } from '../../li
 import { buildExam, EXAM_PRESETS, type ExamConfig } from '../../lib/exam';
 import { dueItems } from '../../lib/spaced-repetition';
 import { buildFlashcards, shuffleFlashcards } from '../../lib/flashcards';
+import { masteryReport } from '../../lib/mastery';
 import { exportRunHistoryCsv } from '../../lib/csv-export';
 import type { CaseDefinition } from '../../lib/types';
 
@@ -290,6 +291,39 @@ export function TrendsPanel() {
           value={streakBest > 0 ? `${streakBest}d` : '—'}
         />
       </div>
+
+      {(() => {
+        const m = masteryReport(catalogue, bestScores, runHistory);
+        if (m.counts.untouched === catalogue.length) return null;
+        const swatch = (label: string, value: number, colour: string) => (
+          <div className="flex items-center gap-1 text-[11px]" title={label}>
+            <span
+              className="inline-block w-2 h-2 rounded-sm"
+              style={{ backgroundColor: colour }}
+              aria-hidden="true"
+            />
+            <span className="text-clinical-subtle">{label}</span>
+            <span className="font-mono text-white">{value}</span>
+          </div>
+        );
+        return (
+          <div
+            className="rounded border border-clinical-border bg-clinical-bg/30 p-2 space-y-1"
+            aria-label={t('mastery.label')}
+          >
+            <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
+              {t('mastery.label')}
+            </div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1">
+              {swatch(t('mastery.consolidated'), m.counts.consolidated, '#4ade80')}
+              {swatch(t('mastery.mastered'), m.counts.mastered, '#a3e635')}
+              {swatch(t('mastery.developing'), m.counts.developing, '#facc15')}
+              {swatch(t('mastery.attempted'), m.counts.attempted, '#f87171')}
+              {swatch(t('mastery.untouched'), m.counts.untouched, '#475569')}
+            </div>
+          </div>
+        );
+      })()}
 
       {streakDays.length > 0 && (
         <div
