@@ -71,6 +71,9 @@ const CampaignPanel = lazy(() =>
 const StudyPlanPanel = lazy(() =>
   import('./ui/panels/StudyPlanPanel').then((m) => ({ default: m.StudyPlanPanel })),
 );
+const StudySetsPanel = lazy(() =>
+  import('./ui/panels/StudySetsPanel').then((m) => ({ default: m.StudySetsPanel })),
+);
 
 export default function App() {
   const mode = useMode((s) => s.mode);
@@ -91,6 +94,9 @@ export default function App() {
               <CaseList />
               <Suspense fallback={null}>
                 <StudyPlanPanel />
+              </Suspense>
+              <Suspense fallback={null}>
+                <StudySetsPanel />
               </Suspense>
               <Suspense
                 fallback={
