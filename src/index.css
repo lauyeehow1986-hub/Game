@@ -112,3 +112,25 @@ summary {
     scroll-behavior: auto !important;
   }
 }
+
+/* High-contrast theme: opt-in via <html data-contrast="high">. Pumps the
+   clinical palette toward WCAG AAA contrast. Honoured automatically when the
+   OS prefers more contrast. */
+html[data-contrast="high"] body {
+  background-color: #000;
+  color: #fff;
+}
+html[data-contrast="high"] .bg-clinical-bg { background-color: #000 !important; }
+html[data-contrast="high"] .bg-clinical-panel { background-color: #0a0a0a !important; }
+html[data-contrast="high"] .border-clinical-border { border-color: #ffffff66 !important; }
+html[data-contrast="high"] .text-clinical-subtle { color: #cbd5e1 !important; }
+html[data-contrast="high"] .text-clinical-accent { color: #80d8ff !important; }
+html[data-contrast="high"] .text-clinical-ok { color: #86efac !important; }
+html[data-contrast="high"] .text-clinical-warn { color: #fde68a !important; }
+html[data-contrast="high"] .text-clinical-danger { color: #fca5a5 !important; }
+html[data-contrast="high"] .bg-clinical-accent { background-color: #80d8ff !important; color: #000 !important; }
+@media (prefers-contrast: more) {
+  html:not([data-contrast]) body { background-color: #000; color: #fff; }
+  html:not([data-contrast]) .border-clinical-border { border-color: #ffffff80 !important; }
+  html:not([data-contrast]) .text-clinical-subtle { color: #cbd5e1 !important; }
+}

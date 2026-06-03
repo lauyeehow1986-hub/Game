@@ -4,10 +4,14 @@ import App from './App';
 import { ErrorBoundary } from './ui/ErrorBoundary';
 import './index.css';
 import { captureInstallPrompt, registerServiceWorker } from './lib/sw-register';
+import { applyPersistedContrast } from './lib/contrast';
 
 // Capture beforeinstallprompt before React even mounts so we don't miss it.
 captureInstallPrompt();
 registerServiceWorker();
+// Apply persisted high-contrast preference BEFORE React mounts to avoid a
+// flash of the default theme.
+applyPersistedContrast();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

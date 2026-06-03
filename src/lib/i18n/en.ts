@@ -133,6 +133,8 @@ export const en: Record<string, string> = {
   'settings.backup.exportFailed': 'Backup failed.',
   'settings.backup.importedReload': 'Backup restored — reloading the page.',
   'settings.backup.importFailed': 'That doesn\'t look like a valid backup file.',
+  'settings.contrast': 'High-contrast theme',
+  'settings.contrast.hint': 'Switches the clinical palette to AAA-contrast colours. Persists per-browser; the OS prefers-contrast: more setting is also honoured automatically.',
   'settings.motion': 'Reduced motion',
   'settings.motion.hint': 'Honoured automatically via prefers-reduced-motion.',
   'settings.motion.on': 'On (system)',

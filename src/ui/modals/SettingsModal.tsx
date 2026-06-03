@@ -5,6 +5,7 @@ import { isMuted, setMuted } from '../../lib/audio';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 import { collectBackup, applyBackup, backupFilename } from '../../lib/backup';
 import { isNarrationEnabled, isSpeechSupported, setNarrationEnabled } from '../../lib/speech';
+import { getContrast, setContrast } from '../../lib/contrast';
 
 interface Props {
   open: boolean;
@@ -28,6 +29,7 @@ export function SettingsModal({ open, onClose }: Props) {
   const [audio, setAudioState] = useState(false);
   const [narration, setNarration] = useState(false);
   const [reduced, setReduced] = useState(false);
+  const [highContrast, setHighContrastState] = useState(false);
   const [backupMsg, setBackupMsg] = useState<string | null>(null);
   const backupMsgTimer = useRef<number | null>(null);
 
@@ -86,6 +88,7 @@ export function SettingsModal({ open, onClose }: Props) {
   useEffect(() => {
     setAudioState(!isMuted());
     setNarration(isNarrationEnabled());
+    setHighContrastState(getContrast() === 'high');
     if (typeof window !== 'undefined') {
       setReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     }
@@ -187,6 +190,18 @@ export function SettingsModal({ open, onClose }: Props) {
               <span className="ml-2 font-mono text-clinical-subtle">{sec}s</span>
             </Row>
           )}
+
+          {/* High-contrast theme */}
+          <Row label={t('settings.contrast')} hint={t('settings.contrast.hint')}>
+            <Toggle
+              checked={highContrast}
+              label={t('settings.contrast')}
+              onChange={(v) => {
+                setContrast(v ? 'high' : 'normal');
+                setHighContrastState(v);
+              }}
+            />
+          </Row>
 
           {/* Reduced motion (system) */}
           <Row label={t('settings.motion')} hint={t('settings.motion.hint')}>

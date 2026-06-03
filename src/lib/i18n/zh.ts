@@ -127,6 +127,8 @@ export const zh: Record<string, string> = {
   'settings.backup.exportFailed': '备份失败。',
   'settings.backup.importedReload': '已恢复备份 — 正在重新载入页面。',
   'settings.backup.importFailed': '此文件不是有效的备份。',
+  'settings.contrast': '高对比度主题',
+  'settings.contrast.hint': '将临床配色切换为AAA级对比度。逐浏览器保存;系统的 prefers-contrast: more 也会被自动应用。',
   'settings.motion': '减少动画',
   'settings.motion.hint': '自动遵循系统的 prefers-reduced-motion 设置。',
   'settings.motion.on': '已开启(系统)',
