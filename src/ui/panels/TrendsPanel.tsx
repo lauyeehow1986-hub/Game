@@ -8,6 +8,7 @@ import { buildHeatmap } from '../../lib/streak-heatmap';
 import { useMemo, useState, lazy, Suspense } from 'react';
 import { computePersonalTrends, computeDecisionWeaknesses, gradeBandLabel } from '../../lib/personal-trends';
 import { coachSuggestion } from '../../lib/coach';
+import { competency } from '../../lib/competency';
 import { useLocale, useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
 import { CURRICULA } from '../../lib/curricula';
@@ -136,6 +137,39 @@ export function TrendsPanel() {
           {t('lb.runs', { runs: casesCompleted, decisions: decisionsMade })}
         </span>
       </header>
+
+      {(() => {
+        const distinctCases = Object.keys(bestScores).length;
+        if (distinctCases === 0) return null;
+        const distinctions = Object.values(bestScores).filter((b) => b.max > 0 && b.score / b.max >= 0.9).length;
+        const meanRatio = distinctCases > 0
+          ? Object.values(bestScores).reduce((acc, b) => acc + (b.max > 0 ? b.score / b.max : 0), 0) / distinctCases
+          : 0;
+        const c = competency({
+          distinctCasesPlayed: distinctCases,
+          meanRatio,
+          distinctions,
+        });
+        const tierColour: Record<string, string> = {
+          'novice': 'border-clinical-subtle/40 text-clinical-subtle',
+          'advanced-beginner': 'border-clinical-warn/40 text-clinical-warn',
+          'competent': 'border-clinical-accent/40 text-clinical-accent',
+          'proficient': 'border-clinical-ok/40 text-clinical-ok',
+          'expert': 'border-amber-400/60 text-amber-300',
+        };
+        return (
+          <div className={`rounded border ${tierColour[c.tier]} p-2 space-y-1`}>
+            <div className="flex items-baseline justify-between">
+              <span className="text-[10px] uppercase tracking-wider">{t('competency.label')}</span>
+              <span className="text-[12px] font-semibold">{t(`competency.tier.${c.tier}`)}</span>
+            </div>
+            <div className="h-1.5 bg-clinical-bg rounded overflow-hidden">
+              <div className="h-full bg-current" style={{ width: `${Math.round(c.progress * 100)}%` }} />
+            </div>
+            <p className="text-[11px] leading-snug">{t(c.reason)}</p>
+          </div>
+        );
+      })()}
 
       <div className="grid grid-cols-3 gap-2 text-[11px]">
         <Mini label={t('lb.cases')} value={`${trends.totalPlayed}/${trends.totalCases}`} />

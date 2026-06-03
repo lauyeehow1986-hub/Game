@@ -79,7 +79,38 @@ describe('10/10 rating audit', () => {
     expect(hud).toMatch(/useCampaign/);
 
     const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8')) as { version: string };
-    expect(pkg.version).toMatch(/^[23456]\./);
+    expect(pkg.version).toMatch(/^[234567]\./);
+  });
+
+  it('axis 4g (v6.1-v7.0): handoff, Brier calibration, study sets, cheatsheet, competency shipped', () => {
+    for (const f of ['handoff.ts', 'calibration.ts', 'cheatsheet-print.ts', 'competency.ts']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/lib', f), 'utf-8').length,
+        `${f} missing or empty`,
+      ).toBeGreaterThan(100);
+    }
+    expect(
+      readFileSync(resolve(ROOT, 'src/state/studySetsStore.ts'), 'utf-8').length,
+    ).toBeGreaterThan(100);
+    expect(
+      readFileSync(resolve(ROOT, 'src/ui/panels/StudySetsPanel.tsx'), 'utf-8').length,
+    ).toBeGreaterThan(100);
+    // gameStore exposes resumeFromHandoff.
+    const gs = readFileSync(resolve(ROOT, 'src/state/gameStore.ts'), 'utf-8');
+    expect(gs).toMatch(/resumeFromHandoff/);
+    // ExamModal carries confidence + calibration.
+    const exam = readFileSync(resolve(ROOT, 'src/ui/modals/ExamModal.tsx'), 'utf-8');
+    expect(exam).toMatch(/calibrationScore|calibrationPicks/);
+    // TrendsPanel shows the competency badge + cheatsheet launcher.
+    const trends = readFileSync(resolve(ROOT, 'src/ui/panels/TrendsPanel.tsx'), 'utf-8');
+    expect(trends).toMatch(/competency/);
+    expect(trends).toMatch(/cheatsheet/);
+    // App mounts StudySetsPanel.
+    const app = readFileSync(resolve(ROOT, 'src/App.tsx'), 'utf-8');
+    expect(app).toMatch(/StudySetsPanel/);
+    // SettingsModal exposes HandoffSection.
+    const settings = readFileSync(resolve(ROOT, 'src/ui/modals/SettingsModal.tsx'), 'utf-8');
+    expect(settings).toMatch(/HandoffSection|handoff\.heading/);
   });
 
   it('axis 4f (v5.1-v6.0): replay scrubber, coach, peer review shipped', () => {

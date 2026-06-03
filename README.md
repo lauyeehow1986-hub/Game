@@ -38,6 +38,7 @@ Cardio · Acute Emergencies · Cross-Sector · End-of-Life · Pandemic · Primar
 - **Today's plan** *(v5.0)* — adaptive 5-item daily list composing spaced retrieval, weakest practice, curriculum continuity, daily challenge, discovery
 - **Duel mode** *(v5.0)* — two players, one device, alternating questions, head-to-head verdict
 - **Timeline scrubber + peer review** *(v6.0)* — walk a finished run step-by-step with cumulative score + stability; shared runs carry peer-review threads with compact review tokens
+- **Handoff + competency + Brier** *(v7.0)* — SGH1.* pause/resume tokens; confidence-rated exam scoring with calibration verdict; Dreyfus competency tier in Trends; my study sets; printable cheatsheet
 - **Hospital Ops mode** — 8-hour tycoon shift at TTSH: hire staff, set bed capacity, manage budget + DORSCON
 - **Practice mode** — re-attempt a single decision in isolation (no score recorded)
 - **Quick Quiz** — 5 random decisions in sequence with running score

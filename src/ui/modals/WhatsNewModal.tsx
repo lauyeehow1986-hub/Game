@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v60-seen';
+const KEY = 'sg-pathway-whatsnew-v70-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'v7.0 — Competency tier, calibration, handoff tokens, study sets, cheatsheet',
+    body: 'The competency milestone. A Dreyfus-style tier (Novice → Advanced beginner → Competent → Proficient → Expert) appears at the top of Trends, derived from cases played + mean ratio + distinctions + Brier calibration. Exams now carry a 20/40/60/80/100% confidence dial per question and show a Brier score with an overconfident / underconfident / well-calibrated verdict. New SGH1.* handoff tokens let you pause mid-case and resume later (or pass to a colleague). My study sets compose ad-hoc case packs. A printable catalogue cheatsheet ships from Trends.',
+  },
   {
     heading: 'v6.0 — Timeline scrubber, coach micro-curricula, peer-review threads',
     body: 'The social milestone. Every finished case gains a ⏯ Timeline scrub button that lets you walk forward and backward through your run with cumulative score and a stability bar at each step. Trends gains a Coach card that picks your weakest played category and proposes three cases to shore it up. Shared runs now carry peer-review threads — paste a friend\'s run URL, leave per-step comments, and exchange compact review tokens. All client-side. Three new specialty cases (offshore-clinic STEMI with pharmaco-invasive transfer, MMR vaccine-hesitancy conversation, KKH postpartum-haemorrhage drill) bring the catalogue to 38.',
