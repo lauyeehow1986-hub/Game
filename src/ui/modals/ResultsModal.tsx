@@ -22,6 +22,9 @@ import { getCase } from '../../content';
 const PracticeDecisionModal = lazy(() =>
   import('./PracticeDecisionModal').then((m) => ({ default: m.PracticeDecisionModal })),
 );
+const ReplayScrubberModal = lazy(() =>
+  import('./ReplayScrubberModal').then((m) => ({ default: m.ReplayScrubberModal })),
+);
 
 export function ResultsModal() {
   const t = useT();
@@ -50,6 +53,7 @@ export function ResultsModal() {
   const recordStreakDay = useStreak((s) => s.recordToday);
   const cardRef = useFocusTrap<HTMLDivElement>(status === 'completed');
   const [practice, setPractice] = useState<{ decisionId: string } | null>(null);
+  const [replayOpen, setReplayOpen] = useState(false);
 
   // Build a {decisionId -> text} view of the persisted notes for the
   // currently-completed case, so the ExportButtons + textareas read off
@@ -417,6 +421,12 @@ export function ResultsModal() {
             {t('results.replay')}
           </button>
           <button
+            onClick={() => setReplayOpen(true)}
+            className="tap-target px-4 py-2 rounded border border-clinical-accent/40 text-clinical-accent hover:bg-clinical-accent/10 text-xs"
+          >
+            {t('results.replayScrubber')}
+          </button>
+          <button
             onClick={resetRun}
             data-autofocus
             className="tap-target px-4 py-2 rounded border border-clinical-border text-clinical-subtle hover:text-white text-xs"
@@ -431,6 +441,13 @@ export function ResultsModal() {
             caseDef={caseDef}
             decisionId={practice.decisionId}
             onClose={() => setPractice(null)}
+          />
+        )}
+        {replayOpen && (
+          <ReplayScrubberModal
+            caseDef={caseDef}
+            log={log}
+            onClose={() => setReplayOpen(false)}
           />
         )}
       </Suspense>

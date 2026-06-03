@@ -380,6 +380,13 @@ export const zh: Record<string, string> = {
   'practice.tryAgain': '再试一次',
 
   'results.replay': '重玩病例',
+  'results.replayScrubber': '⏯ 时间线回放',
+  'replay.heading': '运行时间线',
+  'replay.empty': '本次运行没有记录决策。',
+  'replay.chose': '你选择',
+  'replay.stability': '整个运行的稳定度',
+  'replay.journey': '路径',
+  'replay.kbHint': '← / → 单步 · Home / End 跳转 · Esc 关闭',
   'results.note.label': '您的反思',
   'results.note.placeholder': '可选 — 将包含在课程教案导出中。',
   'results.practiceDecision': '练习此决策',
