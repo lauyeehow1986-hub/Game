@@ -79,7 +79,38 @@ describe('10/10 rating audit', () => {
     expect(hud).toMatch(/useCampaign/);
 
     const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8')) as { version: string };
-    expect(pkg.version).toMatch(/^[234567]\./);
+    expect(pkg.version).toMatch(/^[2345678]\./);
+  });
+
+  it('axis 4h (v7.1-v8.0): goals, bookmarks, flashcards, mastery, portfolio shipped', () => {
+    for (const f of ['learning-goals.ts', 'flashcards.ts', 'mastery.ts', 'portfolio.ts', 'portfolio-print.ts']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/lib', f), 'utf-8').length,
+        `${f} missing or empty`,
+      ).toBeGreaterThan(100);
+    }
+    for (const f of ['learningGoalsStore.ts', 'bookmarksStore.ts']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/state', f), 'utf-8').length,
+        `${f} missing or empty`,
+      ).toBeGreaterThan(100);
+    }
+    expect(
+      readFileSync(resolve(ROOT, 'src/ui/modals/FlashcardsModal.tsx'), 'utf-8').length,
+    ).toBeGreaterThan(100);
+    // TrendsPanel surfaces all five v7.1-v8.0 launchers.
+    const trends = readFileSync(resolve(ROOT, 'src/ui/panels/TrendsPanel.tsx'), 'utf-8');
+    expect(trends).toMatch(/useLearningGoals/);
+    expect(trends).toMatch(/useBookmarks/);
+    expect(trends).toMatch(/FlashcardsModal/);
+    expect(trends).toMatch(/masteryReport/);
+    expect(trends).toMatch(/buildPortfolio|portfolio-print/);
+    // ResultsModal exposes the bookmark toggle.
+    const results = readFileSync(resolve(ROOT, 'src/ui/modals/ResultsModal.tsx'), 'utf-8');
+    expect(results).toMatch(/useBookmarks|toggleBookmark/);
+    // package.json bumped to 8.x.
+    const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8')) as { version: string };
+    expect(pkg.version).toMatch(/^8\./);
   });
 
   it('axis 4g (v6.1-v7.0): handoff, Brier calibration, study sets, cheatsheet, competency shipped', () => {

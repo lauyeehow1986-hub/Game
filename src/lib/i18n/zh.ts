@@ -239,6 +239,8 @@ export const zh: Record<string, string> = {
   'mastery.developing': '发展中',
   'mastery.attempted': '已尝试',
   'mastery.untouched': '未触及',
+  'portfolio.open': '📁 学习者档案(打印)',
+  'portfolio.namePrompt': '打印在档案上的名字(留空则匿名):',
   'duel.open': '⚔ 对战 — 传递设备',
   'duel.heading': '面对面对战',
   'duel.turn': '轮到',

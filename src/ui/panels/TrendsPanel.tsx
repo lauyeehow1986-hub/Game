@@ -20,6 +20,7 @@ import { buildExam, EXAM_PRESETS, type ExamConfig } from '../../lib/exam';
 import { dueItems } from '../../lib/spaced-repetition';
 import { buildFlashcards, shuffleFlashcards } from '../../lib/flashcards';
 import { masteryReport } from '../../lib/mastery';
+import { buildPortfolio } from '../../lib/portfolio';
 import { exportRunHistoryCsv } from '../../lib/csv-export';
 import type { CaseDefinition } from '../../lib/types';
 
@@ -446,6 +447,40 @@ export function TrendsPanel() {
           className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
         >
           {t('flashcards.open')}
+        </button>
+      )}
+
+      {trends.totalPlayed > 0 && (
+        <button
+          onClick={() => {
+            void (async () => {
+              const { openPrintablePortfolio } = await import('../../lib/portfolio-print');
+              const learnerName = (typeof window !== 'undefined'
+                ? window.prompt(t('portfolio.namePrompt'), '') ?? ''
+                : '');
+              const portfolio = buildPortfolio({
+                learnerName,
+                generatedAt: Date.now(),
+                bestScores,
+                runHistory,
+                decisionNotes,
+                bookmarks,
+                catalogue,
+                goals: goalTargets,
+                unlockedAchievements,
+                resolveTitle: (c) => tr(c.title),
+                resolveDecisionPrompt: (caseId, decisionId) => {
+                  const c = catalogue.find((x) => x.id === caseId);
+                  const node = c?.pathway.find((n) => n.decision?.id === decisionId);
+                  return node?.decision ? tr(node.decision.prompt) : null;
+                },
+              });
+              openPrintablePortfolio(portfolio, locale === 'zh' ? 'zh' : 'en');
+            })();
+          }}
+          className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-amber-400/40 text-amber-300 hover:bg-amber-400/10"
+        >
+          {t('portfolio.open')}
         </button>
       )}
 

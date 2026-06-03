@@ -39,6 +39,7 @@ Cardio · Acute Emergencies · Cross-Sector · End-of-Life · Pandemic · Primar
 - **Duel mode** *(v5.0)* — two players, one device, alternating questions, head-to-head verdict
 - **Timeline scrubber + peer review** *(v6.0)* — walk a finished run step-by-step with cumulative score + stability; shared runs carry peer-review threads with compact review tokens
 - **Handoff + competency + Brier** *(v7.0)* — SGH1.* pause/resume tokens; confidence-rated exam scoring with calibration verdict; Dreyfus competency tier in Trends; my study sets; printable cheatsheet
+- **Goals + bookmarks + flashcards + mastery + portfolio** *(v8.0)* — weekly learning targets with progress bars; star decisions for later; deck of decision-rationale flashcards seeded per day; 5-tier per-case mastery ladder (untouched → consolidated); printable single-page learner portfolio aggregating competency, mastery, weekly progress, top cases, reflections, bookmarks
 - **Hospital Ops mode** — 8-hour tycoon shift at TTSH: hire staff, set bed capacity, manage budget + DORSCON
 - **Practice mode** — re-attempt a single decision in isolation (no score recorded)
 - **Quick Quiz** — 5 random decisions in sequence with running score

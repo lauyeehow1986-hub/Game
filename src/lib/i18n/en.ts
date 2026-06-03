@@ -245,6 +245,8 @@ export const en: Record<string, string> = {
   'mastery.developing': 'Developing',
   'mastery.attempted': 'Attempted',
   'mastery.untouched': 'Untouched',
+  'portfolio.open': '📁 Portfolio (print)',
+  'portfolio.namePrompt': 'Name to print on the portfolio (leave blank for anonymous):',
   'duel.open': '⚔ Duel — pass the device',
   'duel.heading': 'Head-to-head duel',
   'duel.turn': "It's",

@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v70-seen';
+const KEY = 'sg-pathway-whatsnew-v80-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'v8.0 — Goals, bookmarks, flashcards, mastery, printable portfolio',
+    body: 'The longitudinal-learner milestone. Weekly learning goals (cases / distinctions / mean) live at the top of Trends with colour-graded progress bars you can edit inline. Every decision in the results screen gains a ☆ Save toggle — bookmarked decisions surface in a "Saved for review" section with one-tap practice. A new 🃏 Flashcards mode deals decision-rationale cards from your played cases, shuffled deterministically per day (front = prompt + case title, reveal = best answer + rationale + guideline). A 5-tier mastery ladder (untouched → attempted → developing → mastered → consolidated) requires retention across days, not just one good run. A single-page printable 📁 Portfolio rolls up your competency tier, mastery breakdown, weekly progress, top cases, recent reflections and bookmarks — keep it as a study artefact or hand it to a supervisor.',
+  },
   {
     heading: 'v7.0 — Competency tier, calibration, handoff tokens, study sets, cheatsheet',
     body: 'The competency milestone. A Dreyfus-style tier (Novice → Advanced beginner → Competent → Proficient → Expert) appears at the top of Trends, derived from cases played + mean ratio + distinctions + Brier calibration. Exams now carry a 20/40/60/80/100% confidence dial per question and show a Brier score with an overconfident / underconfident / well-calibrated verdict. New SGH1.* handoff tokens let you pause mid-case and resume later (or pass to a colleague). My study sets compose ad-hoc case packs. A printable catalogue cheatsheet ships from Trends.',
