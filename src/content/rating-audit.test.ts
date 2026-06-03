@@ -79,7 +79,29 @@ describe('10/10 rating audit', () => {
     expect(hud).toMatch(/useCampaign/);
 
     const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8')) as { version: string };
-    expect(pkg.version).toMatch(/^[2345]\./);
+    expect(pkg.version).toMatch(/^[23456]\./);
+  });
+
+  it('axis 4f (v5.1-v6.0): replay scrubber, coach, peer review shipped', () => {
+    for (const f of ['replay.ts', 'coach.ts', 'peer-review.ts']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/lib', f), 'utf-8').length,
+        `${f} missing or empty`,
+      ).toBeGreaterThan(100);
+    }
+    expect(
+      readFileSync(resolve(ROOT, 'src/ui/modals/ReplayScrubberModal.tsx'), 'utf-8').length,
+    ).toBeGreaterThan(100);
+    // RunReviewModal wires the peer-review panel.
+    const runReview = readFileSync(resolve(ROOT, 'src/ui/modals/RunReviewModal.tsx'), 'utf-8');
+    expect(runReview).toMatch(/PeerReviewPanel/);
+    expect(runReview).toMatch(/SGR1|encodeThread|peer-review/);
+    // TrendsPanel surfaces the coach card.
+    const trends = readFileSync(resolve(ROOT, 'src/ui/panels/TrendsPanel.tsx'), 'utf-8');
+    expect(trends).toMatch(/coachSuggestion/);
+    // ResultsModal launches the timeline scrubber.
+    const results = readFileSync(resolve(ROOT, 'src/ui/modals/ResultsModal.tsx'), 'utf-8');
+    expect(results).toMatch(/ReplayScrubberModal/);
   });
 
   it('axis 4e (v4.1-v5.0): study planner, duel, specialty pack, high-contrast shipped', () => {

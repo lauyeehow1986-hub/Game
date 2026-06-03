@@ -503,6 +503,20 @@ export const en: Record<string, string> = {
 
   // Run review (when opening a ?run= URL)
   'runReview.heading': 'Reviewing a shared run',
+  'review.heading': 'Peer review',
+  'review.intro': 'Add per-step comments. Save stays local to this browser; copy the token to send your review to whoever shared the run.',
+  'review.author': 'Your name',
+  'review.body': 'Comment',
+  'review.bodyPlaceholder': 'What did this step do well — and what would you do differently?',
+  'review.step': 'step {{n}}',
+  'review.add': 'Add comment',
+  'review.copyToken': '📋 Copy review token',
+  'review.copyManual': 'Copy this review token and send it to the run\'s author:',
+  'review.copied': 'Token copied.',
+  'review.importSummary': '+ Import a review token',
+  'review.importBtn': 'Import',
+  'review.imported': 'Imported into this thread.',
+  'review.noneFound': 'No matching review tokens found.',
   'runReview.subtitle': 'Replay of "{{title}}". Decisions below are the shared player\'s; the best-practice column shows what a perfect run would have chosen.',
   'runReview.notFound': 'Couldn\'t find the case "{{id}}" — the shared run links to a case that isn\'t installed.',
 

@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v50-seen';
+const KEY = 'sg-pathway-whatsnew-v60-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'v6.0 — Timeline scrubber, coach micro-curricula, peer-review threads',
+    body: 'The social milestone. Every finished case gains a ⏯ Timeline scrub button that lets you walk forward and backward through your run with cumulative score and a stability bar at each step. Trends gains a Coach card that picks your weakest played category and proposes three cases to shore it up. Shared runs now carry peer-review threads — paste a friend\'s run URL, leave per-step comments, and exchange compact review tokens. All client-side. Three new specialty cases (offshore-clinic STEMI with pharmaco-invasive transfer, MMR vaccine-hesitancy conversation, KKH postpartum-haemorrhage drill) bring the catalogue to 38.',
+  },
   {
     heading: 'v5.0 — Personalised practice: study plan, duel, specialty cases, high-contrast',
     body: 'The personalised-experience milestone. A new "Today\'s plan" panel composes 5 ranked things to do — spaced-retrieval review, weakest practice, curriculum continuity, daily challenge, discovery — so you always have a next click. ⚔ Duel mode lets two players share the device with alternating questions and a head-to-head verdict. Three new specialty cases fill catalogue gaps: an ERAS knee TKR, an AECOPD with targeted oxygen, and an IV-antibiotic anaphylaxis with the IM-adrenaline-first rule. Settings gains a high-contrast theme (AAA palette, OS prefers-contrast also honoured). 35 cases, 450+ tests.',
