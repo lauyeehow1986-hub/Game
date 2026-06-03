@@ -250,6 +250,7 @@ export const en: Record<string, string> = {
   'journal.label': 'Case journal — what did this case teach you?',
   'journal.placeholder': 'A whole-case reflection: what surprised you, what you would do differently next time.',
   'journal.heading': 'Case journal',
+  'freeze.label': 'Freezes',
   'duel.open': '⚔ Duel — pass the device',
   'duel.heading': 'Head-to-head duel',
   'duel.turn': "It's",

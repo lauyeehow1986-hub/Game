@@ -10,7 +10,9 @@ import { computePersonalTrends, computeDecisionWeaknesses, gradeBandLabel } from
 import { coachSuggestion } from '../../lib/coach';
 import { competency } from '../../lib/competency';
 import { computeWeekReport } from '../../lib/learning-goals';
+import { shieldStreak, weekKey } from '../../lib/streak-freeze';
 import { useLearningGoals } from '../../state/learningGoalsStore';
+import { useStreakFreezes } from '../../state/streakFreezeStore';
 import { useBookmarks } from '../../state/bookmarksStore';
 import { useCaseJournal } from '../../state/caseJournalStore';
 import { useLocale, useT, useTr } from '../../lib/i18n';
@@ -100,6 +102,8 @@ export function TrendsPanel() {
   const streakDays = useStreak((s) => s.days);
   const streakNow = currentStreakValue({ days: streakDays });
   const streakBest = bestStreakValue({ days: streakDays });
+  const freezesAvailable = useStreakFreezes((s) => s.available);
+  const awardFreezeForWeek = useStreakFreezes((s) => s.awardForWeek);
   const decisionNotes = useProgress((s) => s.decisionNotes);
   const setDecisionNote = useProgress((s) => s.setDecisionNote);
   const [practice, setPractice] = useState<{ caseDef: CaseDefinition; decisionId: string } | null>(null);
@@ -191,6 +195,11 @@ export function TrendsPanel() {
 
       {(() => {
         const w = computeWeekReport(runHistory, goalTargets);
+        // Idempotent: when this week's targets are all met, mint a freeze
+        // for that week (no-op on repeat renders).
+        if (w.allMet) {
+          awardFreezeForWeek(weekKey(Date.now()));
+        }
         const bar = (p: number) => (
           <div className="h-1.5 bg-clinical-bg rounded overflow-hidden">
             <div
@@ -284,17 +293,32 @@ export function TrendsPanel() {
         <Mini label={t('trends.grade')} value={trends.totalPlayed > 0 ? meanGrade : '—'} />
       </div>
 
-      <div className="grid grid-cols-2 gap-2 text-[11px]">
-        <Mini
-          label={t('hud.streak')}
-          value={streakNow > 0 ? `🔥 ${streakNow}d` : '—'}
-          colour={streakNow > 0 ? '#facc15' : undefined}
-        />
-        <Mini
-          label={t('hud.streak.best')}
-          value={streakBest > 0 ? `${streakBest}d` : '—'}
-        />
-      </div>
+      {(() => {
+        const shielded = shieldStreak(
+          streakDays,
+          new Date().toLocaleDateString('en-CA'),
+          freezesAvailable,
+        );
+        const bonusDays = Math.max(0, shielded.value - streakNow);
+        return (
+          <div className="grid grid-cols-3 gap-2 text-[11px]">
+            <Mini
+              label={t('hud.streak')}
+              value={streakNow > 0 ? `🔥 ${streakNow}d` : '—'}
+              colour={streakNow > 0 ? '#facc15' : undefined}
+            />
+            <Mini
+              label={t('hud.streak.best')}
+              value={streakBest > 0 ? `${streakBest}d` : '—'}
+            />
+            <Mini
+              label={t('freeze.label')}
+              value={freezesAvailable > 0 ? `❄ ${freezesAvailable}` : '—'}
+              colour={bonusDays > 0 ? '#3aa6ff' : freezesAvailable > 0 ? '#a3e635' : undefined}
+            />
+          </div>
+        );
+      })()}
 
       {(() => {
         const m = masteryReport(catalogue, bestScores, runHistory);

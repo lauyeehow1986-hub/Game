@@ -244,6 +244,7 @@ export const zh: Record<string, string> = {
   'journal.label': '病例日志 — 这个病例教会了你什么?',
   'journal.placeholder': '整体反思:有什么意外、下次会怎么做。',
   'journal.heading': '病例日志',
+  'freeze.label': '冻结',
   'duel.open': '⚔ 对战 — 传递设备',
   'duel.heading': '面对面对战',
   'duel.turn': '轮到',
