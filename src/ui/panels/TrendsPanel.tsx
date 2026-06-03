@@ -8,7 +8,7 @@ import { buildHeatmap } from '../../lib/streak-heatmap';
 import { useMemo, useState, lazy, Suspense } from 'react';
 import { computePersonalTrends, computeDecisionWeaknesses, gradeBandLabel } from '../../lib/personal-trends';
 import { coachSuggestion } from '../../lib/coach';
-import { useT, useTr } from '../../lib/i18n';
+import { useLocale, useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
 import { CURRICULA } from '../../lib/curricula';
 import { buildRandomQuiz, buildQuizFromDecisions, type QuizItem } from '../../lib/quiz';
@@ -76,6 +76,7 @@ function Sparkline({ ratios }: { ratios: number[] }) {
 
 export function TrendsPanel() {
   const t = useT();
+  const locale = useLocale((s) => s.locale);
   const tr = useTr();
   const bestScores = useProgress((s) => s.bestScores);
   const decisionsMade = useProgress((s) => s.decisionsMade);
@@ -259,6 +260,18 @@ export function TrendsPanel() {
         className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
       >
         {t('educator.open')}
+      </button>
+
+      <button
+        onClick={() => {
+          void (async () => {
+            const { openPrintableCheatsheet } = await import('../../lib/cheatsheet-print');
+            openPrintableCheatsheet(catalogue, locale === 'zh' ? 'zh' : 'en');
+          })();
+        }}
+        className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+      >
+        {t('cheatsheet.open')}
       </button>
 
       {trends.totalPlayed > 0 && (

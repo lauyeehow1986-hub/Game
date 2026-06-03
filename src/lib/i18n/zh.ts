@@ -199,6 +199,7 @@ export const zh: Record<string, string> = {
   'sets.hidePicker': '取消',
   'sets.pickCase': '选择病例…',
   'sets.playFirst': '从第一例开始',
+  'cheatsheet.open': '🖨 速查表(打印)',
   'duel.open': '⚔ 对战 — 传递设备',
   'duel.heading': '面对面对战',
   'duel.turn': '轮到',

@@ -205,6 +205,7 @@ export const en: Record<string, string> = {
   'sets.hidePicker': 'Cancel',
   'sets.pickCase': 'Pick a case…',
   'sets.playFirst': 'Play first',
+  'cheatsheet.open': '🖨 Cheatsheet (print)',
   'duel.open': '⚔ Duel — pass the device',
   'duel.heading': 'Head-to-head duel',
   'duel.turn': "It's",
