@@ -14,6 +14,7 @@ import type { QuizItem } from '../../lib/quiz';
 import { openPrintableCertificate } from '../../lib/certificate-print';
 import { encodeCompletion } from '../../lib/assignment';
 import { Confetti } from '../Confetti';
+import { score as calibrationScore, CONFIDENCE_LEVELS } from '../../lib/calibration';
 
 interface Props {
   exam: QuizItem[];
@@ -39,6 +40,8 @@ export function ExamModal({ exam, config, presetName, resolveCase, onClose, assi
   const [index, setIndex] = useState(0);
   const [focusIdx, setFocusIdx] = useState(0);
   const [picks, setPicks] = useState<ExamPick[]>([]);
+  const [calibrationPicks, setCalibrationPicks] = useState<Array<{ forecast: number; correct: 0 | 1 }>>([]);
+  const [confidence, setConfidence] = useState<number>(0.6);
   const [remaining, setRemaining] = useState(config.durationSec);
   const [finished, setFinished] = useState(false);
   const [name, setName] = useState('');
@@ -79,6 +82,12 @@ export function ExamModal({ exam, config, presetName, resolveCase, onClose, assi
     const max = maxScoreForDecision(decision);
     const next = [...picks, { score: opt.score * decision.weight, max }];
     setPicks(next);
+    // Confidence calibration: forecast (this question's confidence) vs whether
+    // they picked the highest-scoring option (correct = 1).
+    const bestOptionScore = Math.max(...decision.options.map((o) => o.score));
+    const wasBest = opt.score >= bestOptionScore - 0.01 ? 1 : 0;
+    setCalibrationPicks([...calibrationPicks, { forecast: confidence, correct: wasBest as 0 | 1 }]);
+    setConfidence(0.6);
     setFocusIdx(0);
     if (index + 1 >= exam.length) {
       setFinished(true);
@@ -161,6 +170,25 @@ export function ExamModal({ exam, config, presetName, resolveCase, onClose, assi
             <p className="text-sm text-white font-medium">
               <GlossaryText>{tr(decision.prompt)}</GlossaryText>
             </p>
+            <div className="flex items-center gap-2 text-[11px]">
+              <span className="text-clinical-subtle">{t('exam.confidence')}:</span>
+              <div className="flex gap-1">
+                {CONFIDENCE_LEVELS.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setConfidence(c)}
+                    aria-pressed={confidence === c}
+                    className={`px-2 py-1 rounded border font-mono ${
+                      confidence === c
+                        ? 'border-clinical-accent bg-clinical-accent/10 text-white'
+                        : 'border-clinical-border text-clinical-subtle hover:text-white'
+                    }`}
+                  >
+                    {Math.round(c * 100)}%
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="space-y-1.5">
               {decision.options.map((opt, i) => (
                 <button
@@ -199,6 +227,27 @@ export function ExamModal({ exam, config, presetName, resolveCase, onClose, assi
             <div className="text-[11px] text-clinical-subtle">
               {t('exam.answered', { answered: result.answered, total: result.total })}
             </div>
+
+            {calibrationPicks.length > 0 && (() => {
+              const cal = calibrationScore(calibrationPicks);
+              return (
+                <div className="text-left rounded border border-clinical-border bg-clinical-bg/40 p-2 space-y-1">
+                  <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
+                    {t('exam.calibration')}
+                  </div>
+                  <div className="text-[11px] text-white font-mono">
+                    Brier {cal.brier.toFixed(3)} · {t('exam.calibration.hitRate')} {Math.round(cal.hitRate * 100)}% · {t('exam.calibration.meanForecast')} {Math.round(cal.meanForecast * 100)}%
+                  </div>
+                  <div className={`text-[11px] ${cal.overconfidence > 0.1 ? 'text-clinical-warn' : cal.overconfidence < -0.1 ? 'text-clinical-accent' : 'text-clinical-ok'}`}>
+                    {cal.overconfidence > 0.1
+                      ? t('exam.calibration.overconfident', { delta: Math.round(cal.overconfidence * 100) })
+                      : cal.overconfidence < -0.1
+                      ? t('exam.calibration.underconfident', { delta: Math.round(-cal.overconfidence * 100) })
+                      : t('exam.calibration.wellCalibrated')}
+                  </div>
+                </div>
+              );
+            })()}
 
             <div className="pt-2">
               <label className="block text-[11px] text-clinical-subtle mb-1 text-left">
