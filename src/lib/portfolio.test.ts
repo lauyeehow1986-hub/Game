@@ -101,6 +101,29 @@ describe('portfolio', () => {
     expect(p.recentBookmarks[0].caseId).toBe('c0');
   });
 
+  it('caps recent journal entries to 5 and sorts newest-first', () => {
+    const catalogue = Array.from({ length: 8 }, (_, i) => mkCase(`c${i}`, `Case ${i}`));
+    const caseJournal = Object.fromEntries(
+      Array.from({ length: 8 }, (_, i) => [`c${i}`, { text: `entry ${i}`, updatedAt: NOW - i * 60_000 }]),
+    );
+    const p = buildPortfolio({
+      learnerName: 'a',
+      generatedAt: NOW,
+      bestScores: {},
+      runHistory: {},
+      decisionNotes: {},
+      bookmarks: {},
+      caseJournal,
+      catalogue,
+      goals: DEFAULT_TARGETS,
+      unlockedAchievements: [],
+      resolveTitle: (c) => (c.title as { en: string }).en,
+      resolveDecisionPrompt: () => null,
+    });
+    expect(p.recentJournal).toHaveLength(5);
+    expect(p.recentJournal[0].caseId).toBe('c0');
+  });
+
   it('skips empty reflection text', () => {
     const catalogue = [mkCase('a', 'A')];
     const p = buildPortfolio({

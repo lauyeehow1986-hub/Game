@@ -2,6 +2,7 @@ import { useEffect, lazy, Suspense } from 'react';
 import { useGame } from '../../state/gameStore';
 import { useProgress } from '../../state/progressStore';
 import { useBookmarks } from '../../state/bookmarksStore';
+import { useCaseJournal } from '../../state/caseJournalStore';
 import { gradeForRatio, totalScoreFromLog } from '../../lib/scoring';
 import { usePerspective } from '../../state/perspectiveStore';
 import { chimeCaseComplete } from '../../lib/audio';
@@ -52,6 +53,8 @@ export function ResultsModal() {
   const setDecisionNote = useProgress((s) => s.setDecisionNote);
   const bookmarks = useBookmarks((s) => s.items);
   const toggleBookmark = useBookmarks((s) => s.toggle);
+  const journalEntries = useCaseJournal((s) => s.entries);
+  const setJournalEntry = useCaseJournal((s) => s.set);
   const fireAchievement = useAchievements((s) => s.fire);
   const recordStreakDay = useStreak((s) => s.recordToday);
   const cardRef = useFocusTrap<HTMLDivElement>(status === 'completed');
@@ -167,6 +170,21 @@ export function ResultsModal() {
             </div>
           </section>
         )}
+
+        <section className="px-5 py-4 border-b border-clinical-border space-y-2">
+          <label className="block text-[11px]">
+            <span className="text-[10px] uppercase tracking-wider text-clinical-subtle">
+              {t('journal.label')}
+            </span>
+            <textarea
+              value={journalEntries[caseDef.id]?.text ?? ''}
+              onChange={(e) => setJournalEntry(caseDef.id, e.target.value)}
+              placeholder={t('journal.placeholder')}
+              rows={3}
+              className="mt-0.5 w-full bg-clinical-bg border border-clinical-border rounded px-2 py-1 text-[12px] text-white resize-y"
+            />
+          </label>
+        </section>
 
         <section className="px-5 py-4 border-b border-clinical-border space-y-3">
           <div className="flex items-center gap-2">

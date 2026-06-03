@@ -12,6 +12,7 @@ import { competency } from '../../lib/competency';
 import { computeWeekReport } from '../../lib/learning-goals';
 import { useLearningGoals } from '../../state/learningGoalsStore';
 import { useBookmarks } from '../../state/bookmarksStore';
+import { useCaseJournal } from '../../state/caseJournalStore';
 import { useLocale, useT, useTr } from '../../lib/i18n';
 import { ACHIEVEMENTS } from '../../lib/achievements';
 import { CURRICULA } from '../../lib/curricula';
@@ -113,6 +114,8 @@ export function TrendsPanel() {
   const setGoalTargets = useLearningGoals((s) => s.setTargets);
   const bookmarks = useBookmarks((s) => s.items);
   const removeBookmark = useBookmarks((s) => s.remove);
+  const journalEntries = useCaseJournal((s) => s.entries);
+  const removeJournal = useCaseJournal((s) => s.remove);
 
   const runHistory = useProgress((s) => s.runHistory);
   const catalogue = useMemo(
@@ -465,6 +468,7 @@ export function TrendsPanel() {
                 runHistory,
                 decisionNotes,
                 bookmarks,
+                caseJournal: journalEntries,
                 catalogue,
                 goals: goalTargets,
                 unlockedAchievements,
@@ -729,6 +733,52 @@ export function TrendsPanel() {
                       </button>
                       <button
                         onClick={() => removeBookmark(b.caseId, b.decisionId)}
+                        className="text-[10px] px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+                      >
+                        {t('bookmark.remove')}
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </details>
+        );
+      })()}
+
+      {(() => {
+        const list = Object.entries(journalEntries)
+          .map(([caseId, entry]) => ({ caseId, ...entry }))
+          .sort((a, b) => b.updatedAt - a.updatedAt);
+        if (list.length === 0) return null;
+        return (
+          <details className="text-[11px] border-t border-clinical-border pt-2">
+            <summary className="cursor-pointer text-clinical-subtle hover:text-white">
+              {t('journal.heading')} ({list.length})
+            </summary>
+            <ul className="mt-1.5 space-y-1.5 max-h-72 overflow-y-auto scrollbar-thin pr-1">
+              {list.map((e) => {
+                const c = catalogue.find((x) => x.id === e.caseId);
+                return (
+                  <li key={e.caseId} className="border-l-2 border-clinical-accent/60 pl-2">
+                    <div className="text-white leading-snug whitespace-pre-wrap">{e.text}</div>
+                    <div className="text-[10px] text-clinical-subtle font-mono">
+                      {c ? tr(c.title) : e.caseId} · {new Date(e.updatedAt).toLocaleDateString()}
+                    </div>
+                    <div className="flex gap-1 mt-1">
+                      <button
+                        disabled={!c}
+                        onClick={() => {
+                          if (!c) return;
+                          if (status !== 'idle') resetRun();
+                          startCase(c);
+                        }}
+                        className="text-[10px] px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white disabled:opacity-40"
+                      >
+                        {t('trends.weak.restart')}
+                      </button>
+                      <button
+                        onClick={() => removeJournal(e.caseId)}
                         className="text-[10px] px-2 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
                       >
                         {t('bookmark.remove')}

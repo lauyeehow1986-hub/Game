@@ -19,6 +19,8 @@ export interface PortfolioInputs {
   runHistory: Record<string, RunHistoryEntry[]>;
   decisionNotes: Record<string, string>;
   bookmarks: Record<string, { caseId: string; decisionId: string; addedAt: number; note?: string }>;
+  /** Per-case free-text journal entries, latest-wins. */
+  caseJournal?: Record<string, { text: string; updatedAt: number }>;
   catalogue: CaseDefinition[];
   goals: WeeklyTargets;
   unlockedAchievements: string[];
@@ -39,6 +41,13 @@ export interface PortfolioReflection {
   decisionId: string;
   prompt: string | null;
   text: string;
+}
+
+export interface PortfolioJournalEntry {
+  caseId: string;
+  caseTitle: string;
+  text: string;
+  updatedAt: number;
 }
 
 export interface PortfolioBookmark {
@@ -70,6 +79,8 @@ export interface Portfolio {
   recentReflections: PortfolioReflection[];
   /** Up to 5 most recent bookmarks. */
   recentBookmarks: PortfolioBookmark[];
+  /** Up to 5 most recent case-level journal entries. */
+  recentJournal: PortfolioJournalEntry[];
 }
 
 const DISTINCTION_RATIO = 0.9;
@@ -128,6 +139,16 @@ export function buildPortfolio(input: PortfolioInputs): Portfolio {
     .sort((a, b) => a.caseTitle.localeCompare(b.caseTitle))
     .slice(0, 5);
 
+  const recentJournal: PortfolioJournalEntry[] = Object.entries(input.caseJournal ?? {})
+    .map(([caseId, entry]) => ({
+      caseId,
+      caseTitle: titleById.get(caseId) ?? caseId,
+      text: entry.text,
+      updatedAt: entry.updatedAt,
+    }))
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .slice(0, 5);
+
   const recentBookmarks: PortfolioBookmark[] = Object.values(input.bookmarks)
     .sort((a, b) => b.addedAt - a.addedAt)
     .slice(0, 5)
@@ -157,5 +178,6 @@ export function buildPortfolio(input: PortfolioInputs): Portfolio {
     topCases,
     recentReflections,
     recentBookmarks,
+    recentJournal,
   };
 }

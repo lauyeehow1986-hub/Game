@@ -68,6 +68,7 @@ interface PrintLabels {
   topCases: string;
   reflections: string;
   bookmarks: string;
+  journal: string;
   footer: string;
   emptyReflections: string;
   emptyBookmarks: string;
@@ -85,8 +86,9 @@ const LABELS: Record<'en' | 'zh', PrintLabels> = {
     mastery: 'Mastery breakdown',
     week: 'This week\'s goal progress',
     topCases: 'Top cases',
-    reflections: 'Recent reflections',
+    reflections: 'Recent decision reflections',
     bookmarks: 'Saved for review',
+    journal: 'Case journal',
     footer: 'Generated locally from your offline progress. No accounts, no servers.',
     emptyReflections: 'No reflection notes yet.',
     emptyBookmarks: 'No bookmarks yet.',
@@ -114,8 +116,9 @@ const LABELS: Record<'en' | 'zh', PrintLabels> = {
     mastery: '掌握度分布',
     week: '本周目标进度',
     topCases: '最佳病例',
-    reflections: '最近反思',
+    reflections: '最近决策反思',
     bookmarks: '待复习',
+    journal: '病例日志',
     footer: '从你的本地离线进度生成。无账户、无服务器。',
     emptyReflections: '尚无反思笔记。',
     emptyBookmarks: '尚无收藏。',
@@ -177,6 +180,12 @@ export function renderPortfolioHtml(p: Portfolio, locale: 'en' | 'zh' = 'en'): s
         .map((r) => `<div class="card"><div class="t">${esc(r.caseTitle)}${r.prompt ? ` — ${esc(r.prompt)}` : ''}</div><div class="b">${esc(r.text)}</div></div>`)
         .join('');
 
+  const journalBlock = p.recentJournal.length === 0
+    ? ''
+    : `<h2>${esc(L.journal)}</h2>` + p.recentJournal
+        .map((j) => `<div class="card"><div class="t">${esc(j.caseTitle)}</div><div class="b">${esc(j.text)}</div></div>`)
+        .join('');
+
   const bookmarksBlock = p.recentBookmarks.length === 0
     ? `<p class="b">${esc(L.emptyBookmarks)}</p>`
     : `<ul class="tight">${p.recentBookmarks
@@ -204,6 +213,8 @@ export function renderPortfolioHtml(p: Portfolio, locale: 'en' | 'zh' = 'en'): s
 
   <h2>${esc(L.topCases)}</h2>
   ${topCasesBlock}
+
+  ${journalBlock}
 
   <h2>${esc(L.reflections)}</h2>
   ${reflectionsBlock}
