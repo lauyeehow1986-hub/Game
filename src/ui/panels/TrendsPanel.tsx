@@ -18,6 +18,7 @@ import { CURRICULA } from '../../lib/curricula';
 import { buildRandomQuiz, buildQuizFromDecisions, type QuizItem } from '../../lib/quiz';
 import { buildExam, EXAM_PRESETS, type ExamConfig } from '../../lib/exam';
 import { dueItems } from '../../lib/spaced-repetition';
+import { buildFlashcards, shuffleFlashcards } from '../../lib/flashcards';
 import { exportRunHistoryCsv } from '../../lib/csv-export';
 import type { CaseDefinition } from '../../lib/types';
 
@@ -38,6 +39,9 @@ const AnalyticsModal = lazy(() =>
 );
 const DuelModal = lazy(() =>
   import('../modals/DuelModal').then((m) => ({ default: m.DuelModal })),
+);
+const FlashcardsModal = lazy(() =>
+  import('../modals/FlashcardsModal').then((m) => ({ default: m.FlashcardsModal })),
 );
 
 const CATEGORY_COLOURS: Record<'acute' | 'elective' | 'outpatient', string> = {
@@ -102,6 +106,7 @@ export function TrendsPanel() {
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [duelOpen, setDuelOpen] = useState(false);
   const [goalsOpen, setGoalsOpen] = useState(false);
+  const [flashcardsOpen, setFlashcardsOpen] = useState(false);
   const goalTargets = useLearningGoals((s) => s.targets);
   const setGoalTargets = useLearningGoals((s) => s.setTargets);
   const bookmarks = useBookmarks((s) => s.items);
@@ -400,6 +405,15 @@ export function TrendsPanel() {
       >
         {t('cheatsheet.open')}
       </button>
+
+      {trends.totalPlayed > 0 && (
+        <button
+          onClick={() => setFlashcardsOpen(true)}
+          className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
+        >
+          {t('flashcards.open')}
+        </button>
+      )}
 
       {trends.totalPlayed > 0 && (
         <button
@@ -890,6 +904,12 @@ export function TrendsPanel() {
         {duelOpen && (
           <DuelModal pool={catalogue} onClose={() => setDuelOpen(false)} />
         )}
+        {flashcardsOpen && (() => {
+          const playedIds = Object.keys(bestScores);
+          const built = buildFlashcards(catalogue, playedIds.length > 0 ? playedIds : undefined);
+          const deck = shuffleFlashcards(built, Math.floor(Date.now() / 86400000));
+          return <FlashcardsModal deck={deck} onClose={() => setFlashcardsOpen(false)} />;
+        })()}
       </Suspense>
     </section>
   );
