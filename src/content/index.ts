@@ -85,6 +85,9 @@ import { chestPainTriageCase } from './cases/chest-pain-triage';
 import { electiveKneeTkrCase } from './cases/elective-knee-tkr';
 import { copdAecCase } from './cases/copd-exacerbation';
 import { anaphylaxisEdCase } from './cases/anaphylaxis-ed';
+import { stemiRuralThrombolysisCase } from './cases/stemi-rural-thrombolysis';
+import { paedsVaccineHesitancyCase } from './cases/paeds-vaccine-hesitancy';
+import { postpartumHaemorrhageCase } from './cases/postpartum-haemorrhage';
 import type { CaseDefinition, Facility } from '../lib/types';
 
 const allFacilities: Facility[] = [
@@ -150,6 +153,9 @@ export const cases: Record<string, CaseDefinition> = {
   [electiveKneeTkrCase.id]: electiveKneeTkrCase,
   [copdAecCase.id]: copdAecCase,
   [anaphylaxisEdCase.id]: anaphylaxisEdCase,
+  [stemiRuralThrombolysisCase.id]: stemiRuralThrombolysisCase,
+  [paedsVaccineHesitancyCase.id]: paedsVaccineHesitancyCase,
+  [postpartumHaemorrhageCase.id]: postpartumHaemorrhageCase,
 };
 
 export function getFacility(id: string): Facility | undefined {
