@@ -249,6 +249,8 @@ export const zh: Record<string, string> = {
   'calibration.verdict.good': '校准良好 — 自信与准确率相符。',
   'calibration.verdict.fair': '尚可,但自信与准确率有偏差。',
   'calibration.verdict.poor': '自信偏高/偏低 — 下次尝试前重读理由。',
+  'certificate.print': '🏆 打印个人最佳证书',
+  'certificate.namePrompt': '打印在证书上的名字(留空则显示"学习者"):',
   'duel.open': '⚔ 对战 — 传递设备',
   'duel.heading': '面对面对战',
   'duel.turn': '轮到',

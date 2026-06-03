@@ -255,6 +255,8 @@ export const en: Record<string, string> = {
   'calibration.verdict.good': 'Well calibrated — your confidence matches your accuracy.',
   'calibration.verdict.fair': 'Workable, but confidence and accuracy drift.',
   'calibration.verdict.poor': 'Over-/under-confident — re-read rationales before next attempt.',
+  'certificate.print': '🏆 Print personal-best certificate',
+  'certificate.namePrompt': 'Name to print on the certificate (leave blank for "Learner"):',
   'duel.open': '⚔ Duel — pass the device',
   'duel.heading': 'Head-to-head duel',
   'duel.turn': "It's",

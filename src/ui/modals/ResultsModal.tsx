@@ -31,6 +31,7 @@ const ReplayScrubberModal = lazy(() =>
 export function ResultsModal() {
   const t = useT();
   const tr = useTr();
+  const locale = useLocale((s) => s.locale);
   const status = useGame((s) => s.run.status);
   const log = useGame((s) => s.run.log);
   const caseDef = useGame((s) => s.caseDef);
@@ -73,10 +74,15 @@ export function ResultsModal() {
     }
   }
 
+  const [personalBestAt, setPersonalBestAt] = useState<number | null>(null);
+
   useEffect(() => {
     if (status === 'completed' && caseDef) {
       const { earned, max } = totalScoreFromLog(log);
+      const prior = useProgress.getState().bestScores[caseDef.id];
+      const isNewBest = !prior || (max > 0 && earned / max > (prior.max > 0 ? prior.score / prior.max : 0) + 1e-9);
       recordCaseResult(caseDef.id, earned, max, log);
+      if (isNewBest && max > 0) setPersonalBestAt(Date.now());
       recordStreakDay();
       chimeCaseComplete();
       const runsForThisCase = (runHistory[caseDef.id]?.length ?? 0) + 1;
@@ -410,6 +416,35 @@ export function ResultsModal() {
         )}
 
         <footer className="px-5 py-4 flex items-center justify-end gap-2 flex-wrap">
+          {personalBestAt != null && (
+            <button
+              onClick={() => {
+                void (async () => {
+                  const { openPersonalBestCertificate, personalBestRef } = await import(
+                    '../../lib/personal-best-print'
+                  );
+                  const name =
+                    typeof window !== 'undefined'
+                      ? window.prompt(t('certificate.namePrompt'), '') ?? ''
+                      : '';
+                  openPersonalBestCertificate({
+                    caseTitle: tr(caseDef.title),
+                    caseCategory: caseDef.category,
+                    ratioPct: Math.round((earned / max) * 100),
+                    score: earned,
+                    max,
+                    at: personalBestAt,
+                    ref: personalBestRef(caseDef.id, personalBestAt),
+                    learnerName: name,
+                    locale: locale === 'zh' ? 'zh' : 'en',
+                  });
+                })();
+              }}
+              className="tap-target text-[11px] px-3 py-1.5 rounded border border-amber-400/60 text-amber-300 hover:bg-amber-400/10"
+            >
+              {t('certificate.print')}
+            </button>
+          )}
           <ExportButtons notes={notes} />
           {(() => {
             // Surface campaign next-case CTA when a shift is active and has
