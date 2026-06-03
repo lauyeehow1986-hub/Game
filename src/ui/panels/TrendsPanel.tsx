@@ -13,6 +13,7 @@ import { computeWeekReport } from '../../lib/learning-goals';
 import { shieldStreak, weekKey } from '../../lib/streak-freeze';
 import { useLearningGoals } from '../../state/learningGoalsStore';
 import { useStreakFreezes } from '../../state/streakFreezeStore';
+import { useCalibration } from '../../state/calibrationStore';
 import { useBookmarks } from '../../state/bookmarksStore';
 import { useCaseJournal } from '../../state/caseJournalStore';
 import { useLocale, useT, useTr } from '../../lib/i18n';
@@ -104,6 +105,7 @@ export function TrendsPanel() {
   const streakBest = bestStreakValue({ days: streakDays });
   const freezesAvailable = useStreakFreezes((s) => s.available);
   const awardFreezeForWeek = useStreakFreezes((s) => s.awardForWeek);
+  const calibrationSessions = useCalibration((s) => s.sessions);
   const decisionNotes = useProgress((s) => s.decisionNotes);
   const setDecisionNote = useProgress((s) => s.setDecisionNote);
   const [practice, setPractice] = useState<{ caseDef: CaseDefinition; decisionId: string } | null>(null);
@@ -167,10 +169,17 @@ export function TrendsPanel() {
         const meanRatio = distinctCases > 0
           ? Object.values(bestScores).reduce((acc, b) => acc + (b.max > 0 ? b.score / b.max : 0), 0) / distinctCases
           : 0;
+        // Pull a wellCalibrated signal from persisted exam sessions: a Brier
+        // ≤ 0.1 in the most recent session counts as one signal point.
+        const wellCalibrated = (() => {
+          const last = calibrationSessions[calibrationSessions.length - 1];
+          return last && last.brier <= 0.1 ? 1 : 0;
+        })();
         const c = competency({
           distinctCasesPlayed: distinctCases,
           meanRatio,
           distinctions,
+          wellCalibrated,
         });
         const tierColour: Record<string, string> = {
           'novice': 'border-clinical-subtle/40 text-clinical-subtle',
@@ -189,6 +198,52 @@ export function TrendsPanel() {
               <div className="h-full bg-current" style={{ width: `${Math.round(c.progress * 100)}%` }} />
             </div>
             <p className="text-[11px] leading-snug">{t(c.reason)}</p>
+          </div>
+        );
+      })()}
+
+      {(() => {
+        if (calibrationSessions.length === 0) return null;
+        const last = calibrationSessions[calibrationSessions.length - 1];
+        const prev = calibrationSessions[calibrationSessions.length - 2];
+        const verdict =
+          last.brier <= 0.1 ? 'good' : last.brier <= 0.2 ? 'fair' : 'poor';
+        const verdictColour = { good: '#4ade80', fair: '#facc15', poor: '#f87171' }[verdict];
+        const delta = prev ? last.brier - prev.brier : null;
+        const recent = calibrationSessions.slice(-8);
+        return (
+          <div className="rounded border border-clinical-border bg-clinical-bg/30 p-2 space-y-1">
+            <div className="flex items-baseline justify-between">
+              <span className="text-[10px] uppercase tracking-wider text-clinical-subtle">
+                {t('calibration.trendLabel')}
+              </span>
+              <span className="text-[11px] font-mono" style={{ color: verdictColour }}>
+                Brier {last.brier.toFixed(3)}
+                {delta != null && (
+                  <span className="ml-1 text-[10px]">
+                    {delta < 0 ? '↓' : delta > 0 ? '↑' : '·'}
+                    {Math.abs(delta).toFixed(3)}
+                  </span>
+                )}
+              </span>
+            </div>
+            <div className="flex items-end gap-0.5 h-5">
+              {recent.map((s, i) => (
+                <div
+                  key={i}
+                  className="w-1.5 rounded-t"
+                  style={{
+                    height: `${Math.max(8, (1 - Math.min(1, s.brier)) * 100)}%`,
+                    backgroundColor:
+                      s.brier <= 0.1 ? '#4ade80' : s.brier <= 0.2 ? '#facc15' : '#f87171',
+                  }}
+                  title={`Brier ${s.brier.toFixed(3)}`}
+                />
+              ))}
+            </div>
+            <p className="text-[10px] text-clinical-subtle">
+              {t(`calibration.verdict.${verdict}`)}
+            </p>
           </div>
         );
       })()}

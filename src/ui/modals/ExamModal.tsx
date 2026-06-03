@@ -15,6 +15,7 @@ import { openPrintableCertificate } from '../../lib/certificate-print';
 import { encodeCompletion } from '../../lib/assignment';
 import { Confetti } from '../Confetti';
 import { score as calibrationScore, CONFIDENCE_LEVELS } from '../../lib/calibration';
+import { useCalibration } from '../../state/calibrationStore';
 
 interface Props {
   exam: QuizItem[];
@@ -46,6 +47,7 @@ export function ExamModal({ exam, config, presetName, resolveCase, onClose, assi
   const [finished, setFinished] = useState(false);
   const [name, setName] = useState('');
   const [tokenCopied, setTokenCopied] = useState(false);
+  const recordCalibrationSession = useCalibration((s) => s.recordSession);
 
   const item = exam[index];
   const caseDef = item ? resolveCase(item.caseId) : null;
@@ -71,6 +73,13 @@ export function ExamModal({ exam, config, presetName, resolveCase, onClose, assi
     }, 1000);
     return () => window.clearInterval(id);
   }, [finished]);
+
+  // Persist the calibration session once when the exam finishes.
+  useEffect(() => {
+    if (!finished || calibrationPicks.length === 0) return;
+    const cal = calibrationScore(calibrationPicks);
+    recordCalibrationSession(calibrationPicks, cal.brier);
+  }, [finished]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const result = useMemo(
     () => gradeExam(picks, exam.length, config.passRatio),
