@@ -61,8 +61,10 @@ describe('scenery — staging maths', () => {
     }
   });
 
-  it('a single actor is centred', () => {
-    expect(defaultStagePos(0, 1).x).toBe(STAGE_W / 2);
+  it('a single actor lands on the staging centre (right of mid to clear left fixtures)', () => {
+    const p = defaultStagePos(0, 1);
+    expect(p.x).toBe(250);
+    expect(p.x).toBeGreaterThan(STAGE_W / 2 - 1);
   });
 
   it('defaultStagePos is deterministic', () => {

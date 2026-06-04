@@ -424,7 +424,28 @@ function StreetScene(): JSX.Element {
       ))}
       {/* SCDF ambulance parked right */}
       <Ambulance x={300} y={150} />
+      {/* Wheeled stretcher in the action zone (left-centre) so the patient
+       * isn't lying on bare tarmac during the on-scene handover. */}
+      <Stretcher x={150} y={250} />
       <rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="url(#street-vig)" />
+    </g>
+  );
+}
+
+/** A wheeled ambulance stretcher / trolley (patient lies on top of it). */
+function Stretcher({ x, y }: { x: number; y: number }): JSX.Element {
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <GroundShadow x={30} y={14} rx={48} opacity={0.3} />
+      <rect x={-8} y={0} width={92} height={9} rx={3} fill="#dfe5ea" />
+      <rect x={-8} y={0} width={92} height={3} rx={1.5} fill="#f87171" />
+      {/* raised back-rest at the head end */}
+      <rect x={-10} y={-10} width={10} height={12} rx={2} fill="#cdd9df" transform="rotate(-14 -5 -4)" />
+      {/* frame + wheels */}
+      <rect x={2} y={9} width={3} height={16} fill="#94a3b8" />
+      <rect x={70} y={9} width={3} height={16} fill="#94a3b8" />
+      <circle cx={4} cy={26} r={3.5} fill="#1f2937" />
+      <circle cx={72} cy={26} r={3.5} fill="#1f2937" />
     </g>
   );
 }
@@ -782,18 +803,22 @@ export function SceneBackground({ scene }: { scene: SceneId }): JSX.Element {
 
 /**
  * Deterministic fallback staging: when a beat doesn't pin an explicit
- * position, fan present actors across the lower-mid foreground in a gentle
- * arc so they read as standing *in* the room rather than in a grid. `index`
+ * position, fan present actors across the front of the stage in a gentle arc
+ * so they read as standing *in* the room (and large enough to see) rather than
+ * lined up in a grid mid-scene over the props. Centred slightly right of the
+ * middle to clear the left-side fixtures (IV poles, bed heads, desks). `index`
  * is the actor's slot among the present actors; `count` is the total present.
  */
 export function defaultStagePos(index: number, count: number): ScenePos {
   const n = Math.max(1, count);
-  const spread = Math.min(360, 70 * n);
-  const startX = STAGE_W / 2 - spread / 2;
+  const cx = 250;
+  const spread = Math.min(300, 60 * n);
+  const startX = cx - spread / 2;
   const step = n > 1 ? spread / (n - 1) : 0;
-  const x = n === 1 ? STAGE_W / 2 : startX + index * step;
-  // Slight depth zig-zag so figures don't perfectly overlap.
-  const y = 196 + (index % 2 === 0 ? 0 : 18);
+  const x = n === 1 ? cx : startX + index * step;
+  // In the clear front band, with a slight depth zig-zag so figures don't
+  // perfectly overlap and gain a touch of staggered depth.
+  const y = 228 + (index % 2 === 0 ? 0 : 16);
   return { x, y };
 }
 

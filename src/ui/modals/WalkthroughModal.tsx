@@ -385,6 +385,7 @@ function Stage({ walkthrough, chapter, activeByActor, selectedActorId, onPickAct
   for (const [id, beat] of activeByActor) {
     if (!lead || beat.at > lead.beat.at) lead = { id, beat };
   }
+  const leadId = lead?.id ?? null;
 
   return (
     <svg
@@ -393,12 +394,22 @@ function Stage({ walkthrough, chapter, activeByActor, selectedActorId, onPickAct
       aria-label="walkthrough stage"
       style={{ shapeRendering: 'crispEdges' }}
     >
+      <defs>
+        {/* soft focus glow behind whoever is currently speaking */}
+        <radialGradient id="lead-halo" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#fde68a" stopOpacity={0.34} />
+          <stop offset="60%" stopColor="#fde68a" stopOpacity={0.1} />
+          <stop offset="100%" stopColor="#fde68a" stopOpacity={0} />
+        </radialGradient>
+      </defs>
+
       {/* Environment */}
       <SceneBackground scene={scene} />
 
       {/* Staged figures */}
       {staged.map(({ actor, beat, x, y, scale, isActive, isSelected }) => {
-        const figScale = 30 * scale;
+        const figScale = 34 * scale;
+        const isLead = actor.id === leadId;
         return (
           <g
             key={actor.id}
@@ -407,6 +418,16 @@ function Stage({ walkthrough, chapter, activeByActor, selectedActorId, onPickAct
             onClick={() => onPickActor(actor.id)}
             aria-label={`${actor.role}${beat ? `: ${beat.action}` : ''}`}
           >
+            {/* focus glow behind the speaker */}
+            {isLead && (
+              <ellipse
+                cx={0}
+                cy={-figScale * 0.45}
+                rx={figScale * 0.95}
+                ry={figScale * 1.05}
+                fill="url(#lead-halo)"
+              />
+            )}
             {/* contact shadow */}
             <GroundShadow x={0} y={2} rx={9 * scale} opacity={isActive ? 0.34 : 0.2} />
             {/* selection / active ring on the floor */}
@@ -419,11 +440,18 @@ function Stage({ walkthrough, chapter, activeByActor, selectedActorId, onPickAct
                 fill="none"
                 stroke={isSelected ? '#ffffff' : actor.swatch ?? '#fde68a'}
                 strokeWidth={isSelected ? 1.6 : 1.1}
-                opacity={0.9}
+                opacity={0.85}
               />
             )}
+            {/* pulsing ring marks the current speaker */}
+            {isLead && !isSelected && (
+              <ellipse cx={0} cy={2} rx={15 * scale} ry={5 * scale} fill="none" stroke="#fde68a" strokeWidth={1.4}>
+                <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" />
+                <animate attributeName="rx" values={`${13 * scale};${17 * scale};${13 * scale}`} dur="1.5s" repeatCount="indefinite" />
+              </ellipse>
+            )}
             {/* sprite — anchored so feet sit on (0,0) */}
-            <g transform={`translate(0,${-figScale / 2})`} opacity={isActive ? 1 : 0.6}>
+            <g transform={`translate(0,${-figScale / 2})`} opacity={isActive ? 1 : 0.5}>
               <ActorSprite
                 actor={actor}
                 size={figScale}
@@ -434,34 +462,53 @@ function Stage({ walkthrough, chapter, activeByActor, selectedActorId, onPickAct
                 walkFrame={isActive && beat?.walking ? tick % WALK_FRAMES : undefined}
               />
             </g>
-            {/* small name tag */}
-            <text
-              y={10}
-              textAnchor="middle"
-              fontSize={5.5}
-              fill={isActive ? '#fff' : '#cbd5e1'}
-              stroke="#000"
-              strokeWidth={0.3}
-              paintOrder="stroke"
-              fontFamily="ui-monospace, monospace"
-            >
-              {actor.role.length > 16 ? actor.role.slice(0, 16) + '…' : actor.role}
-            </text>
+            {/* small name tag — skipped for the lead (named in the bubble) */}
+            {!isLead && (
+              <text
+                y={10}
+                textAnchor="middle"
+                fontSize={5.5}
+                fill={isActive ? '#fff' : '#cbd5e1'}
+                stroke="#000"
+                strokeWidth={0.4}
+                paintOrder="stroke"
+                fontFamily="ui-monospace, monospace"
+              >
+                {actor.role.length > 16 ? actor.role.slice(0, 16) + '…' : actor.role}
+              </text>
+            )}
           </g>
         );
       })}
 
-      {/* Current line of dialogue — a single speech bubble above the lead */}
+      {/* Current line of dialogue — pinned to the top "broadcast" band so it
+       * never occludes the figures (which live below the horizon). A faint
+       * stem links it to the speaker's head; the speaker also pulses. */}
       {lead && (() => {
         const s = staged.find((st) => st.actor.id === lead!.id);
         if (!s) return null;
-        const bx = Math.max(80, Math.min(STAGE_W - 80, s.x));
-        const by = Math.max(34, s.y - 42 * s.scale);
+        const figScale = 34 * s.scale;
+        const bw = 200;
+        const bh = 52;
+        const bx = Math.max(bw / 2 + 4, Math.min(STAGE_W - bw / 2 - 4, s.x));
+        const by = 8;
+        const headY = s.y - figScale; // top of the speaker's head
         return (
           <g key="lead-bubble" pointerEvents="none">
-            <line x1={s.x} y1={by + 18} x2={s.x} y2={s.y - 30 * s.scale} stroke="#fff" strokeWidth={0.5} opacity={0.5} />
-            <foreignObject x={bx - 78} y={by} width={156} height={40}>
-              <div className="text-[8px] leading-tight text-white bg-black/72 border border-white/25 rounded-md px-2 py-1 text-center shadow-lg backdrop-blur-sm">
+            {/* stem from bubble down to the speaker's head */}
+            <line
+              x1={bx}
+              y1={by + bh}
+              x2={s.x}
+              y2={headY - 2}
+              stroke="#fde68a"
+              strokeWidth={0.6}
+              strokeDasharray="2 2"
+              opacity={0.5}
+            />
+            <circle cx={s.x} cy={headY - 2} r={1.4} fill="#fde68a" opacity={0.8} />
+            <foreignObject x={bx - bw / 2} y={by} width={bw} height={bh}>
+              <div className="text-[8px] leading-snug text-white bg-black/80 border border-amber-300/40 rounded-md px-2 py-1 text-center shadow-xl">
                 <span className="text-amber-300 font-semibold">{walkthrough.actors[lead!.id]?.role}: </span>
                 {lead!.beat.action}
               </div>
