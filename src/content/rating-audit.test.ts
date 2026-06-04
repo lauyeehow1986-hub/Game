@@ -79,7 +79,38 @@ describe('10/10 rating audit', () => {
     expect(hud).toMatch(/useCampaign/);
 
     const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8')) as { version: string };
-    expect(pkg.version).toMatch(/^[2345678]\./);
+    expect(pkg.version).toMatch(/^[23456789]\./);
+  });
+
+  it('axis 4i (v8.1-v9.0): journal, freeze, calibration trend, certificate, debrief shipped', () => {
+    for (const f of ['streak-freeze.ts', 'personal-best-print.ts', 'debrief.ts', 'debrief-print.ts']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/lib', f), 'utf-8').length,
+        `${f} missing or empty`,
+      ).toBeGreaterThan(100);
+    }
+    for (const f of ['caseJournalStore.ts', 'streakFreezeStore.ts', 'calibrationStore.ts']) {
+      expect(
+        readFileSync(resolve(ROOT, 'src/state', f), 'utf-8').length,
+        `${f} missing or empty`,
+      ).toBeGreaterThan(100);
+    }
+    // ResultsModal exposes journal, debrief and personal-best certificate.
+    const results = readFileSync(resolve(ROOT, 'src/ui/modals/ResultsModal.tsx'), 'utf-8');
+    expect(results).toMatch(/useCaseJournal/);
+    expect(results).toMatch(/personal-best-print|openPersonalBestCertificate/);
+    expect(results).toMatch(/debrief|buildDebrief/);
+    // ExamModal persists calibration sessions across runs.
+    const exam = readFileSync(resolve(ROOT, 'src/ui/modals/ExamModal.tsx'), 'utf-8');
+    expect(exam).toMatch(/useCalibration|recordCalibrationSession|recordSession/);
+    // TrendsPanel surfaces freezes, calibration trend and journal.
+    const trends = readFileSync(resolve(ROOT, 'src/ui/panels/TrendsPanel.tsx'), 'utf-8');
+    expect(trends).toMatch(/useStreakFreezes|shieldStreak/);
+    expect(trends).toMatch(/useCalibration|calibration\.trendLabel/);
+    expect(trends).toMatch(/useCaseJournal|journal\.heading/);
+    // package.json bumped to 9.x.
+    const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8')) as { version: string };
+    expect(pkg.version).toMatch(/^9\./);
   });
 
   it('axis 4h (v7.1-v8.0): goals, bookmarks, flashcards, mastery, portfolio shipped', () => {
@@ -108,9 +139,9 @@ describe('10/10 rating audit', () => {
     // ResultsModal exposes the bookmark toggle.
     const results = readFileSync(resolve(ROOT, 'src/ui/modals/ResultsModal.tsx'), 'utf-8');
     expect(results).toMatch(/useBookmarks|toggleBookmark/);
-    // package.json bumped to 8.x.
+    // package.json bumped past 8.x — locked tight in axis 4i.
     const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8')) as { version: string };
-    expect(pkg.version).toMatch(/^8\./);
+    expect(pkg.version).toMatch(/^[89]\./);
   });
 
   it('axis 4g (v6.1-v7.0): handoff, Brier calibration, study sets, cheatsheet, competency shipped', () => {

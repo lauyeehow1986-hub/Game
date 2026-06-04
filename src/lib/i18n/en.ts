@@ -257,6 +257,7 @@ export const en: Record<string, string> = {
   'calibration.verdict.poor': 'Over-/under-confident — re-read rationales before next attempt.',
   'certificate.print': '🏆 Print personal-best certificate',
   'certificate.namePrompt': 'Name to print on the certificate (leave blank for "Learner"):',
+  'debrief.print': '📝 Generate debrief',
   'duel.open': '⚔ Duel — pass the device',
   'duel.heading': 'Head-to-head duel',
   'duel.turn': "It's",

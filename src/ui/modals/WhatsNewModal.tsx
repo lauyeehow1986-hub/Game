@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 
-const KEY = 'sg-pathway-whatsnew-v80-seen';
+const KEY = 'sg-pathway-whatsnew-v90-seen';
 
 const ITEMS: Array<{ heading: string; body: string }> = [
+  {
+    heading: 'v9.0 — Case journal, freeze tokens, calibration trend, certificate, smart debrief',
+    body: 'The reflective-practice milestone. Every results screen now opens with a whole-case journal textarea — what surprised you, what you\'d do differently — separate from the per-decision notes. ❄ Streak-freeze tokens are minted automatically when you complete a week\'s targets; they shield missed days so a busy week doesn\'t break a streak. Exam calibration now persists across sessions: Trends shows a Brier sparkline + delta and the Dreyfus tier reads "well calibrated" without re-attempting an exam. A 🏆 Print personal-best certificate button surfaces on every new personal best. The headline addition: 📝 Generate debrief — a printable post-run summary that lists misses weakest-first with the best answer + rationale + guideline reference, plus concrete next steps tuned to your competency tier and global mean. Portfolio gains an optional Case journal section.',
+  },
   {
     heading: 'v8.0 — Goals, bookmarks, flashcards, mastery, printable portfolio',
     body: 'The longitudinal-learner milestone. Weekly learning goals (cases / distinctions / mean) live at the top of Trends with colour-graded progress bars you can edit inline. Every decision in the results screen gains a ☆ Save toggle — bookmarked decisions surface in a "Saved for review" section with one-tap practice. A new 🃏 Flashcards mode deals decision-rationale cards from your played cases, shuffled deterministically per day (front = prompt + case title, reveal = best answer + rationale + guideline). A 5-tier mastery ladder (untouched → attempted → developing → mastered → consolidated) requires retention across days, not just one good run. A single-page printable 📁 Portfolio rolls up your competency tier, mastery breakdown, weekly progress, top cases, recent reflections and bookmarks — keep it as a study artefact or hand it to a supervisor.',

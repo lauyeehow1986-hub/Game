@@ -416,6 +416,61 @@ export function ResultsModal() {
         )}
 
         <footer className="px-5 py-4 flex items-center justify-end gap-2 flex-wrap">
+          <button
+            onClick={() => {
+              void (async () => {
+                const { buildDebrief } = await import('../../lib/debrief');
+                const { openPrintableDebrief } = await import('../../lib/debrief-print');
+                const { competency } = await import('../../lib/competency');
+                const allBest = useProgress.getState().bestScores;
+                const distinctCases = Object.keys(allBest).length;
+                const distinctions = Object.values(allBest).filter(
+                  (b) => b.max > 0 && b.score / b.max >= 0.9,
+                ).length;
+                const globalMean = distinctCases > 0
+                  ? Object.values(allBest).reduce(
+                      (acc, b) => acc + (b.max > 0 ? b.score / b.max : 0),
+                      0,
+                    ) / distinctCases
+                  : null;
+                const priorRuns = useProgress.getState().runHistory[caseDef.id] ?? [];
+                // Exclude the run just recorded (latest) so we get the prior mean.
+                const prior = priorRuns.slice(0, -1);
+                const priorMean = prior.length > 0
+                  ? prior.reduce((acc, r) => acc + (r.max > 0 ? r.score / r.max : 0), 0) / prior.length
+                  : null;
+                const priorBestEntry = prior.reduce<{ score: number; max: number } | null>(
+                  (acc, r) => {
+                    const rr = r.max > 0 ? r.score / r.max : 0;
+                    const aa = acc && acc.max > 0 ? acc.score / acc.max : 0;
+                    return !acc || rr > aa ? r : acc;
+                  },
+                  null,
+                );
+                const priorBestRatio = priorBestEntry && priorBestEntry.max > 0
+                  ? priorBestEntry.score / priorBestEntry.max
+                  : null;
+                const tier = competency({
+                  distinctCasesPlayed: distinctCases,
+                  meanRatio: globalMean ?? 0,
+                  distinctions,
+                }).tier;
+                const debrief = buildDebrief({
+                  caseDef,
+                  log,
+                  priorBestRatio,
+                  priorMeanRatio: priorMean,
+                  globalMeanRatio: globalMean,
+                  competencyTier: tier,
+                  resolveText: (v) => tr(v as Parameters<typeof tr>[0]),
+                });
+                openPrintableDebrief(debrief, locale === 'zh' ? 'zh' : 'en');
+              })();
+            }}
+            className="tap-target text-[11px] px-3 py-1.5 rounded border border-clinical-accent/60 text-clinical-accent hover:bg-clinical-accent/10"
+          >
+            {t('debrief.print')}
+          </button>
           {personalBestAt != null && (
             <button
               onClick={() => {
