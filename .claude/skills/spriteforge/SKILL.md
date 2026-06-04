@@ -54,16 +54,34 @@ A Claude Skill that wraps the project's deterministic SVG sprite generator
 4. The Stage component (`src/ui/modals/WalkthroughModal.tsx`) auto-renders
    the new sprite — no rendering changes needed.
 
-## Sprite anatomy
+## Sprite anatomy (HD pixel art, v9.7+)
 
-Each sprite occupies a 48×64 viewBox (portrait) and composes:
+Each sprite is composed entirely of **integer-aligned `<rect>` primitives** on
+a 48×64 viewBox. No curves — `image-rendering: pixelated` on the parent SVG
+keeps the look crisp at any display scale. Parts:
 
-- **Body**: rectangle in the uniform colour with rounded shoulders. Stub
-  arms + hands tinted to skin tone.
-- **Head**: skin-tone circle with two small eye dots and a subtle mouth line.
+- **Body**: stepped-shoulder torso in the uniform colour, integer-grid limbs.
+- **Head**: 16×16 skin-tone rectangle with stepped corner pixels (squared
+  with one-pixel notches), eye dots and a one-pixel mouth.
 - **Hair**: one of three styles (short / medium / tied-back), colour from a
-  four-band palette.
+  four-band palette. Tied-back style shows a bun on the back of the head
+  (centred when facing away, side-offset when facing camera).
+- **Arms**: 5px wide; in profile (E/W) only the front arm is drawn.
 - **Accessory**: role-specific overlay — see table below.
+
+## Direction + animation params
+
+`<ActorSprite>` accepts:
+
+| Prop | Type | Default | Effect |
+| - | - | - | - |
+| `direction` | `'N' \| 'S' \| 'E' \| 'W'` | `'S'` | S = facing camera, N = back-facing (face suppressed), E/W = profile (horizontal mirror) |
+| `interactionFrame` | `0..5` or `undefined` | `undefined` | 6-frame universal interaction loop (arm raise → peak → lower → rest). `undefined` = arms at rest. |
+| `walkFrame` | `0..3` or `undefined` | `undefined` | 4-frame walk cycle (leg-stride alternation). `undefined` = legs at rest. |
+| `size` | number | `64` | viewBox unit size |
+
+The Walkthrough Stage ticks at 6 fps (150 ms interval). Active actors play
+the interaction loop; beats marked `walking: true` also play the walk cycle.
 
 | Accessory kind | Used by | Visual cue |
 | - | - | - |

@@ -10,7 +10,7 @@ import {
   type WalkthroughActor,
   type WalkthroughBeat,
 } from '../../lib/walkthrough';
-import { ActorSprite } from '../../lib/sprite-generator';
+import { ActorSprite, INTERACTION_FRAMES, WALK_FRAMES } from '../../lib/sprite-generator';
 
 interface Props {
   walkthrough: Walkthrough;
@@ -334,8 +334,22 @@ function Stage({ walkthrough, activeByActor, selectedActorId, onPickActor }: Sta
 
   const rows = [...grouped.keys()].sort((a, b) => a - b);
 
+  // Animation tick — 6 fps drives the universal interaction loop and walk
+  // cycle. Both loops are short (6 / 4 frames) and the frame counter wraps
+  // forever; selecting modulo by frame count inside each sprite is cheap.
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setTick((t) => (t + 1) % (INTERACTION_FRAMES * WALK_FRAMES * 6)), 150);
+    return () => window.clearInterval(id);
+  }, []);
+
   return (
-    <svg viewBox="0 0 480 270" className="w-full h-full" aria-label="walkthrough stage">
+    <svg
+      viewBox="0 0 480 270"
+      className="w-full h-full"
+      aria-label="walkthrough stage"
+      style={{ imageRendering: 'pixelated' as const, shapeRendering: 'crispEdges' }}
+    >
       <defs>
         <linearGradient id="stage-bg" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#0c1a2b" />
@@ -379,9 +393,15 @@ function Stage({ walkthrough, activeByActor, selectedActorId, onPickActor }: Sta
                       strokeWidth={isSelected ? 1.4 : 0.9}
                     />
                   )}
-                  {/* Generated character sprite (v9.6 — SpriteForge skill) */}
+                  {/* Generated character sprite (v9.7 — HD pixel art, animated) */}
                   <g opacity={isActive ? 1 : 0.55}>
-                    <ActorSprite actor={actor} size={28} />
+                    <ActorSprite
+                      actor={actor}
+                      size={28}
+                      direction={beat?.direction ?? 'S'}
+                      interactionFrame={isActive ? tick % INTERACTION_FRAMES : undefined}
+                      walkFrame={isActive && beat?.walking ? tick % WALK_FRAMES : undefined}
+                    />
                   </g>
                   <text
                     y="22"

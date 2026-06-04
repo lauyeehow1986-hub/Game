@@ -3,9 +3,13 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import {
   ActorSprite,
   HAIR_COLOURS,
+  INTERACTION_FRAMES,
   SKIN_TONES,
+  WALK_FRAMES,
   accessoryFor,
+  armRaiseFor,
   deriveFeatures,
+  strideFor,
 } from './sprite-generator';
 import type { WalkthroughActor } from './walkthrough';
 import { stemiWalkthrough } from './walkthrough-stemi';
@@ -104,8 +108,8 @@ describe('sprite-generator — every STEMI walkthrough actor renders', () => {
     for (const actor of Object.values(stemiWalkthrough.actors)) {
       const svg = renderToStaticMarkup(<ActorSprite actor={actor} />);
       expect(svg, `actor ${actor.id} did not render a <g>`).toMatch(/^<g/);
-      // Sanity: contains a head circle.
-      expect(svg).toMatch(/<circle[^>]+r="9"/);
+      // Sanity: HD pixel-art head is a 16×16 rectangle.
+      expect(svg).toMatch(/<rect[^>]+width="16"[^>]+height="16"/);
     }
   });
 
@@ -114,5 +118,65 @@ describe('sprite-generator — every STEMI walkthrough actor renders', () => {
     const s1 = renderToStaticMarkup(<ActorSprite actor={a} />);
     const s2 = renderToStaticMarkup(<ActorSprite actor={a} />);
     expect(s1).toBe(s2);
+  });
+
+  it('back-facing (N) suppresses facial features', () => {
+    const a = stemiWalkthrough.actors['paramedic'];
+    const front = renderToStaticMarkup(<ActorSprite actor={a} direction="S" />);
+    const back = renderToStaticMarkup(<ActorSprite actor={a} direction="N" />);
+    // Eyes (fill="#1a1410" at the eye coords) only render front-side.
+    // The simplest invariant: the back-facing markup is strictly shorter.
+    expect(back.length).toBeLessThan(front.length);
+  });
+
+  it('W-facing applies a horizontal flip transform', () => {
+    const a = stemiWalkthrough.actors['paramedic'];
+    const out = renderToStaticMarkup(<ActorSprite actor={a} direction="W" />);
+    expect(out).toMatch(/scale\(-1,1\)/);
+  });
+
+  it('different interaction frames produce different arm Y coords', () => {
+    const a = stemiWalkthrough.actors['paramedic'];
+    const f0 = renderToStaticMarkup(<ActorSprite actor={a} interactionFrame={0} />);
+    const f2 = renderToStaticMarkup(<ActorSprite actor={a} interactionFrame={2} />);
+    expect(f0).not.toBe(f2);
+  });
+
+  it('different walk frames produce different leg X coords', () => {
+    const a = stemiWalkthrough.actors['paramedic'];
+    const w0 = renderToStaticMarkup(<ActorSprite actor={a} walkFrame={0} />);
+    const w1 = renderToStaticMarkup(<ActorSprite actor={a} walkFrame={1} />);
+    expect(w0).not.toBe(w1);
+  });
+});
+
+describe('sprite-generator — animation frame math', () => {
+  it('armRaiseFor cycles through 6 frames with a peak in the middle', () => {
+    expect(armRaiseFor(0)).toBe(0);
+    expect(armRaiseFor(1)).toBe(-2);
+    expect(armRaiseFor(2)).toBe(-4); // peak
+    expect(armRaiseFor(3)).toBe(-2);
+    expect(armRaiseFor(4)).toBe(0);
+    expect(armRaiseFor(5)).toBe(0);
+  });
+
+  it('armRaiseFor wraps modulo the interaction-loop length', () => {
+    for (let i = -10; i < 10; i += 1) {
+      expect(armRaiseFor(i)).toBe(armRaiseFor(i + INTERACTION_FRAMES));
+    }
+  });
+
+  it('strideFor alternates left and right stride directions', () => {
+    expect(strideFor(0)).toEqual({ leftDx: 0, rightDx: 0 });
+    expect(strideFor(1).leftDx).toBeGreaterThan(0);
+    expect(strideFor(1).rightDx).toBeLessThan(0);
+    expect(strideFor(3).leftDx).toBeLessThan(0);
+    expect(strideFor(3).rightDx).toBeGreaterThan(0);
+  });
+
+  it('strideFor wraps modulo the walk-cycle length', () => {
+    for (let i = -10; i < 10; i += 1) {
+      expect(strideFor(i)).toEqual(strideFor(i + WALK_FRAMES));
+    }
   });
 });

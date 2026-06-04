@@ -377,7 +377,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'SGH ambulance bay → cath corridor',
       defaultNextChapterId: 'cath-activation',
       beats: [
-        { at: 0, actorId: 'driver', action: 'Pulls into the SGH bypass bay. "STEMI bypass" called overhead.' },
+        { at: 0, actorId: 'driver', action: 'Pulls into the SGH bypass bay. "STEMI bypass" called overhead.', walking: true },
         { at: 5, actorId: 'paramedic', action: 'Verbal handover: ROSC 08:21, GCS 14, BP 102/64, ECG anterior STEMI.' },
         { at: 10, actorId: 'ed-hca', action: 'Patient transferred onto trolley. Repeat 12-lead leads attached.' },
         { at: 15, actorId: 'ed-doctor', action: 'Confirms anterior STEMI on the repeat ECG. Pages STEMI 7777.' },
@@ -552,7 +552,7 @@ export const stemiWalkthrough: Walkthrough = {
         { at: 20, actorId: 'cath-cardio', action: 'Stent deployed; post-dilatation. Final injection — TIMI 3 flow.' },
         { at: 28, actorId: 'cath-radiog', action: 'Total fluoro time 12 min; dose 1.2 Gy.' },
         { at: 34, actorId: 'cath-cardio', action: 'Sheath haemostasis. Patient to CCU. Door-to-balloon: 89 min.' },
-        { at: 38, actorId: 'cleaner-cath', action: 'Enters with turnover trolley; next case slot already booked.' },
+        { at: 38, actorId: 'cleaner-cath', action: 'Enters with turnover trolley; next case slot already booked.', walking: true },
       ],
     },
 

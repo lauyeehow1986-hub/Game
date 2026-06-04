@@ -44,6 +44,12 @@ export interface WalkthroughBeat {
   action: string;
   /** Scene-relative camera focus (0..1 normalised). */
   focus?: { x: number; y: number };
+  /** Optional facing direction (default 'S' = facing camera). */
+  direction?: 'N' | 'S' | 'E' | 'W';
+  /** When true, the sprite plays the walk cycle in addition to the
+   *  interaction loop. Use for beats where the actor moves between
+   *  stations (e.g., paramedic wheeling the trolley). */
+  walking?: boolean;
 }
 
 export interface WalkthroughBranchOption {
