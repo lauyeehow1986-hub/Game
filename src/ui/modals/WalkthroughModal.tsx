@@ -10,6 +10,7 @@ import {
   type WalkthroughActor,
   type WalkthroughBeat,
 } from '../../lib/walkthrough';
+import { ActorSprite } from '../../lib/sprite-generator';
 
 interface Props {
   walkthrough: Walkthrough;
@@ -369,17 +370,23 @@ function Stage({ walkthrough, activeByActor, selectedActorId, onPickActor }: Sta
                   onClick={() => onPickActor(actor.id)}
                   aria-label={`${actor.role}${beat ? `: ${beat.action}` : ''}`}
                 >
-                  <circle
-                    r="10"
-                    fill={actor.swatch ?? '#475569'}
-                    stroke={isSelected ? '#fff' : isActive ? '#fde68a' : '#1e293b'}
-                    strokeWidth={isSelected ? 2 : isActive ? 1.5 : 1}
-                    opacity={isActive ? 1 : 0.45}
-                  />
+                  {/* Active / selected glow halo behind the sprite */}
+                  {(isActive || isSelected) && (
+                    <circle
+                      r="15"
+                      fill={isActive ? `${actor.swatch ?? '#475569'}44` : 'transparent'}
+                      stroke={isSelected ? '#fff' : '#fde68a'}
+                      strokeWidth={isSelected ? 1.4 : 0.9}
+                    />
+                  )}
+                  {/* Generated character sprite (v9.6 — SpriteForge skill) */}
+                  <g opacity={isActive ? 1 : 0.55}>
+                    <ActorSprite actor={actor} size={28} />
+                  </g>
                   <text
                     y="22"
                     textAnchor="middle"
-                    fontSize="7"
+                    fontSize="6.5"
                     fill={isActive ? '#fff' : '#94a3b8'}
                     fontFamily="ui-monospace, monospace"
                   >
