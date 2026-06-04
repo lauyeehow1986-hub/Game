@@ -23,10 +23,20 @@ describe('t()', () => {
     expect(t('common.start')).toBe('开始');
   });
 
-  it('falls back to English when the key is missing in the active locale', () => {
-    setLocale('ta');
-    // Tamil dict doesn't define every key — pick one we know is en-only.
-    expect(t('about.financing.body')).toContain('stylised heuristics');
+  it('falls back to English when the key is missing in the active locale', async () => {
+    // Now that every shipped locale is at full parity (v9.3), exercising the
+    // en-fallback path requires temporarily removing a key from the target
+    // dict. The fallback chain is locale → en → bare key.
+    const { ta } = await import('./i18n/ta');
+    const key = 'common.start';
+    const original = ta[key];
+    delete (ta as Record<string, string>)[key];
+    try {
+      setLocale('ta');
+      expect(t(key)).toBe('Start'); // English value
+    } finally {
+      (ta as Record<string, string>)[key] = original;
+    }
   });
 
   it('returns the bare key when truly unknown', () => {

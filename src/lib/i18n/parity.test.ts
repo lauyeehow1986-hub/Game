@@ -21,9 +21,12 @@ import { LOCALES } from '../i18n';
 const enKeys = new Set(Object.keys(en));
 
 /** Minimum UI-chrome coverage each partial locale must maintain. */
-const PARTIAL_FLOOR: Record<string, number> = {
-  ta: 0.16,
-};
+/**
+ * Empty means every shipped locale is at full parity. When future partial
+ * locales are scaffolded, add them here as `{ code: 0.NN }` and the floor
+ * test will hold them above their introduction percentage.
+ */
+const PARTIAL_FLOOR: Record<string, number> = {};
 
 function coverage(dict: Record<string, string>): number {
   let present = 0;

@@ -35,7 +35,7 @@ export const LOCALES: LocaleMeta[] = [
   { code: 'en', nativeName: 'English', englishName: 'English', coverage: 'full' },
   { code: 'zh', nativeName: '中文', englishName: 'Chinese (Simplified)', coverage: 'full' },
   { code: 'ms', nativeName: 'Bahasa Melayu', englishName: 'Malay', coverage: 'full' },
-  { code: 'ta', nativeName: 'தமிழ்', englishName: 'Tamil', coverage: 'partial' },
+  { code: 'ta', nativeName: 'தமிழ்', englishName: 'Tamil', coverage: 'full' },
 ];
 
 // English is the fallback chain and is always needed, so it stays in the

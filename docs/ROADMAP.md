@@ -32,8 +32,8 @@ gap widened with every English/Chinese feature arc. This track closes it.
 | - | - | - |
 | **v9.1** | Honesty + tracking: locale coverage metadata, "partial" switcher hint, CI parity metric with enforced floor, expanded critical-key set, review + this roadmap, README claim qualified | ✅ shipped |
 | **v9.2** | **Malay (`ms`) UI chrome → full parity** with English (627/627, enforced) | ✅ shipped |
-| **v9.3** | **Tamil (`ta`) UI chrome → full parity** (native-review-flagged) | ▶ next |
-| **v9.4** | Case-content translation track — `ms` for the primary-care / public-health cases first (URTI CHAS GP, Healthier-SG diabetes, dengue, Mindline) | planned |
+| **v9.3** | **Tamil (`ta`) UI chrome → full parity** with English (627/627, enforced; native-review-flagged) | ✅ shipped |
+| **v9.4** | Case-content translation track — `ms` for the primary-care / public-health cases first (URTI CHAS GP, Healthier-SG diabetes, dengue, Mindline) | ▶ next |
 | **v9.5** | Case-content translation track — `ta`, same case ordering | planned |
 | **v10.0** | Capstone: all four official languages at full UI + case parity; mother-tongue first-run suggestion from `navigator.languages`; "end-to-end translation" claim restored for all locales | planned |
 
