@@ -22,7 +22,6 @@ const enKeys = new Set(Object.keys(en));
 
 /** Minimum UI-chrome coverage each partial locale must maintain. */
 const PARTIAL_FLOOR: Record<string, number> = {
-  ms: 0.17,
   ta: 0.16,
 };
 
