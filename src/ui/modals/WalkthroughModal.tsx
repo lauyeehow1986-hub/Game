@@ -9,8 +9,18 @@ import {
   type Walkthrough,
   type WalkthroughActor,
   type WalkthroughBeat,
+  type WalkthroughChapter,
 } from '../../lib/walkthrough';
 import { ActorSprite, INTERACTION_FRAMES, WALK_FRAMES } from '../../lib/sprite-generator';
+import {
+  SceneBackground,
+  GroundShadow,
+  defaultStagePos,
+  depthScale,
+  STAGE_W,
+  STAGE_H,
+  type SceneId,
+} from '../../lib/scenery';
 
 interface Props {
   walkthrough: Walkthrough;
@@ -18,19 +28,6 @@ interface Props {
 }
 
 const PLAY_TICK_MS = 100; // 10 fps is plenty for prose beats
-
-const TEAM_ROW: Record<string, number> = {
-  patient: 0,
-  bystander: 1,
-  'first-responder': 1,
-  ambulance: 2,
-  ed: 3,
-  cath: 3,
-  ward: 4,
-  rehab: 4,
-  outpatient: 4,
-  support: 5,
-};
 
 const TEAM_LABEL: Record<string, string> = {
   patient: 'Patient',
@@ -186,6 +183,7 @@ export function WalkthroughModal({ walkthrough, onClose }: Props) {
           <div className="relative bg-clinical-bg overflow-hidden">
             <Stage
               walkthrough={walkthrough}
+              chapter={chapter}
               activeByActor={activeByActor}
               selectedActorId={selectedActorId}
               onPickActor={(id) => setSelectedActorId(id)}
@@ -312,119 +310,165 @@ export function WalkthroughModal({ walkthrough, onClose }: Props) {
   );
 }
 
-/* ── Stage (SVG placeholder — replaced by Phaser in v9.5) ─────────────── */
+/* ── Stage — cinematic scene composition (v9.8) ───────────────────────── *
+ * Replaces the v9.4–v9.7 team-row grid. Renders the chapter's SceneBackground
+ * environment, then stages only the *present* actors in the space with depth
+ * scaling, ground shadows, poses, expressions, and a single "current line"
+ * speech bubble for the lead beat. Reads as a directed shot rather than a
+ * roster. */
 
 interface StageProps {
   walkthrough: Walkthrough;
+  chapter: WalkthroughChapter;
   activeByActor: Map<string, WalkthroughBeat>;
   selectedActorId: string | null;
   onPickActor: (id: string) => void;
 }
 
-function Stage({ walkthrough, activeByActor, selectedActorId, onPickActor }: StageProps) {
-  // Lay actors in horizontal rows by team, ordered left-to-right by id.
-  const grouped = new Map<number, WalkthroughActor[]>();
-  for (const a of Object.values(walkthrough.actors)) {
-    const row = TEAM_ROW[a.team] ?? 5;
-    const list = grouped.get(row) ?? [];
-    list.push(a);
-    grouped.set(row, list);
+/** Stable per-chapter ordering: actor ids by their first appearance time. */
+function chapterActorOrder(chapter: WalkthroughChapter): string[] {
+  const firstAt = new Map<string, number>();
+  for (const b of chapter.beats) {
+    const cur = firstAt.get(b.actorId);
+    if (cur == null || b.at < cur) firstAt.set(b.actorId, b.at);
   }
-  for (const list of grouped.values()) list.sort((a, b) => a.id.localeCompare(b.id));
+  return [...firstAt.entries()].sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0])).map(([id]) => id);
+}
 
-  const rows = [...grouped.keys()].sort((a, b) => a - b);
+function Stage({ walkthrough, chapter, activeByActor, selectedActorId, onPickActor }: StageProps) {
+  const scene: SceneId = chapter.scene ?? 'resus';
 
-  // Animation tick — 6 fps drives the universal interaction loop and walk
-  // cycle. Both loops are short (6 / 4 frames) and the frame counter wraps
-  // forever; selecting modulo by frame count inside each sprite is cheap.
+  // Animation tick — 6 fps drives the interaction loop and walk cycle.
   const [tick, setTick] = useState(0);
   useEffect(() => {
-    const id = window.setInterval(() => setTick((t) => (t + 1) % (INTERACTION_FRAMES * WALK_FRAMES * 6)), 150);
+    const id = window.setInterval(
+      () => setTick((t) => (t + 1) % (INTERACTION_FRAMES * WALK_FRAMES * 6)),
+      150,
+    );
     return () => window.clearInterval(id);
   }, []);
 
+  const order = chapterActorOrder(chapter);
+  const total = order.length;
+
+  // Build the list of staged figures: every present actor, plus the selected
+  // one even if it has no active beat (so its card stays meaningful).
+  type Staged = {
+    actor: WalkthroughActor;
+    beat: WalkthroughBeat | undefined;
+    x: number;
+    y: number;
+    scale: number;
+    isActive: boolean;
+    isSelected: boolean;
+  };
+  const staged: Staged[] = [];
+  for (const id of order) {
+    const beat = activeByActor.get(id);
+    const actor = walkthrough.actors[id];
+    if (!actor) continue;
+    const isActive = !!beat;
+    const isSelected = id === selectedActorId;
+    if (!isActive && !isSelected) continue;
+    const idx = order.indexOf(id);
+    const fallback = defaultStagePos(idx, total);
+    const x = beat?.pos?.x ?? fallback.x;
+    const y = beat?.pos?.y ?? fallback.y;
+    staged.push({ actor, beat, x, y, scale: depthScale(y), isActive, isSelected });
+  }
+  // Painter's algorithm: figures further back (smaller y) drawn first.
+  staged.sort((a, b) => a.y - b.y);
+
+  // The "lead beat" is the most-recently-fired active beat — it gets the
+  // on-screen line of dialogue, so multiple figures don't all shout captions.
+  let lead: { id: string; beat: WalkthroughBeat } | null = null;
+  for (const [id, beat] of activeByActor) {
+    if (!lead || beat.at > lead.beat.at) lead = { id, beat };
+  }
+
   return (
     <svg
-      viewBox="0 0 480 270"
+      viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}
       className="w-full h-full"
       aria-label="walkthrough stage"
-      style={{ imageRendering: 'pixelated' as const, shapeRendering: 'crispEdges' }}
+      style={{ shapeRendering: 'crispEdges' }}
     >
-      <defs>
-        <linearGradient id="stage-bg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0c1a2b" />
-          <stop offset="100%" stopColor="#050b16" />
-        </linearGradient>
-      </defs>
-      <rect width="480" height="270" fill="url(#stage-bg)" />
-      {rows.map((rowIdx, i) => {
-        const list = grouped.get(rowIdx) ?? [];
-        const y = 30 + i * 38;
+      {/* Environment */}
+      <SceneBackground scene={scene} />
+
+      {/* Staged figures */}
+      {staged.map(({ actor, beat, x, y, scale, isActive, isSelected }) => {
+        const figScale = 30 * scale;
         return (
-          <g key={rowIdx}>
+          <g
+            key={actor.id}
+            transform={`translate(${x},${y})`}
+            className="cursor-pointer"
+            onClick={() => onPickActor(actor.id)}
+            aria-label={`${actor.role}${beat ? `: ${beat.action}` : ''}`}
+          >
+            {/* contact shadow */}
+            <GroundShadow x={0} y={2} rx={9 * scale} opacity={isActive ? 0.34 : 0.2} />
+            {/* selection / active ring on the floor */}
+            {(isActive || isSelected) && (
+              <ellipse
+                cx={0}
+                cy={2}
+                rx={13 * scale}
+                ry={4.5 * scale}
+                fill="none"
+                stroke={isSelected ? '#ffffff' : actor.swatch ?? '#fde68a'}
+                strokeWidth={isSelected ? 1.6 : 1.1}
+                opacity={0.9}
+              />
+            )}
+            {/* sprite — anchored so feet sit on (0,0) */}
+            <g transform={`translate(0,${-figScale / 2})`} opacity={isActive ? 1 : 0.6}>
+              <ActorSprite
+                actor={actor}
+                size={figScale}
+                direction={beat?.direction ?? 'S'}
+                pose={beat?.pose ?? 'stand'}
+                expression={beat?.expression ?? 'neutral'}
+                interactionFrame={isActive ? tick % INTERACTION_FRAMES : undefined}
+                walkFrame={isActive && beat?.walking ? tick % WALK_FRAMES : undefined}
+              />
+            </g>
+            {/* small name tag */}
             <text
-              x="6"
-              y={y - 12}
-              fontSize="8"
-              fill="#94a3b8"
+              y={10}
+              textAnchor="middle"
+              fontSize={5.5}
+              fill={isActive ? '#fff' : '#cbd5e1'}
+              stroke="#000"
+              strokeWidth={0.3}
+              paintOrder="stroke"
               fontFamily="ui-monospace, monospace"
             >
-              {TEAM_LABEL[Object.entries(TEAM_ROW).find(([, v]) => v === rowIdx)?.[0] ?? ''] ?? ''}
+              {actor.role.length > 16 ? actor.role.slice(0, 16) + '…' : actor.role}
             </text>
-            {list.map((actor, j) => {
-              const x = 70 + j * 70;
-              const beat = activeByActor.get(actor.id);
-              const isActive = !!beat;
-              const isSelected = actor.id === selectedActorId;
-              return (
-                <g
-                  key={actor.id}
-                  transform={`translate(${x},${y})`}
-                  className="cursor-pointer"
-                  onClick={() => onPickActor(actor.id)}
-                  aria-label={`${actor.role}${beat ? `: ${beat.action}` : ''}`}
-                >
-                  {/* Active / selected glow halo behind the sprite */}
-                  {(isActive || isSelected) && (
-                    <circle
-                      r="15"
-                      fill={isActive ? `${actor.swatch ?? '#475569'}44` : 'transparent'}
-                      stroke={isSelected ? '#fff' : '#fde68a'}
-                      strokeWidth={isSelected ? 1.4 : 0.9}
-                    />
-                  )}
-                  {/* Generated character sprite (v9.7 — HD pixel art, animated) */}
-                  <g opacity={isActive ? 1 : 0.55}>
-                    <ActorSprite
-                      actor={actor}
-                      size={28}
-                      direction={beat?.direction ?? 'S'}
-                      interactionFrame={isActive ? tick % INTERACTION_FRAMES : undefined}
-                      walkFrame={isActive && beat?.walking ? tick % WALK_FRAMES : undefined}
-                    />
-                  </g>
-                  <text
-                    y="22"
-                    textAnchor="middle"
-                    fontSize="6.5"
-                    fill={isActive ? '#fff' : '#94a3b8'}
-                    fontFamily="ui-monospace, monospace"
-                  >
-                    {actor.role.length > 14 ? actor.role.slice(0, 14) + '…' : actor.role}
-                  </text>
-                  {isActive && (
-                    <foreignObject x="-78" y="28" width="156" height="44">
-                      <div className="text-[8px] leading-tight text-white/90 bg-clinical-panel/90 border border-clinical-border rounded px-1.5 py-1 text-center">
-                        {beat?.action}
-                      </div>
-                    </foreignObject>
-                  )}
-                </g>
-              );
-            })}
           </g>
         );
       })}
+
+      {/* Current line of dialogue — a single speech bubble above the lead */}
+      {lead && (() => {
+        const s = staged.find((st) => st.actor.id === lead!.id);
+        if (!s) return null;
+        const bx = Math.max(80, Math.min(STAGE_W - 80, s.x));
+        const by = Math.max(34, s.y - 42 * s.scale);
+        return (
+          <g key="lead-bubble" pointerEvents="none">
+            <line x1={s.x} y1={by + 18} x2={s.x} y2={s.y - 30 * s.scale} stroke="#fff" strokeWidth={0.5} opacity={0.5} />
+            <foreignObject x={bx - 78} y={by} width={156} height={40}>
+              <div className="text-[8px] leading-tight text-white bg-black/72 border border-white/25 rounded-md px-2 py-1 text-center shadow-lg backdrop-blur-sm">
+                <span className="text-amber-300 font-semibold">{walkthrough.actors[lead!.id]?.role}: </span>
+                {lead!.beat.action}
+              </div>
+            </foreignObject>
+          </g>
+        );
+      })()}
     </svg>
   );
 }

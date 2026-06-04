@@ -50,10 +50,57 @@ export type AccessoryKind =
 /** Cardinal facing direction. */
 export type Direction = 'N' | 'S' | 'E' | 'W';
 
+/**
+ * Body pose. `stand`/`walk` are the upright defaults; the rest stage the
+ * figure for the cinematic — `kneel`/`cpr` for the bystander resuscitating,
+ * `collapsed` for the patient on the floor, `sit` for seated counselling /
+ * ward-chair beats, `point` for a directing gesture.
+ */
+export type Pose = 'stand' | 'walk' | 'kneel' | 'sit' | 'cpr' | 'collapsed' | 'point';
+
+/**
+ * Facial expression. Drives eyes / brows / mouth on front-facing sprites only
+ * (back-facing N still suppresses the face entirely).
+ */
+export type Expression =
+  | 'neutral'
+  | 'alarmed'
+  | 'distressed'
+  | 'pained'
+  | 'focused'
+  | 'relieved'
+  | 'unconscious';
+
+/** Arm configuration, derived from pose. */
+type ArmPose = 'rest' | 'point' | 'cpr' | 'reach';
+
 /** Number of frames in the universal interaction loop. */
 export const INTERACTION_FRAMES = 6;
 /** Number of frames in the walk cycle. */
 export const WALK_FRAMES = 4;
+
+/** Maps a pose to an outer transform applied in the 48×64 local grid. */
+export function poseTransform(pose: Pose): string {
+  switch (pose) {
+    case 'kneel': return 'translate(0,16) scale(0.98,0.70)';
+    case 'sit': return 'translate(0,16) scale(1,0.68)';
+    case 'cpr': return 'translate(2,16) rotate(20 24 58) scale(0.98,0.78)';
+    case 'collapsed': return 'rotate(-74 24 60) translate(2,2)';
+    case 'stand':
+    case 'walk':
+    case 'point':
+    default: return '';
+  }
+}
+
+/** Maps a pose to the arm configuration it implies. */
+function armPoseFor(pose: Pose): ArmPose {
+  switch (pose) {
+    case 'point': return 'point';
+    case 'cpr': return 'cpr';
+    default: return 'rest';
+  }
+}
 
 export interface SpriteFeatures {
   skin: string;
@@ -61,7 +108,20 @@ export interface SpriteFeatures {
   hair: string;
   hairStyle: 0 | 1 | 2;
   uniform: string;
+  /** A darker shade of the uniform colour, for volume shading. */
+  uniformShade: string;
   accessory: AccessoryKind;
+}
+
+/** Darken a #rrggbb colour by a 0..1 factor. */
+export function darken(hex: string, factor = 0.7): string {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  const r = Math.round(((n >> 16) & 0xff) * factor);
+  const g = Math.round(((n >> 8) & 0xff) * factor);
+  const b = Math.round((n & 0xff) * factor);
+  return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
 }
 
 /* ── feature derivation (pure) ───────────────────────────────────────── */
@@ -98,12 +158,14 @@ export function accessoryFor(actor: { id: string; role: string; team: ActorTeam 
 export function deriveFeatures(actor: WalkthroughActor): SpriteFeatures {
   const h = hash(actor.id);
   const skin = SKIN_TONES[h & 3];
+  const uniform = actor.swatch ?? '#475569';
   return {
     skin,
     skinShade: SKIN_SHADE[skin] ?? '#5a371f',
     hair: HAIR_COLOURS[(h >> 2) & 3],
     hairStyle: ((h >> 4) & 3) as 0 | 1 | 2,
-    uniform: actor.swatch ?? '#475569',
+    uniform,
+    uniformShade: darken(uniform, 0.72),
     accessory: accessoryFor(actor),
   };
 }
@@ -153,6 +215,10 @@ interface SpriteProps {
   interactionFrame?: number;
   /** 0..3; active only when the beat marks the actor as walking. */
   walkFrame?: number;
+  /** Body pose. Defaults to 'stand'. */
+  pose?: Pose;
+  /** Facial expression. Defaults to 'neutral'. */
+  expression?: Expression;
 }
 
 export function ActorSprite({
@@ -161,6 +227,8 @@ export function ActorSprite({
   direction = 'S',
   interactionFrame,
   walkFrame,
+  pose = 'stand',
+  expression = 'neutral',
 }: SpriteProps): JSX.Element {
   const f = deriveFeatures(actor);
   const scale = size / 64;
@@ -169,13 +237,22 @@ export function ActorSprite({
   const isBack = direction === 'N';
   const armDy = interactionFrame == null ? 0 : armRaiseFor(interactionFrame);
   const stride = walkFrame == null ? { leftDx: 0, rightDx: 0 } : strideFor(walkFrame);
+  const armPose = armPoseFor(pose);
+  const pt = poseTransform(pose);
   return (
     <g transform={`scale(${scale}) translate(-24,-32)${flipX ? ' translate(48,0) scale(-1,1)' : ''}`}>
-      <SpriteBody features={f} stride={stride} />
-      <SpriteAccessory features={f} armDy={armDy} />
-      <SpriteHead features={f} isBack={isBack} />
-      <SpriteHair features={f} isBack={isBack} />
-      <SpriteArms features={f} armDy={armDy} isProfile={direction === 'E' || direction === 'W'} />
+      <g transform={pt || undefined}>
+        <SpriteBody features={f} stride={stride} pose={pose} />
+        <SpriteAccessory features={f} armDy={armDy} />
+        <SpriteHead features={f} isBack={isBack} expression={expression} />
+        <SpriteHair features={f} isBack={isBack} />
+        <SpriteArms
+          features={f}
+          armDy={armDy}
+          isProfile={direction === 'E' || direction === 'W'}
+          armPose={armPose}
+        />
+      </g>
     </g>
   );
 }
@@ -187,11 +264,16 @@ export function ActorSprite({
 function SpriteBody({
   features,
   stride,
+  pose = 'stand',
 }: {
   features: SpriteFeatures;
   stride: { leftDx: number; rightDx: number };
+  pose?: Pose;
 }): JSX.Element {
-  const { uniform, skin } = features;
+  const { uniform, skin, uniformShade } = features;
+  // Seated / kneeling poses fold the lower legs forward instead of straight
+  // down, so the figure doesn't read as standing-but-shrunk.
+  const folded = pose === 'sit' || pose === 'kneel' || pose === 'cpr';
   return (
     <g>
       {/* Neck */}
@@ -200,12 +282,27 @@ function SpriteBody({
       <rect x={13} y={26} width={22} height={28} fill={uniform} />
       <rect x={14} y={25} width={20} height={1} fill={uniform} />
       <rect x={15} y={24} width={18} height={1} fill={uniform} />
-      {/* Legs */}
-      <rect x={15 + stride.leftDx} y={54} width={6} height={10} fill={uniform} />
-      <rect x={27 + stride.rightDx} y={54} width={6} height={10} fill={uniform} />
-      {/* Feet */}
-      <rect x={14 + stride.leftDx} y={63} width={8} height={1} fill="#1a1a1a" />
-      <rect x={26 + stride.rightDx} y={63} width={8} height={1} fill="#1a1a1a" />
+      {/* Torso side-shading for a touch of volume */}
+      <rect x={13} y={26} width={3} height={28} fill={uniformShade} opacity={0.55} />
+      {folded ? (
+        <>
+          {/* Thighs forward + shins down (seated/kneeling silhouette) */}
+          <rect x={15} y={52} width={20} height={6} fill={uniform} />
+          <rect x={15} y={56} width={6} height={9} fill={uniformShade} />
+          <rect x={29} y={56} width={6} height={9} fill={uniformShade} />
+          <rect x={14} y={64} width={8} height={1} fill="#1a1a1a" />
+          <rect x={28} y={64} width={8} height={1} fill="#1a1a1a" />
+        </>
+      ) : (
+        <>
+          {/* Legs */}
+          <rect x={15 + stride.leftDx} y={54} width={6} height={10} fill={uniform} />
+          <rect x={27 + stride.rightDx} y={54} width={6} height={10} fill={uniform} />
+          {/* Feet */}
+          <rect x={14 + stride.leftDx} y={63} width={8} height={1} fill="#1a1a1a" />
+          <rect x={26 + stride.rightDx} y={63} width={8} height={1} fill="#1a1a1a" />
+        </>
+      )}
     </g>
   );
 }
@@ -213,9 +310,11 @@ function SpriteBody({
 function SpriteHead({
   features,
   isBack,
+  expression = 'neutral',
 }: {
   features: SpriteFeatures;
   isBack: boolean;
+  expression?: Expression;
 }): JSX.Element {
   const { skin, skinShade } = features;
   return (
@@ -226,18 +325,103 @@ function SpriteHead({
       <rect x={31} y={5} width={1} height={1} fill="transparent" />
       <rect x={16} y={20} width={1} height={1} fill={skinShade} />
       <rect x={31} y={20} width={1} height={1} fill={skinShade} />
+      {/* Cheek shading for a hint of volume */}
+      <rect x={16} y={11} width={1} height={7} fill={skinShade} opacity={0.6} />
       {/* Chin shading */}
       <rect x={18} y={20} width={12} height={1} fill={skinShade} />
-      {/* Eyes + mouth on front-facing only */}
-      {!isBack && (
-        <>
-          <rect x={20} y={13} width={2} height={2} fill="#1a1410" />
-          <rect x={26} y={13} width={2} height={2} fill="#1a1410" />
-          <rect x={22} y={18} width={4} height={1} fill="#7a4a2a" />
-        </>
-      )}
+      {/* Face features on front-facing only */}
+      {!isBack && <FaceFeatures expression={expression} />}
     </g>
   );
+}
+
+/** Eyes / brows / mouth driven by expression (front-facing only). */
+function FaceFeatures({ expression }: { expression: Expression }): JSX.Element {
+  const EYE = '#1a1410';
+  const MOUTH = '#7a4a2a';
+  switch (expression) {
+    case 'alarmed':
+      return (
+        <>
+          {/* raised brows */}
+          <rect x={19} y={10} width={3} height={1} fill={EYE} />
+          <rect x={26} y={10} width={3} height={1} fill={EYE} />
+          {/* wide eyes */}
+          <rect x={19} y={12} width={3} height={3} fill={EYE} />
+          <rect x={26} y={12} width={3} height={3} fill={EYE} />
+          {/* open shouting mouth */}
+          <rect x={22} y={17} width={4} height={3} fill="#5a2e1a" />
+          <rect x={23} y={17} width={2} height={1} fill="#d98c6a" />
+        </>
+      );
+    case 'distressed':
+      return (
+        <>
+          {/* inner-up worried brows (slant up toward the nose) */}
+          <line x1={19} y1={12} x2={22} y2={10} stroke={EYE} strokeWidth={1} />
+          <line x1={29} y1={12} x2={26} y2={10} stroke={EYE} strokeWidth={1} />
+          <rect x={20} y={13} width={2} height={2} fill={EYE} />
+          <rect x={26} y={13} width={2} height={2} fill={EYE} />
+          {/* frown */}
+          <path d="M 22 19 Q 24 17 26 19" stroke={MOUTH} strokeWidth={1} fill="none" />
+        </>
+      );
+    case 'pained':
+      return (
+        <>
+          {/* furrowed brows (slant down toward the nose) */}
+          <line x1={19} y1={10} x2={22} y2={12} stroke={EYE} strokeWidth={1} />
+          <line x1={29} y1={10} x2={26} y2={12} stroke={EYE} strokeWidth={1} />
+          {/* squeezed-shut eyes */}
+          <rect x={20} y={14} width={3} height={1} fill={EYE} />
+          <rect x={25} y={14} width={3} height={1} fill={EYE} />
+          {/* gritted grimace */}
+          <rect x={21} y={18} width={6} height={2} fill="#5a2e1a" />
+          <line x1={24} y1={18} x2={24} y2={20} stroke="#d98c6a" strokeWidth={0.5} />
+        </>
+      );
+    case 'focused':
+      return (
+        <>
+          {/* level brows */}
+          <rect x={19} y={11} width={3} height={1} fill={EYE} />
+          <rect x={26} y={11} width={3} height={1} fill={EYE} />
+          {/* narrowed eyes */}
+          <rect x={20} y={13} width={3} height={1} fill={EYE} />
+          <rect x={25} y={13} width={3} height={1} fill={EYE} />
+          <rect x={22} y={18} width={4} height={1} fill={MOUTH} />
+        </>
+      );
+    case 'relieved':
+      return (
+        <>
+          {/* soft eyes */}
+          <rect x={20} y={13} width={2} height={1} fill={EYE} />
+          <rect x={26} y={13} width={2} height={1} fill={EYE} />
+          {/* slight smile */}
+          <path d="M 22 18 Q 24 20 26 18" stroke={MOUTH} strokeWidth={1} fill="none" />
+        </>
+      );
+    case 'unconscious':
+      return (
+        <>
+          {/* closed eyes */}
+          <rect x={20} y={14} width={3} height={1} fill={EYE} />
+          <rect x={25} y={14} width={3} height={1} fill={EYE} />
+          {/* slack mouth */}
+          <rect x={22} y={18} width={3} height={2} fill="#5a2e1a" />
+        </>
+      );
+    case 'neutral':
+    default:
+      return (
+        <>
+          <rect x={20} y={13} width={2} height={2} fill={EYE} />
+          <rect x={26} y={13} width={2} height={2} fill={EYE} />
+          <rect x={22} y={18} width={4} height={1} fill={MOUTH} />
+        </>
+      );
+  }
 }
 
 function SpriteHair({
@@ -290,12 +474,55 @@ function SpriteArms({
   features,
   armDy,
   isProfile,
+  armPose = 'rest',
 }: {
   features: SpriteFeatures;
   armDy: number;
   isProfile: boolean;
+  armPose?: ArmPose;
 }): JSX.Element {
   const { uniform, skin } = features;
+
+  // CPR: both arms locked straight, dropping vertically from the shoulders to
+  // stacked hands in front of the chest. Combined with the forward lean in the
+  // pose transform this reads as the iconic compression posture.
+  if (armPose === 'cpr') {
+    return (
+      <g>
+        <rect x={18} y={26} width={5} height={24} fill={uniform} />
+        <rect x={25} y={26} width={5} height={24} fill={uniform} />
+        {/* near-arm shading so the two arms read as separate */}
+        <rect x={18} y={26} width={1.5} height={24} fill={features.uniformShade} opacity={0.6} />
+        {/* stacked hands at the bottom */}
+        <rect x={18} y={49} width={12} height={5} rx={1.5} fill={skin} />
+      </g>
+    );
+  }
+
+  // Point: right arm extended outward (directing / hailing gesture).
+  if (armPose === 'point') {
+    return (
+      <g>
+        <rect x={9} y={28 + armDy} width={5} height={16} fill={uniform} />
+        <rect x={9} y={43 + armDy} width={5} height={3} fill={skin} />
+        <rect x={34} y={26} width={16} height={5} fill={uniform} transform="rotate(-12 34 28)" />
+        <rect x={48} y={23} width={4} height={4} fill={skin} transform="rotate(-12 48 25)" />
+      </g>
+    );
+  }
+
+  // Reach (seated / handing-over): both forearms angled forward.
+  if (armPose === 'reach') {
+    return (
+      <g>
+        <rect x={11} y={28} width={5} height={12} fill={uniform} transform="rotate(18 13 30)" />
+        <rect x={32} y={28} width={5} height={12} fill={uniform} transform="rotate(-18 35 30)" />
+        <rect x={14} y={38} width={4} height={3} fill={skin} />
+        <rect x={30} y={38} width={4} height={3} fill={skin} />
+      </g>
+    );
+  }
+
   // In profile (E/W) only one arm is visible at the front.
   if (isProfile) {
     return (

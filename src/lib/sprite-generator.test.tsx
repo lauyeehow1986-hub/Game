@@ -8,7 +8,9 @@ import {
   WALK_FRAMES,
   accessoryFor,
   armRaiseFor,
+  darken,
   deriveFeatures,
+  poseTransform,
   strideFor,
 } from './sprite-generator';
 import type { WalkthroughActor } from './walkthrough';
@@ -147,6 +149,76 @@ describe('sprite-generator — every STEMI walkthrough actor renders', () => {
     const w0 = renderToStaticMarkup(<ActorSprite actor={a} walkFrame={0} />);
     const w1 = renderToStaticMarkup(<ActorSprite actor={a} walkFrame={1} />);
     expect(w0).not.toBe(w1);
+  });
+});
+
+describe('sprite-generator — poses', () => {
+  const a = () => stemiWalkthrough.actors['patient'];
+
+  it('poseTransform returns empty for upright poses and a transform otherwise', () => {
+    expect(poseTransform('stand')).toBe('');
+    expect(poseTransform('walk')).toBe('');
+    expect(poseTransform('point')).toBe('');
+    expect(poseTransform('kneel')).not.toBe('');
+    expect(poseTransform('sit')).not.toBe('');
+    expect(poseTransform('cpr')).not.toBe('');
+    expect(poseTransform('collapsed')).not.toBe('');
+  });
+
+  it('collapsed pose lays the figure down with a rotation', () => {
+    expect(poseTransform('collapsed')).toMatch(/rotate\(-7\d/);
+    const svg = renderToStaticMarkup(<ActorSprite actor={a()} pose="collapsed" />);
+    expect(svg).toMatch(/rotate\(-7\d/);
+  });
+
+  it('each pose yields distinct rendered markup', () => {
+    const seen = new Set<string>();
+    for (const pose of ['stand', 'kneel', 'sit', 'cpr', 'collapsed', 'point'] as const) {
+      seen.add(renderToStaticMarkup(<ActorSprite actor={a()} pose={pose} />));
+    }
+    expect(seen.size).toBe(6);
+  });
+
+  it('the CPR pose draws stacked hands below the arms', () => {
+    const stand = renderToStaticMarkup(<ActorSprite actor={a()} pose="stand" />);
+    const cpr = renderToStaticMarkup(<ActorSprite actor={a()} pose="cpr" />);
+    expect(cpr).not.toBe(stand);
+  });
+});
+
+describe('sprite-generator — expressions', () => {
+  const a = () => stemiWalkthrough.actors['patient'];
+
+  it('each expression yields distinct rendered markup', () => {
+    const seen = new Set<string>();
+    for (const expression of ['neutral', 'alarmed', 'distressed', 'pained', 'focused', 'relieved', 'unconscious'] as const) {
+      seen.add(renderToStaticMarkup(<ActorSprite actor={a()} expression={expression} />));
+    }
+    expect(seen.size).toBe(7);
+  });
+
+  it('expressions are suppressed on a back-facing sprite', () => {
+    const neutral = renderToStaticMarkup(<ActorSprite actor={a()} direction="N" expression="neutral" />);
+    const alarmed = renderToStaticMarkup(<ActorSprite actor={a()} direction="N" expression="alarmed" />);
+    expect(neutral).toBe(alarmed);
+  });
+});
+
+describe('sprite-generator — colour helpers', () => {
+  it('darken reduces each channel by the factor', () => {
+    expect(darken('#ffffff', 0.5)).toBe('#808080'); // round(255*0.5)=128
+    expect(darken('#000000', 0.5)).toBe('#000000');
+    expect(darken('#10a060', 1)).toBe('#10a060');
+  });
+
+  it('darken returns the input unchanged for a malformed colour', () => {
+    expect(darken('rgb(1,2,3)')).toBe('rgb(1,2,3)');
+  });
+
+  it('deriveFeatures exposes a darker uniform shade', () => {
+    const f = deriveFeatures({ id: 'x', role: 'r', team: 'ward', bio: '', swatch: '#3aa6ff' });
+    expect(f.uniformShade).not.toBe(f.uniform);
+    expect(f.uniformShade).toMatch(/^#[0-9a-f]{6}$/);
   });
 });
 

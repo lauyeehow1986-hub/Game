@@ -36,6 +36,19 @@ export interface WalkthroughActor {
   swatch?: string;
 }
 
+/** Body pose for a beat — staged figure (kneeling, CPR, collapsed, …). */
+export type BeatPose = 'stand' | 'walk' | 'kneel' | 'sit' | 'cpr' | 'collapsed' | 'point';
+
+/** Facial expression for a beat. */
+export type BeatExpression =
+  | 'neutral'
+  | 'alarmed'
+  | 'distressed'
+  | 'pained'
+  | 'focused'
+  | 'relieved'
+  | 'unconscious';
+
 export interface WalkthroughBeat {
   /** Seconds from the start of the containing Chapter. */
   at: number;
@@ -50,6 +63,14 @@ export interface WalkthroughBeat {
    *  interaction loop. Use for beats where the actor moves between
    *  stations (e.g., paramedic wheeling the trolley). */
   walking?: boolean;
+  /** Explicit stage position (480×270 stage units). When omitted the
+   *  renderer falls back to a deterministic staging arc. Lets a chapter
+   *  choreograph exactly where each figure stands in the scene. */
+  pos?: { x: number; y: number };
+  /** Body pose for this beat (default 'stand'). */
+  pose?: BeatPose;
+  /** Facial expression for this beat (default 'neutral'). */
+  expression?: BeatExpression;
 }
 
 export interface WalkthroughBranchOption {
@@ -64,6 +85,20 @@ export interface WalkthroughChapter {
   id: string;
   /** Display title (i18n key or literal). */
   title: string;
+  /** Environment to stage this chapter in. Drives the SceneBackground.
+   *  When omitted the renderer falls back to a neutral clinical room. */
+  scene?:
+    | 'kopitiam'
+    | 'street'
+    | 'resus'
+    | 'cathlab'
+    | 'imaging'
+    | 'counsel'
+    | 'ward'
+    | 'pharmacy'
+    | 'rehab'
+    | 'clinic'
+    | 'backhouse';
   /** How long the chapter plays (in seconds, before any branch decision). */
   durationSec: number;
   /** Optional chyron string shown top-left, e.g. '08:15 SGT'. */

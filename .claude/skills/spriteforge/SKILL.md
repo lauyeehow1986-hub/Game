@@ -69,19 +69,59 @@ keeps the look crisp at any display scale. Parts:
 - **Arms**: 5px wide; in profile (E/W) only the front arm is drawn.
 - **Accessory**: role-specific overlay — see table below.
 
-## Direction + animation params
+## Direction, pose, expression + animation params
 
 `<ActorSprite>` accepts:
 
 | Prop | Type | Default | Effect |
 | - | - | - | - |
 | `direction` | `'N' \| 'S' \| 'E' \| 'W'` | `'S'` | S = facing camera, N = back-facing (face suppressed), E/W = profile (horizontal mirror) |
+| `pose` | `Pose` | `'stand'` | Body posture — see pose table |
+| `expression` | `Expression` | `'neutral'` | Face — eyes / brows / mouth (front-facing only) |
 | `interactionFrame` | `0..5` or `undefined` | `undefined` | 6-frame universal interaction loop (arm raise → peak → lower → rest). `undefined` = arms at rest. |
 | `walkFrame` | `0..3` or `undefined` | `undefined` | 4-frame walk cycle (leg-stride alternation). `undefined` = legs at rest. |
 | `size` | number | `64` | viewBox unit size |
 
 The Walkthrough Stage ticks at 6 fps (150 ms interval). Active actors play
 the interaction loop; beats marked `walking: true` also play the walk cycle.
+
+### Poses (v9.8+)
+
+`poseTransform(pose)` returns an SVG transform applied around the whole figure,
+reusing the accessory art; arm configuration is derived per pose.
+
+| Pose | Reads as | Construction |
+| - | - | - |
+| `stand` / `walk` | upright | identity transform |
+| `kneel` | crouched beside something | lower + vertical compress, legs folded |
+| `sit` | seated (counselling, ward chair) | lower + compress, arms at rest |
+| `cpr` | chest compressions | forward lean + both arms straight down to stacked hands |
+| `collapsed` | on the floor | ~−74° rotation about the feet |
+| `point` | directing / hailing | right arm extended outward |
+
+### Expressions (v9.8+)
+
+`neutral`, `alarmed` (wide eyes + raised brows + open mouth), `distressed`
+(inner-up worried brows + frown), `pained` (furrowed brows + squeezed eyes +
+grimace), `focused` (level brows + narrowed eyes), `relieved` (soft eyes +
+slight smile), `unconscious` (closed eyes + slack mouth). Suppressed on N.
+
+## Scenery (v9.8+) — environments + staging
+
+`src/lib/scenery.tsx` provides the cinematic stage the sprites stand in,
+replacing the old team-row grid. A chapter sets `scene` (one of `kopitiam`,
+`street`, `resus`, `cathlab`, `imaging`, `counsel`, `ward`, `pharmacy`,
+`rehab`, `clinic`, `backhouse`) and the renderer composes that environment
+(perspective floor, props, signage, lighting, ambient crowd, vignette). Beats
+then place each present actor via `pos` + `pose` + `expression`; missing `pos`
+falls back to `defaultStagePos()` (a gentle staging arc). `depthScale(y)` makes
+figures lower on the stage larger (0.7 at the horizon → 1.3 at the front).
+
+The hero environment is the Bras Basah `kopitiam` (three hawker stalls with
+signage, ceiling fans, fluorescent tubes, marble tables + red stools, seated
+patrons, a drink-stall queue, a gathering ring of onlookers, shophouse pillars
+and warm morning light) — the front-centre is intentionally clear so the
+collapse → bystander-CPR → CFR-AED choreography reads cleanly.
 
 | Accessory kind | Used by | Visual cue |
 | - | - | - |
@@ -103,14 +143,23 @@ the interaction loop; beats marked `walking: true` also play the walk cycle.
 
 ## Tests
 
-`src/lib/sprite-generator.test.tsx` (33 tests):
+`src/lib/sprite-generator.test.tsx`:
 
 - Feature derivation determinism (same id → same features).
 - Skin / hair palette membership (no rogue colours).
-- Uniform colour comes from swatch with a neutral fallback.
+- Uniform colour comes from swatch with a neutral fallback; `uniformShade`
+  derived via `darken()`.
 - Every role in the STEMI catalogue maps to its expected accessory.
 - Every actor in `stemiWalkthrough.actors` renders to a valid SVG `<g>`.
 - The same actor renders identical markup twice in a row.
+- Pose / expression: each pose and each expression yields distinct markup;
+  collapsed carries the lay-down rotation; expressions suppressed on N.
+
+`src/lib/scenery.test.tsx`:
+
+- Every `SceneId` renders a non-trivial, deterministic `<g>`.
+- The kopitiam carries its hawker-stall signage.
+- `defaultStagePos` stays within stage bounds; `depthScale` runs 0.7 → 1.3.
 
 ## Verifying a single actor
 

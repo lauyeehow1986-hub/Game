@@ -312,20 +312,29 @@ export const stemiWalkthrough: Walkthrough = {
     collapse: {
       id: 'collapse',
       title: 'Collapse — 08:15 at Bras Basah',
+      scene: 'kopitiam',
       durationSec: 30,
       timeOfDay: '08:15 SGT',
       location: 'Bras Basah kopitiam',
       defaultNextChapterId: 'ambulance',
       beats: [
-        { at: 0, actorId: 'patient', action: 'Walking to the kopi counter — clutches chest, collapses.' },
-        { at: 2, actorId: 'bystander', action: 'Sees the collapse, shouts for help, dials 995.' },
-        { at: 4, actorId: 'support-cleaner', action: 'Clears tables and keeps onlookers back so the area is safe.' },
-        { at: 6, actorId: 'bystander', action: 'On 995: dispatcher confirms cardiac arrest. Starts hands-only CPR.' },
-        { at: 10, actorId: 'patient', action: 'Pulseless. Receiving chest compressions at 100–120 / min.' },
-        { at: 14, actorId: 'cfr', action: 'myResponder ping accepted — arrives with PAD AED from 280 m away.' },
-        { at: 18, actorId: 'cfr', action: 'AED pads on. Shock advised. Stand clear, shock delivered.' },
-        { at: 22, actorId: 'cfr', action: 'CPR resumed. Second cycle.' },
-        { at: 26, actorId: 'patient', action: 'Return of spontaneous circulation. Groaning. Pulse palpable.' },
+        // Mr Tan, mid-morning kopi run, suddenly clutches his chest.
+        { at: 0, actorId: 'patient', action: 'Walking to the kopi counter — clutches chest, collapses.', pos: { x: 214, y: 224 }, pose: 'stand', expression: 'pained' },
+        // A passer-by sees it and reacts.
+        { at: 2, actorId: 'bystander', action: 'Sees the collapse, shouts for help, dials 995.', pos: { x: 264, y: 224 }, pose: 'stand', expression: 'alarmed' },
+        // The coffee-shop attendant clears tables and waves onlookers back.
+        { at: 4, actorId: 'support-cleaner', action: 'Clears tables and keeps onlookers back so the area is safe.', pos: { x: 314, y: 214 }, pose: 'point', direction: 'W', expression: 'alarmed' },
+        // Bystander drops to his knees and starts hands-only CPR.
+        { at: 6, actorId: 'bystander', action: 'On 995: dispatcher confirms cardiac arrest. Starts hands-only CPR.', pos: { x: 240, y: 240 }, pose: 'cpr', direction: 'W', expression: 'focused' },
+        // Patient now on the floor, pulseless, receiving compressions.
+        { at: 10, actorId: 'patient', action: 'Pulseless. Receiving chest compressions at 100–120 / min.', pos: { x: 202, y: 238 }, pose: 'collapsed', expression: 'unconscious' },
+        // The myResponder CFR sprints in from the five-foot-way with a PAD AED.
+        { at: 14, actorId: 'cfr', action: 'myResponder ping accepted — arrives with PAD AED from 280 m away.', pos: { x: 372, y: 232 }, pose: 'walk', walking: true, direction: 'W', expression: 'focused' },
+        // CFR kneels on the far side, applies pads, delivers a shock.
+        { at: 18, actorId: 'cfr', action: 'AED pads on. Shock advised. Stand clear, shock delivered.', pos: { x: 166, y: 242 }, pose: 'kneel', direction: 'E', expression: 'focused' },
+        { at: 22, actorId: 'cfr', action: 'CPR resumed. Second cycle.', pos: { x: 170, y: 242 }, pose: 'cpr', direction: 'E', expression: 'focused' },
+        // ROSC — Mr Tan groans, a pulse returns.
+        { at: 26, actorId: 'patient', action: 'Return of spontaneous circulation. Groaning. Pulse palpable.', pos: { x: 202, y: 238 }, pose: 'collapsed', expression: 'pained' },
       ],
     },
 
@@ -336,6 +345,7 @@ export const stemiWalkthrough: Walkthrough = {
     ambulance: {
       id: 'ambulance',
       title: 'Ambulance on scene — 08:24',
+      scene: 'street',
       durationSec: 28,
       timeOfDay: '08:24 SGT',
       location: 'On scene — Bras Basah Road',
@@ -356,13 +366,14 @@ export const stemiWalkthrough: Walkthrough = {
         ],
       },
       beats: [
-        { at: 0, actorId: 'paramedic', action: 'Arrives with EA. Hands over from CFR — ROSC, GCS 14.' },
-        { at: 3, actorId: 'driver', action: 'Sets up the stretcher and clears the route to the EA.' },
-        { at: 5, actorId: 'paramedic', action: '12-lead ECG: ST elevation V1–V4. Calls STEMI alert.' },
-        { at: 10, actorId: 'paramedic', action: 'IV access established. Aspirin 300 mg PO loaded.' },
-        { at: 14, actorId: 'driver', action: 'Patient loaded. Code 3 transport. Pre-notifies receiving hospital.' },
-        { at: 18, actorId: 'paramedic', action: 'En route: O2 maintained, BP 102 / 64, HR 88. ECG re-checked.' },
-        { at: 24, actorId: 'paramedic', action: 'Cath team activation confirmed. ETA 4 minutes.' },
+        { at: 0, actorId: 'paramedic', action: 'Arrives with EA. Hands over from CFR — ROSC, GCS 14.', pos: { x: 150, y: 232 }, pose: 'kneel', direction: 'E', expression: 'focused' },
+        { at: 3, actorId: 'driver', action: 'Sets up the stretcher and clears the route to the EA.', pos: { x: 250, y: 222 }, pose: 'stand', expression: 'focused', walking: true },
+        { at: 5, actorId: 'paramedic', action: '12-lead ECG: ST elevation V1–V4. Calls STEMI alert.', pos: { x: 150, y: 232 }, pose: 'kneel', direction: 'E', expression: 'focused' },
+        { at: 10, actorId: 'paramedic', action: 'IV access established. Aspirin 300 mg PO loaded.', pos: { x: 150, y: 232 }, pose: 'kneel', direction: 'E', expression: 'focused' },
+        { at: 8, actorId: 'patient', action: 'On the stretcher — pale, post-arrest, responding to voice.', pos: { x: 120, y: 240 }, pose: 'collapsed', expression: 'pained' },
+        { at: 14, actorId: 'driver', action: 'Patient loaded. Code 3 transport. Pre-notifies receiving hospital.', pos: { x: 250, y: 222 }, pose: 'point', expression: 'focused' },
+        { at: 18, actorId: 'paramedic', action: 'En route: O2 maintained, BP 102 / 64, HR 88. ECG re-checked.', pos: { x: 170, y: 230 }, pose: 'stand', expression: 'focused' },
+        { at: 24, actorId: 'paramedic', action: 'Cath team activation confirmed. ETA 4 minutes.', pos: { x: 170, y: 230 }, pose: 'stand', expression: 'relieved' },
       ],
     },
 
@@ -372,6 +383,7 @@ export const stemiWalkthrough: Walkthrough = {
     'arrive-sgh': {
       id: 'arrive-sgh',
       title: 'SGH STEMI bypass — 08:32',
+      scene: 'resus',
       durationSec: 35,
       timeOfDay: '08:32 SGT',
       location: 'SGH ambulance bay → cath corridor',
@@ -393,6 +405,7 @@ export const stemiWalkthrough: Walkthrough = {
     'cath-activation': {
       id: 'cath-activation',
       title: 'Cath lab activation — 08:38',
+      scene: 'cathlab',
       durationSec: 30,
       timeOfDay: '08:38 SGT',
       location: 'SGH cath lab anteroom',
@@ -412,6 +425,7 @@ export const stemiWalkthrough: Walkthrough = {
     'cath-procedure': {
       id: 'cath-procedure',
       title: 'Diagnostic angiogram — 08:45',
+      scene: 'cathlab',
       durationSec: 40,
       timeOfDay: '08:45 SGT',
       location: 'SGH cath lab',
@@ -433,6 +447,7 @@ export const stemiWalkthrough: Walkthrough = {
     'cardiac-cta': {
       id: 'cardiac-cta',
       title: 'Cardiac CTA — 09:30',
+      scene: 'imaging',
       durationSec: 30,
       timeOfDay: '09:30 SGT',
       location: 'SGH cardiac imaging suite',
@@ -468,6 +483,7 @@ export const stemiWalkthrough: Walkthrough = {
     'mri-scan': {
       id: 'mri-scan',
       title: 'Cardiac MRI — 10:05',
+      scene: 'imaging',
       durationSec: 30,
       timeOfDay: '10:05 SGT',
       location: 'SGH MRI 1.5 T',
@@ -488,6 +504,7 @@ export const stemiWalkthrough: Walkthrough = {
     'family-conference': {
       id: 'family-conference',
       title: 'Family conference — 11:00',
+      scene: 'counsel',
       durationSec: 45,
       timeOfDay: '11:00 SGT',
       location: 'SGH cardiology counselling room',
@@ -508,12 +525,13 @@ export const stemiWalkthrough: Walkthrough = {
         ],
       },
       beats: [
-        { at: 0, actorId: 'family-wife', action: 'Arrives, anxious. Family-son interprets quietly.' },
-        { at: 5, actorId: 'consultant-cardio', action: 'Explains anterior STEMI in plain Mandarin. Opens the angiogram on screen.' },
-        { at: 13, actorId: 'consultant-cardio', action: 'Shows the LAD lesion; describes the heart-team options.' },
-        { at: 22, actorId: 'ct-surgeon', action: 'Reviews the angiogram on screen; weighs surgical risk against PCI.' },
-        { at: 30, actorId: 'cath-cardio', action: 'Describes PCI: angioplasty + drug-eluting stent, RCA managed medically.' },
-        { at: 38, actorId: 'family-wife', action: 'Asks about risk; consultant-cardio answers. Ready to decide.' },
+        { at: 0, actorId: 'family-wife', action: 'Arrives, anxious. Family-son interprets quietly.', pos: { x: 300, y: 226 }, pose: 'sit', expression: 'distressed' },
+        { at: 2, actorId: 'family-son', action: 'Sits beside his mother, translating quietly.', pos: { x: 350, y: 232 }, pose: 'sit', expression: 'distressed' },
+        { at: 5, actorId: 'consultant-cardio', action: 'Explains anterior STEMI in plain Mandarin. Opens the angiogram on screen.', pos: { x: 150, y: 222 }, pose: 'point', expression: 'neutral' },
+        { at: 13, actorId: 'consultant-cardio', action: 'Shows the LAD lesion; describes the heart-team options.', pos: { x: 150, y: 222 }, pose: 'point', expression: 'focused' },
+        { at: 22, actorId: 'ct-surgeon', action: 'Reviews the angiogram on screen; weighs surgical risk against PCI.', pos: { x: 110, y: 232 }, pose: 'stand', expression: 'focused' },
+        { at: 30, actorId: 'cath-cardio', action: 'Describes PCI: angioplasty + drug-eluting stent, RCA managed medically.', pos: { x: 200, y: 230 }, pose: 'stand', expression: 'neutral' },
+        { at: 38, actorId: 'family-wife', action: 'Asks about risk; consultant-cardio answers. Ready to decide.', pos: { x: 300, y: 226 }, pose: 'sit', expression: 'neutral' },
       ],
     },
 
@@ -523,6 +541,7 @@ export const stemiWalkthrough: Walkthrough = {
     'surgeon-decline': {
       id: 'surgeon-decline',
       title: 'Surgeon declines CABG — 11:20',
+      scene: 'counsel',
       durationSec: 25,
       timeOfDay: '11:20 SGT',
       location: 'SGH cardiology counselling room (continued)',
@@ -541,6 +560,7 @@ export const stemiWalkthrough: Walkthrough = {
     'pci-procedure': {
       id: 'pci-procedure',
       title: 'PCI to LAD — 11:45',
+      scene: 'cathlab',
       durationSec: 40,
       timeOfDay: '11:45 SGT',
       location: 'SGH cath lab',
@@ -562,6 +582,7 @@ export const stemiWalkthrough: Walkthrough = {
     'ccu-transfer': {
       id: 'ccu-transfer',
       title: 'CCU transfer — 12:30',
+      scene: 'ward',
       durationSec: 25,
       timeOfDay: '12:30 SGT',
       location: 'SGH Coronary Care Unit',
@@ -581,6 +602,7 @@ export const stemiWalkthrough: Walkthrough = {
     'ward-stay': {
       id: 'ward-stay',
       title: 'Ward 73 — day 2 morning round',
+      scene: 'ward',
       durationSec: 40,
       timeOfDay: '08:30 next day',
       location: 'SGH Ward 73 · Class B2',
@@ -602,13 +624,14 @@ export const stemiWalkthrough: Walkthrough = {
     'complications': {
       id: 'complications',
       title: 'Overnight chest pain — 22:30',
+      scene: 'ward',
       durationSec: 35,
       timeOfDay: '22:30 day 2',
       location: 'SGH Ward 73',
       defaultNextChapterId: 'discharge',
       beats: [
-        { at: 0, actorId: 'patient', action: 'New chest tightness at rest; calls for the nurse.' },
-        { at: 5, actorId: 'ward-nurse', action: 'GTN sublingual given; repeat ECG ordered urgently.' },
+        { at: 0, actorId: 'patient', action: 'New chest tightness at rest; calls for the nurse.', pos: { x: 150, y: 226 }, pose: 'sit', expression: 'pained' },
+        { at: 5, actorId: 'ward-nurse', action: 'GTN sublingual given; repeat ECG ordered urgently.', pos: { x: 210, y: 232 }, pose: 'stand', direction: 'W', expression: 'focused' },
         { at: 11, actorId: 'ward-mo', action: 'ECG: dynamic T-wave inversion in I + aVL. Stat troponin sent.' },
         { at: 18, actorId: 'ward-reg', action: 'Calls cath-cardio overnight; non-occlusive event, manage medically.' },
         { at: 25, actorId: 'ward-pharm', action: 'Optimises ticagrelor dose; adds long-acting nitrate.' },
@@ -622,6 +645,7 @@ export const stemiWalkthrough: Walkthrough = {
     'discharge': {
       id: 'discharge',
       title: 'Discharge day — day 4',
+      scene: 'ward',
       durationSec: 30,
       timeOfDay: '10:00 day 4',
       location: 'SGH Ward 73',
@@ -641,6 +665,7 @@ export const stemiWalkthrough: Walkthrough = {
     pharmacy: {
       id: 'pharmacy',
       title: 'Outpatient pharmacy — collect meds',
+      scene: 'pharmacy',
       durationSec: 25,
       timeOfDay: '11:30 day 4',
       location: 'SGH outpatient pharmacy',
@@ -659,6 +684,7 @@ export const stemiWalkthrough: Walkthrough = {
     'cardiac-rehab': {
       id: 'cardiac-rehab',
       title: 'Cardiac rehab — 4 weeks post-PCI',
+      scene: 'rehab',
       durationSec: 35,
       timeOfDay: '09:00 · 4 weeks later',
       location: 'NHCS Phase II rehab gym',
@@ -679,6 +705,7 @@ export const stemiWalkthrough: Walkthrough = {
     'outpatient-review': {
       id: 'outpatient-review',
       title: 'Specialist outpatient review — 8 weeks',
+      scene: 'clinic',
       durationSec: 30,
       timeOfDay: '14:00 · 8 weeks later',
       location: 'SGH cardiology clinic',
@@ -699,6 +726,7 @@ export const stemiWalkthrough: Walkthrough = {
     'back-of-house': {
       id: 'back-of-house',
       title: 'Back of house — a day in the life',
+      scene: 'backhouse',
       durationSec: 50,
       timeOfDay: '06:00 → 22:00',
       location: 'SGH back-of-house — kitchens, laundry, billing, cath turnover',
@@ -720,6 +748,7 @@ export const stemiWalkthrough: Walkthrough = {
     'arrive-private': {
       id: 'arrive-private',
       title: 'Private A&E — 08:28',
+      scene: 'resus',
       durationSec: 25,
       timeOfDay: '08:28 SGT',
       location: 'Private hospital A&E',
@@ -738,6 +767,7 @@ export const stemiWalkthrough: Walkthrough = {
     'secondary-transfer': {
       id: 'secondary-transfer',
       title: 'Secondary transfer to SGH — 08:42',
+      scene: 'street',
       durationSec: 20,
       timeOfDay: '08:42 SGT',
       location: 'En route Private → SGH',
