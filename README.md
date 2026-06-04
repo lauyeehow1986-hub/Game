@@ -61,7 +61,11 @@ Cardio · Acute Emergencies · Cross-Sector · End-of-Life · Pandemic · Primar
 - **Backup & restore** — Settings → Export / Import JSON moves your progress + streak + custom content between browsers
 
 ### Languages
-4 locales scaffolded. **All 31 cases fully translated end-to-end into Chinese (中文)** — every prompt, option, rationale, outcome, framing line, guideline reference. UI chrome translated for English, Chinese, Malay, Tamil.
+Singapore has four official languages, and all four are selectable. Coverage is **honest and tracked** (see [`docs/REVIEW.md`](docs/REVIEW.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md)):
+
+- **English** — full (UI + all 38 cases).
+- **Chinese (中文)** — full: every case translated end-to-end (prompt, option, rationale, outcome, framing, guideline reference) plus complete UI chrome.
+- **Malay (Bahasa Melayu)** and **Tamil (தமிழ்)** — *in progress on the official-language parity track*. UI chrome is being raised to full parity (v9.2 Malay, v9.3 Tamil); case content follows (v9.4+). The language switcher marks these as partial and falls back to English for any untranslated string, so a learner is never misled. A CI parity metric (`src/lib/i18n/parity.test.ts`) prevents silent regression.
 
 ### Quality
 - 286 unit tests, build clean

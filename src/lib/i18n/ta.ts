@@ -43,6 +43,8 @@ export const ta: Record<string, string> = {
   'hud.perspective.caregiver': 'பராமரிப்பாளர்',
   'hud.perspective.staff': 'பணியாளர்',
   'hud.language': 'மொழி',
+  'lang.partialMark': '(பகுதி)',
+  'lang.partialHint': 'இந்த மொழி இன்னும் முழுமையாக்கப்படுகிறது — சில உரைகள் ஆங்கிலத்தில் காட்டப்படும்.',
   'hud.about': 'பற்றி',
 
   'disclaimer.tag': 'கல்வி',

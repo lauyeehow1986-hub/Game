@@ -14,11 +14,28 @@ import type { LocalisedString } from './types';
 
 export type Locale = 'en' | 'zh' | 'ms' | 'ta';
 
-export const LOCALES: Array<{ code: Locale; nativeName: string; englishName: string }> = [
-  { code: 'en', nativeName: 'English', englishName: 'English' },
-  { code: 'zh', nativeName: '中文', englishName: 'Chinese (Simplified)' },
-  { code: 'ms', nativeName: 'Bahasa Melayu', englishName: 'Malay' },
-  { code: 'ta', nativeName: 'தமிழ்', englishName: 'Tamil' },
+/**
+ * `coverage` flags how complete a locale is so the UI can be honest about it.
+ * Singapore has four official languages; English and Chinese are at full
+ * parity (UI chrome + every case), while Malay and Tamil are being brought up
+ * to parity on the official-language track (see docs/ROADMAP.md). 'full' means
+ * UI chrome + case content; 'partial' means UI chrome is still being completed
+ * and case content falls back to English.
+ */
+export type LocaleCoverage = 'full' | 'partial';
+
+export interface LocaleMeta {
+  code: Locale;
+  nativeName: string;
+  englishName: string;
+  coverage: LocaleCoverage;
+}
+
+export const LOCALES: LocaleMeta[] = [
+  { code: 'en', nativeName: 'English', englishName: 'English', coverage: 'full' },
+  { code: 'zh', nativeName: '中文', englishName: 'Chinese (Simplified)', coverage: 'full' },
+  { code: 'ms', nativeName: 'Bahasa Melayu', englishName: 'Malay', coverage: 'partial' },
+  { code: 'ta', nativeName: 'தமிழ்', englishName: 'Tamil', coverage: 'partial' },
 ];
 
 // English is the fallback chain and is always needed, so it stays in the

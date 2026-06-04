@@ -165,6 +165,8 @@ export const en: Record<string, string> = {
   'hud.perspective.caregiver': 'Caregiver',
   'hud.perspective.staff': 'Staff',
   'hud.language': 'Language',
+  'lang.partialMark': '(partial)',
+  'lang.partialHint': 'This language is still being completed — some text falls back to English.',
   'hud.about': 'About',
 
   // Disclaimer

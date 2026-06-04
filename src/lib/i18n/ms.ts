@@ -43,6 +43,8 @@ export const ms: Record<string, string> = {
   'hud.perspective.caregiver': 'Penjaga',
   'hud.perspective.staff': 'Kakitangan',
   'hud.language': 'Bahasa',
+  'lang.partialMark': '(separa)',
+  'lang.partialHint': 'Bahasa ini masih dilengkapkan — sebahagian teks dipaparkan dalam bahasa Inggeris.',
   'hud.about': 'Tentang',
 
   'disclaimer.tag': 'Pendidikan',

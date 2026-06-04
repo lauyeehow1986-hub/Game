@@ -159,6 +159,8 @@ export const zh: Record<string, string> = {
   'hud.perspective.caregiver': '看护者',
   'hud.perspective.staff': '医护',
   'hud.language': '语言',
+  'lang.partialMark': '(部分)',
+  'lang.partialHint': '该语言仍在完善中 — 部分文本将以英文显示。',
   'hud.about': '关于',
 
   // Disclaimer

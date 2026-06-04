@@ -249,9 +249,18 @@ export function HUD() {
           {LOCALES.map((l) => (
             <option key={l.code} value={l.code}>
               {l.nativeName}
+              {l.coverage === 'partial' ? ` ${t('lang.partialMark')}` : ''}
             </option>
           ))}
         </select>
+        {LOCALES.find((l) => l.code === locale)?.coverage === 'partial' && (
+          <span
+            className="text-[10px] text-clinical-warn max-w-[180px] leading-tight"
+            role="note"
+          >
+            {t('lang.partialHint')}
+          </span>
+        )}
         <button
           onClick={toggleMute}
           aria-label={muted ? t('hud.audio.off') : t('hud.audio.on')}
