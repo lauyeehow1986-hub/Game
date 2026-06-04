@@ -5,7 +5,7 @@ import { useGame } from '../../state/gameStore';
 import { useAchievements } from '../../state/achievementsStore';
 import { useStreak, currentStreakValue, bestStreakValue } from '../../state/streakStore';
 import { buildHeatmap } from '../../lib/streak-heatmap';
-import { useMemo, useState, lazy, Suspense } from 'react';
+import { useMemo, useState, useEffect, lazy, Suspense } from 'react';
 import { computePersonalTrends, computeDecisionWeaknesses, gradeBandLabel } from '../../lib/personal-trends';
 import { coachSuggestion } from '../../lib/coach';
 import { competency } from '../../lib/competency';
@@ -48,6 +48,9 @@ const DuelModal = lazy(() =>
 );
 const FlashcardsModal = lazy(() =>
   import('../modals/FlashcardsModal').then((m) => ({ default: m.FlashcardsModal })),
+);
+const WalkthroughModal = lazy(() =>
+  import('../modals/WalkthroughModal').then((m) => ({ default: m.WalkthroughModal })),
 );
 
 const CATEGORY_COLOURS: Record<'acute' | 'elective' | 'outpatient', string> = {
@@ -116,6 +119,7 @@ export function TrendsPanel() {
   const [duelOpen, setDuelOpen] = useState(false);
   const [goalsOpen, setGoalsOpen] = useState(false);
   const [flashcardsOpen, setFlashcardsOpen] = useState(false);
+  const [walkthroughOpen, setWalkthroughOpen] = useState(false);
   const goalTargets = useLearningGoals((s) => s.targets);
   const setGoalTargets = useLearningGoals((s) => s.setTargets);
   const bookmarks = useBookmarks((s) => s.items);
@@ -531,6 +535,13 @@ export function TrendsPanel() {
           {t('flashcards.open')}
         </button>
       )}
+
+      <button
+        onClick={() => setWalkthroughOpen(true)}
+        className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-accent/60 text-clinical-accent hover:bg-clinical-accent/10"
+      >
+        {t('walkthrough.open')}
+      </button>
 
       {trends.totalPlayed > 0 && (
         <button
@@ -1107,6 +1118,19 @@ export function TrendsPanel() {
           const built = buildFlashcards(catalogue, playedIds.length > 0 ? playedIds : undefined);
           const deck = shuffleFlashcards(built, Math.floor(Date.now() / 86400000));
           return <FlashcardsModal deck={deck} onClose={() => setFlashcardsOpen(false)} />;
+        })()}
+        {walkthroughOpen && (() => {
+          // Lazy require so the STEMI content chunk is fetched only on open.
+          // (v9.5 will swap this for a picker once a second walkthrough exists.)
+          const Inner = () => {
+            const [w, setW] = useState<import('../../lib/walkthrough').Walkthrough | null>(null);
+            useEffect(() => {
+              void import('../../lib/walkthrough-stemi').then((m) => setW(m.stemiWalkthrough));
+            }, []);
+            if (!w) return null;
+            return <WalkthroughModal walkthrough={w} onClose={() => setWalkthroughOpen(false)} />;
+          };
+          return <Inner />;
         })()}
       </Suspense>
     </section>

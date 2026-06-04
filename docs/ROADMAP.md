@@ -33,9 +33,34 @@ gap widened with every English/Chinese feature arc. This track closes it.
 | **v9.1** | Honesty + tracking: locale coverage metadata, "partial" switcher hint, CI parity metric with enforced floor, expanded critical-key set, review + this roadmap, README claim qualified | ✅ shipped |
 | **v9.2** | **Malay (`ms`) UI chrome → full parity** with English (627/627, enforced) | ✅ shipped |
 | **v9.3** | **Tamil (`ta`) UI chrome → full parity** with English (627/627, enforced; native-review-flagged) | ✅ shipped |
-| **v9.4** | Case-content translation track — `ms` for the primary-care / public-health cases first (URTI CHAS GP, Healthier-SG diabetes, dengue, Mindline) | ▶ next |
-| **v9.5** | Case-content translation track — `ta`, same case ordering | planned |
-| **v10.0** | Capstone: all four official languages at full UI + case parity; mother-tongue first-run suggestion from `navigator.languages`; "end-to-end translation" claim restored for all locales | planned |
+
+(The `ms`/`ta` case-content translation track is paused — see the
+Walkthrough arc below, which the user prioritised next. Resume after v10.0.)
+
+## In progress — Visual pathway walkthrough (Bandersnatch-style cinematic)
+
+Scrubbable + branching cinematic of the full STEMI patient journey: 995
+collapse → ambulance → ED → cath lab → ward → discharge → rehab → outpatient
+review. Hybrid Phaser + embedded MP4 clips for showpiece moments. Includes
+atmospheric support staff (AHP, cooks, cleaners, laundry, admin) throughout
+plus one dedicated "Back of house" chapter. Lives as a new standalone mode.
+
+| Version | Deliverable | Status |
+| - | - | - |
+| **v9.4** | **Foundation**: data model (`walkthrough.ts`), traversal helpers, sample STEMI walkthrough (collapse + ambulance chapters + branch-point demo), React/SVG renderer with scrubbable timeline, clickable actor cards, branch-decision overlay, top-level launcher in Trends, i18n keys in all four locales. Renderer is SVG primitives this version so the pipeline is end-to-end testable. | ✅ shipped |
+| v9.5 | Phaser canvas renderer (swap in for the SVG `<Stage>`) + ED chapter (ECG, troponin, cath activation) | ▶ next |
+| v9.6 | Cath lab chapter + CABG-rejected → PCI branch with real content | planned |
+| v9.7 | Ward stay + complications + daily ward rounds + discharge | planned |
+| v9.8 | Cardiac rehab + outpatient specialist review + first embedded MP4 clips | planned |
+| v9.9 | Back-of-house chapter — AHP / cooks / cleaners / laundry / admin day-in-the-life | planned |
+
+## Resumed after Walkthrough — Multilingual case content
+
+| Version | Deliverable | Status |
+| - | - | - |
+| v10.1 | Case-content translation track — `ms` for primary-care / public-health cases first | planned |
+| v10.2 | Case-content translation track — `ta`, same case ordering | planned |
+| **v11.0** | Capstone: all four official languages at full UI + case parity; mother-tongue first-run suggestion from `navigator.languages`; "end-to-end translation" claim restored for all locales | planned |
 
 ### Parity definition (the bar each locale must clear)
 
