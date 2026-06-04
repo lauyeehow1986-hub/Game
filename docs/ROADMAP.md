@@ -47,12 +47,12 @@ plus one dedicated "Back of house" chapter. Lives as a new standalone mode.
 
 | Version | Deliverable | Status |
 | - | - | - |
-| **v9.4** | **Foundation**: data model (`walkthrough.ts`), traversal helpers, sample STEMI walkthrough (collapse + ambulance chapters + branch-point demo), React/SVG renderer with scrubbable timeline, clickable actor cards, branch-decision overlay, top-level launcher in Trends, i18n keys in all four locales. Renderer is SVG primitives this version so the pipeline is end-to-end testable. | ✅ shipped |
-| v9.5 | Phaser canvas renderer (swap in for the SVG `<Stage>`) + ED chapter (ECG, troponin, cath activation) | ▶ next |
-| v9.6 | Cath lab chapter + CABG-rejected → PCI branch with real content | planned |
-| v9.7 | Ward stay + complications + daily ward rounds + discharge | planned |
-| v9.8 | Cardiac rehab + outpatient specialist review + first embedded MP4 clips | planned |
-| v9.9 | Back-of-house chapter — AHP / cooks / cleaners / laundry / admin day-in-the-life | planned |
+| **v9.4** | **Foundation**: data model, traversal helpers, two starter chapters + branch-point demo, React/SVG renderer with scrubbable timeline, clickable actor cards, branch-decision overlay, top-level launcher, i18n keys in all four locales. | ✅ shipped |
+| **v9.5** | **Full STEMI clinical journey + back-of-house chapter**: arrive-SGH (door-to-cath fast-track), cath-activation, diagnostic cath, cardiac CTA (with MRI-yes/no branch), cardiac MRI, family conference (with PCI/CABG branch), surgeon-decline (CABG declined → PCI), PCI procedure, CCU transfer, ward stay with morning round + AHP team, complications + escalation, discharge with case manager + billing, outpatient pharmacy, NHCS Phase II cardiac rehab, specialist outpatient review, and the back-of-house epilogue (cath cleaner, ward cleaner, hospital cook, laundry coordinator, billing clerk, HCA day-in-the-life). 18 canonical chapters + 3 off-canonical (private A&E, secondary transfer, surgeon-decline) wired into the v9.4 engine without engine changes. 30+ Singapore-grounded actors. | ✅ shipped |
+| v9.6 | Phaser canvas renderer (swap in for the SVG `<Stage>`) + atmospheric back-of-house cameos scattered through every chapter | ▶ next |
+| v9.7 | Embedded MP4 showpiece clips (cath stent deployment, MRI tube) — first hybrid content | planned |
+| v9.8 | Locale translation for the walkthrough strings (`zh`, then `ms`, then `ta`) | planned |
+| v9.9 | Second walkthrough — stroke pathway (thrombolysis vs thrombectomy) | planned |
 
 ## Resumed after Walkthrough — Multilingual case content
 

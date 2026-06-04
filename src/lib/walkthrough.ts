@@ -65,13 +65,18 @@ export interface WalkthroughChapter {
   /** Optional location label shown top-right, e.g. 'Bras Basah coffee shop'. */
   location?: string;
   beats: WalkthroughBeat[];
-  /** Optional decision presented at chapter end. Mutually exclusive with
-   *  `defaultNextChapterId` when present (branch wins). */
+  /** Optional decision presented at chapter end. When `branchPoint` is set,
+   *  the runtime pauses for a learner pick. `defaultNextChapterId` may be
+   *  set alongside it — the runtime still pauses for the branch, but the
+   *  canonical-path helpers (canonicalChapterIds, canonicalDurationSec) use
+   *  the default to surface the recommended sequence in the chapter strip. */
   branchPoint?: {
     prompt: string;
     options: WalkthroughBranchOption[];
   };
-  /** Chapter to play next when no branch point is set. */
+  /** Chapter to play next when no branch point fires. Also used by the
+   *  canonical-path helpers to render the recommended chapter sequence
+   *  even on chapters that carry a branchPoint. */
   defaultNextChapterId?: string;
 }
 
