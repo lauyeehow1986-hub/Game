@@ -1121,12 +1121,45 @@ function MrtCarriageScene(): JSX.Element {
  * Scene dispatch + default actor staging positions per scene
  * ──────────────────────────────────────────────────────────────────────── */
 
-/** Cinematic post-process overlay — film grain (feTurbulence) + colour
- *  grading (feColorMatrix) + corner vignette. One filter chain applied to a
- *  full-stage rect so it lays over the scene art uniformly. The grading
- *  matrix mildly warms the highlights and crushes the shadows; the grain is
- *  subtle (opacity 0.05) so realism increases without dominating the art. */
-function CinematicOverlay(): JSX.Element {
+/** Per-scene cinematographic mood. Drives the highlight + shadow tint of the
+ *  `<CinematicOverlay>` so each environment has a distinct feel:
+ *   - `warm`: kopitiam / counsel — amber highlights, deep shadows
+ *   - `daylight`: street / rehab — neutral with cool shadows
+ *   - `sterile`: resus / clinic / ward / pharmacy — cool teal
+ *   - `surgical`: cathlab / imaging — cold blue, crushed shadows
+ *   - `transit`: mrt — cyan highlights, deep shadows
+ *   - `industrial`: backhouse — desaturated, hard contrast */
+type CinematicMood = 'warm' | 'daylight' | 'sterile' | 'surgical' | 'transit' | 'industrial';
+
+const MOOD_FOR: Record<SceneId, CinematicMood> = {
+  kopitiam: 'warm',
+  counsel: 'warm',
+  street: 'daylight',
+  rehab: 'daylight',
+  resus: 'sterile',
+  ward: 'sterile',
+  pharmacy: 'sterile',
+  clinic: 'sterile',
+  cathlab: 'surgical',
+  imaging: 'surgical',
+  mrt: 'transit',
+  backhouse: 'industrial',
+};
+
+const MOOD_TINTS: Record<CinematicMood, { hi: string; lo: string }> = {
+  warm:       { hi: '#fde68a', lo: '#3a1f0a' },
+  daylight:   { hi: '#dbeafe', lo: '#0f1b2a' },
+  sterile:    { hi: '#a7f3d0', lo: '#0e2a30' },
+  surgical:   { hi: '#bfdbfe', lo: '#020b18' },
+  transit:    { hi: '#a5f3fc', lo: '#0a0d12' },
+  industrial: { hi: '#fef3c7', lo: '#1c1917' },
+};
+
+/** Cinematic post-process overlay — film grain (feTurbulence) + per-scene
+ *  colour grading + corner vignette. One filter chain applied to full-stage
+ *  rects so it lays over the scene art uniformly. */
+function CinematicOverlay({ mood = 'warm' }: { mood?: CinematicMood }): JSX.Element {
+  const tints = MOOD_TINTS[mood];
   return (
     <g>
       <defs>
@@ -1145,14 +1178,14 @@ function CinematicOverlay(): JSX.Element {
           <stop offset="55%" stopColor="#000" stopOpacity={0} />
           <stop offset="100%" stopColor="#000" stopOpacity={0.4} />
         </radialGradient>
-        <linearGradient id="cin-grade-warm" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#fde68a" stopOpacity={0.04} />
+        <linearGradient id="cin-grade-tint" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={tints.hi} stopOpacity={0.05} />
           <stop offset="50%" stopColor="#000" stopOpacity={0} />
-          <stop offset="100%" stopColor="#0c1d4d" stopOpacity={0.08} />
+          <stop offset="100%" stopColor={tints.lo} stopOpacity={0.12} />
         </linearGradient>
       </defs>
-      {/* warm-shadow colour-grade tint */}
-      <rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="url(#cin-grade-warm)" />
+      {/* mood-driven highlight + shadow tint */}
+      <rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="url(#cin-grade-tint)" />
       {/* corner vignette */}
       <rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="url(#cin-vig)" />
       {/* film grain — turbulence noise composited as low-alpha white-on-black */}
@@ -1180,7 +1213,7 @@ export function SceneBackground({ scene, cinematic = true }: { scene: SceneId; c
   return (
     <g>
       {body}
-      {cinematic && <CinematicOverlay />}
+      {cinematic && <CinematicOverlay mood={MOOD_FOR[scene]} />}
     </g>
   );
 }

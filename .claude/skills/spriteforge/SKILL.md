@@ -27,8 +27,10 @@ A Claude Skill that wraps the project's deterministic SVG sprite generator
 
 ## Constraints honoured
 
-- **No image assets**. Every sprite is inline SVG primitives; the bundle stays
-  asset-free and the PWA works offline without binary downloads.
+- **Inline-SVG sprites by default**. Each sprite stays inline so it's keyed off
+  the actor id with no per-sprite asset bundling. (The Phaser canvas separately
+  *bakes* sprites to textures at runtime — see `spriteTexture.ts` — but that's
+  a render-time cache, not a committed asset.)
 - **Deterministic**. Same actor id → same sprite, always. No PRNG drift, no
   build-time generation. This also means the diff for a new sprite is small
   and reviewable.
@@ -37,6 +39,10 @@ A Claude Skill that wraps the project's deterministic SVG sprite generator
 - **i18n-safe**. Sprites carry no embedded text other than the `Pb` marker on
   the lead apron (a universal radiology label); role names render as separate
   `<text>` elements that the i18n layer translates.
+- **Backgrounds are pre-baked PNGs (v9.14+)**. Scene environments live as
+  HD PNGs at `public/walkthrough/scenes/*.png` produced by `pnpm bake:scenes`.
+  Sprites compose over those backdrops via the staging geometry. The pivot
+  from "asset-free" to "assets-heavy" is documented in ROADMAP v9.14.
 
 ## Workflow for adding a new actor
 
