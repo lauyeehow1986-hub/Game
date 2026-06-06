@@ -411,8 +411,10 @@ function Stage({ walkthrough, chapter, activeByActor, selectedActorId, onPickAct
         </radialGradient>
       </defs>
 
-      {/* Environment */}
-      <SceneBackground scene={scene} />
+      {/* Environment — v9.14 assets-heavy: load the pre-baked HD PNG when
+       *  available (sharper, gradient-rich) and fall back to inline SVG if
+       *  the asset is missing. */}
+      <UltraBackground scene={scene} />
 
       {/* Staged figures */}
       {staged.map(({ actor, beat, x, y, scale, isActive, isSelected }) => {
@@ -533,6 +535,32 @@ function Stage({ walkthrough, chapter, activeByActor, selectedActorId, onPickAct
         );
       })()}
     </svg>
+  );
+}
+
+/** Assets-heavy backdrop (v9.14+). Renders the pre-baked HD PNG when it
+ *  loads cleanly; gracefully falls back to the inline-SVG scene if the
+ *  asset isn't found (development without `pnpm bake:scenes`, or a PWA
+ *  cache miss). The fallback keeps everything offline-capable. */
+function UltraBackground({ scene }: { scene: SceneId }) {
+  const [pngFailed, setPngFailed] = useState(false);
+  // Reset on scene change so we re-attempt the new PNG.
+  useEffect(() => setPngFailed(false), [scene]);
+  if (pngFailed) {
+    return <SceneBackground scene={scene} />;
+  }
+  // Vite serves /public assets from root; production base path is '/'.
+  const href = `${import.meta.env.BASE_URL ?? '/'}walkthrough/scenes/${scene}.png`.replace('//', '/');
+  return (
+    <image
+      href={href}
+      x={0}
+      y={0}
+      width={STAGE_W}
+      height={STAGE_H}
+      preserveAspectRatio="xMidYMid slice"
+      onError={() => setPngFailed(true)}
+    />
   );
 }
 

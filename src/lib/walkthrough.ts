@@ -101,6 +101,7 @@ export interface WalkthroughChapter {
   scene?:
     | 'kopitiam'
     | 'street'
+    | 'mrt'
     | 'resus'
     | 'cathlab'
     | 'imaging'

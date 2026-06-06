@@ -25,6 +25,7 @@ import type { JSX } from 'react';
 export type SceneId =
   | 'kopitiam'
   | 'street'
+  | 'mrt'
   | 'resus'
   | 'cathlab'
   | 'imaging'
@@ -789,23 +790,399 @@ function BackhouseScene(): JSX.Element {
 }
 
 /* ────────────────────────────────────────────────────────────────────────
+ * MRT CARRIAGE — Singapore-spec interior, in motion through the tunnel.
+ *
+ * Assets-heavy SVG (v9.14 pivot): no longer apologising for fidelity. Every
+ * surface gets multi-stop gradients, glass reflections, motion-blurred
+ * tunnel scenery through the windows, fluorescent ceiling bloom, brushed-
+ * aluminium grab poles + hanging hand straps, the iconic red-and-blue
+ * SMRT seat upholstery, an LED "NEXT STATION" indicator, the SOS panel,
+ * "no eating/drinking/smoking" pictograms, and the EWL route diagram with
+ * the current segment highlighted. ~120 elements; ~25 kB of inline markup.
+ * ──────────────────────────────────────────────────────────────────────── */
+
+function MrtCarriageScene(): JSX.Element {
+  return (
+    <g>
+      <defs>
+        <linearGradient id="mrt-wall" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#cfd8df" />
+          <stop offset="60%" stopColor="#a4b3bd" />
+          <stop offset="100%" stopColor="#7a8896" />
+        </linearGradient>
+        <linearGradient id="mrt-ceil" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#e9eef2" />
+          <stop offset="100%" stopColor="#aebbc4" />
+        </linearGradient>
+        <linearGradient id="mrt-floor" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3f4854" />
+          <stop offset="100%" stopColor="#1d242d" />
+        </linearGradient>
+        <linearGradient id="mrt-floor-strip" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#fbbf24" />
+          <stop offset="100%" stopColor="#b45309" />
+        </linearGradient>
+        <linearGradient id="mrt-seat-red" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#dc3a3a" />
+          <stop offset="50%" stopColor="#9a1f1f" />
+          <stop offset="100%" stopColor="#5b1010" />
+        </linearGradient>
+        <linearGradient id="mrt-seat-blue" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#2563eb" />
+          <stop offset="60%" stopColor="#1e3a8a" />
+          <stop offset="100%" stopColor="#0c1d4d" />
+        </linearGradient>
+        <linearGradient id="mrt-pole" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#3f4855" />
+          <stop offset="35%" stopColor="#cdd6df" />
+          <stop offset="55%" stopColor="#f5f7fa" />
+          <stop offset="75%" stopColor="#cdd6df" />
+          <stop offset="100%" stopColor="#3f4855" />
+        </linearGradient>
+        <linearGradient id="mrt-window" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#0b1424" />
+          <stop offset="50%" stopColor="#070d18" />
+          <stop offset="100%" stopColor="#040810" />
+        </linearGradient>
+        <linearGradient id="mrt-glass-refl" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity={0.28} />
+          <stop offset="40%" stopColor="#ffffff" stopOpacity={0.06} />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity={0} />
+        </linearGradient>
+        <radialGradient id="mrt-tube-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#fffbe6" stopOpacity={0.95} />
+          <stop offset="100%" stopColor="#fffbe6" stopOpacity={0} />
+        </radialGradient>
+        <radialGradient id="mrt-vig" cx="50%" cy="50%" r="72%">
+          <stop offset="65%" stopColor="#000" stopOpacity={0} />
+          <stop offset="100%" stopColor="#040810" stopOpacity={0.55} />
+        </radialGradient>
+
+        {/* Motion-blur filter applied to the streaks of tunnel scenery
+         *  passing the carriage windows. */}
+        <filter id="mrt-motion-blur" x="-10%" y="-10%" width="120%" height="120%">
+          <feGaussianBlur stdDeviation="6 0" />
+        </filter>
+        {/* Soft bloom for the ceiling fluorescents. */}
+        <filter id="mrt-bloom" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="3" />
+        </filter>
+      </defs>
+
+      {/* dark carriage cavity */}
+      <rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="#15202b" />
+
+      {/* CEILING band */}
+      <rect x={0} y={0} width={STAGE_W} height={26} fill="url(#mrt-ceil)" />
+      <rect x={0} y={26} width={STAGE_W} height={2} fill="#5a6772" />
+      {/* recessed fluorescent strips with bloom halos */}
+      {[120, 240, 360].map((cx, i) => (
+        <g key={i}>
+          <ellipse cx={cx} cy={16} rx={70} ry={14} fill="url(#mrt-tube-glow)" filter="url(#mrt-bloom)" />
+          <rect x={cx - 50} y={10} width={100} height={5} rx={2} fill="#fffbe6" />
+          <rect x={cx - 50} y={10} width={100} height={5} rx={2} fill="#ffffff" opacity={0.6}>
+            <animate attributeName="opacity" values="0.6;0.85;0.6" dur={`${3 + (i % 2)}s`} repeatCount="indefinite" />
+          </rect>
+        </g>
+      ))}
+
+      {/* AD/ROUTE-MAP BAND above the windows */}
+      <rect x={0} y={28} width={STAGE_W} height={26} fill="#dde4e9" />
+      <rect x={0} y={28} width={STAGE_W} height={2} fill="#9bafbd" />
+      {/* EWL route diagram (East-West Line) — current segment highlighted */}
+      <g transform="translate(20,38)">
+        {[
+          'PASIR RIS',
+          'TAMPINES',
+          'SIMEI',
+          'TANAH MERAH',
+          'BEDOK',
+          'KEMBANGAN',
+          'EUNOS',
+          'PAYA LEBAR',
+          'ALJUNIED',
+          'KALLANG',
+        ].map((label, i) => {
+          const x = i * 46;
+          const isCurrent = i === 4; // train is at/between Bedok
+          return (
+            <g key={label} transform={`translate(${x},0)`}>
+              <line x1={0} y1={6} x2={46} y2={6} stroke="#0fa755" strokeWidth={2.4} />
+              <circle cx={0} cy={6} r={isCurrent ? 3.5 : 2.4} fill={isCurrent ? '#fbbf24' : '#0fa755'} stroke="#fff" strokeWidth={0.6}>
+                {isCurrent && <animate attributeName="r" values="3;4;3" dur="1.5s" repeatCount="indefinite" />}
+              </circle>
+              <text x={0} y={16} textAnchor="middle" fontFamily="ui-monospace, monospace" fontSize={3.6} fill={isCurrent ? '#0c1d4d' : '#4b5563'}>
+                {label}
+              </text>
+            </g>
+          );
+        })}
+      </g>
+      {/* NEXT STATION LED indicator */}
+      <g transform="translate(380,30)">
+        <rect x={0} y={0} width={92} height={22} rx={2} fill="#0a0a0a" />
+        <rect x={2} y={2} width={88} height={6} fill="#ffae34" opacity={0.95}>
+          <animate attributeName="opacity" values="0.7;1;0.7" dur="1.3s" repeatCount="indefinite" />
+        </rect>
+        <text x={46} y={7} textAnchor="middle" fontSize={4.6} fontFamily="ui-monospace, monospace" fill="#0a0a0a" fontWeight="bold">
+          NEXT: TAMPINES
+        </text>
+        <text x={46} y={15} textAnchor="middle" fontSize={4.4} fontFamily="ui-monospace, monospace" fill="#34d399">
+          下一站 · 淡滨尼
+        </text>
+        <text x={46} y={20} textAnchor="middle" fontSize={3.6} fontFamily="ui-monospace, monospace" fill="#fb923c">
+          STESEN SETERUSNYA
+        </text>
+      </g>
+
+      {/* WINDOW STRIP — wide horizontal window with motion-blurred tunnel */}
+      <g>
+        {/* window frame */}
+        <rect x={0} y={56} width={STAGE_W} height={48} fill="#3f4855" />
+        {/* glass divided into panes */}
+        {[0, 1, 2, 3].map((i) => (
+          <g key={i}>
+            <rect x={4 + i * 120} y={60} width={112} height={40} fill="url(#mrt-window)" />
+            {/* motion-blurred bright streaks (tunnel lights / wall) */}
+            <g filter="url(#mrt-motion-blur)" clipPath={`url(#mrt-pane-${i})`}>
+              {[8, 22, 38, 56, 76, 92].map((sy, k) => (
+                <rect key={k} x={4 + i * 120 - 60} y={60 + sy} width={232} height={2} fill="#fbbf24" opacity={0.5}>
+                  <animate
+                    attributeName="x"
+                    values={`${4 + i * 120 + 120};${4 + i * 120 - 200}`}
+                    dur={`${0.6 + (k % 3) * 0.3}s`}
+                    repeatCount="indefinite"
+                  />
+                </rect>
+              ))}
+              {[14, 28, 48, 70].map((sy, k) => (
+                <rect key={`b${k}`} x={4 + i * 120 - 60} y={60 + sy} width={232} height={1.2} fill="#67e8f9" opacity={0.3}>
+                  <animate
+                    attributeName="x"
+                    values={`${4 + i * 120 + 120};${4 + i * 120 - 200}`}
+                    dur={`${0.4 + (k % 3) * 0.2}s`}
+                    repeatCount="indefinite"
+                  />
+                </rect>
+              ))}
+            </g>
+            <clipPath id={`mrt-pane-${i}`}>
+              <rect x={4 + i * 120} y={60} width={112} height={40} />
+            </clipPath>
+            {/* glass reflection sheen */}
+            <rect x={4 + i * 120} y={60} width={112} height={40} fill="url(#mrt-glass-refl)" />
+            {/* mullions */}
+            <rect x={i === 0 ? 0 : 2 + i * 120} y={58} width={4} height={44} fill="#5a6772" />
+          </g>
+        ))}
+        <rect x={STAGE_W - 4} y={58} width={4} height={44} fill="#5a6772" />
+      </g>
+
+      {/* WAINSCOT below windows */}
+      <rect x={0} y={104} width={STAGE_W} height={36} fill="url(#mrt-wall)" />
+      <rect x={0} y={104} width={STAGE_W} height={1} fill="#566370" />
+      <rect x={0} y={139} width={STAGE_W} height={1} fill="#566370" />
+
+      {/* SLIDING DOORS — pair centered */}
+      <g transform="translate(196,56)">
+        <rect x={0} y={0} width={88} height={84} fill="#3f4855" />
+        <rect x={0} y={0} width={44} height={84} fill="url(#mrt-window)" />
+        <rect x={44} y={0} width={44} height={84} fill="url(#mrt-window)" />
+        <rect x={0} y={0} width={44} height={84} fill="url(#mrt-glass-refl)" />
+        <rect x={44} y={0} width={44} height={84} fill="url(#mrt-glass-refl)" />
+        {/* center seam */}
+        <rect x={43} y={0} width={2} height={84} fill="#0a0e14" />
+        {/* SMRT decals on doors */}
+        <text x={22} y={36} textAnchor="middle" fontSize={7} fontFamily="ui-monospace, monospace" fontWeight="bold" fill="#fff" opacity={0.85}>
+          SMRT
+        </text>
+        <text x={66} y={36} textAnchor="middle" fontSize={7} fontFamily="ui-monospace, monospace" fontWeight="bold" fill="#fff" opacity={0.85}>
+          SMRT
+        </text>
+        {/* yellow door-edge warning stripes */}
+        <rect x={0} y={0} width={2} height={84} fill="#fbbf24" />
+        <rect x={86} y={0} width={2} height={84} fill="#fbbf24" />
+        {/* button + intercom */}
+        <circle cx={22} cy={66} r={4} fill="#ef4444" stroke="#fff" strokeWidth={0.6}>
+          <animate attributeName="fill" values="#ef4444;#7f1d1d;#ef4444" dur="2.4s" repeatCount="indefinite" />
+        </circle>
+        <text x={22} y={75} textAnchor="middle" fontSize={3} fontFamily="ui-monospace, monospace" fill="#fff">SOS</text>
+      </g>
+
+      {/* SEAT ROW under the window — Singapore-spec red & blue bench */}
+      <g transform="translate(0,140)">
+        {/* seat structure */}
+        <rect x={0} y={0} width={196} height={28} fill="#1f2937" />
+        <rect x={284} y={0} width={196} height={28} fill="#1f2937" />
+        {/* seat cushions (alternating red/blue) */}
+        {[0, 1, 2, 3].map((i) => (
+          <g key={`lc${i}`} transform={`translate(${10 + i * 46},2)`}>
+            <rect x={0} y={0} width={38} height={20} rx={3} fill={i % 2 ? 'url(#mrt-seat-blue)' : 'url(#mrt-seat-red)'} />
+            <rect x={0} y={0} width={38} height={4} rx={2} fill="#000" opacity={0.18} />
+            {/* anti-slip texture */}
+            {[0, 1, 2, 3, 4].map((k) => (
+              <line key={k} x1={4 + k * 7} y1={4} x2={4 + k * 7} y2={18} stroke="#000" strokeWidth={0.3} opacity={0.25} />
+            ))}
+          </g>
+        ))}
+        {[0, 1, 2, 3].map((i) => (
+          <g key={`rc${i}`} transform={`translate(${294 + i * 46},2)`}>
+            <rect x={0} y={0} width={38} height={20} rx={3} fill={i % 2 ? 'url(#mrt-seat-red)' : 'url(#mrt-seat-blue)'} />
+            <rect x={0} y={0} width={38} height={4} rx={2} fill="#000" opacity={0.18} />
+            {[0, 1, 2, 3, 4].map((k) => (
+              <line key={k} x1={4 + k * 7} y1={4} x2={4 + k * 7} y2={18} stroke="#000" strokeWidth={0.3} opacity={0.25} />
+            ))}
+          </g>
+        ))}
+        {/* priority-seat sticker on the first left seat */}
+        <rect x={12} y={4} width={10} height={10} fill="#fef3c7" stroke="#92400e" strokeWidth={0.6} />
+        <text x={17} y={12} textAnchor="middle" fontSize={5} fill="#92400e">♿</text>
+      </g>
+
+      {/* GRAB POLES — vertical brushed-aluminium */}
+      {[40, 145, 335, 440].map((x, i) => (
+        <g key={i}>
+          <rect x={x - 1.5} y={28} width={3} height={184} fill="url(#mrt-pole)" />
+          {/* base flange */}
+          <rect x={x - 4} y={210} width={8} height={4} rx={1.5} fill="#5a6772" />
+        </g>
+      ))}
+
+      {/* HORIZONTAL STRAP RAIL across the ceiling */}
+      <rect x={20} y={32} width={STAGE_W - 40} height={3} fill="url(#mrt-pole)" />
+      {/* hanging straps with subtle sway */}
+      {[80, 120, 280, 320, 380, 420].map((x, i) => (
+        <g key={i} transform={`translate(${x},35)`}>
+          <g>
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              values="-2;2;-2"
+              dur={`${3 + (i % 3) * 0.6}s`}
+              repeatCount="indefinite"
+              additive="sum"
+            />
+            <line x1={0} y1={0} x2={0} y2={22} stroke="#1f2937" strokeWidth={1.6} />
+            <rect x={-5} y={20} width={10} height={6} rx={3} fill="#0b1424" stroke="#ca8a04" strokeWidth={0.4} />
+            <rect x={-5} y={20} width={10} height={2} rx={1} fill="#fbbf24" />
+          </g>
+        </g>
+      ))}
+
+      {/* FLOOR with yellow tactile strip near doors */}
+      <rect x={0} y={216} width={STAGE_W} height={STAGE_H - 216} fill="url(#mrt-floor)" />
+      {/* perspective floor seams */}
+      {[226, 240, 254].map((y, i) => (
+        <line key={i} x1={0} y1={y} x2={STAGE_W} y2={y} stroke="#0a0d12" strokeWidth={0.5} opacity={0.6 - i * 0.15} />
+      ))}
+      {/* yellow tactile strip in front of the doors */}
+      <rect x={196} y={216} width={88} height={6} fill="url(#mrt-floor-strip)" />
+      {/* tactile dots */}
+      {Array.from({ length: 14 }, (_, i) => (
+        <circle key={i} cx={200 + i * 6} cy={219} r={1} fill="#92400e" />
+      ))}
+      {/* yellow "stand back" line */}
+      <rect x={0} y={224} width={196} height={1.5} fill="#fbbf24" opacity={0.85} />
+      <rect x={284} y={224} width={196} height={1.5} fill="#fbbf24" opacity={0.85} />
+
+      {/* NO EATING/DRINKING/SMOKING pictograms (lower wall, near doors) */}
+      <g transform="translate(186,142)" opacity={0.85}>
+        <rect x={0} y={0} width={9} height={9} rx={1} fill="#fff" stroke="#dc2626" strokeWidth={0.5} />
+        <line x1={1} y1={1} x2={8} y2={8} stroke="#dc2626" strokeWidth={0.6} />
+        <text x={4.5} y={7} textAnchor="middle" fontSize={5} fill="#7c2d12">🍔</text>
+      </g>
+      <g transform="translate(285,142)" opacity={0.85}>
+        <rect x={0} y={0} width={9} height={9} rx={1} fill="#fff" stroke="#dc2626" strokeWidth={0.5} />
+        <line x1={1} y1={1} x2={8} y2={8} stroke="#dc2626" strokeWidth={0.6} />
+        <text x={4.5} y={7} textAnchor="middle" fontSize={5} fill="#7c2d12">🚬</text>
+      </g>
+
+      {/* a couple of seated commuters as silhouettes at the seat ends
+       *  (decorative — they don't carry beats) */}
+      <g transform="translate(28,142)">
+        <rect x={0} y={-22} width={14} height={22} rx={3} fill="#374151" />
+        <circle cx={7} cy={-26} r={6} fill="#c79a6d" />
+        <path d="M 1 -28 a 6 6 0 0 1 12 0 z" fill="#1c140e" />
+        <rect x={-4} y={-18} width={18} height={11} fill="#e8e3d8" opacity={0.85} transform="rotate(-8 5 -13)" />
+      </g>
+      <g transform="translate(450,142)">
+        <rect x={0} y={-22} width={14} height={22} rx={3} fill="#475569" />
+        <circle cx={7} cy={-26} r={6} fill="#a3744f" />
+        <path d="M 1 -28 a 6 6 0 0 1 12 0 z" fill="#1c140e" />
+      </g>
+
+      {/* SVG vignette overlay */}
+      <rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="url(#mrt-vig)" />
+    </g>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────
  * Scene dispatch + default actor staging positions per scene
  * ──────────────────────────────────────────────────────────────────────── */
 
-export function SceneBackground({ scene }: { scene: SceneId }): JSX.Element {
+/** Cinematic post-process overlay — film grain (feTurbulence) + colour
+ *  grading (feColorMatrix) + corner vignette. One filter chain applied to a
+ *  full-stage rect so it lays over the scene art uniformly. The grading
+ *  matrix mildly warms the highlights and crushes the shadows; the grain is
+ *  subtle (opacity 0.05) so realism increases without dominating the art. */
+function CinematicOverlay(): JSX.Element {
+  return (
+    <g>
+      <defs>
+        <filter id="cin-grade" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" stitchTiles="stitch" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1
+                    0 0 0 0 1
+                    0 0 0 0 1
+                    0 0 0 0.05 0"
+          />
+          <feComposite in2="SourceGraphic" operator="in" />
+        </filter>
+        <radialGradient id="cin-vig" cx="50%" cy="50%" r="78%">
+          <stop offset="55%" stopColor="#000" stopOpacity={0} />
+          <stop offset="100%" stopColor="#000" stopOpacity={0.4} />
+        </radialGradient>
+        <linearGradient id="cin-grade-warm" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#fde68a" stopOpacity={0.04} />
+          <stop offset="50%" stopColor="#000" stopOpacity={0} />
+          <stop offset="100%" stopColor="#0c1d4d" stopOpacity={0.08} />
+        </linearGradient>
+      </defs>
+      {/* warm-shadow colour-grade tint */}
+      <rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="url(#cin-grade-warm)" />
+      {/* corner vignette */}
+      <rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="url(#cin-vig)" />
+      {/* film grain — turbulence noise composited as low-alpha white-on-black */}
+      <rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="#ffffff" filter="url(#cin-grade)" />
+    </g>
+  );
+}
+
+export function SceneBackground({ scene, cinematic = true }: { scene: SceneId; cinematic?: boolean }): JSX.Element {
+  let body: JSX.Element;
   switch (scene) {
-    case 'kopitiam': return <KopitiamScene />;
-    case 'street': return <StreetScene />;
-    case 'resus': return <ResusScene />;
-    case 'cathlab': return <CathLabScene />;
-    case 'imaging': return <ImagingScene />;
-    case 'counsel': return <CounselScene />;
-    case 'ward': return <WardScene />;
-    case 'pharmacy': return <PharmacyScene />;
-    case 'rehab': return <RehabScene />;
-    case 'clinic': return <ClinicScene />;
-    case 'backhouse': return <BackhouseScene />;
+    case 'kopitiam': body = <KopitiamScene />; break;
+    case 'street': body = <StreetScene />; break;
+    case 'mrt': body = <MrtCarriageScene />; break;
+    case 'resus': body = <ResusScene />; break;
+    case 'cathlab': body = <CathLabScene />; break;
+    case 'imaging': body = <ImagingScene />; break;
+    case 'counsel': body = <CounselScene />; break;
+    case 'ward': body = <WardScene />; break;
+    case 'pharmacy': body = <PharmacyScene />; break;
+    case 'rehab': body = <RehabScene />; break;
+    case 'clinic': body = <ClinicScene />; break;
+    case 'backhouse': body = <BackhouseScene />; break;
   }
+  return (
+    <g>
+      {body}
+      {cinematic && <CinematicOverlay />}
+    </g>
+  );
 }
 
 /**

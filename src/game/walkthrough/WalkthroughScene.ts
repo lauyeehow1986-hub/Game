@@ -180,15 +180,35 @@ export class WalkthroughScene extends Phaser.Scene {
   }
 
   private loadBackground(scene: SceneId): void {
-    const key = `wt-bg-${scene}`;
-    this.ensureTexture(key, () => sceneToDataUri(scene), () => {
+    const place = (key: string) => {
       if (this.bg) this.bg.destroy();
       this.bg = this.add
         .image(0, 0, key)
         .setOrigin(0, 0)
         .setDisplaySize(STAGE_W, STAGE_H)
         .setDepth(-10);
+    };
+    const svgKey = `wt-bg-${scene}`;
+    // v9.14 assets-heavy: load the pre-baked HD PNG first; fall back to the
+    // inline-SVG bake if the PNG is missing (no `pnpm bake:scenes` in dev).
+    const pngKey = `wt-bg-png-${scene}`;
+    if (this.textures.exists(pngKey)) {
+      place(pngKey);
+      return;
+    }
+    const url = `${(import.meta as ImportMeta).env?.BASE_URL ?? '/'}walkthrough/scenes/${scene}.png`.replace('//', '/');
+    this.load.image(pngKey, url);
+    this.load.once(Phaser.Loader.Events.COMPLETE, () => {
+      if (this.textures.exists(pngKey)) {
+        place(pngKey);
+      } else {
+        this.ensureTexture(svgKey, () => sceneToDataUri(scene), () => place(svgKey));
+      }
     });
+    this.load.once(Phaser.Loader.Events.FILE_LOAD_ERROR, () => {
+      this.ensureTexture(svgKey, () => sceneToDataUri(scene), () => place(svgKey));
+    });
+    this.load.start();
   }
 
   private upsertFigure(f: PhaserFigure): void {

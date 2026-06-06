@@ -12,7 +12,7 @@ import {
 } from './scenery';
 
 const ALL_SCENES: SceneId[] = [
-  'kopitiam', 'street', 'resus', 'cathlab', 'imaging',
+  'kopitiam', 'street', 'mrt', 'resus', 'cathlab', 'imaging',
   'counsel', 'ward', 'pharmacy', 'rehab', 'clinic', 'backhouse',
 ];
 
@@ -38,6 +38,21 @@ describe('scenery — backgrounds', () => {
     const svg = renderToStaticMarkup(<SceneBackground scene="kopitiam" />);
     expect(svg).toContain('KOPI');
     expect(svg).toContain('CHICKEN RICE');
+  });
+
+  it('the MRT carries Singapore-specific carriage details', () => {
+    const svg = renderToStaticMarkup(<SceneBackground scene="mrt" />);
+    expect(svg).toContain('SMRT');
+    expect(svg).toContain('TAMPINES');
+    expect(svg).toContain('SOS');
+  });
+
+  it('cinematic overlay can be disabled', () => {
+    const with_overlay = renderToStaticMarkup(<SceneBackground scene="mrt" cinematic />);
+    const without = renderToStaticMarkup(<SceneBackground scene="mrt" cinematic={false} />);
+    expect(without.length).toBeLessThan(with_overlay.length);
+    expect(with_overlay).toContain('cin-vig');
+    expect(without).not.toContain('cin-vig');
   });
 
   it('GroundShadow is an ellipse flatter than it is wide', () => {

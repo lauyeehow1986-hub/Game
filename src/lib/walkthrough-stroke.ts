@@ -4,9 +4,11 @@
  * showpieces all reuse cleanly for a new clinical journey.
  *
  * Patient: Mdm Lim, 72-year-old retired teacher. Sudden onset right-sided
- * weakness and aphasia during morning tai-chi in the void deck. Family notice
- * facial droop, dial 995. Singapore stroke network: SCDF FAST screen → "stroke
- * bypass" → NNI@TTSH (or NNI@SGH) hyperacute stroke unit. CT head excludes
+ * weakness and aphasia while standing in a moving MRT carriage on the
+ * East-West Line between Bedok and Tampines (morning commute). Fellow
+ * commuter and station staff press the SOS plunger; SCDF meets the train at
+ * Tampines. Singapore stroke network: SCDF FAST screen → "stroke bypass" →
+ * NNI@TTSH (or NNI@SGH) hyperacute stroke unit. CT head excludes
  * haemorrhage, CT angiogram identifies M1 occlusion. Heart-team-equivalent
  * stroke decision branch: IV thrombolysis (alteplase / tenecteplase) within
  * 4.5 hours vs primary endovascular thrombectomy for the large-vessel
@@ -40,17 +42,24 @@ export const strokeWalkthrough: Walkthrough = {
       id: 'family-daughter',
       role: 'Daughter, 44',
       team: 'patient',
-      bio: 'The patient\'s daughter, an accounts manager. First to notice the facial droop and slurred speech at the void deck. Calls 995, accompanies the ambulance, acts as the family liaison through admission and discharge planning.',
+      bio: 'The patient\'s daughter, an accounts manager. Arrives at NNI@TTSH ~25 minutes after the ambulance, alerted by the SMRT station manager who relayed her mother\'s emergency contact. Acts as the family liaison through admission and discharge planning.',
       swatch: '#60a5fa',
     },
 
-    /* Pre-hospital */
+    /* Pre-hospital — MRT commute setting */
     'bystander': {
       id: 'stroke-bystander',
-      role: 'Tai-chi neighbour',
+      role: 'Fellow commuter (uncle)',
       team: 'bystander',
-      bio: 'A 65-year-old neighbour from the same tai-chi group. Helps lower Mdm Lim to the void-deck bench, notes the time of onset (08:35), keeps her airway clear while the daughter calls 995.',
+      bio: 'A 60-something commuter standing across the carriage. Catches Mdm Lim as she slumps against the grab pole, notes the time, supports her airway. Calls out for the train staff and presses the SOS plunger by the doors.',
       swatch: '#a3e635',
+    },
+    'smrt-staff': {
+      id: 'smrt-staff',
+      role: 'SMRT station manager',
+      team: 'first-responder',
+      bio: 'Tampines station manager. Responds to the SOS plunger alert, meets the carriage at the platform, calls 995, walks the paramedics onto the train and clears the platform for the stretcher.',
+      swatch: '#16a34a',
     },
 
     /* Ambulance */
@@ -202,19 +211,26 @@ export const strokeWalkthrough: Walkthrough = {
      * ──────────────────────────────────────────────────────────────────── */
     collapse: {
       id: 'collapse',
-      title: 'Sudden onset — 08:35 at the void deck',
-      scene: 'kopitiam',
-      durationSec: 28,
+      title: 'Sudden onset — 08:35 on the MRT',
+      scene: 'mrt',
+      durationSec: 30,
       timeOfDay: '08:35 SGT',
-      location: 'HDB void deck — Tampines',
+      location: 'EWL · between Bedok and Tampines',
       defaultNextChapterId: 'ambulance',
       beats: [
-        { at: 0, actorId: 'patient', action: 'Mid-tai-chi — sudden right-arm drop, slurred speech, listing to one side.', pos: { x: 214, y: 224 }, pose: 'stand', expression: 'pained' },
-        { at: 3, actorId: 'bystander', action: 'Catches her arm. Eases her to the void-deck bench. Notes the time.', pos: { x: 264, y: 222 }, pose: 'stand', expression: 'alarmed' },
-        { at: 7, actorId: 'family-daughter', action: 'Runs over. Notices the facial droop and slurred speech — phones 995.', pos: { x: 304, y: 220 }, pose: 'point', expression: 'distressed' },
-        { at: 12, actorId: 'patient', action: 'Right arm weak, speech slurred, comprehending. Awake.', pos: { x: 184, y: 234 }, pose: 'sit', expression: 'distressed' },
-        { at: 16, actorId: 'family-daughter', action: 'On 995: gives the FAST positive features and the exact onset time.', pos: { x: 304, y: 220 }, pose: 'point', expression: 'distressed' },
-        { at: 22, actorId: 'bystander', action: 'Keeps her upright, head supported. Family on the phone with dispatcher.', pos: { x: 244, y: 226 }, pose: 'kneel', direction: 'E', expression: 'focused' },
+        // Standing in the carriage, holding the grab pole near the doors.
+        { at: 0, actorId: 'patient', action: 'Standing at the pole — sudden right arm gives way, leans on the door.', pos: { x: 174, y: 244 }, pose: 'stand', expression: 'pained' },
+        // Fellow commuter sees her stagger.
+        { at: 3, actorId: 'bystander', action: 'Sees her slump against the pole. Moves in to catch her.', pos: { x: 220, y: 248 }, pose: 'walk', walking: true, direction: 'W', expression: 'alarmed' },
+        // She drops further — lowered into the priority seat by the doors.
+        { at: 7, actorId: 'patient', action: 'Right side weak, speech slurred but conscious. Eased into the priority seat.', pos: { x: 50, y: 230 }, pose: 'sit', expression: 'distressed' },
+        // Bystander hits the SOS plunger and shouts for the train manager.
+        { at: 11, actorId: 'bystander', action: 'Presses the SOS plunger by the doors. Calls out for the train staff.', pos: { x: 222, y: 226 }, pose: 'point', direction: 'E', expression: 'alarmed' },
+        // SMRT station manager comes on the radio / arrives onto the carriage.
+        { at: 17, actorId: 'smrt-staff', action: 'Radios control: medical emergency, car 3. Train held at next platform.', pos: { x: 320, y: 232 }, pose: 'point', direction: 'W', expression: 'focused' },
+        // Bystander steadies her head while waiting; notes the time.
+        { at: 22, actorId: 'bystander', action: 'Steadies her head. Notes the time of onset for the medics. FAST positive.', pos: { x: 86, y: 236 }, pose: 'kneel', direction: 'E', expression: 'focused' },
+        { at: 26, actorId: 'smrt-staff', action: 'On 995: stroke alert. Paramedics rerouted to Tampines platform 2.', pos: { x: 320, y: 232 }, pose: 'stand', direction: 'W', expression: 'focused' },
       ],
     },
 
@@ -223,19 +239,19 @@ export const strokeWalkthrough: Walkthrough = {
      * ──────────────────────────────────────────────────────────────────── */
     ambulance: {
       id: 'ambulance',
-      title: 'Ambulance on scene — 08:48',
+      title: 'Ambulance at the station — 08:48',
       scene: 'street',
       durationSec: 26,
       timeOfDay: '08:48 SGT',
-      location: 'Tampines block · 13 min from NNI@TTSH',
+      location: 'Tampines MRT platform 2 → ambulance bay',
       defaultNextChapterId: 'arrive-nni',
       beats: [
-        { at: 0, actorId: 'paramedic', action: 'Arrives with EA. Confirms FAST: facial droop, right arm drift, slurred speech.', pos: { x: 222, y: 246 }, pose: 'kneel', direction: 'W', expression: 'focused' },
-        { at: 4, actorId: 'patient', action: 'On the stretcher — alert, right hemiparesis, expressive aphasia.', pos: { x: 170, y: 244 }, pose: 'collapsed', expression: 'distressed' },
+        { at: 0, actorId: 'paramedic', action: 'Met on the platform by SMRT staff. FAST positive on assessment.', pos: { x: 222, y: 246 }, pose: 'kneel', direction: 'W', expression: 'focused' },
+        { at: 4, actorId: 'patient', action: 'On the stretcher off the train — alert, right hemiparesis, expressive aphasia.', pos: { x: 170, y: 244 }, pose: 'collapsed', expression: 'distressed' },
         { at: 8, actorId: 'paramedic', action: 'BP 178/102. Capillary glucose 6.4 (rules out hypoglycaemia).', pos: { x: 222, y: 246 }, pose: 'kneel', direction: 'W', expression: 'focused' },
         { at: 13, actorId: 'driver', action: 'Stroke bypass called. Routes to NNI@TTSH. Pre-notifies stroke team.', pos: { x: 312, y: 238 }, pose: 'point', expression: 'focused' },
         { at: 19, actorId: 'paramedic', action: 'Last-known-well 08:35. Onset-to-door projected: 27 min.', pos: { x: 222, y: 240 }, pose: 'stand', direction: 'W', expression: 'focused' },
-        { at: 24, actorId: 'family-daughter', action: 'Travels in the EA cabin; supplies medication list and NRIC.', pos: { x: 154, y: 236 }, pose: 'sit', expression: 'distressed' },
+        { at: 24, actorId: 'smrt-staff', action: 'Hands over emergency contact (next-of-kin) from the patient\'s wallet.', pos: { x: 100, y: 232 }, pose: 'point', direction: 'E', expression: 'focused' },
       ],
     },
 
@@ -256,7 +272,7 @@ export const strokeWalkthrough: Walkthrough = {
         { at: 7, actorId: 'ed-neurologist', action: 'Quick neuro exam. NIHSS 14 — moderate-severe stroke. Activates the lab.', pos: { x: 200, y: 232 }, pose: 'stand', direction: 'E', expression: 'focused' },
         { at: 14, actorId: 'ed-nurse', action: 'Two large-bore IVs. Bloods (glucose, FBC, coag, U&E) sent stat.', pos: { x: 320, y: 226 }, pose: 'stand', direction: 'W', expression: 'focused' },
         { at: 20, actorId: 'ed-neurologist', action: 'BP 178/102 — within thrombolysis threshold. Walks family to CT.', pos: { x: 200, y: 232 }, pose: 'point', expression: 'focused' },
-        { at: 26, actorId: 'family-daughter', action: 'Hovers at the trolley. Holds her mother\'s left hand.', pos: { x: 286, y: 224 }, pose: 'stand', direction: 'W', expression: 'distressed' },
+        { at: 26, actorId: 'family-daughter', action: 'Arrives at NNI from work. Holds her mother\'s left hand.', pos: { x: 286, y: 224 }, pose: 'stand', direction: 'W', expression: 'distressed' },
       ],
     },
 
