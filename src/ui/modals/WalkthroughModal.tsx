@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Component, lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useFocusTrap } from '../../lib/use-focus-trap';
 import { useT } from '../../lib/i18n';
 import {
@@ -15,17 +15,21 @@ import { ActorSprite, INTERACTION_FRAMES, WALK_FRAMES } from '../../lib/sprite-g
 import {
   SceneBackground,
   GroundShadow,
-  defaultStagePos,
-  depthScale,
   STAGE_W,
   STAGE_H,
   type SceneId,
 } from '../../lib/scenery';
+import { stageFigures } from '../../lib/walkthrough-staging';
 
 interface Props {
   walkthrough: Walkthrough;
   onClose: () => void;
 }
+
+/** Cinematic (Phaser canvas) renderer — lazy so Phaser only loads on opt-in. */
+const LazyPhaserStage = lazy(() => import('./WalkthroughPhaserStage'));
+
+type RendererKind = 'svg' | 'phaser';
 
 const PLAY_TICK_MS = 100; // 10 fps is plenty for prose beats
 
@@ -57,6 +61,8 @@ export function WalkthroughModal({ walkthrough, onClose }: Props) {
   const [selectedActorId, setSelectedActorId] = useState<string | null>(null);
   /** Branch overlay shown when a chapter with a branchPoint reaches its end. */
   const [branchOpen, setBranchOpen] = useState(false);
+  /** Stage renderer — SVG (default, polished) or Phaser canvas (beta). */
+  const [renderer, setRenderer] = useState<RendererKind>('svg');
 
   const chapter = chapterOf(walkthrough, chapterId);
   const totalSec = chapter?.durationSec ?? 0;
@@ -161,33 +167,74 @@ export function WalkthroughModal({ walkthrough, onClose }: Props) {
               {chapter.title}
             </h2>
           </div>
-          <div className="text-right space-y-0.5">
-            {chapter.timeOfDay && (
-              <div className="text-[11px] font-mono text-amber-300">{chapter.timeOfDay}</div>
-            )}
-            {chapter.location && (
-              <div className="text-[10px] text-clinical-subtle">{chapter.location}</div>
-            )}
+          <div className="flex items-center gap-3">
+            {/* Renderer toggle — SVG (default) vs Phaser canvas (beta) */}
+            <div className="flex rounded border border-clinical-border overflow-hidden text-[10px]">
+              <button
+                onClick={() => setRenderer('svg')}
+                className={`px-2 py-1 ${renderer === 'svg' ? 'bg-clinical-accent text-white' : 'text-clinical-subtle hover:text-white'}`}
+                aria-pressed={renderer === 'svg'}
+                title="Vector stage (default)"
+              >
+                2D
+              </button>
+              <button
+                onClick={() => setRenderer('phaser')}
+                className={`px-2 py-1 ${renderer === 'phaser' ? 'bg-clinical-accent text-white' : 'text-clinical-subtle hover:text-white'}`}
+                aria-pressed={renderer === 'phaser'}
+                title="Phaser canvas renderer (beta) — tweened motion, particles, camera"
+              >
+                Cinematic ᴮᴱᵀᴬ
+              </button>
+            </div>
+            <div className="text-right space-y-0.5">
+              {chapter.timeOfDay && (
+                <div className="text-[11px] font-mono text-amber-300">{chapter.timeOfDay}</div>
+              )}
+              {chapter.location && (
+                <div className="text-[10px] text-clinical-subtle">{chapter.location}</div>
+              )}
+            </div>
+            <button
+              onClick={onClose}
+              className="text-clinical-subtle hover:text-white text-base"
+              aria-label={t('common.close')}
+            >
+              ✕
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="text-clinical-subtle hover:text-white text-base"
-            aria-label={t('common.close')}
-          >
-            ✕
-          </button>
         </header>
 
-        {/* Stage — SVG actor placements (replaced by Phaser in v9.5) */}
+        {/* Stage — SVG vector renderer (default) or Phaser canvas (beta) */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-0 min-h-0">
           <div className="relative bg-clinical-bg overflow-hidden">
-            <Stage
-              walkthrough={walkthrough}
-              chapter={chapter}
-              activeByActor={activeByActor}
-              selectedActorId={selectedActorId}
-              onPickActor={(id) => setSelectedActorId(id)}
-            />
+            {renderer === 'phaser' ? (
+              <StageErrorBoundary onFallback={() => setRenderer('svg')}>
+                <Suspense
+                  fallback={
+                    <div className="absolute inset-0 grid place-items-center text-[11px] text-clinical-subtle">
+                      Loading cinematic renderer…
+                    </div>
+                  }
+                >
+                  <LazyPhaserStage
+                    walkthrough={walkthrough}
+                    chapter={chapter}
+                    activeByActor={activeByActor}
+                    selectedActorId={selectedActorId}
+                    onPickActor={(id) => setSelectedActorId(id)}
+                  />
+                </Suspense>
+              </StageErrorBoundary>
+            ) : (
+              <Stage
+                walkthrough={walkthrough}
+                chapter={chapter}
+                activeByActor={activeByActor}
+                selectedActorId={selectedActorId}
+                onPickActor={(id) => setSelectedActorId(id)}
+              />
+            )}
             {branchOpen && chapter.branchPoint && (
               <BranchOverlay
                 prompt={chapter.branchPoint.prompt}
@@ -325,16 +372,6 @@ interface StageProps {
   onPickActor: (id: string) => void;
 }
 
-/** Stable per-chapter ordering: actor ids by their first appearance time. */
-function chapterActorOrder(chapter: WalkthroughChapter): string[] {
-  const firstAt = new Map<string, number>();
-  for (const b of chapter.beats) {
-    const cur = firstAt.get(b.actorId);
-    if (cur == null || b.at < cur) firstAt.set(b.actorId, b.at);
-  }
-  return [...firstAt.entries()].sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0])).map(([id]) => id);
-}
-
 function Stage({ walkthrough, chapter, activeByActor, selectedActorId, onPickActor }: StageProps) {
   const scene: SceneId = chapter.scene ?? 'resus';
 
@@ -348,44 +385,10 @@ function Stage({ walkthrough, chapter, activeByActor, selectedActorId, onPickAct
     return () => window.clearInterval(id);
   }, []);
 
-  const order = chapterActorOrder(chapter);
-  const total = order.length;
-
-  // Build the list of staged figures: every present actor, plus the selected
-  // one even if it has no active beat (so its card stays meaningful).
-  type Staged = {
-    actor: WalkthroughActor;
-    beat: WalkthroughBeat | undefined;
-    x: number;
-    y: number;
-    scale: number;
-    isActive: boolean;
-    isSelected: boolean;
-  };
-  const staged: Staged[] = [];
-  for (const id of order) {
-    const beat = activeByActor.get(id);
-    const actor = walkthrough.actors[id];
-    if (!actor) continue;
-    const isActive = !!beat;
-    const isSelected = id === selectedActorId;
-    if (!isActive && !isSelected) continue;
-    const idx = order.indexOf(id);
-    const fallback = defaultStagePos(idx, total);
-    const x = beat?.pos?.x ?? fallback.x;
-    const y = beat?.pos?.y ?? fallback.y;
-    staged.push({ actor, beat, x, y, scale: depthScale(y), isActive, isSelected });
-  }
-  // Painter's algorithm: figures further back (smaller y) drawn first.
-  staged.sort((a, b) => a.y - b.y);
-
-  // The "lead beat" is the most-recently-fired active beat — it gets the
-  // on-screen line of dialogue, so multiple figures don't all shout captions.
-  let lead: { id: string; beat: WalkthroughBeat } | null = null;
-  for (const [id, beat] of activeByActor) {
-    if (!lead || beat.at > lead.beat.at) lead = { id, beat };
-  }
-  const leadId = lead?.id ?? null;
+  // Shared staging geometry (same as the Phaser renderer uses).
+  const { figures: staged, leadId } = stageFigures(walkthrough, chapter, activeByActor, selectedActorId);
+  const leadBeat = leadId ? activeByActor.get(leadId) : undefined;
+  const lead = leadId && leadBeat ? { id: leadId, beat: leadBeat } : null;
 
   return (
     <svg
@@ -636,4 +639,34 @@ function formatSec(s: number): string {
   const m = Math.floor(total / 60);
   const ss = String(total % 60).padStart(2, '0');
   return `${m}:${ss}`;
+}
+
+/** Keeps a Phaser mount failure from ever taking down the modal — falls back
+ *  to the SVG renderer with a one-tap recovery. */
+class StageErrorBoundary extends Component<
+  { onFallback: () => void; children: ReactNode },
+  { failed: boolean }
+> {
+  constructor(props: { onFallback: () => void; children: ReactNode }) {
+    super(props);
+    this.state = { failed: false };
+  }
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    if (this.state.failed) {
+      return (
+        <div className="absolute inset-0 grid place-items-center text-center text-[11px] text-clinical-subtle p-4">
+          <div>
+            Cinematic renderer unavailable on this device.{' '}
+            <button onClick={this.props.onFallback} className="underline text-clinical-accent">
+              Switch to 2D
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }

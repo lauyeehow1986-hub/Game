@@ -53,10 +53,30 @@ plus one dedicated "Back of house" chapter. Lives as a new standalone mode.
 | **v9.7** | **High-definition pixel-art sprites + 4-direction + 6-frame interaction loop + 4-frame walk cycle**. Integer-grid construction (rect-only primitives) with `image-rendering: pixelated` and `shapeRendering: crispEdges`. Direction-aware: N hides facial features, E/W mirror via SVG transform. Animation loops are universal (same 6-frame breath / 4-frame stride for every actor) so authoring stays cheap; beats can opt-in to walking. Stage ticks at 6 fps (150 ms). All 30+ STEMI actors animate when active. | ✅ shipped |
 | **v9.8** | **Cinematic scene staging + posed/expressive characters (realism pass)**. Replaces the team-row grid with composed *environments* (`src/lib/scenery.tsx`): 11 hand-built scenes — hero `kopitiam` (three hawker stalls with signage, ceiling fans, fluorescent tubes, marble tables + red stools, seated patrons, drink-stall queue, gathering onlooker ring, shophouse pillars, warm morning light) plus `street`, `resus`, `cathlab`, `imaging`, `counsel`, `ward`, `pharmacy`, `rehab`, `clinic`, `backhouse` — each with a perspective floor, props, lighting, ambient crowd, vignette and SMIL micro-animation (fans, steam, monitor traces, light flicker). Sprites gain **7 poses** (stand/walk/kneel/sit/cpr/collapsed/point) and **7 expressions** (neutral/alarmed/distressed/pained/focused/relieved/unconscious) with volume shading. The collapse chapter is fully choreographed — Mr Tan collapses, a bystander kneels into hands-only CPR, the attendant waves the crowd back, the myResponder CFR sprints in and delivers an AED shock. Beats carry `scene` / `pos` / `pose` / `expression`; figures depth-scale (0.7→1.3) and cast ground shadows; a single "current line" speech bubble tracks the lead beat. Size deliberately not optimised. | ✅ shipped |
 | **v9.8.1** | **Readability + composition refinement** (live-device feedback). Speech bubble moved off the figures into a top "broadcast" band — it can no longer occlude characters — linked to the speaker by a faint dashed stem + head marker; the speaker is emphasised with a soft focus halo and a pulsing ring, and their floor name-tag is dropped (named in the bubble). Figures enlarged (base 30→34) for mobile legibility; default staging moved into the clear front band, centred right-of-middle to clear left-side fixtures. Street scene gains a wheeled stretcher so the patient isn't on bare tarmac; ambulance beats re-blocked (patient + paramedic action left-centre, driver bridging to the EA). | ✅ shipped |
-| v9.9 | Phaser canvas renderer (swap in for the SVG `<Stage>`); sprites + scenes stay the same data shape | ▶ next |
-| v9.10 | Embedded MP4 showpiece clips (cath stent deployment, MRI tube) — first hybrid content | planned |
-| v9.11 | Locale translation for the walkthrough strings (`zh`, then `ms`, then `ta`) | planned |
-| v9.12 | Second walkthrough — stroke pathway (thrombolysis vs thrombectomy) | planned |
+| **v9.8.2** | **Patient staged in every clinical scene.** Mr Tan was missing as a visible figure in most clinical chapters (only collapse / ambulance / complications showed him). He's now placed in-scene throughout: lying on the resus trolley (arrive-SGH, private A&E), on the cath table under the C-arm (activation, diagnostic, PCI), sliding into the CT/MRI bore (CTA, MRI), settled in the CCU bed, propped up in the ward bed (day-2 round), on the secondary-transfer stretcher, on the treadmill (rehab), and on the clinic exam couch — with pose + expression tracking his condition (pained → neutral → relieved). | ✅ shipped |
+| **v9.9** | **Phaser canvas renderer (beta)** — behind a `2D / Cinematic` toggle in the modal header; the default SVG stage is untouched. Reuses the hand-built SVG environments as a single full-stage canvas texture (so the backdrop is pixel-identical), then adds what a game loop does best: figures tween smoothly between beats, idle-bob at 60 fps, the speaker gets a pulsing focus ring, particle ambience drifts through the scene, and the camera shakes on the AED shock. Figures use the same hash-derived skin/uniform colours as the SVG sprites. A new pure module (`walkthrough-staging.ts`) is the single source of staging geometry for **both** renderers. Lazy-loaded (Phaser stays out of the default bundle) and wrapped in an error boundary that falls back to 2D. | ✅ shipped (beta) |
+| v9.10 | Phaser figure fidelity: port the full posed sprite art (or pre-baked per-pose textures) into the canvas so Cinematic figures match the SVG sprites detail-for-detail; smooth walk-in/out paths between beats | ▶ next |
+| v9.11 | Embedded MP4 showpiece clips (cath stent deployment, MRI tube) — first hybrid content | planned |
+| v9.12 | Locale translation for the walkthrough strings (`zh`, then `ms`, then `ta`) | planned |
+| v9.13 | Second walkthrough — stroke pathway (thrombolysis vs thrombectomy) | planned |
+
+### Renderer / engine decision (why Phaser, not Unity)
+
+A Unity MCP server (`unity-mcp-server`) was evaluated for driving the cinematic.
+Decision: **stay on Phaser, within the web stack.** Reasons:
+
+- **Offline, asset-free PWA is a hard product constraint.** A Unity WebGL build
+  ships a multi-MB WASM + data bundle and an external player; the whole project
+  is deliberately inline-SVG / procedural so it installs and runs offline with
+  no binary downloads. Unity breaks that promise.
+- **One stack, one test surface.** The renderer shares React state, i18n, the
+  Vitest suite, and the `walkthrough-staging.ts` geometry. Phaser is already a
+  dependency (the ops/hospital canvas). Unity would be a parallel C#/editor
+  toolchain with no path into the existing tests or CI.
+- **No Unity MCP is connected to this environment** in any case (only a generic
+  Three.js scene tool is available). If photoreal 3D is wanted later, the
+  lighter path is a Three.js/WebGL layer behind the same renderer toggle —
+  same data, same constraints — rather than Unity.
 
 ## Resumed after Walkthrough — Multilingual case content
 

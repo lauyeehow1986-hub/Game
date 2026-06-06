@@ -389,6 +389,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'SGH ambulance bay → cath corridor',
       defaultNextChapterId: 'cath-activation',
       beats: [
+        { at: 0, actorId: 'patient', action: 'On the resus trolley — anterior STEMI, post-arrest, GCS 14.', pos: { x: 250, y: 181 }, pose: 'collapsed', expression: 'pained' },
         { at: 0, actorId: 'driver', action: 'Pulls into the SGH bypass bay. "STEMI bypass" called overhead.', walking: true },
         { at: 5, actorId: 'paramedic', action: 'Verbal handover: ROSC 08:21, GCS 14, BP 102/64, ECG anterior STEMI.' },
         { at: 10, actorId: 'ed-hca', action: 'Patient transferred onto trolley. Repeat 12-lead leads attached.' },
@@ -411,6 +412,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'SGH cath lab anteroom',
       defaultNextChapterId: 'cath-procedure',
       beats: [
+        { at: 0, actorId: 'patient', action: 'On the cath table — awake, draped, right wrist prepped.', pos: { x: 210, y: 187 }, pose: 'collapsed', expression: 'pained' },
         { at: 0, actorId: 'cath-cardio', action: 'Meets patient at the lab; brief introduction in dialect.' },
         { at: 6, actorId: 'cath-nurse', action: 'Gowns patient, attaches monitoring; right radial access prep.' },
         { at: 12, actorId: 'ed-clerk', action: 'Mrs Tan on the phone — verbal consent for emergency angiography captured.' },
@@ -431,6 +433,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'SGH cath lab',
       defaultNextChapterId: 'cardiac-cta',
       beats: [
+        { at: 0, actorId: 'patient', action: 'On the cath table through the diagnostic study — haemodynamically stable.', pos: { x: 210, y: 187 }, pose: 'collapsed', expression: 'neutral' },
         { at: 0, actorId: 'cath-cardio', action: 'Radial puncture; JR4 catheter; selective RCA injection.' },
         { at: 7, actorId: 'cath-radiog', action: 'Fluoro: mid-RCA 70% stenosis, not acute.' },
         { at: 13, actorId: 'cath-cardio', action: 'JL4 to left system: LAD 95% proximal — the culprit lesion.' },
@@ -469,6 +472,7 @@ export const stemiWalkthrough: Walkthrough = {
         ],
       },
       beats: [
+        { at: 0, actorId: 'patient', action: 'On the CT table, sliding into the gantry for the scan.', pos: { x: 195, y: 181 }, pose: 'collapsed', expression: 'neutral' },
         { at: 0, actorId: 'imaging-radiog', action: 'Patient slides into the CT scanner. Rate control with metoprolol IV.' },
         { at: 6, actorId: 'imaging-nurse', action: 'IV contrast 60 mL Iopromide. Breath-hold instructions in Mandarin.' },
         { at: 12, actorId: 'imaging-radiog', action: 'CTA acquired: triple-vessel disease, Agatston calcium score 480.' },
@@ -489,6 +493,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'SGH MRI 1.5 T',
       defaultNextChapterId: 'family-conference',
       beats: [
+        { at: 0, actorId: 'patient', action: 'On the MRI table — cardiac coils placed, sliding into the bore.', pos: { x: 195, y: 181 }, pose: 'collapsed', expression: 'neutral' },
         { at: 0, actorId: 'imaging-radiog', action: 'Patient on the MRI table. Cardiac coils placed.' },
         { at: 6, actorId: 'imaging-nurse', action: 'Gadolinium IV for late gadolinium enhancement.' },
         { at: 12, actorId: 'imaging-radiog', action: 'Cine, T2, late-gad sequences acquired.' },
@@ -566,6 +571,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'SGH cath lab',
       defaultNextChapterId: 'ccu-transfer',
       beats: [
+        { at: 0, actorId: 'patient', action: 'Back on the cath table for the intervention — awake, monitored.', pos: { x: 210, y: 187 }, pose: 'collapsed', expression: 'neutral' },
         { at: 0, actorId: 'cath-cardio', action: 'Back on table. Wire across the LAD lesion.' },
         { at: 7, actorId: 'cath-cardio', action: 'Pre-dilatation balloon. Lesion opens; TIMI 2 flow restored.' },
         { at: 14, actorId: 'cath-nurse', action: 'Drug-eluting stent loaded: 3.5 × 24 mm.' },
@@ -588,6 +594,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'SGH Coronary Care Unit',
       defaultNextChapterId: 'ward-stay',
       beats: [
+        { at: 0, actorId: 'patient', action: 'Settled into the CCU bed post-PCI — drowsy, comfortable, monitored.', pos: { x: 205, y: 183 }, pose: 'collapsed', expression: 'pained' },
         { at: 0, actorId: 'ward-nurse', action: 'Receives patient. Attaches CCU monitoring; arterial line maintained.' },
         { at: 6, actorId: 'ward-mo', action: 'Clerks admission. Insulin sliding scale (newly diagnosed diabetic).' },
         { at: 12, actorId: 'ward-pharm', action: 'Medication reconciliation: ASA, ticagrelor, atorvastatin, bisoprolol, ramipril.' },
@@ -608,6 +615,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'SGH Ward 73 · Class B2',
       defaultNextChapterId: 'complications',
       beats: [
+        { at: 0, actorId: 'patient', action: 'Day 2 — sitting up in bed, chest pain settled, troponin trending down.', pos: { x: 175, y: 184 }, pose: 'sit', expression: 'relieved' },
         { at: 0, actorId: 'ward-hca', action: '07:00 — vital signs round before the doctors arrive.' },
         { at: 6, actorId: 'ward-reg', action: 'Pre-rounds: troponin trending down, ECG resolved, no chest pain overnight.' },
         { at: 12, actorId: 'ward-consultant', action: '08:30 — leads the cardiology team round. Plan: mobilise, titrate ramipril.' },
@@ -630,8 +638,8 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'SGH Ward 73',
       defaultNextChapterId: 'discharge',
       beats: [
-        { at: 0, actorId: 'patient', action: 'New chest tightness at rest; calls for the nurse.', pos: { x: 150, y: 226 }, pose: 'sit', expression: 'pained' },
-        { at: 5, actorId: 'ward-nurse', action: 'GTN sublingual given; repeat ECG ordered urgently.', pos: { x: 210, y: 232 }, pose: 'stand', direction: 'W', expression: 'focused' },
+        { at: 0, actorId: 'patient', action: 'New chest tightness at rest; calls for the nurse.', pos: { x: 200, y: 183 }, pose: 'collapsed', expression: 'pained' },
+        { at: 5, actorId: 'ward-nurse', action: 'GTN sublingual given; repeat ECG ordered urgently.', pos: { x: 235, y: 232 }, pose: 'stand', direction: 'W', expression: 'focused' },
         { at: 11, actorId: 'ward-mo', action: 'ECG: dynamic T-wave inversion in I + aVL. Stat troponin sent.' },
         { at: 18, actorId: 'ward-reg', action: 'Calls cath-cardio overnight; non-occlusive event, manage medically.' },
         { at: 25, actorId: 'ward-pharm', action: 'Optimises ticagrelor dose; adds long-acting nitrate.' },
@@ -651,6 +659,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'SGH Ward 73',
       defaultNextChapterId: 'pharmacy',
       beats: [
+        { at: 0, actorId: 'patient', action: 'Day 4 — up and dressed at the bedside, ready to go home.', pos: { x: 290, y: 214 }, pose: 'stand', direction: 'W', expression: 'relieved' },
         { at: 0, actorId: 'ward-consultant', action: 'Discharge round. Medication plan, follow-up, red flags walked through.' },
         { at: 7, actorId: 'discharge-coord', action: 'Books NHCS Phase II cardiac rehab; arranges outpatient cardiology in 8 weeks.' },
         { at: 14, actorId: 'ward-pharm', action: 'Counsels on each new med; ticagrelor dyspnoea caution; bleeding precautions.' },
@@ -671,6 +680,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'SGH outpatient pharmacy',
       defaultNextChapterId: 'cardiac-rehab',
       beats: [
+        { at: 0, actorId: 'patient', action: 'At the pharmacy counter with his wife to collect the discharge meds.', pos: { x: 180, y: 236 }, pose: 'stand', expression: 'relieved' },
         { at: 0, actorId: 'outpatient-pharm', action: 'Verifies prescription against discharge summary.' },
         { at: 6, actorId: 'outpatient-pharm', action: 'Dispenses 4-week supply. Walks through dose, timing, side effects.' },
         { at: 14, actorId: 'family-wife', action: 'Pays the cash portion; receipts and refill plan handed over.' },
@@ -690,6 +700,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'NHCS Phase II rehab gym',
       defaultNextChapterId: 'outpatient-review',
       beats: [
+        { at: 0, actorId: 'patient', action: 'On the treadmill for the first supervised, monitored session.', pos: { x: 305, y: 192 }, pose: 'walk', walking: true, direction: 'W', expression: 'focused' },
         { at: 0, actorId: 'rehab-physio', action: 'Greets Mr Tan for the first supervised session.' },
         { at: 6, actorId: 'rehab-physio', action: '6-minute walk test: 360 m, ~4.2 METs.' },
         { at: 13, actorId: 'rehab-physio', action: 'Prescribes monitored treadmill at 70% HR reserve.' },
@@ -711,6 +722,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'SGH cardiology clinic',
       defaultNextChapterId: 'back-of-house',
       beats: [
+        { at: 0, actorId: 'patient', action: 'Seated on the exam couch for his 8-week specialist review.', pos: { x: 330, y: 186 }, pose: 'sit', direction: 'W', expression: 'relieved' },
         { at: 0, actorId: 'clinic-cardio', action: 'Reviews symptoms, exercise tolerance, medication adherence.' },
         { at: 7, actorId: 'clinic-cardio', action: 'Repeat 12-lead and echo: LVEF improved from 35% to 50%.' },
         { at: 14, actorId: 'clinic-cardio', action: 'Continues DAPT to 12 months; statin titrated.' },
@@ -754,6 +766,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'Private hospital A&E',
       defaultNextChapterId: 'secondary-transfer',
       beats: [
+        { at: 0, actorId: 'patient', action: 'On the A&E trolley — anterior STEMI confirmed, awaiting transfer.', pos: { x: 250, y: 181 }, pose: 'collapsed', expression: 'pained' },
         { at: 0, actorId: 'paramedic', action: 'Alternative routing: nearest A&E. ECG handed to A&E doctor.' },
         { at: 6, actorId: 'paramedic', action: 'A&E assesses; confirms anterior STEMI; no on-site cath service.' },
         { at: 12, actorId: 'paramedic', action: 'Secondary transfer to SGH cath lab activated; second alert sent.' },
@@ -773,6 +786,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'En route Private → SGH',
       defaultNextChapterId: 'arrive-sgh',
       beats: [
+        { at: 0, actorId: 'patient', action: 'On the stretcher for the secondary transfer to SGH.', pos: { x: 150, y: 244 }, pose: 'collapsed', expression: 'pained' },
         { at: 0, actorId: 'paramedic', action: 'Re-runs ECG en route; no change.' },
         { at: 5, actorId: 'driver', action: 'Pre-notifies SGH bypass bay; ETA 8 minutes.' },
         { at: 11, actorId: 'paramedic', action: 'Door-to-balloon clock now over the 90-minute target due to the detour.' },
