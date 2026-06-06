@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { SHOWPIECES, ShowpieceArt, type ShowpieceId } from './showpieces';
 import { stemiWalkthrough } from './walkthrough-stemi';
 
-const ALL: ShowpieceId[] = ['stent-deployment', 'mri-bore-slide', 'aed-shock'];
+const ALL: ShowpieceId[] = ['stent-deployment', 'mri-bore-slide', 'aed-shock', 'thrombectomy-pass'];
 
 describe('showpieces — art', () => {
   it('every showpiece id renders a 480×270 SVG with no NaN/undefined coords', () => {

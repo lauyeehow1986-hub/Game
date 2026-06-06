@@ -9,6 +9,7 @@ import {
   type Walkthrough,
 } from './walkthrough';
 import { stemiWalkthrough } from './walkthrough-stemi';
+import { strokeWalkthrough } from './walkthrough-stroke';
 
 /* Small synthetic graph for unit-level tests, so the STEMI content can evolve
  * without breaking traversal coverage. */
@@ -180,6 +181,74 @@ describe('STEMI walkthrough content', () => {
         expect(b.at).toBeGreaterThanOrEqual(0);
         expect(b.at).toBeLessThanOrEqual(c.durationSec);
       }
+    }
+  });
+});
+
+describe('Stroke walkthrough content', () => {
+  it('starts at the collapse chapter', () => {
+    expect(strokeWalkthrough.startChapterId).toBe('collapse');
+    expect(chapterOf(strokeWalkthrough, 'collapse')).toBeTruthy();
+  });
+
+  it('every beat references a known actor', () => {
+    for (const c of Object.values(strokeWalkthrough.chapters)) {
+      for (const b of c.beats) {
+        expect(
+          strokeWalkthrough.actors[b.actorId],
+          `chapter ${c.id} beat at ${b.at} references unknown actor ${b.actorId}`,
+        ).toBeTruthy();
+      }
+    }
+  });
+
+  it('every branch option leads to a defined chapter', () => {
+    for (const c of Object.values(strokeWalkthrough.chapters)) {
+      if (!c.branchPoint) continue;
+      for (const opt of c.branchPoint.options) {
+        expect(
+          strokeWalkthrough.chapters[opt.nextChapterId],
+          `chapter ${c.id} branch option "${opt.label}" → missing chapter ${opt.nextChapterId}`,
+        ).toBeTruthy();
+      }
+    }
+  });
+
+  it('every defaultNextChapterId resolves', () => {
+    for (const c of Object.values(strokeWalkthrough.chapters)) {
+      if (!c.defaultNextChapterId) continue;
+      expect(
+        strokeWalkthrough.chapters[c.defaultNextChapterId],
+        `chapter ${c.id} defaultNextChapterId ${c.defaultNextChapterId} missing`,
+      ).toBeTruthy();
+    }
+  });
+
+  it('beats within a chapter are strictly within its duration', () => {
+    for (const c of Object.values(strokeWalkthrough.chapters)) {
+      for (const b of c.beats) {
+        expect(b.at).toBeGreaterThanOrEqual(0);
+        expect(b.at).toBeLessThanOrEqual(c.durationSec);
+      }
+    }
+  });
+
+  it('the thrombectomy chapter ships the thrombectomy-pass showpiece', () => {
+    const c = strokeWalkthrough.chapters['thrombectomy']!;
+    const t = c.beats.find((b) => b.showpiece?.kind === 'svg' && b.showpiece.id === 'thrombectomy-pass');
+    expect(t, 'thrombectomy chapter missing thrombectomy-pass showpiece').toBeTruthy();
+  });
+
+  it('Mdm Lim has a distinct internal id from Mr Tan (so sprites differ)', () => {
+    expect(strokeWalkthrough.actors['patient'].id).not.toBe(stemiWalkthrough.actors['patient'].id);
+  });
+
+  it('every clinical chapter stages the patient figure', () => {
+    const clinical = ['arrive-nni', 'ct-scan', 'thrombolysis', 'thrombectomy', 'nicu-transfer', 'stroke-ward', 'community-rehab', 'outpatient-review'];
+    for (const id of clinical) {
+      const c = strokeWalkthrough.chapters[id]!;
+      const patientBeat = c.beats.find((b) => b.actorId === 'patient');
+      expect(patientBeat, `stroke chapter ${id} missing a patient beat`).toBeTruthy();
     }
   });
 });

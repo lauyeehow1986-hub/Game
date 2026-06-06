@@ -54,7 +54,7 @@ export type BeatExpression =
  *  bundle stays asset-free). When present, the overlay plays above the stage
  *  for the duration of the beat. */
 export type BeatShowpiece =
-  | { kind: 'svg'; id: 'stent-deployment' | 'mri-bore-slide' | 'aed-shock'; title?: string; caption?: string }
+  | { kind: 'svg'; id: 'stent-deployment' | 'mri-bore-slide' | 'aed-shock' | 'thrombectomy-pass'; title?: string; caption?: string }
   | { kind: 'mp4'; src: string; poster?: string; title?: string; caption?: string; loop?: boolean };
 
 export interface WalkthroughBeat {

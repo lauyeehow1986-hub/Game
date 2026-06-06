@@ -15,7 +15,7 @@
  */
 import type { JSX } from 'react';
 
-export type ShowpieceId = 'stent-deployment' | 'mri-bore-slide' | 'aed-shock';
+export type ShowpieceId = 'stent-deployment' | 'mri-bore-slide' | 'aed-shock' | 'thrombectomy-pass';
 
 export interface ShowpieceMeta {
   id: ShowpieceId;
@@ -41,6 +41,11 @@ export const SHOWPIECES: Record<ShowpieceId, ShowpieceMeta> = {
     title: 'AED — shock advised',
     caption: 'Pads on · charging · stand clear · shock delivered',
   },
+  'thrombectomy-pass': {
+    id: 'thrombectomy-pass',
+    title: 'Mechanical thrombectomy — stent retriever pass',
+    caption: 'Guide catheter to M1 · stent retriever deployed across clot · 4-min engagement · withdraw with clot · TICI 2b',
+  },
 };
 
 /** Render the inline SVG for the given showpiece. */
@@ -52,6 +57,8 @@ export function ShowpieceArt({ id }: { id: ShowpieceId }): JSX.Element {
       return <MriBoreSlide />;
     case 'aed-shock':
       return <AedShock />;
+    case 'thrombectomy-pass':
+      return <ThrombectomyPass />;
   }
 }
 
@@ -312,6 +319,143 @@ function MriBoreSlide(): JSX.Element {
         <text x={50}  y={250} fill="#94a3b8">ADVANCE</text>
         <text x={180} y={250} fill="#94a3b8">ACQUIRE</text>
         <text x={350} y={250} fill="#94a3b8">RETRACT</text>
+      </g>
+    </svg>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+ * Thrombectomy pass — stent retriever ensnares clot at the M1 segment and is
+ * withdrawn WITH the clot. Flow restores downstream after retrieval. 10s loop.
+ * ──────────────────────────────────────────────────────────────────────── */
+
+function ThrombectomyPass(): JSX.Element {
+  return (
+    <svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="sp-thr-bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#101a2b" />
+          <stop offset="100%" stopColor="#040a16" />
+        </linearGradient>
+        <linearGradient id="sp-thr-vessel" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#a83232" />
+          <stop offset="50%" stopColor="#7e1a1a" />
+          <stop offset="100%" stopColor="#511010" />
+        </linearGradient>
+        <radialGradient id="sp-thr-flow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#dc2626" stopOpacity={0.95} />
+          <stop offset="100%" stopColor="#7f1d1d" stopOpacity={0} />
+        </radialGradient>
+      </defs>
+      <rect x={0} y={0} width={480} height={270} fill="url(#sp-thr-bg)" />
+
+      <text x={20} y={28} fill="#fde68a" fontSize={11} fontFamily="ui-monospace, monospace" letterSpacing="1">
+        MCA · left M1 occlusion · clot
+      </text>
+      <text x={460} y={28} textAnchor="end" fill="#94a3b8" fontSize={9} fontFamily="ui-monospace, monospace">
+        Stent retriever 6 × 30 mm
+      </text>
+
+      {/* phase bar */}
+      <g fontSize={9} fontFamily="ui-monospace, monospace">
+        <text x={36}  y={250} fill="#94a3b8">GUIDE</text>
+        <text x={140} y={250} fill="#94a3b8">DEPLOY RETRIEVER</text>
+        <text x={290} y={250} fill="#94a3b8">4-MIN ENGAGE</text>
+        <text x={400} y={250} fill="#94a3b8">WITHDRAW · TICI 2b</text>
+      </g>
+      <rect x={20} y={258} width={440} height={3} rx={1.5} fill="#1e293b" />
+      <rect x={20} y={258} width={0} height={3} rx={1.5} fill="#fde68a">
+        <animate attributeName="width" values="0;110;230;330;440;440" keyTimes="0;0.2;0.45;0.65;0.95;1" dur="10s" repeatCount="indefinite" />
+      </rect>
+
+      {/* vessel — slight upward arch (MCA-like) with a darker clot mid-segment */}
+      <g transform="translate(0,40)">
+        <path
+          d="M 20 100 Q 240 50 460 100 L 460 130 Q 240 80 20 130 Z"
+          fill="url(#sp-thr-vessel)"
+        />
+        {/* lumen */}
+        <path
+          d="M 20 110 Q 240 70 460 110 L 460 120 Q 240 80 20 120 Z"
+          fill="#1a0a0a"
+        />
+
+        {/* the clot — a dark, stationary mass at the M1, visible until withdrawal */}
+        <g>
+          <ellipse cx={262} cy={90} rx={30} ry={9} fill="#2a0606">
+            <animate attributeName="opacity" values="1;1;1;1;1;1;1;0;0" keyTimes="0;0.2;0.45;0.5;0.55;0.6;0.7;0.85;1" dur="10s" repeatCount="indefinite" />
+          </ellipse>
+          {/* clot moving out with the retriever — appears as it withdraws */}
+          <ellipse cx={262} cy={90} rx={30} ry={9} fill="#2a0606" opacity={0}>
+            <animate attributeName="opacity" values="0;0;0;0;0;0;1;1;0" keyTimes="0;0.2;0.45;0.5;0.55;0.6;0.7;0.85;1" dur="10s" repeatCount="indefinite" />
+            <animate attributeName="cx" values="262;262;262;262;262;262;262;460;460" keyTimes="0;0.2;0.45;0.5;0.55;0.6;0.7;0.85;1" dur="10s" repeatCount="indefinite" />
+          </ellipse>
+        </g>
+
+        {/* PHASE 1 — guide / wire across (0-2s) */}
+        <line x1={460} y1={92} x2={20} y2={92} stroke="#a3a3a3" strokeWidth={1.2} strokeDasharray="2 3">
+          <animate attributeName="x1" values="460;460;20;20" keyTimes="0;0.05;0.2;1" dur="10s" repeatCount="indefinite" />
+        </line>
+
+        {/* PHASE 2 — stent retriever deployed across the clot (2-4.5s) */}
+        <g opacity={0}>
+          <animate attributeName="opacity" values="0;0;0;1;1;1;1;1;0" keyTimes="0;0.18;0.22;0.3;0.4;0.55;0.7;0.85;1" dur="10s" repeatCount="indefinite" />
+          {/* outer retriever mesh outline */}
+          <rect x={232} y={80} width={60} height={20} rx={4} fill="none" stroke="#fef3c7" strokeWidth={0.7} />
+          {/* mesh diamonds */}
+          {[0,1,2,3,4,5,6].map((i) => (
+            <line key={`d${i}`} x1={232 + i * 9} y1={80} x2={241 + i * 9} y2={100} stroke="#fef3c7" strokeWidth={0.4} opacity={0.85} />
+          ))}
+          {[0,1,2,3,4,5,6].map((i) => (
+            <line key={`u${i}`} x1={232 + i * 9} y1={100} x2={241 + i * 9} y2={80} stroke="#fef3c7" strokeWidth={0.4} opacity={0.85} />
+          ))}
+          {/* pull-tether toward the femoral side (right) */}
+          <line x1={292} y1={90} x2={460} y2={90} stroke="#fef3c7" strokeWidth={0.6} />
+        </g>
+
+        {/* PHASE 3 — withdrawal: retriever + clot move RIGHT together (7-8.5s) */}
+        <g opacity={0}>
+          <animate attributeName="opacity" values="0;0;0;0;0;0;0;1;0;0" keyTimes="0;0.18;0.22;0.3;0.4;0.55;0.65;0.7;0.85;1" dur="10s" repeatCount="indefinite" />
+          {/* the retriever assembly translates right */}
+          <g>
+            <animateTransform
+              attributeName="transform"
+              type="translate"
+              values="0 0; 0 0; 0 0; 0 0; 0 0; 0 0; 0 0; 0 0; 200 0; 200 0"
+              keyTimes="0;0.18;0.22;0.3;0.4;0.55;0.65;0.7;0.85;1"
+              dur="10s"
+              repeatCount="indefinite"
+            />
+            <rect x={232} y={80} width={60} height={20} rx={4} fill="none" stroke="#fef3c7" strokeWidth={0.7} />
+            {[0,1,2,3,4,5,6].map((i) => (
+              <line key={`wd${i}`} x1={232 + i * 9} y1={80} x2={241 + i * 9} y2={100} stroke="#fef3c7" strokeWidth={0.4} opacity={0.85} />
+            ))}
+            {/* clot ensnared INSIDE the retriever */}
+            <ellipse cx={262} cy={90} rx={26} ry={7} fill="#2a0606" />
+          </g>
+        </g>
+
+        {/* PHASE 4 — flow restored (after 8.5s): travelling pulses left-to-right */}
+        <g>
+          {[0, 1, 2].map((i) => (
+            <circle key={i} cx={20} cy={90} r={6} fill="url(#sp-thr-flow)" opacity={0}>
+              <animate
+                attributeName="opacity"
+                values={`0;0;0;0;0;0;0;0;0;${0.85};0`}
+                keyTimes={`0;0.18;0.22;0.3;0.4;0.55;0.65;0.7;0.85;${0.88 + i * 0.03};1`}
+                dur="10s"
+                repeatCount="indefinite"
+              />
+              <animate
+                attributeName="cx"
+                values={`20;20;20;20;20;20;20;20;20;${100 + i * 80};460`}
+                keyTimes={`0;0.18;0.22;0.3;0.4;0.55;0.65;0.7;0.85;${0.88 + i * 0.03};1`}
+                dur="10s"
+                repeatCount="indefinite"
+              />
+            </circle>
+          ))}
+        </g>
       </g>
     </svg>
   );

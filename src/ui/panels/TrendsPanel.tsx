@@ -119,7 +119,7 @@ export function TrendsPanel() {
   const [duelOpen, setDuelOpen] = useState(false);
   const [goalsOpen, setGoalsOpen] = useState(false);
   const [flashcardsOpen, setFlashcardsOpen] = useState(false);
-  const [walkthroughOpen, setWalkthroughOpen] = useState(false);
+  const [walkthroughOpen, setWalkthroughOpen] = useState<null | 'stemi' | 'stroke'>(null);
   const goalTargets = useLearningGoals((s) => s.targets);
   const setGoalTargets = useLearningGoals((s) => s.setTargets);
   const bookmarks = useBookmarks((s) => s.items);
@@ -536,12 +536,22 @@ export function TrendsPanel() {
         </button>
       )}
 
-      <button
-        onClick={() => setWalkthroughOpen(true)}
-        className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-accent/60 text-clinical-accent hover:bg-clinical-accent/10"
-      >
-        {t('walkthrough.open')}
-      </button>
+      {/* Walkthrough picker — STEMI (cardiac) and Stroke (neuro) pathways
+       *  ship as siblings; each chunk is fetched only on its own button tap. */}
+      <div className="space-y-1">
+        <button
+          onClick={() => setWalkthroughOpen('stemi')}
+          className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-accent/60 text-clinical-accent hover:bg-clinical-accent/10"
+        >
+          {t('walkthrough.open')} · STEMI
+        </button>
+        <button
+          onClick={() => setWalkthroughOpen('stroke')}
+          className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-accent/60 text-clinical-accent hover:bg-clinical-accent/10"
+        >
+          {t('walkthrough.open')} · Stroke (LVO)
+        </button>
+      </div>
 
       {trends.totalPlayed > 0 && (
         <button
@@ -1120,15 +1130,20 @@ export function TrendsPanel() {
           return <FlashcardsModal deck={deck} onClose={() => setFlashcardsOpen(false)} />;
         })()}
         {walkthroughOpen && (() => {
-          // Lazy require so the STEMI content chunk is fetched only on open.
-          // (v9.5 will swap this for a picker once a second walkthrough exists.)
+          // Lazy require so the chosen walkthrough's content chunk is fetched
+          // only on open (and only that one — the other never enters the bundle).
+          const which = walkthroughOpen;
           const Inner = () => {
             const [w, setW] = useState<import('../../lib/walkthrough').Walkthrough | null>(null);
             useEffect(() => {
-              void import('../../lib/walkthrough-stemi').then((m) => setW(m.stemiWalkthrough));
+              if (which === 'stemi') {
+                void import('../../lib/walkthrough-stemi').then((m) => setW(m.stemiWalkthrough));
+              } else {
+                void import('../../lib/walkthrough-stroke').then((m) => setW(m.strokeWalkthrough));
+              }
             }, []);
             if (!w) return null;
-            return <WalkthroughModal walkthrough={w} onClose={() => setWalkthroughOpen(false)} />;
+            return <WalkthroughModal walkthrough={w} onClose={() => setWalkthroughOpen(null)} />;
           };
           return <Inner />;
         })()}
