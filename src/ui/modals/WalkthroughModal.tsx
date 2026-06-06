@@ -418,10 +418,18 @@ function Stage({ walkthrough, chapter, activeByActor, selectedActorId, onPickAct
       {staged.map(({ actor, beat, x, y, scale, isActive, isSelected }) => {
         const figScale = 34 * scale;
         const isLead = actor.id === leadId;
+        const walking = beat?.walking ?? false;
+        // SVG parity with Phaser (v9.10): glide figures between beat positions
+        // via a CSS transform transition. Walking beats use a longer ease so
+        // they read as a traversal rather than a glide-in.
+        const moveCss = {
+          transform: `translate(${x}px, ${y}px)`,
+          transition: `transform ${walking ? 850 : 450}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+        } as const;
         return (
           <g
             key={actor.id}
-            transform={`translate(${x},${y})`}
+            style={moveCss}
             className="cursor-pointer"
             onClick={() => onPickActor(actor.id)}
             aria-label={`${actor.role}${beat ? `: ${beat.action}` : ''}`}
