@@ -1,35 +1,43 @@
 /**
- * WalkthroughScene — Phaser canvas renderer for the pathway cinematic (v9.9,
- * beta). Runs alongside the default SVG `<Stage>` behind a renderer toggle.
+ * WalkthroughScene — Phaser canvas renderer for the pathway cinematic.
  *
- * Design: the hand-built SVG environments are loaded as a single full-stage
- * texture (see sceneTexture.ts), so the backdrop is pixel-identical to SVG
- * mode. Phaser then owns what a game loop does well that SVG can't:
- *   - smooth tweened motion of figures between beats (they glide / walk in),
- *   - a continuous 60 fps idle bob on active figures,
- *   - a pulsing focus ring on the current speaker,
- *   - particle ambience (drifting motes / steam),
- *   - a camera shake punctuating the AED shock.
+ * v9.9 (beta): backdrop = the hand-built SVG environment loaded as one texture;
+ * figures were simplified Graphics avatars.
  *
- * Figures are drawn procedurally with Graphics using the SAME skin/uniform
- * colours the SVG sprite derives (passed in via the frame), so identities stay
- * consistent across renderers. Coordinates use a fixed 480×270 logical space
- * (Scale.FIT) so they map 1:1 with the SVG stage geometry.
+ * v9.10 (fidelity): figures are now the REAL `ActorSprite` art, baked to
+ * textures (see spriteTexture.ts) — exact accessories, poses, expressions — so
+ * Cinematic figures match the SVG sprites detail-for-detail. Phaser then layers
+ * on motion the SVG stage can't: figures glide between beat positions, *walk in*
+ * from offscreen (and out) when a beat marks them walking, idle-bob at 60 fps,
+ * the speaker gets a pulsing focus ring + halo, particle ambience drifts
+ * through, and the camera shakes on the AED shock.
+ *
+ * Coordinates use a fixed 480×270 logical space (Scale.FIT) so they map 1:1
+ * with the SVG stage geometry from `walkthrough-staging.ts`.
  */
 import Phaser from 'phaser';
 import { STAGE_W, STAGE_H, type SceneId } from '../../lib/scenery';
+import type { WalkthroughActor } from '../../lib/walkthrough';
 import { sceneToDataUri } from './sceneTexture';
+import {
+  SPRITE_BASE,
+  spriteTextureKey,
+  spriteToDataUri,
+  type SpriteTextureOpts,
+} from './spriteTexture';
 
 export interface PhaserFigure {
   id: string;
   x: number;
   y: number;
   scale: number;
+  actor: WalkthroughActor;
   swatch: string;
-  skin: string;
   role: string;
-  pose: 'stand' | 'walk' | 'kneel' | 'sit' | 'cpr' | 'collapsed' | 'point';
-  facing: 'N' | 'S' | 'E' | 'W';
+  pose: SpriteTextureOpts['pose'];
+  expression: SpriteTextureOpts['expression'];
+  facing: SpriteTextureOpts['direction'];
+  walking: boolean;
   isActive: boolean;
   isLead: boolean;
   isSelected: boolean;
@@ -39,18 +47,24 @@ export interface PhaserFrame {
   scene: SceneId;
   figures: PhaserFigure[];
   caption: { role: string; action: string; x: number } | null;
-  /** Punctuate this frame with a camera shake (e.g. the AED shock). */
   shake?: boolean;
 }
 
 interface FigNode {
   container: Phaser.GameObjects.Container;
   ring: Phaser.GameObjects.Graphics;
-  body: Phaser.GameObjects.Graphics;
+  halo: Phaser.GameObjects.Graphics;
+  image: Phaser.GameObjects.Image | null;
   label: Phaser.GameObjects.Text;
+  actor: WalkthroughActor;
+  texKey: string;
+  figPx: number;
   phase: number;
   pose: PhaserFigure['pose'];
   active: boolean;
+  moving: boolean;
+  tx: number;
+  ty: number;
 }
 
 function hexToNum(hex: string): number {
@@ -78,7 +92,6 @@ export class WalkthroughScene extends Phaser.Scene {
   create(): void {
     this.cameras.main.setBackgroundColor('#0b1320');
 
-    // 4×4 white dot texture for the ambience particles.
     const g = this.add.graphics();
     g.fillStyle(0xffffff, 1).fillCircle(2, 2, 2);
     g.generateTexture('wt-dust', 4, 4);
@@ -98,10 +111,9 @@ export class WalkthroughScene extends Phaser.Scene {
       })
       .setDepth(-5);
 
-    // Top caption ("broadcast band") — never overlaps figures.
-    this.captionBox = this.add.graphics().setDepth(100);
+    this.captionBox = this.add.graphics().setDepth(1000);
     this.captionText = this.add
-      .text(STAGE_W / 2, 10, '', {
+      .text(STAGE_W / 2, 12, '', {
         fontFamily: 'ui-monospace, monospace',
         fontSize: '8px',
         color: '#ffffff',
@@ -109,7 +121,7 @@ export class WalkthroughScene extends Phaser.Scene {
         wordWrap: { width: 184 },
       })
       .setOrigin(0.5, 0)
-      .setDepth(101);
+      .setDepth(1001);
 
     this.ready = true;
     if (this.pending) {
@@ -143,7 +155,7 @@ export class WalkthroughScene extends Phaser.Scene {
     }
     for (const [id, node] of this.figs) {
       if (!seen.has(id)) {
-        node.container.destroy();
+        this.exitFigure(node);
         this.figs.delete(id);
       }
     }
@@ -152,36 +164,45 @@ export class WalkthroughScene extends Phaser.Scene {
     if (frame.shake) this.cameras.main.shake(380, 0.005);
   }
 
+  /** Ensure a texture exists (baking it from `make` if not), then run `then`. */
+  private ensureTexture(key: string, make: () => string, then: () => void): void {
+    if (this.textures.exists(key)) {
+      then();
+      return;
+    }
+    const handler = (addedKey: string) => {
+      if (addedKey !== key) return;
+      this.textures.off(Phaser.Textures.Events.ADD, handler);
+      then();
+    };
+    this.textures.on(Phaser.Textures.Events.ADD, handler);
+    this.textures.addBase64(key, make());
+  }
+
   private loadBackground(scene: SceneId): void {
     const key = `wt-bg-${scene}`;
-    const place = () => {
+    this.ensureTexture(key, () => sceneToDataUri(scene), () => {
       if (this.bg) this.bg.destroy();
       this.bg = this.add
         .image(0, 0, key)
         .setOrigin(0, 0)
         .setDisplaySize(STAGE_W, STAGE_H)
         .setDepth(-10);
-    };
-    if (this.textures.exists(key)) {
-      place();
-      return;
-    }
-    // Listen on the generic ADD event and match the key — robust across
-    // Phaser versions regardless of the keyed-event variant.
-    const handler = (addedKey: string) => {
-      if (addedKey !== key) return;
-      this.textures.off(Phaser.Textures.Events.ADD, handler);
-      place();
-    };
-    this.textures.on(Phaser.Textures.Events.ADD, handler);
-    this.textures.addBase64(key, sceneToDataUri(scene));
+    });
   }
 
   private upsertFigure(f: PhaserFigure): void {
+    const figPx = 34 * f.scale;
+    const texKey = spriteTextureKey(f.id, {
+      pose: f.pose,
+      expression: f.expression,
+      direction: f.facing,
+    });
+
     let node = this.figs.get(f.id);
     if (!node) {
       const ring = this.add.graphics();
-      const body = this.add.graphics();
+      const halo = this.add.graphics();
       const label = this.add
         .text(0, 9, '', {
           fontFamily: 'ui-monospace, monospace',
@@ -190,71 +211,142 @@ export class WalkthroughScene extends Phaser.Scene {
           align: 'center',
         })
         .setOrigin(0.5, 0);
-      const container = this.add.container(f.x, f.y, [ring, body, label]);
-      container.setSize(26, 30);
+
+      // Walk-in: enter from the edge the figure faces away from; else fade in.
+      const entryX = f.walking
+        ? f.facing === 'W'
+          ? STAGE_W + 30
+          : f.facing === 'E'
+            ? -30
+            : f.x < STAGE_W / 2
+              ? -30
+              : STAGE_W + 30
+        : f.x;
+      const container = this.add.container(entryX, f.y, [halo, ring, label]);
+      container.setSize(28, 34);
       container.setInteractive(
-        new Phaser.Geom.Rectangle(-13, -26, 26, 32),
+        new Phaser.Geom.Rectangle(-14, -figPx, 28, figPx + 6),
         Phaser.Geom.Rectangle.Contains,
       );
       container.on('pointerdown', () => this.onPick?.(f.id));
-      container.setAlpha(0);
-      this.tweens.add({ targets: container, alpha: 1, duration: 250 });
-      node = { container, ring, body, label, phase: Math.random() * Math.PI * 2, pose: f.pose, active: f.isActive };
+
+      node = {
+        container,
+        ring,
+        halo,
+        image: null,
+        label,
+        actor: f.actor,
+        texKey: '',
+        figPx,
+        phase: Math.random() * Math.PI * 2,
+        pose: f.pose,
+        active: f.isActive,
+        moving: false,
+        tx: f.x,
+        ty: f.y,
+      };
       this.figs.set(f.id, node);
-    } else {
-      // Glide to the new position.
-      this.tweens.add({ targets: node.container, x: f.x, y: f.y, duration: 450, ease: 'Sine.easeInOut' });
-      node.pose = f.pose;
-      node.active = f.isActive;
+
+      if (f.walking && entryX !== f.x) {
+        node.moving = true;
+        this.tweens.add({
+          targets: container,
+          x: f.x,
+          y: f.y,
+          duration: 950,
+          ease: 'Sine.easeInOut',
+          onComplete: () => {
+            if (node) node.moving = false;
+          },
+        });
+      } else {
+        container.setAlpha(0);
+        this.tweens.add({ targets: container, alpha: 1, duration: 250 });
+      }
+    } else if (node.tx !== f.x || node.ty !== f.y) {
+      // Reposition between beats — walk if the beat is a walking one, else glide.
+      node.moving = f.walking;
+      this.tweens.add({
+        targets: node.container,
+        x: f.x,
+        y: f.y,
+        duration: f.walking ? 850 : 450,
+        ease: 'Sine.easeInOut',
+        onComplete: () => {
+          if (node) node.moving = false;
+        },
+      });
     }
-    node.container.setScale(f.scale);
+
+    node.tx = f.x;
+    node.ty = f.y;
+    node.figPx = figPx;
+    node.pose = f.pose;
+    node.active = f.isActive;
     node.container.setDepth(Math.round(f.y));
-    this.drawFigure(node, f);
+
+    this.drawRing(node, f);
+    node.label.setText(f.isLead ? '' : f.role.length > 16 ? f.role.slice(0, 16) + '…' : f.role);
+    node.label.setAlpha(f.isActive ? 1 : 0.7);
+
+    // Swap / create the sprite image when the pose-texture changes.
+    if (node.texKey !== texKey) {
+      node.texKey = texKey;
+      this.ensureTexture(
+        texKey,
+        () => spriteToDataUri(f.actor, { pose: f.pose, expression: f.expression, direction: f.facing }),
+        () => {
+          const n = this.figs.get(f.id);
+          if (!n || n.texKey !== texKey) return;
+          if (!n.image) {
+            n.image = this.add.image(0, -n.figPx / 2, texKey).setOrigin(0.5, 0.5);
+            n.container.add(n.image);
+            n.container.sendToBack(n.image);
+            // keep ring/halo behind the sprite
+            n.container.sendToBack(n.ring);
+            n.container.sendToBack(n.halo);
+          } else {
+            n.image.setTexture(texKey);
+          }
+          n.image.setScale(n.figPx / SPRITE_BASE);
+          n.image.setAlpha(f.isActive ? 1 : 0.55);
+        },
+      );
+    } else if (node.image) {
+      node.image.setScale(figPx / SPRITE_BASE);
+      node.image.setAlpha(f.isActive ? 1 : 0.55);
+    }
   }
 
-  private drawFigure(node: FigNode, f: PhaserFigure): void {
-    const { ring, body, label } = node;
-
-    // floor ring
+  private drawRing(node: FigNode, f: PhaserFigure): void {
+    const { ring, halo } = node;
     ring.clear();
+    halo.clear();
     if (f.isActive || f.isSelected) {
       const col = f.isSelected ? 0xffffff : hexToNum(f.swatch);
       ring.lineStyle(1.1, f.isLead ? 0xfde68a : col, 0.85);
-      ring.strokeEllipse(0, 2, 26, 9);
+      ring.strokeEllipse(0, 2, 26 * f.scale, 9 * f.scale);
     }
     if (f.isLead) {
+      // soft focus halo + outer ring on the speaker
+      halo.fillStyle(0xfde68a, 0.12);
+      halo.fillCircle(0, -node.figPx * 0.45, node.figPx * 0.95);
       ring.lineStyle(1.2, 0xfde68a, 0.5);
-      ring.strokeEllipse(0, 2, 32, 11);
+      ring.strokeEllipse(0, 2, 32 * f.scale, 11 * f.scale);
     }
+  }
 
-    // body (rounded), head, simple face — feet anchored at (0,0)
-    body.clear();
-    body.fillStyle(0x000000, 0.28);
-    body.fillEllipse(0, 2, 16, 5); // contact shadow
-    body.fillStyle(hexToNum(f.swatch), 1);
-    body.fillRoundedRect(-5, -18, 10, 18, 3);
-    body.fillStyle(hexToNum(f.skin), 1);
-    body.fillCircle(0, -22, 4.5);
-    if (f.facing !== 'N') {
-      body.fillStyle(0x1a1410, 1);
-      body.fillRect(-2.4, -23, 1.1, 1.4);
-      body.fillRect(1.3, -23, 1.1, 1.4);
-    }
-    // pose framing
-    body.setScale(f.facing === 'W' ? -1 : 1, 1);
-    if (f.pose === 'collapsed') {
-      body.setRotation(-1.29); // ≈ -74°, lays the figure down
-    } else if (f.pose === 'kneel' || f.pose === 'sit' || f.pose === 'cpr') {
-      body.setRotation(0);
-      body.y = 4;
-    } else {
-      body.setRotation(0);
-      body.y = 0;
-    }
-    body.setAlpha(f.isActive ? 1 : 0.55);
-
-    label.setText(f.isLead ? '' : f.role.length > 16 ? f.role.slice(0, 16) + '…' : f.role);
-    label.setAlpha(f.isActive ? 1 : 0.7);
+  private exitFigure(node: FigNode): void {
+    const edge = node.tx < STAGE_W / 2 ? -30 : STAGE_W + 30;
+    this.tweens.add({
+      targets: node.container,
+      x: edge,
+      alpha: 0,
+      duration: 600,
+      ease: 'Sine.easeIn',
+      onComplete: () => node.container.destroy(),
+    });
   }
 
   private updateCaption(caption: PhaserFrame['caption']): void {
@@ -269,8 +361,7 @@ export class WalkthroughScene extends Phaser.Scene {
     this.captionText.setText(`${caption.role}: ${caption.action}`);
     const bw = 200;
     const bx = Phaser.Math.Clamp(caption.x, bw / 2 + 4, STAGE_W - bw / 2 - 4);
-    const th = this.captionText.height;
-    const bh = th + 8;
+    const bh = this.captionText.height + 8;
     this.captionText.setPosition(bx, 12);
     this.captionBox.clear();
     this.captionBox.fillStyle(0x000000, 0.8);
@@ -280,11 +371,21 @@ export class WalkthroughScene extends Phaser.Scene {
   }
 
   update(time: number): void {
-    // Idle bob on the active figures' bodies (not the ring).
     for (const node of this.figs.values()) {
-      if (!node.active || node.pose === 'collapsed') continue;
-      const base = node.pose === 'kneel' || node.pose === 'sit' || node.pose === 'cpr' ? 4 : 0;
-      node.body.y = base + Math.sin(time / 320 + node.phase) * 0.9;
+      if (!node.image) continue;
+      const rest = -node.figPx / 2;
+      if (node.pose === 'collapsed') {
+        node.image.y = rest;
+        continue;
+      }
+      if (node.moving) {
+        // brisker bob + slight tilt while walking
+        node.image.y = rest + Math.sin(time / 90 + node.phase) * 1.6;
+        node.image.rotation = Math.sin(time / 90 + node.phase) * 0.04;
+      } else {
+        node.image.rotation = 0;
+        node.image.y = node.active ? rest + Math.sin(time / 320 + node.phase) * 0.9 : rest;
+      }
     }
   }
 }

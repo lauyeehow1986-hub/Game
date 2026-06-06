@@ -16,7 +16,6 @@ import {
   type PhaserFigure,
 } from '../../game/walkthrough/WalkthroughScene';
 import { stageFigures } from '../../lib/walkthrough-staging';
-import { deriveFeatures } from '../../lib/sprite-generator';
 import { STAGE_W, STAGE_H, type SceneId } from '../../lib/scenery';
 import type { Walkthrough, WalkthroughBeat, WalkthroughChapter } from '../../lib/walkthrough';
 
@@ -78,23 +77,22 @@ export default function WalkthroughPhaserStage({
 
   useEffect(() => {
     const { figures, leadId } = stageFigures(walkthrough, chapter, activeByActor, selectedActorId);
-    const figs: PhaserFigure[] = figures.map((fig) => {
-      const ft = deriveFeatures(fig.actor);
-      return {
-        id: fig.actor.id,
-        x: fig.x,
-        y: fig.y,
-        scale: fig.scale,
-        swatch: fig.actor.swatch ?? '#475569',
-        skin: ft.skin,
-        role: fig.actor.role,
-        pose: fig.beat?.pose ?? 'stand',
-        facing: fig.beat?.direction ?? 'S',
-        isActive: fig.isActive,
-        isLead: fig.isLead,
-        isSelected: fig.isSelected,
-      };
-    });
+    const figs: PhaserFigure[] = figures.map((fig) => ({
+      id: fig.actor.id,
+      x: fig.x,
+      y: fig.y,
+      scale: fig.scale,
+      actor: fig.actor,
+      swatch: fig.actor.swatch ?? '#475569',
+      role: fig.actor.role,
+      pose: fig.beat?.pose ?? 'stand',
+      expression: fig.beat?.expression ?? 'neutral',
+      facing: fig.beat?.direction ?? 'S',
+      walking: !!fig.beat?.walking,
+      isActive: fig.isActive,
+      isLead: fig.isLead,
+      isSelected: fig.isSelected,
+    }));
 
     const leadBeat = leadId ? activeByActor.get(leadId) : undefined;
     const leadFig = figures.find((f) => f.actor.id === leadId);
