@@ -20,6 +20,7 @@ import {
   type SceneId,
 } from '../../lib/scenery';
 import { stageFigures } from '../../lib/walkthrough-staging';
+import { ShowpieceOverlay } from './ShowpieceOverlay';
 
 interface Props {
   walkthrough: Walkthrough;
@@ -235,6 +236,10 @@ export function WalkthroughModal({ walkthrough, onClose }: Props) {
                 onPickActor={(id) => setSelectedActorId(id)}
               />
             )}
+            {/* Procedural "b-roll" showpiece — plays above the stage during
+                beats that declare one. Asset-free SVG by default; MP4 hook
+                available for content owners. */}
+            <ShowpieceOverlay activeBeats={activeBeats} />
             {branchOpen && chapter.branchPoint && (
               <BranchOverlay
                 prompt={chapter.branchPoint.prompt}

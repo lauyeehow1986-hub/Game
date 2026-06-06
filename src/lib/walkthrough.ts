@@ -49,6 +49,14 @@ export type BeatExpression =
   | 'relieved'
   | 'unconscious';
 
+/** Showpiece beat overlay. Either an inline-SVG "b-roll" (asset-free, ships
+ *  with the bundle) or an external MP4 (added later by content owners; the
+ *  bundle stays asset-free). When present, the overlay plays above the stage
+ *  for the duration of the beat. */
+export type BeatShowpiece =
+  | { kind: 'svg'; id: 'stent-deployment' | 'mri-bore-slide' | 'aed-shock'; title?: string; caption?: string }
+  | { kind: 'mp4'; src: string; poster?: string; title?: string; caption?: string; loop?: boolean };
+
 export interface WalkthroughBeat {
   /** Seconds from the start of the containing Chapter. */
   at: number;
@@ -71,6 +79,9 @@ export interface WalkthroughBeat {
   pose?: BeatPose;
   /** Facial expression for this beat (default 'neutral'). */
   expression?: BeatExpression;
+  /** Optional procedural "b-roll" shown above the stage during this beat
+   *  (inline SVG showpiece or external MP4 — see BeatShowpiece). */
+  showpiece?: BeatShowpiece;
 }
 
 export interface WalkthroughBranchOption {

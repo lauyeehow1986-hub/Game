@@ -331,7 +331,7 @@ export const stemiWalkthrough: Walkthrough = {
         // The myResponder CFR sprints in from the five-foot-way with a PAD AED.
         { at: 14, actorId: 'cfr', action: 'myResponder ping accepted — arrives with PAD AED from 280 m away.', pos: { x: 372, y: 232 }, pose: 'walk', walking: true, direction: 'W', expression: 'focused' },
         // CFR kneels on the far side, applies pads, delivers a shock.
-        { at: 18, actorId: 'cfr', action: 'AED pads on. Shock advised. Stand clear, shock delivered.', pos: { x: 166, y: 242 }, pose: 'kneel', direction: 'E', expression: 'focused' },
+        { at: 18, actorId: 'cfr', action: 'AED pads on. Shock advised. Stand clear, shock delivered.', pos: { x: 166, y: 242 }, pose: 'kneel', direction: 'E', expression: 'focused', showpiece: { kind: 'svg', id: 'aed-shock' } },
         { at: 22, actorId: 'cfr', action: 'CPR resumed. Second cycle.', pos: { x: 170, y: 242 }, pose: 'cpr', direction: 'E', expression: 'focused' },
         // ROSC — Mr Tan groans, a pulse returns.
         { at: 26, actorId: 'patient', action: 'Return of spontaneous circulation. Groaning. Pulse palpable.', pos: { x: 202, y: 238 }, pose: 'collapsed', expression: 'pained' },
@@ -496,7 +496,7 @@ export const stemiWalkthrough: Walkthrough = {
         { at: 0, actorId: 'patient', action: 'On the MRI table — cardiac coils placed, sliding into the bore.', pos: { x: 195, y: 181 }, pose: 'collapsed', expression: 'neutral' },
         { at: 0, actorId: 'imaging-radiog', action: 'Patient on the MRI table. Cardiac coils placed.' },
         { at: 6, actorId: 'imaging-nurse', action: 'Gadolinium IV for late gadolinium enhancement.' },
-        { at: 12, actorId: 'imaging-radiog', action: 'Cine, T2, late-gad sequences acquired.' },
+        { at: 12, actorId: 'imaging-radiog', action: 'Cine, T2, late-gad sequences acquired.', showpiece: { kind: 'svg', id: 'mri-bore-slide' } },
         { at: 18, actorId: 'cath-cardio', action: 'Reviews MRI: viable myocardium in LAD territory, minimal scar.' },
         { at: 24, actorId: 'cath-cardio', action: 'Viability confirmed. PCI is meaningful. Heart team to convene.' },
       ],
@@ -575,7 +575,7 @@ export const stemiWalkthrough: Walkthrough = {
         { at: 0, actorId: 'cath-cardio', action: 'Back on table. Wire across the LAD lesion.' },
         { at: 7, actorId: 'cath-cardio', action: 'Pre-dilatation balloon. Lesion opens; TIMI 2 flow restored.' },
         { at: 14, actorId: 'cath-nurse', action: 'Drug-eluting stent loaded: 3.5 × 24 mm.' },
-        { at: 20, actorId: 'cath-cardio', action: 'Stent deployed; post-dilatation. Final injection — TIMI 3 flow.' },
+        { at: 20, actorId: 'cath-cardio', action: 'Stent deployed; post-dilatation. Final injection — TIMI 3 flow.', showpiece: { kind: 'svg', id: 'stent-deployment' } },
         { at: 28, actorId: 'cath-radiog', action: 'Total fluoro time 12 min; dose 1.2 Gy.' },
         { at: 34, actorId: 'cath-cardio', action: 'Sheath haemostasis. Patient to CCU. Door-to-balloon: 89 min.' },
         { at: 38, actorId: 'cleaner-cath', action: 'Enters with turnover trolley; next case slot already booked.', walking: true },

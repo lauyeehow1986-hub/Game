@@ -316,8 +316,15 @@ function KopitiamScene(): JSX.Element {
       {/* A loose ring of onlookers drawn toward the commotion (behind the
        * action, facing in) — the Singapore "kaypoh" crowd gathering. */}
       <QueuePatron x={250} y={206} scale={0.8} hue="#52606e" />
+      <QueuePatron x={264} y={208} scale={0.78} hue="#785b3c" />
       <QueuePatron x={284} y={210} scale={0.86} hue="#6b5648" />
+      <QueuePatron x={298} y={208} scale={0.82} hue="#4a3c30" />
       <QueuePatron x={312} y={206} scale={0.8} hue="#3f4654" />
+      <QueuePatron x={328} y={208} scale={0.78} hue="#5b4636" />
+
+      {/* Extra back-row patrons + a couple craning to see */}
+      <SeatedPatron x={224} y={172} scale={0.7} hue="#52606e" action="read" />
+      <SeatedPatron x={350} y={172} scale={0.72} hue="#5b4636" action="drink" />
 
       {/* Front-right table with patrons (foreground crowd, flanking right) */}
       <KopiTable x={420} y={220} scale={1.2} props="full" />
