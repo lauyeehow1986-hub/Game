@@ -219,18 +219,19 @@ export const strokeWalkthrough: Walkthrough = {
       defaultNextChapterId: 'ambulance',
       beats: [
         // Standing in the carriage, holding the grab pole near the doors.
-        { at: 0, actorId: 'patient', action: 'Standing at the pole — sudden right arm gives way, leans on the door.', pos: { x: 174, y: 244 }, pose: 'stand', expression: 'pained' },
+        { at: 0, actorId: 'patient', action: 'Standing at the pole — sudden right arm gives way, leans on the door.', pos: { x: 174, y: 248 }, pose: 'stand', expression: 'pained' },
         // Fellow commuter sees her stagger.
         { at: 3, actorId: 'bystander', action: 'Sees her slump against the pole. Moves in to catch her.', pos: { x: 220, y: 248 }, pose: 'walk', walking: true, direction: 'W', expression: 'alarmed' },
-        // She drops further — lowered into the priority seat by the doors.
-        { at: 7, actorId: 'patient', action: 'Right side weak, speech slurred but conscious. Eased into the priority seat.', pos: { x: 50, y: 230 }, pose: 'sit', expression: 'distressed' },
+        // She drops onto the priority seat by the doors (foreground bench).
+        // Anchor at y=242 puts her hips on the purple cushion at y≈218.
+        { at: 7, actorId: 'patient', action: 'Right side weak, speech slurred but conscious. Eased into the priority seat.', pos: { x: 52, y: 242 }, pose: 'sit', expression: 'distressed' },
         // Bystander hits the SOS plunger and shouts for the train manager.
-        { at: 11, actorId: 'bystander', action: 'Presses the SOS plunger by the doors. Calls out for the train staff.', pos: { x: 222, y: 226 }, pose: 'point', direction: 'E', expression: 'alarmed' },
-        // SMRT station manager comes on the radio / arrives onto the carriage.
-        { at: 17, actorId: 'smrt-staff', action: 'Radios control: medical emergency, car 3. Train held at next platform.', pos: { x: 320, y: 232 }, pose: 'point', direction: 'W', expression: 'focused' },
-        // Bystander steadies her head while waiting; notes the time.
-        { at: 22, actorId: 'bystander', action: 'Steadies her head. Notes the time of onset for the medics. FAST positive.', pos: { x: 86, y: 236 }, pose: 'kneel', direction: 'E', expression: 'focused' },
-        { at: 26, actorId: 'smrt-staff', action: 'On 995: stroke alert. Paramedics rerouted to Tampines platform 2.', pos: { x: 320, y: 232 }, pose: 'stand', direction: 'W', expression: 'focused' },
+        { at: 11, actorId: 'bystander', action: 'Presses the SOS plunger by the doors. Calls out for the train staff.', pos: { x: 222, y: 248 }, pose: 'point', direction: 'E', expression: 'alarmed' },
+        // SMRT station manager comes on the radio.
+        { at: 17, actorId: 'smrt-staff', action: 'Radios control: medical emergency, car 3. Train held at next platform.', pos: { x: 360, y: 246 }, pose: 'point', direction: 'W', expression: 'focused' },
+        // Bystander kneels at the seat to steady her head.
+        { at: 22, actorId: 'bystander', action: 'Steadies her head. Notes the time of onset for the medics. FAST positive.', pos: { x: 110, y: 250 }, pose: 'kneel', direction: 'E', expression: 'focused' },
+        { at: 26, actorId: 'smrt-staff', action: 'On 995: stroke alert. Paramedics rerouted to Tampines platform 2.', pos: { x: 360, y: 246 }, pose: 'stand', direction: 'W', expression: 'focused' },
       ],
     },
 

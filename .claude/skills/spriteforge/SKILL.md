@@ -91,6 +91,20 @@ keeps the look crisp at any display scale. Parts:
 The Walkthrough Stage ticks at 6 fps (150 ms interval). Active actors play
 the interaction loop; beats marked `walking: true` also play the walk cycle.
 
+### Age, glasses, beard (v9.15+)
+
+`deriveFeatures` adds three demographic axes so the cast reads visibly distinct:
+
+| Field | Source | Effect on sprite |
+| - | - | - |
+| `ageBand` | parsed from role text (`Mdm Lim, 72` → elder) or inferred from role keywords + hash | elders pick from the gray end of `HAIR_COLOURS` (last two entries) ~75% of the time; elders also render slight crow's-foot wrinkles at the temples |
+| `hasGlasses` | hash-gated, biased high for elders + clinical-staff roles (consultant, cardiologist, neurologist, radiologist, clerk, manager) | small rounded twin frames with sheen reflection + temple arms |
+| `beard` | hash-gated; never for female-coded explicit roles (Mdm/Mrs/Ms/Miss/Daughter/Wife) and never with hair-style 2 (tied-back) | `light` stubble shading along the jaw, or `full` short-cropped beard with implied moustache |
+
+Adding a Singapore-grounded age cue (gray hair, glasses, wrinkles) was the
+single biggest character-distinctness improvement — Mdm Lim, 72 now reads as
+72 instead of as a generic adult.
+
 ### Poses (v9.8+)
 
 `poseTransform(pose)` returns an SVG transform applied around the whole figure,

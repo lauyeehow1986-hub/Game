@@ -1111,6 +1111,40 @@ function MrtCarriageScene(): JSX.Element {
         <path d="M 1 -28 a 6 6 0 0 1 12 0 z" fill="#1c140e" />
       </g>
 
+      {/* FOREGROUND PRIORITY-SEAT BENCH at the door
+       *  Singapore MRT carriages have a single-seat reserved bench at the
+       *  door area for elderly / pregnant / disabled commuters. This one is
+       *  placed at full stage scale (depth ≈ 1.0) so the action of easing
+       *  the patient onto it reads clearly — not crammed into the back row. */}
+      <g transform="translate(20,200)">
+        {/* contact shadow under the bench */}
+        <ellipse cx={32} cy={50} rx={36} ry={5} fill="#000" opacity={0.32} />
+        {/* seat back rest */}
+        <rect x={2} y={-22} width={64} height={6} rx={2} fill="#5a6772" />
+        <rect x={2} y={-22} width={64} height={6} rx={2} fill="url(#mrt-pole)" opacity={0.7} />
+        {/* upright supports + mounting brackets */}
+        <rect x={6} y={-16} width={3} height={28} fill="#5a6772" />
+        <rect x={59} y={-16} width={3} height={28} fill="#5a6772" />
+        {/* seat cushion (priority-seat purple, Singapore-spec) */}
+        <rect x={2} y={12} width={64} height={20} rx={4} fill="#5b21b6" />
+        <rect x={2} y={12} width={64} height={5} rx={2} fill="#7c3aed" />
+        <rect x={2} y={28} width={64} height={4} fill="#3b0764" opacity={0.6} />
+        {/* anti-slip ridges */}
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((k) => (
+          <line key={k} x1={6 + k * 7.5} y1={17} x2={6 + k * 7.5} y2={29} stroke="#1e1b4b" strokeWidth={0.4} opacity={0.4} />
+        ))}
+        {/* priority decal on the back rest */}
+        <rect x={28} y={-21} width={12} height={4} rx={1} fill="#fef3c7" stroke="#92400e" strokeWidth={0.5} />
+        <text x={34} y={-18} textAnchor="middle" fontSize={3.4} fontFamily="ui-monospace, monospace" fill="#92400e">♿</text>
+        {/* "RESERVED" marker on the cushion edge */}
+        <text x={34} y={9} textAnchor="middle" fontSize={3.2} fontFamily="ui-monospace, monospace" fill="#fde68a" letterSpacing="0.5">
+          RESERVED · 优先座
+        </text>
+        {/* glass armrest divider on the right (matches Singapore MRT) */}
+        <rect x={62} y={-12} width={4} height={30} rx={1.5} fill="#1e293b" />
+        <rect x={63} y={-10} width={2} height={26} rx={1} fill="#a5f3fc" opacity={0.35} />
+      </g>
+
       {/* SVG vignette overlay */}
       <rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="url(#mrt-vig)" />
     </g>

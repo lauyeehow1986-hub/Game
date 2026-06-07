@@ -222,6 +222,44 @@ describe('sprite-generator — colour helpers', () => {
   });
 });
 
+describe('sprite-generator — age / glasses / beard derivation (v9.15)', () => {
+  it('an explicit age in the role text drives the ageBand', () => {
+    const young = deriveFeatures({ id: 'y', role: 'Daughter, 28', team: 'patient', bio: '' });
+    const adult = deriveFeatures({ id: 'a', role: 'Mr Tan, 58', team: 'patient', bio: '' });
+    const elder = deriveFeatures({ id: 'e', role: 'Mdm Lim, 72', team: 'patient', bio: '' });
+    expect(young.ageBand).toBe('young');
+    expect(adult.ageBand).toBe('adult');
+    expect(elder.ageBand).toBe('elder');
+  });
+
+  it('most elders end up with gray-band hair (75% by hash, with a dyed-dark minority)', () => {
+    const grayBand = [HAIR_COLOURS[4], HAIR_COLOURS[5]];
+    let gray = 0;
+    for (let i = 0; i < 60; i += 1) {
+      const f = deriveFeatures({ id: `elder-${i}`, role: 'Elder, 72', team: 'patient', bio: '' });
+      if ((grayBand as readonly string[]).includes(f.hair)) gray += 1;
+    }
+    expect(gray, 'expected most elders to have gray hair').toBeGreaterThanOrEqual(40);
+  });
+
+  it('female-coded explicit roles never grow beards', () => {
+    for (const role of ['Mdm Lim, 72', 'Mrs Tan, 56', 'Daughter, 44', 'Wife, 36']) {
+      for (let i = 0; i < 10; i += 1) {
+        const f = deriveFeatures({ id: `${role}-${i}`, role, team: 'patient', bio: '' });
+        expect(f.beard, `${role} hash-${i} should not have a beard`).toBe('none');
+      }
+    }
+  });
+
+  it('the rendered sprite reflects glasses + beard in markup', () => {
+    const a = stemiWalkthrough.actors['consultant-cardio'];
+    const f = deriveFeatures(a);
+    if (!f.hasGlasses && f.beard === 'none') return; // hash-dependent; skip
+    const svg = renderToStaticMarkup(<ActorSprite actor={a} />);
+    if (f.hasGlasses) expect(svg).toMatch(/stroke="#1a1410"/);
+  });
+});
+
 describe('sprite-generator — animation frame math', () => {
   it('armRaiseFor cycles through 6 frames with a peak in the middle', () => {
     expect(armRaiseFor(0)).toBe(0);

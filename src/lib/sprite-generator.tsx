@@ -37,8 +37,42 @@ const SKIN_SHADE: Record<string, string> = {
   '#7e5235': '#5a371f',
 };
 
-/** Hair colour palette — short list, all plausible in Singapore. */
-export const HAIR_COLOURS = ['#1a1410', '#2c1f17', '#3d2e22', '#5c4a3a'] as const;
+/** Hair colour palette — short list, all plausible in Singapore. Last two
+ *  entries are gray / white-streaked, reserved for elder characters so the
+ *  cast reads visibly distinct across ages. */
+export const HAIR_COLOURS = ['#1a1410', '#2c1f17', '#3d2e22', '#5c4a3a', '#9aa0a6', '#e5e7eb'] as const;
+
+/** Age band drives gray hair, glasses probability, wrinkle hints, posture. */
+export type AgeBand = 'young' | 'adult' | 'elder';
+
+/** Parse an explicit age from a role string like "Mdm Lim, 72" or "Son, 28". */
+function explicitAgeFromRole(role: string): number | null {
+  const m = /,\s*(\d{1,3})\s*$/.exec(role);
+  if (!m) return null;
+  const n = parseInt(m[1], 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Bucket an explicit age into a band. */
+function bandFromAge(age: number): AgeBand {
+  if (age >= 65) return 'elder';
+  if (age >= 35) return 'adult';
+  return 'young';
+}
+
+/** When no explicit age is given, infer a band from role keywords + a tiny
+ *  hash jitter so peers look distinct rather than identical-aged. */
+function inferAgeBand(role: string, h: number): AgeBand {
+  const r = role.toLowerCase();
+  if (r.includes('consultant') || r.includes('senior')) {
+    return ((h >> 8) & 7) < 6 ? 'adult' : 'elder';
+  }
+  if (r.includes('registrar') || r.includes('case manager') || r.includes('coordinator')) return 'adult';
+  if (r.includes('mo') || r.includes('hca') || r.includes('officer')) {
+    return ((h >> 8) & 7) < 6 ? 'young' : 'adult';
+  }
+  return ((h >> 8) & 3) === 0 ? 'young' : 'adult';
+}
 
 /** Accessory kind drives the role-specific overlay. */
 export type AccessoryKind =
@@ -111,6 +145,12 @@ export interface SpriteFeatures {
   /** A darker shade of the uniform colour, for volume shading. */
   uniformShade: string;
   accessory: AccessoryKind;
+  /** Apparent age, derived from the role text ("Mdm Lim, 72") or hash. */
+  ageBand: AgeBand;
+  /** True when the actor wears glasses (rendered as a small frame overlay). */
+  hasGlasses: boolean;
+  /** Beard kind — 'none' (default), 'light' (stubble), 'full'. */
+  beard: 'none' | 'light' | 'full';
 }
 
 /** Darken a #rrggbb colour by a 0..1 factor. */
@@ -159,14 +199,61 @@ export function deriveFeatures(actor: WalkthroughActor): SpriteFeatures {
   const h = hash(actor.id);
   const skin = SKIN_TONES[h & 3];
   const uniform = actor.swatch ?? '#475569';
+
+  // Age: parsed from the role text when explicit ("Mdm Lim, 72"); otherwise
+  // inferred from role keywords + a small hash jitter so the cast spans ages.
+  const explicit = explicitAgeFromRole(actor.role);
+  const ageBand: AgeBand = explicit != null ? bandFromAge(explicit) : inferAgeBand(actor.role, h);
+
+  // Elder: pick from the gray end of the palette (last 2 entries) with high
+  // probability so silver hair tracks age. Younger bands pick from the dark
+  // entries (first 4) so the look stays Singapore-realistic.
+  const hairIdx =
+    ageBand === 'elder'
+      ? ((h >> 2) & 3) < 3
+        ? 4 + ((h >> 5) & 1) // 4 or 5 (gray / white)
+        : (h >> 2) & 3       // small chance of dyed dark
+      : (h >> 2) & 3;        // young / adult: dark only
+  const hair = HAIR_COLOURS[hairIdx];
+
+  // Glasses: more common in elder + clinical-staff roles. Cardiologists,
+  // neurologists, radiologists, consultants and Mdm Lim are common cases.
+  const r = actor.role.toLowerCase();
+  const role_hint_glasses =
+    r.includes('consultant') || r.includes('cardiolog') || r.includes('neurolog') ||
+    r.includes('radiolog') || r.includes('clerk') || r.includes('manager');
+  const hasGlasses = ageBand === 'elder'
+    ? ((h >> 6) & 3) > 0           // 75% of elders
+    : role_hint_glasses
+      ? ((h >> 6) & 3) > 1         // 50% of glasses-prone roles
+      : ((h >> 6) & 7) === 0;      // ~12% otherwise
+
+  // Beard — male-presenting cue inferred from role text, then hash gates the
+  // intensity. We never beard hair-style 2 (tied-back / bun) to avoid mixed
+  // signals; female-coded explicit roles (Mdm, Mrs) suppress beards entirely.
+  const hairStyle = ((h >> 4) & 3) as 0 | 1 | 2;
+  const female_coded = /^(mdm|mrs|ms\.?|miss|daughter|wife)\b/i.test(actor.role);
+  const beard_roll = (h >> 9) & 7;
+  const beard: 'none' | 'light' | 'full' =
+    female_coded || hairStyle === 2
+      ? 'none'
+      : beard_roll < 1
+        ? 'full'
+        : beard_roll < 3
+          ? 'light'
+          : 'none';
+
   return {
     skin,
     skinShade: SKIN_SHADE[skin] ?? '#5a371f',
-    hair: HAIR_COLOURS[(h >> 2) & 3],
-    hairStyle: ((h >> 4) & 3) as 0 | 1 | 2,
+    hair,
+    hairStyle,
     uniform,
     uniformShade: darken(uniform, 0.72),
     accessory: accessoryFor(actor),
+    ageBand,
+    hasGlasses,
+    beard,
   };
 }
 
@@ -316,7 +403,7 @@ function SpriteHead({
   isBack: boolean;
   expression?: Expression;
 }): JSX.Element {
-  const { skin, skinShade } = features;
+  const { skin, skinShade, ageBand, hasGlasses, beard } = features;
   return (
     <g>
       {/* Head — square with corner pixels removed for stepped roundness */}
@@ -330,7 +417,52 @@ function SpriteHead({
       {/* Chin shading */}
       <rect x={18} y={20} width={12} height={1} fill={skinShade} />
       {/* Face features on front-facing only */}
-      {!isBack && <FaceFeatures expression={expression} />}
+      {!isBack && (
+        <>
+          <FaceFeatures expression={expression} />
+          {/* Elder wrinkles — short cheek-line + temple line beside the eyes */}
+          {ageBand === 'elder' && (
+            <g opacity={0.55}>
+              <rect x={17} y={15} width={2} height={1} fill={skinShade} />
+              <rect x={29} y={15} width={2} height={1} fill={skinShade} />
+              <rect x={18} y={17} width={1} height={1} fill={skinShade} />
+              <rect x={29} y={17} width={1} height={1} fill={skinShade} />
+            </g>
+          )}
+          {/* Glasses overlay — rounded twin frames bridging at the nose */}
+          {hasGlasses && (
+            <g>
+              <rect x={18} y={11} width={5} height={5} rx={1.5} fill="none" stroke="#1a1410" strokeWidth={0.9} />
+              <rect x={25} y={11} width={5} height={5} rx={1.5} fill="none" stroke="#1a1410" strokeWidth={0.9} />
+              <line x1={23} y1={13} x2={25} y2={13} stroke="#1a1410" strokeWidth={0.9} />
+              {/* lens reflection sheen */}
+              <line x1={19} y1={12} x2={21} y2={14} stroke="#fff" strokeWidth={0.5} opacity={0.7} />
+              <line x1={26} y1={12} x2={28} y2={14} stroke="#fff" strokeWidth={0.5} opacity={0.7} />
+              {/* temple arms (to the hair line) */}
+              <line x1={18} y1={13.5} x2={16} y2={13} stroke="#1a1410" strokeWidth={0.7} />
+              <line x1={30} y1={13.5} x2={32} y2={13} stroke="#1a1410" strokeWidth={0.7} />
+            </g>
+          )}
+          {/* Beard — light stubble vs full beard around the jaw */}
+          {beard !== 'none' && (
+            <g>
+              {beard === 'light' ? (
+                <>
+                  <rect x={18} y={19} width={12} height={2} fill={skinShade} opacity={0.55} />
+                  <rect x={19} y={18} width={10} height={1} fill={skinShade} opacity={0.35} />
+                </>
+              ) : (
+                <>
+                  <rect x={17} y={17} width={14} height={4} fill="#2c1f17" opacity={0.85} />
+                  <rect x={18} y={16} width={12} height={1} fill="#2c1f17" opacity={0.7} />
+                  {/* moustache implied above the lip */}
+                  <rect x={20} y={17} width={8} height={1} fill="#2c1f17" />
+                </>
+              )}
+            </g>
+          )}
+        </>
+      )}
     </g>
   );
 }
