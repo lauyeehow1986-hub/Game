@@ -42,6 +42,33 @@ function emissive(color: string, intensity = 1.2): THREE.MeshStandardMaterial {
   });
 }
 
+/** Polished metal with a clearcoat layer — reflects the IBL envmap when
+ *  one is loaded, falls back to plain shiny metalness otherwise. Used on
+ *  the cath-lab C-arm and the MRI gantry where the surfaces *must* read
+ *  as physical metal under any lighting. */
+function clearcoatMetal(color: string, roughness = 0.25): THREE.MeshPhysicalMaterial {
+  return new THREE.MeshPhysicalMaterial({
+    color, roughness, metalness: 0.9, clearcoat: 1.0, clearcoatRoughness: 0.08,
+  });
+}
+
+/** Transmissive glass — proper refraction + tinted absorption under IBL.
+ *  Used for the cath-lab lead-glass control window, the MRI bore opening,
+ *  and the ward daylight windows where the IBL HDRI is what makes the
+ *  window read as a window instead of a flat coloured rectangle. */
+function transmissiveGlass(tint = '#dff1ff', thickness = 0.05): THREE.MeshPhysicalMaterial {
+  return new THREE.MeshPhysicalMaterial({
+    color: tint,
+    roughness: 0.04,
+    metalness: 0,
+    transmission: 0.92,
+    thickness,
+    ior: 1.45,
+    transparent: true,
+    opacity: 0.85,
+  });
+}
+
 function box(
   w: number, h: number, d: number, material: THREE.Material,
   x = 0, y = 0, z = 0, castShadow = true,
@@ -356,17 +383,18 @@ function buildCathlab(): Environment3D {
   // cath table
   g.add(box(2.6, 0.14, 0.8, std('#1f2937', 0.5), 0, 0.95, -7.5));
   g.add(box(0.5, 0.85, 0.5, std('#475569', 0.5, 0.5), 0, 0.45, -7.5));
-  // C-arm: a big arc over the table
+  // C-arm: a big arc over the table — clearcoat-metal so IBL gives it
+  // proper specular highlights from the surgical lights and ceiling glow.
   const cArm = new THREE.Mesh(
     new THREE.TorusGeometry(1.45, 0.16, 10, 24, Math.PI),
-    std('#e2e8f0', 0.45, 0.4),
+    clearcoatMetal('#e8eef5', 0.22),
   );
   cArm.position.set(0.8, 1.1, -7.5);
   cArm.rotation.z = Math.PI;
   cArm.castShadow = true;
   g.add(cArm);
-  g.add(box(0.55, 0.4, 0.55, std('#cbd5e1', 0.4), 0.8, 2.65, -7.5));   // detector
-  g.add(box(0.55, 0.4, 0.55, std('#cbd5e1', 0.4), 0.8, -0.2 + 0.65, -7.5)); // tube
+  g.add(box(0.55, 0.4, 0.55, clearcoatMetal('#cbd5e1', 0.3), 0.8, 2.65, -7.5));   // detector
+  g.add(box(0.55, 0.4, 0.55, clearcoatMetal('#cbd5e1', 0.3), 0.8, -0.2 + 0.65, -7.5)); // tube
   // ceiling monitor boom (bank of 4 screens)
   const boom = new THREE.Group();
   for (let i = 0; i < 4; i += 1) {
@@ -375,8 +403,9 @@ function buildCathlab(): Environment3D {
   boom.add(cylinder(0.05, 0.05, 2.0, std('#94a3b8', 0.4, 0.7), 0, 1.4, 0, 8));
   boom.position.set(-2.2, 2.3, -8.6);
   g.add(boom);
-  // lead-glass control room
-  g.add(box(6, 2.4, 0.18, std('#9fb8d9', 0.1, 0.1), -10, 1.6, -14.0, false));
+  // lead-glass control room — transmission glass; the IBL behind it
+  // refracts subtly through, selling the "looking into the next room" feel.
+  g.add(box(6, 2.4, 0.18, transmissiveGlass('#dfecff', 0.18), -10, 1.6, -14.0, false));
   monitor(g, 4.5, -9.5);
   ceilingBar(g, 0, -10, '#dbeafe');
   return {
@@ -394,9 +423,11 @@ function buildImaging(): Environment3D {
   const g = new THREE.Group();
   floor(g, '#cdd6e0', '#aebbcb');
   walls(g, '#dde5ee');
-  // scanner gantry: big ring + bore
+  // scanner gantry: big ring + bore — clearcoat-white plastic on the
+  // gantry shell so IBL gives it the curved sheen MRI scanners actually
+  // have on real photos.
   const gantry = new THREE.Group();
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.55, 14, 28), std('#f1f5f9', 0.55));
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.55, 14, 28), clearcoatMetal('#f1f5f9', 0.32));
   ring.castShadow = true;
   gantry.add(ring);
   const bore = new THREE.Mesh(
@@ -405,14 +436,14 @@ function buildImaging(): Environment3D {
   );
   bore.rotation.x = Math.PI / 2;
   gantry.add(bore);
-  gantry.add(box(3.4, 0.5, 1.4, std('#e2e8f0', 0.6), 0, -1.75, 0));
+  gantry.add(box(3.4, 0.5, 1.4, clearcoatMetal('#e2e8f0', 0.4), 0, -1.75, 0));
   gantry.position.set(0, 2.0, -11);
   g.add(gantry);
   // sliding patient table into the bore
   g.add(box(0.75, 0.10, 3.6, std('#dbeafe', 0.8), 0, 1.05, -8.2));
   g.add(box(0.5, 0.95, 1.2, std('#cbd5e1', 0.6), 0, 0.5, -7.2));
-  // control window
-  g.add(box(5.5, 2.2, 0.16, std('#aac4e2', 0.1, 0.1), 9.5, 1.7, -14.2, false));
+  // control window — transmission glass.
+  g.add(box(5.5, 2.2, 0.16, transmissiveGlass('#cee2f5', 0.16), 9.5, 1.7, -14.2, false));
   monitor(g, -5.5, -9);
   ceilingBar(g, 0, -8, '#e8f1ff'); ceilingBar(g, -6, -11, '#e8f1ff');
   return {
@@ -477,8 +508,11 @@ function buildWard(): Environment3D {
   ivPole(g, -5.9, -9.6);
   // privacy curtains between beds
   g.add(box(0.06, 2.4, 4.2, std('#a7d6c9', 0.95), 0, 2.4, -9.5, false));
-  // daylight window
+  // daylight window — emissive backdrop + a transmission-glass pane in
+  // front. With IBL loaded the ward picks up real soft warmth through
+  // it; without IBL the emissive backdrop still reads as daylight.
   g.add(box(7, 2.4, 0.15, emissive('#dff1ff', 0.85), 0, 3.4, -15.6, false));
+  g.add(box(7, 2.4, 0.06, transmissiveGlass('#f0f8ff', 0.06), 0, 3.4, -15.52, false));
   ceilingBar(g, -4, -8); ceilingBar(g, 4, -8);
   return {
     group: g,

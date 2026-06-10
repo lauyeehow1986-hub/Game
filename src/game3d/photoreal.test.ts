@@ -11,7 +11,15 @@ import * as THREE from 'three';
 import { _resetActorCache, loadActorTemplate, createActorFigure, CAST_DIR } from './actorLoader';
 import { SCENE_HDRI_SLUGS, HDR_DIR } from './ibl';
 import { SCENE_IDS_3D } from './environments';
+import {
+  ANIM_DIR,
+  POSE_CLIP_SLUGS,
+  PoseAnimationDriver,
+  _resetClipCache,
+  loadPoseClip,
+} from './animationLibrary';
 import { stemiWalkthrough } from '../lib/walkthrough-stemi';
+import type { BeatPose } from '../lib/walkthrough';
 
 describe('actorLoader — fallback behaviour', () => {
   it('exposes the public CAST_DIR path', () => {
@@ -65,5 +73,41 @@ describe('IBL — per-scene HDRI registry', () => {
     const slugs = Object.values(SCENE_HDRI_SLUGS);
     // At least 6 of the 12 scenes should map to a distinct HDRI.
     expect(new Set(slugs).size).toBeGreaterThanOrEqual(6);
+  });
+});
+
+describe('animationLibrary — Mixamo-clip retargeting scaffold', () => {
+  it('exposes the public ANIM_DIR path', () => {
+    expect(ANIM_DIR).toBe('/3d/anims/');
+  });
+
+  it('maps every BeatPose to a clip slug', () => {
+    const poses: BeatPose[] = ['stand', 'walk', 'kneel', 'sit', 'cpr', 'collapsed', 'point'];
+    for (const p of poses) {
+      expect(POSE_CLIP_SLUGS[p], `missing clip slug for ${p}`).toBeTruthy();
+      expect(POSE_CLIP_SLUGS[p]).toMatch(/^[a-z0-9-]+$/);
+    }
+  });
+
+  it('loadPoseClip resolves (clip or null) rather than rejecting on a missing file', async () => {
+    _resetClipCache();
+    const clip = await loadPoseClip('cpr');
+    expect(clip === null).toBe(true);
+  });
+
+  it('loadPoseClip dedupes concurrent calls for the same pose', () => {
+    _resetClipCache();
+    const a = loadPoseClip('cpr');
+    const b = loadPoseClip('cpr');
+    expect(a).toBe(b);
+  });
+
+  it('PoseAnimationDriver constructs and disposes without errors against an empty rig', async () => {
+    const root = new THREE.Group();
+    const d = new PoseAnimationDriver(root);
+    // Driving setPose when no clip is loaded is a no-op (never throws).
+    await d.setPose('cpr');
+    d.update(1 / 60);
+    d.dispose();
   });
 });

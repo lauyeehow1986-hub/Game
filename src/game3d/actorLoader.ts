@@ -16,6 +16,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Humanoid } from './humanoid';
+import { PoseAnimationDriver, cloneRig } from './animationLibrary';
 import type { BeatExpression, BeatPose, WalkthroughActor } from '../lib/walkthrough';
 
 /** Public path where authored character GLBs live. Files are optional. */
@@ -102,14 +103,18 @@ class GlbFigure implements ActorFigure {
   private goal = new THREE.Vector2(0, 0);
   private moving = false;
   private state = { pose: 'stand' as BeatPose, expression: 'neutral' as BeatExpression, walking: false, speaking: false, isLead: false };
-  private mixer: THREE.AnimationMixer;
+  /** Mixamo-clip retargeting driver — auto-loads any pose clips that
+   *  exist at public/3d/anims/ and cross-fades on pose change. */
+  private driver: PoseAnimationDriver;
   private focusRing: THREE.Mesh;
   private phase: number;
 
   constructor(actor: WalkthroughActor, template: THREE.Group) {
     this.actorId = actor.id;
     this.root = new THREE.Group();
-    const clone = template.clone(true);
+    // SkeletonUtils.clone preserves the skeleton + skinned binding so
+    // multiple instances of the same template can pose independently.
+    const clone = cloneRig(template);
     clone.traverse((o) => {
       if (o instanceof THREE.Mesh) {
         o.castShadow = true;
@@ -118,7 +123,8 @@ class GlbFigure implements ActorFigure {
       }
     });
     this.root.add(clone);
-    this.mixer = new THREE.AnimationMixer(clone);
+    this.driver = new PoseAnimationDriver(clone);
+    void this.driver.setPose('stand');
     this.phase = [...actor.id].reduce((h, c) => h + c.charCodeAt(0), 0) % 7;
 
     // speaker focus ring (same as procedural humanoid)
@@ -141,7 +147,14 @@ class GlbFigure implements ActorFigure {
   }
 
   setState(next: Partial<typeof this.state>) {
+    const prevPose = this.state.pose;
     Object.assign(this.state, next);
+    // Forward pose changes to the animation driver — when a clip exists
+    // for the new pose, it cross-fades; when not, the no-op resolves
+    // silently and the rig stays in its previous animation (or bind pose).
+    if (next.pose && next.pose !== prevPose) {
+      void this.driver.setPose(next.pose);
+    }
   }
 
   update(t: number, dt: number) {
@@ -156,8 +169,8 @@ class GlbFigure implements ActorFigure {
       this.root.position.z += (dz / dist) * step;
       this.root.rotation.y = Math.atan2(dx, dz);
     }
-    void this.phase; void t;
-    this.mixer.update(dt);
+    void this.phase;
+    this.driver.update(dt);
 
     const want = this.state.isLead ? 0.55 + Math.sin(t * 4) * 0.18 : 0;
     const m = this.focusRing.material as THREE.MeshBasicMaterial;
@@ -165,6 +178,7 @@ class GlbFigure implements ActorFigure {
   }
 
   dispose() {
+    this.driver.dispose();
     this.root.traverse((o) => {
       if (o instanceof THREE.Mesh) {
         o.geometry.dispose();
