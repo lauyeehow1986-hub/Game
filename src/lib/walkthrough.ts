@@ -82,6 +82,10 @@ export interface WalkthroughBeat {
   /** Optional procedural "b-roll" shown above the stage during this beat
    *  (inline SVG showpiece or external MP4 — see BeatShowpiece). */
   showpiece?: BeatShowpiece;
+  /** Onomatopoeia audio cue ("DING!", "🚨 SIREN", "*CLEAR*") rendered as a
+   *  floating text indicator near the speaker. The PWA has no audio assets;
+   *  this gives the action a sound dimension without an audio file. */
+  sfx?: string;
 }
 
 export interface WalkthroughBranchOption {

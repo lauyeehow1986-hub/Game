@@ -26,7 +26,10 @@ export type AchievementId =
   | 'open-mind'
   | 'educator'
   | 'author'
-  | 'completionist';
+  | 'completionist'
+  | 'walk-stemi'
+  | 'walk-stroke'
+  | 'walk-multi-pathway';
 
 export type TriggerKind =
   | 'case-completed'
@@ -34,7 +37,8 @@ export type TriggerKind =
   | 'locale-changed'
   | 'demo-opened'
   | 'export-used'
-  | 'custom-content-added';
+  | 'custom-content-added'
+  | 'walkthrough-completed';
 
 export interface AchievementDefinition {
   id: AchievementId;
@@ -60,6 +64,9 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   { id: 'educator',            title: 'Educator',            description: 'Export a lesson plan or share a run/curriculum URL.' },
   { id: 'author',              title: 'Author',              description: 'Import or build a custom case or curriculum.' },
   { id: 'completionist',       title: 'Completionist',       description: 'Score at least once on every built-in case.' },
+  { id: 'walk-stemi',          title: '🫀 Cardiac arrest to recovery', description: 'Completed the full STEMI patient pathway walkthrough.' },
+  { id: 'walk-stroke',         title: '🧠 Stroke pathway hero',        description: 'Completed the large-vessel-occlusion stroke pathway walkthrough.' },
+  { id: 'walk-multi-pathway',  title: '🏆 Multi-pathway master',       description: 'Completed every walkthrough in the catalogue.' },
 ];
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -73,7 +80,8 @@ export type Trigger =
   | { kind: 'locale-changed'; locale: Locale }
   | { kind: 'demo-opened' }
   | { kind: 'export-used' }
-  | { kind: 'custom-content-added' };
+  | { kind: 'custom-content-added' }
+  | { kind: 'walkthrough-completed'; walkthroughId: string };
 
 export interface ProgressSnapshot {
   /** Count of cases where the best score ratio is ≥ 0.9. */
@@ -131,6 +139,18 @@ export function evaluate(
     case 'custom-content-added':
       want('author', true);
       break;
+    case 'walkthrough-completed': {
+      // Single-pathway badges, deterministic from the walkthrough id.
+      const id = trigger.walkthroughId;
+      if (id.startsWith('stemi')) want('walk-stemi', true);
+      if (id.startsWith('stroke')) want('walk-stroke', true);
+      // Multi-pathway master fires once both single-pathway badges are unlocked
+      // — including the one we are about to unlock in this same evaluation.
+      const willHaveStemi = already.has('walk-stemi') || (id.startsWith('stemi'));
+      const willHaveStroke = already.has('walk-stroke') || (id.startsWith('stroke'));
+      want('walk-multi-pathway', willHaveStemi && willHaveStroke);
+      break;
+    }
   }
   return unlocked;
 }

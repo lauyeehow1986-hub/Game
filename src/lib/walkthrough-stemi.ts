@@ -331,7 +331,7 @@ export const stemiWalkthrough: Walkthrough = {
         // The myResponder CFR sprints in from the five-foot-way with a PAD AED.
         { at: 14, actorId: 'cfr', action: 'myResponder ping accepted — arrives with PAD AED from 280 m away.', pos: { x: 372, y: 232 }, pose: 'walk', walking: true, direction: 'W', expression: 'focused' },
         // CFR kneels on the far side, applies pads, delivers a shock.
-        { at: 18, actorId: 'cfr', action: 'AED pads on. Shock advised. Stand clear, shock delivered.', pos: { x: 166, y: 242 }, pose: 'kneel', direction: 'E', expression: 'focused', showpiece: { kind: 'svg', id: 'aed-shock' } },
+        { at: 18, actorId: 'cfr', action: 'AED pads on. Shock advised. Stand clear, shock delivered.', pos: { x: 166, y: 242 }, pose: 'kneel', direction: 'E', expression: 'focused', showpiece: { kind: 'svg', id: 'aed-shock' }, sfx: '⚡ CLEAR!' },
         { at: 22, actorId: 'cfr', action: 'CPR resumed. Second cycle.', pos: { x: 170, y: 242 }, pose: 'cpr', direction: 'E', expression: 'focused' },
         // ROSC — Mr Tan groans, a pulse returns.
         { at: 26, actorId: 'patient', action: 'Return of spontaneous circulation. Groaning. Pulse palpable.', pos: { x: 202, y: 238 }, pose: 'collapsed', expression: 'pained' },
@@ -371,7 +371,7 @@ export const stemiWalkthrough: Walkthrough = {
         { at: 3, actorId: 'driver', action: 'Sets up the stretcher and clears the route to the EA.', pos: { x: 312, y: 238 }, pose: 'stand', direction: 'W', expression: 'focused', walking: true },
         { at: 5, actorId: 'paramedic', action: '12-lead ECG: ST elevation V1–V4. Calls STEMI alert.', pos: { x: 222, y: 246 }, pose: 'kneel', direction: 'W', expression: 'focused' },
         { at: 10, actorId: 'paramedic', action: 'IV access established. Aspirin 300 mg PO loaded.', pos: { x: 222, y: 246 }, pose: 'kneel', direction: 'W', expression: 'focused' },
-        { at: 14, actorId: 'driver', action: 'Patient loaded. Code 3 transport. Pre-notifies receiving hospital.', pos: { x: 312, y: 238 }, pose: 'point', expression: 'focused' },
+        { at: 14, actorId: 'driver', action: 'Patient loaded. Code 3 transport. Pre-notifies receiving hospital.', pos: { x: 312, y: 238 }, pose: 'point', expression: 'focused', sfx: '🚨 SIREN' },
         { at: 18, actorId: 'paramedic', action: 'En route: O2 maintained, BP 102 / 64, HR 88. ECG re-checked.', pos: { x: 222, y: 240 }, pose: 'stand', direction: 'W', expression: 'focused' },
         { at: 24, actorId: 'paramedic', action: 'Cath team activation confirmed. ETA 4 minutes.', pos: { x: 222, y: 240 }, pose: 'stand', expression: 'relieved' },
       ],

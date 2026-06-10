@@ -21,6 +21,7 @@ import {
 } from '../../lib/scenery';
 import { stageFigures } from '../../lib/walkthrough-staging';
 import { ShowpieceOverlay } from './ShowpieceOverlay';
+import { useAchievements } from '../../state/achievementsStore';
 
 interface Props {
   walkthrough: Walkthrough;
@@ -88,6 +89,10 @@ export function WalkthroughModal({ walkthrough, onClose }: Props) {
             setChapterId(chapter.defaultNextChapterId);
             return 0;
           }
+          // Terminal canonical chapter — fire walkthrough-completed.
+          useAchievements
+            .getState()
+            .fire({ kind: 'walkthrough-completed', walkthroughId: walkthrough.id });
           setPlaying(false);
           return chapter.durationSec;
         }
@@ -478,6 +483,7 @@ function Stage({ walkthrough, chapter, activeByActor, selectedActorId, onPickAct
                 expression={beat?.expression ?? 'neutral'}
                 interactionFrame={isActive ? tick % INTERACTION_FRAMES : undefined}
                 walkFrame={isActive && beat?.walking ? tick % WALK_FRAMES : undefined}
+                speaking={isActive && actor.id === leadId}
               />
             </g>
             {/* small name tag — skipped for the lead (named in the bubble) */}
@@ -531,6 +537,41 @@ function Stage({ walkthrough, chapter, activeByActor, selectedActorId, onPickAct
                 {lead!.beat.action}
               </div>
             </foreignObject>
+          </g>
+        );
+      })()}
+
+      {/* Audio cue text indicator (v9.16+). When the lead beat declares an
+       *  `sfx` string, render it as a floating onomatopoeia near the speaker
+       *  — comic-book style. Drifts up + fades, looping every 1.6s. */}
+      {lead?.beat.sfx && (() => {
+        const s = staged.find((st) => st.actor.id === lead.id);
+        if (!s) return null;
+        const headY = s.y - 34 * s.scale;
+        return (
+          <g key={`sfx-${lead.id}-${lead.beat.at}`} pointerEvents="none">
+            <text
+              x={s.x + 16}
+              y={headY - 4}
+              fontSize={9}
+              fontFamily="ui-monospace, monospace"
+              fontWeight="bold"
+              fill="#fbbf24"
+              stroke="#000"
+              strokeWidth={0.6}
+              paintOrder="stroke"
+              style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.5))' }}
+            >
+              <animate attributeName="opacity" values="0;1;1;0" dur="1.6s" repeatCount="indefinite" />
+              <animateTransform
+                attributeName="transform"
+                type="translate"
+                values="0 4; 0 -8; 0 -12"
+                dur="1.6s"
+                repeatCount="indefinite"
+              />
+              {lead.beat.sfx}
+            </text>
           </g>
         );
       })()}

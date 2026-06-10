@@ -74,6 +74,9 @@ const GLYPHS: Record<AchievementId, string> = {
   'educator': 'E',
   'author': 'P',
   'completionist': '*',
+  'walk-stemi': '🫀',
+  'walk-stroke': '🧠',
+  'walk-multi-pathway': '🏆',
 };
 
 function Badge({ id }: { id: AchievementId }) {

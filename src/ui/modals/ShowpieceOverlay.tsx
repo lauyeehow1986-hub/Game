@@ -65,6 +65,16 @@ export function ShowpieceOverlay({ activeBeats }: Props) {
       aria-hidden={!visible}
       style={{ pointerEvents: 'none' }}
     >
+      {/* Letterbox bars — slide in from the top and bottom edges when a
+       *  showpiece is active. Reads as a film B-roll cut. */}
+      <div
+        className="absolute top-0 left-0 right-0 bg-black z-10 transition-transform duration-300 ease-out"
+        style={{ height: '8%', transform: visible ? 'translateY(0)' : 'translateY(-100%)' }}
+      />
+      <div
+        className="absolute bottom-0 left-0 right-0 bg-black z-10 transition-transform duration-300 ease-out"
+        style={{ height: '8%', transform: visible ? 'translateY(0)' : 'translateY(100%)' }}
+      />
       {/* dimming scrim */}
       <div className="absolute inset-0 bg-black/55 backdrop-blur-[1px]" />
       {/* framed panel */}

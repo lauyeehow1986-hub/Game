@@ -32,11 +32,14 @@ export interface SpriteTextureOpts {
   direction: Direction;
   /** Optional walk-cycle frame (0..3) to bake a mid-stride pose. */
   walkFrame?: number;
+  /** Bakes the lip-sync overlay (speaker mouth-open frame) so Phaser figures
+   *  read as actively talking on stage. */
+  speaking?: boolean;
 }
 
 /** Stable cache key for a baked sprite texture. */
 export function spriteTextureKey(actorId: string, o: SpriteTextureOpts): string {
-  return `wt-spr-${actorId}|${o.pose}|${o.expression}|${o.direction}|${o.walkFrame ?? '-'}`;
+  return `wt-spr-${actorId}|${o.pose}|${o.expression}|${o.direction}|${o.walkFrame ?? '-'}|${o.speaking ? 's' : '-'}`;
 }
 
 export function spriteToDataUri(actor: WalkthroughActor, o: SpriteTextureOpts): string {
@@ -59,6 +62,7 @@ export function spriteToDataUri(actor: WalkthroughActor, o: SpriteTextureOpts): 
           expression: o.expression,
           direction: o.direction,
           walkFrame: o.walkFrame,
+          speaking: o.speaking,
         }),
       ),
     ),

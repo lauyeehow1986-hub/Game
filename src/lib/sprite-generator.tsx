@@ -306,6 +306,9 @@ interface SpriteProps {
   pose?: Pose;
   /** Facial expression. Defaults to 'neutral'. */
   expression?: Expression;
+  /** When true the mouth lip-syncs (opens / closes at ~3 Hz) — used for the
+   *  currently-speaking lead figure to make it feel alive on stage. */
+  speaking?: boolean;
 }
 
 export function ActorSprite({
@@ -316,6 +319,7 @@ export function ActorSprite({
   walkFrame,
   pose = 'stand',
   expression = 'neutral',
+  speaking = false,
 }: SpriteProps): JSX.Element {
   const f = deriveFeatures(actor);
   const scale = size / 64;
@@ -331,7 +335,7 @@ export function ActorSprite({
       <g transform={pt || undefined}>
         <SpriteBody features={f} stride={stride} pose={pose} />
         <SpriteAccessory features={f} armDy={armDy} />
-        <SpriteHead features={f} isBack={isBack} expression={expression} />
+        <SpriteHead features={f} isBack={isBack} expression={expression} speaking={speaking} />
         <SpriteHair features={f} isBack={isBack} />
         <SpriteArms
           features={f}
@@ -398,10 +402,12 @@ function SpriteHead({
   features,
   isBack,
   expression = 'neutral',
+  speaking = false,
 }: {
   features: SpriteFeatures;
   isBack: boolean;
   expression?: Expression;
+  speaking?: boolean;
 }): JSX.Element {
   const { skin, skinShade, ageBand, hasGlasses, beard } = features;
   return (
@@ -420,6 +426,30 @@ function SpriteHead({
       {!isBack && (
         <>
           <FaceFeatures expression={expression} />
+          {/* Lip-sync mouth — overlays the static expression mouth while
+           *  the speaker is delivering their beat. Asymmetric open/close
+           *  cycle reads as natural speech. */}
+          {speaking && (
+            <g>
+              {/* fresh skin patch erases the static expression mouth */}
+              <rect x={20} y={17} width={8} height={4} fill={features.skin} />
+              {/* the animated speaking mouth — height pulses */}
+              <rect x={22} y={18} width={4} height={1} fill="#5a2e1a">
+                <animate
+                  attributeName="height"
+                  values="1;3;2;3;1;2;1;3;1"
+                  dur="1.3s"
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="y"
+                  values="18;17;17.5;17;18;17.5;18;17;18"
+                  dur="1.3s"
+                  repeatCount="indefinite"
+                />
+              </rect>
+            </g>
+          )}
           {/* Elder wrinkles — short cheek-line + temple line beside the eyes */}
           {ageBand === 'elder' && (
             <g opacity={0.55}>

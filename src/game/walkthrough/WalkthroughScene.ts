@@ -217,6 +217,7 @@ export class WalkthroughScene extends Phaser.Scene {
       pose: f.pose,
       expression: f.expression,
       direction: f.facing,
+      speaking: f.isLead && f.isActive,
     });
 
     let node = this.figs.get(f.id);
@@ -315,7 +316,7 @@ export class WalkthroughScene extends Phaser.Scene {
       node.texKey = texKey;
       this.ensureTexture(
         texKey,
-        () => spriteToDataUri(f.actor, { pose: f.pose, expression: f.expression, direction: f.facing }),
+        () => spriteToDataUri(f.actor, { pose: f.pose, expression: f.expression, direction: f.facing, speaking: f.isLead && f.isActive }),
         () => {
           const n = this.figs.get(f.id);
           if (!n || n.texKey !== texKey) return;

@@ -226,9 +226,9 @@ export const strokeWalkthrough: Walkthrough = {
         // Anchor at y=242 puts her hips on the purple cushion at y≈218.
         { at: 7, actorId: 'patient', action: 'Right side weak, speech slurred but conscious. Eased into the priority seat.', pos: { x: 52, y: 242 }, pose: 'sit', expression: 'distressed' },
         // Bystander hits the SOS plunger and shouts for the train manager.
-        { at: 11, actorId: 'bystander', action: 'Presses the SOS plunger by the doors. Calls out for the train staff.', pos: { x: 222, y: 248 }, pose: 'point', direction: 'E', expression: 'alarmed' },
+        { at: 11, actorId: 'bystander', action: 'Presses the SOS plunger by the doors. Calls out for the train staff.', pos: { x: 222, y: 248 }, pose: 'point', direction: 'E', expression: 'alarmed', sfx: '🔔 DING!' },
         // SMRT station manager comes on the radio.
-        { at: 17, actorId: 'smrt-staff', action: 'Radios control: medical emergency, car 3. Train held at next platform.', pos: { x: 360, y: 246 }, pose: 'point', direction: 'W', expression: 'focused' },
+        { at: 17, actorId: 'smrt-staff', action: 'Radios control: medical emergency, car 3. Train held at next platform.', pos: { x: 360, y: 246 }, pose: 'point', direction: 'W', expression: 'focused', sfx: '📻 *kssh*' },
         // Bystander kneels at the seat to steady her head.
         { at: 22, actorId: 'bystander', action: 'Steadies her head. Notes the time of onset for the medics. FAST positive.', pos: { x: 110, y: 250 }, pose: 'kneel', direction: 'E', expression: 'focused' },
         { at: 26, actorId: 'smrt-staff', action: 'On 995: stroke alert. Paramedics rerouted to Tampines platform 2.', pos: { x: 360, y: 246 }, pose: 'stand', direction: 'W', expression: 'focused' },
