@@ -17,7 +17,7 @@ arcs running in parallel:
    versions through v9.17 (three renderers: SVG, Phaser canvas, Three.js 3D).
 
 Current branch: `claude/healthcare-pathway-game-X7oRQ` ·
-**697 tests passing**, type-check clean, production build clean.
+**698 tests passing**, type-check clean, production build clean.
 
 ---
 
@@ -74,8 +74,9 @@ journal, smart debrief. English + Chinese at 100% parity throughout.
 - v9.15 — Demographically-real cast: `ageBand` (young/adult/elder) derived from explicit role-text age or hash-jittered keywords; elders get gray/white hair, temple wrinkles, glasses bias; new `hasGlasses` + `beard` features (beards suppressed for female-coded roles). MRT seat-alignment fix: new foreground priority-seat bench so Mdm Lim's sit beat lands on a cushion, not mid-air.
 - v9.16 — Award-game polish quartet: (1) lip-sync mouth animation on the speaking actor (both renderers, suppressed back-facing); (2) `sfx` onomatopoeia indicators floating above the speaker (⚡ CLEAR!, 🚨 SIREN, 🔔 DING!, 📻 *kssh*) — audio dimension with zero audio assets; (3) three walkthrough achievements (`walk-stemi`, `walk-stroke`, `walk-multi-pathway`) fired at terminal chapters; (4) letterbox bars sliding in during B-roll showpieces.
 
-**Three.js 3D renderer (v9.17, beta)** ✅
-- Third renderer toggle option (2D / Cinematic / 3D ᴮᴱᵀᴬ) consuming the same `walkthrough-staging.ts` frames. `src/game3d/`: stage-unit → world-metre mapping (true perspective replaces `depthScale`), all 12 scenes rebuilt as procedural 3D sets with per-scene lighting moods + ambient motion (kopitiam fans, ambulance beacon, MRT tunnel streaks), articulated humanoids from the same `deriveFeatures` hash as the 2D sprites (age/glasses/beard/accessories carry over) with pose blending, walk cycles, ~110/min CPR compressions, lip-sync, geometric expressions. ACES tone mapping, soft shadows, fog, speaker-tracking camera, raycast picking. Lazy 536 kB chunk; falls back to 2D on error.
+**Three.js 3D renderer (v9.17 → v9.17.1, beta)** ✅
+- v9.17 — Third renderer toggle option (2D / Cinematic / 3D ᴮᴱᵀᴬ) consuming the same `walkthrough-staging.ts` frames. `src/game3d/`: stage-unit → world-metre mapping (true perspective replaces `depthScale`), all 12 scenes rebuilt as procedural 3D sets with per-scene lighting moods + ambient motion (kopitiam fans, ambulance beacon, MRT tunnel streaks), articulated humanoids from the same `deriveFeatures` hash as the 2D sprites (age/glasses/beard/accessories carry over) with pose blending, walk cycles, ~110/min CPR compressions, lip-sync, geometric expressions. ACES tone mapping, soft shadows, fog, speaker-tracking camera, raycast picking. Lazy 536 kB chunk; falls back to 2D on error.
+- v9.17.1 — Framing + facing-direction fix. Tighter world scale (20 m × 13 m), narrower FOV 32°, closer camera so figures occupy ~33% of frame height (was ~5%); `yawFor` corrected so E faces stage-right and W stage-left (regression test included). New `docs/3D-RENDERER.md` records the Babylon.js vs Three.js decision (verdict: stay on Three.js — Babylon's 900 kB-1.2 MB core would roughly double our chunk; the bottleneck is *assets*, not the engine) and lists CC0/free rigged-character sources for the future photoreal asset swap-in.
 
 ---
 
@@ -126,7 +127,7 @@ verification — any browser at `localhost:5173` works.
 
 ## Health metrics
 
-- **Tests**: 697 passing (`pnpm test`)
+- **Tests**: 698 passing (`pnpm test`)
 - **Type-check**: clean (`pnpm exec tsc --noEmit`)
 - **Production build**: clean. Bundle chunks split correctly — Phaser is a separately-lazy 1.48 MB chunk loaded only when the Cinematic renderer is selected; each walkthrough (STEMI / Stroke) is its own lazy chunk (~29 kB / ~19 kB).
 - **HD scene assets**: ~15 MB across 12 PNGs in `public/walkthrough/scenes/`, served at `/walkthrough/scenes/{id}.png`, cached by the existing service worker on first fetch (offline-capable from the second visit onward).

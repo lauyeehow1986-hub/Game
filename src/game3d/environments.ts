@@ -193,8 +193,12 @@ function buildKopitiam(): Environment3D {
   stall(g, -8, -13.5, '#fbbf24', '#15803d');  // drinks
   stall(g, 0, -13.8, '#f87171', '#b91c1c');   // chicken rice
   stall(g, 8, -13.5, '#a5f3fc', '#0e7490');   // noodles
-  kopiTable(g, -7, -7); kopiTable(g, -2.5, -8.5); kopiTable(g, 3, -7.5);
-  kopiTable(g, 8, -8); kopiTable(g, -9.5, -3.5); kopiTable(g, 9.5, -4);
+  kopiTable(g, -5.5, -6.5); kopiTable(g, -1.8, -7.5); kopiTable(g, 2.2, -6.5);
+  kopiTable(g, 5.5, -7.5); kopiTable(g, -7.5, -3.0); kopiTable(g, 7.0, -3.5);
+  // newspapers + spilled kopi-cups on a few tables for set-dressing
+  for (const [tx, tz] of [[-5.5, -6.5], [2.2, -6.5]] as const) {
+    g.add(box(0.35, 0.01, 0.22, std('#fde68a', 0.9), tx + 0.15, 0.80, tz - 0.05, false));
+  }
   // shophouse pillars
   for (const x of [-12, 12]) g.add(cylinder(0.35, 0.4, 5.6, std('#d6cdbd', 0.9), x, 2.8, -2, 12));
   const fans = [ceilingFan(g, -6, -8), ceilingFan(g, 6, -8)];
@@ -238,13 +242,13 @@ function buildStreet(): Environment3D {
   const beaconLight = new THREE.PointLight('#ef4444', 0, 14, 1.8);
   beaconLight.position.set(-0.4, 2.8, 0);
   amb.add(beaconLight);
-  amb.position.set(6.5, 0, -10.5);
+  amb.position.set(5.5, 0, -7.5);
   amb.rotation.y = -0.25;
   g.add(amb);
   // street lamp
-  g.add(cylinder(0.07, 0.09, 6.5, std('#52525b', 0.6), -10, 3.25, -12, 8));
-  g.add(box(1.2, 0.12, 0.4, emissive('#ffedb8', 1.8), -9.5, 6.45, -12, false));
-  trolley(g, -3, -6, 0.1);
+  g.add(cylinder(0.07, 0.09, 6.5, std('#52525b', 0.6), -7.5, 3.25, -10, 8));
+  g.add(box(1.2, 0.12, 0.4, emissive('#ffedb8', 1.8), -7.0, 6.45, -10, false));
+  trolley(g, -2.5, -4.5, 0.1);
   g.userData.animate = (t: number) => {
     const on = Math.sin(t * 7) > 0;
     (beacon.material as THREE.MeshStandardMaterial).emissiveIntensity = on ? 3.2 : 0.4;

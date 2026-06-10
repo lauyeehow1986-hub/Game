@@ -40,6 +40,16 @@ describe('space — stage-unit → world mapping', () => {
     expect(yawFor('S')).toBe(0); // rest pose faces the camera
   });
 
+  it("yawFor's E rotates the +Z rest-forward to +X (stage-right)", () => {
+    // Rotating (0,0,1) around +Y by yaw(E) must land on (+1,0,0).
+    const yE = yawFor('E');
+    expect(Math.sin(yE)).toBeCloseTo(1, 6);
+    expect(Math.cos(yE)).toBeCloseTo(0, 6);
+    const yW = yawFor('W');
+    expect(Math.sin(yW)).toBeCloseTo(-1, 6);
+    expect(Math.cos(yW)).toBeCloseTo(0, 6);
+  });
+
   it('camera rig looks into the set from the front', () => {
     expect(CAMERA.pos.z).toBeGreaterThan(0);
     expect(CAMERA.lookAt.z).toBeLessThan(0);

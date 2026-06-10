@@ -96,10 +96,10 @@ export class Stage3D {
     this.key = new THREE.DirectionalLight('#ffffff', 1);
     this.key.castShadow = true;
     this.key.shadow.mapSize.set(2048, 2048);
-    this.key.shadow.camera.left = -16;
-    this.key.shadow.camera.right = 16;
-    this.key.shadow.camera.top = 16;
-    this.key.shadow.camera.bottom = -16;
+    this.key.shadow.camera.left = -11;
+    this.key.shadow.camera.right = 11;
+    this.key.shadow.camera.top = 11;
+    this.key.shadow.camera.bottom = -11;
     this.key.shadow.bias = -0.0008;
     this.scene.add(this.hemi, this.key, this.key.target);
 
@@ -198,8 +198,8 @@ export class Stage3D {
     }
 
     // cinematic camera: drift the look-at gently toward the speaker
-    this.lookX += (this.leadWorldX * 0.35 - this.lookX) * Math.min(1, dt * 1.2);
-    let camX = CAMERA.pos.x + this.lookX * 0.4;
+    this.lookX += (this.leadWorldX * 0.45 - this.lookX) * Math.min(1, dt * 1.2);
+    let camX = CAMERA.pos.x + this.lookX * 0.55;
     let camY = CAMERA.pos.y;
     if (this.shakeT > 0) {
       this.shakeT -= dt;
