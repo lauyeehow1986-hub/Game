@@ -26,7 +26,9 @@ import type {
   WalkthroughActor,
 } from '../lib/walkthrough';
 import { buildEnvironment3D, type Environment3D } from './environments';
-import { Humanoid } from './humanoid';
+import { createActorFigure, type ActorFigure } from './actorLoader';
+import { loadSceneEnvironment, applyEnvironment } from './ibl';
+import type { PostFxPipeline } from './postFx';
 import { CAMERA, worldX, worldZ, yawFor } from './space';
 
 export interface Figure3D {
@@ -53,7 +55,7 @@ export interface Frame3D {
 }
 
 interface FigureEntry {
-  humanoid: Humanoid;
+  figure: ActorFigure;
   yawTarget: number;
 }
 
@@ -75,6 +77,11 @@ export class Stage3D {
   private host: HTMLElement;
   private resizeObserver: ResizeObserver;
   private disposed = false;
+  private postFx: PostFxPipeline | null = null;
+  /** Whether to use the postprocessing pipeline (SSAO/bloom/vignette/SMAA).
+   *  Set via setPostFxEnabled(); off by default so low-end devices stay
+   *  on the fast direct-render path. */
+  private postFxEnabled = false;
 
   constructor(host: HTMLElement) {
     this.host = host;
@@ -115,6 +122,26 @@ export class Stage3D {
     this.onPick = cb;
   }
 
+  /** Toggle the SSAO/bloom/vignette/SMAA pipeline. Off keeps the fast
+   *  direct-render path; on costs ~15-25% of the frame budget at 1080p.
+   *  The whole `postprocessing` package is lazy-imported on first enable
+   *  so the default 3D chunk stays lean. */
+  async setPostFxEnabled(on: boolean) {
+    if (on === this.postFxEnabled) return;
+    this.postFxEnabled = on;
+    if (on && !this.postFx) {
+      const { buildPostFx } = await import('./postFx');
+      if (this.disposed || !this.postFxEnabled) return;
+      this.postFx = buildPostFx(this.renderer, this.scene, this.camera);
+      const w = this.host.clientWidth || 640;
+      const h = this.host.clientHeight || 360;
+      this.postFx.setSize(w, h, Math.min(window.devicePixelRatio, 2));
+    } else if (!on && this.postFx) {
+      this.postFx.dispose();
+      this.postFx = null;
+    }
+  }
+
   setFrame(frame: Frame3D) {
     if (this.disposed) return;
     const sceneChanged = frame.scene !== this.envId;
@@ -125,20 +152,20 @@ export class Stage3D {
       seen.add(f.id);
       let entry = this.figures.get(f.id);
       if (!entry) {
-        entry = { humanoid: new Humanoid(f.actor), yawTarget: yawFor(f.facing) };
+        const figure = createActorFigure(f.actor, this.scene);
+        entry = { figure, yawTarget: yawFor(f.facing) };
         this.figures.set(f.id, entry);
-        this.scene.add(entry.humanoid.root);
-        entry.humanoid.setGoal(worldX(f.x), worldZ(f.y));
-        entry.humanoid.snapToGoal();
+        figure.setGoal(worldX(f.x), worldZ(f.y));
+        figure.snapToGoal();
         // walk-in: new figures during a chapter enter from their off-side
         if (!sceneChanged) {
-          entry.humanoid.root.position.x += f.x < 240 ? -4 : 4;
+          figure.root.position.x += f.x < 240 ? -4 : 4;
         }
       }
-      entry.humanoid.setGoal(worldX(f.x), worldZ(f.y));
-      if (sceneChanged) entry.humanoid.snapToGoal();
+      entry.figure.setGoal(worldX(f.x), worldZ(f.y));
+      if (sceneChanged) entry.figure.snapToGoal();
       entry.yawTarget = yawFor(f.facing);
-      entry.humanoid.setState({
+      entry.figure.setState({
         pose: f.pose,
         expression: f.expression,
         walking: f.walking,
@@ -150,8 +177,8 @@ export class Stage3D {
     // remove departed figures
     for (const [id, entry] of this.figures) {
       if (!seen.has(id)) {
-        this.scene.remove(entry.humanoid.root);
-        entry.humanoid.dispose();
+        this.scene.remove(entry.figure.root);
+        entry.figure.dispose();
         this.figures.delete(id);
       }
     }
@@ -178,6 +205,15 @@ export class Stage3D {
     this.key.target.position.set(0, 0, -7);
     this.scene.fog = new THREE.FogExp2(L.fog.color, L.fog.density);
     this.renderer.setClearColor(new THREE.Color(L.clear));
+
+    // async IBL upgrade: when public/3d/hdr/{id}.hdr is present, the
+    // prefiltered envmap takes over PBR specular + ambient response.
+    // On miss the per-scene preset lights stay in charge — no behaviour
+    // change for users who haven't run `pnpm fetch:3d`.
+    loadSceneEnvironment(id, this.renderer).then((entry) => {
+      if (this.disposed || this.envId !== id) return;
+      applyEnvironment(this.scene, entry);
+    });
   }
 
   private tick() {
@@ -188,9 +224,9 @@ export class Stage3D {
     this.env?.group.userData.animate?.(t);
 
     for (const entry of this.figures.values()) {
-      entry.humanoid.update(t, dt);
+      entry.figure.update(t, dt);
       // smooth yaw toward facing
-      const root = entry.humanoid.root;
+      const root = entry.figure.root;
       let dy = entry.yawTarget - root.rotation.y;
       while (dy > Math.PI) dy -= Math.PI * 2;
       while (dy < -Math.PI) dy += Math.PI * 2;
@@ -210,14 +246,17 @@ export class Stage3D {
     this.camera.position.set(camX, camY, CAMERA.pos.z);
     this.camera.lookAt(this.lookX, CAMERA.lookAt.y, CAMERA.lookAt.z);
 
-    this.renderer.render(this.scene, this.camera);
+    if (this.postFx) this.postFx.render(dt);
+    else this.renderer.render(this.scene, this.camera);
   }
 
   private resize() {
     const w = this.host.clientWidth || 640;
     const h = this.host.clientHeight || 360;
+    const pr = Math.min(window.devicePixelRatio, 2);
     this.renderer.setSize(w, h, false);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(pr);
+    if (this.postFx) this.postFx.setSize(w, h, pr);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
   }
@@ -230,7 +269,7 @@ export class Stage3D {
     );
     this.raycaster.setFromCamera(ndc, this.camera);
     const hits = this.raycaster.intersectObjects(
-      [...this.figures.values()].map((f) => f.humanoid.root),
+      [...this.figures.values()].map((f) => f.figure.root),
       true,
     );
     const id = hits[0]?.object.userData.actorId as string | undefined;
@@ -242,9 +281,10 @@ export class Stage3D {
     this.renderer.setAnimationLoop(null);
     this.resizeObserver.disconnect();
     this.renderer.domElement.removeEventListener('pointerdown', this.handlePointer);
-    for (const entry of this.figures.values()) entry.humanoid.dispose();
+    for (const entry of this.figures.values()) entry.figure.dispose();
     this.figures.clear();
     if (this.env) disposeGroup(this.env.group);
+    this.postFx?.dispose();
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }

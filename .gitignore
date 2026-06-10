@@ -15,3 +15,14 @@ dist-ssr
 .env.local
 coverage
 tsconfig.tsbuildinfo
+
+# Auto-fetched 3D assets (use `pnpm fetch:3d`).  We commit the dir layout
+# (public/3d/{hdr,cast,props}/) and README but never the binary asset blobs
+# themselves — they're CC0 / redownloadable, can be hundreds of MB, and the
+# 3D renderer falls back gracefully when files are missing.
+public/3d/hdr/*.hdr
+public/3d/cast/*.glb
+public/3d/cast/_quaternius/
+public/3d/cast/_kenney/
+public/3d/props/*.glb
+public/3d/props/_quaternius-medical/

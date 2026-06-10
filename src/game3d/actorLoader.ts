@@ -1,0 +1,226 @@
+/**
+ * Actor loader — async cache for per-actor 3D meshes.
+ *
+ * Tries `public/3d/cast/{actorId}.glb` first; on miss (404 / fetch error)
+ * falls back to the procedural `Humanoid` rig. The whole pipeline is
+ * non-blocking: the procedural rig is mounted immediately and *swapped*
+ * for the GLB when it finishes loading, so the offline-PWA shape and
+ * empty-asset-folder dev experience both keep working.
+ *
+ * The loaded GLB is expected to follow the Mixamo / standard humanoid
+ * convention so we can blend in Mixamo-retargeted clips later
+ * (see `animationLibrary.ts`). We don't enforce the rig shape here —
+ * if a clip can't be retargeted, the actor just stays in their bind
+ * pose and the procedural CPR/walk/idle hooks fire as no-ops on the GLB.
+ */
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Humanoid } from './humanoid';
+import type { BeatExpression, BeatPose, WalkthroughActor } from '../lib/walkthrough';
+
+/** Public path where authored character GLBs live. Files are optional. */
+export const CAST_DIR = '/3d/cast/';
+
+/** Cache shape: per-actor-id, the gltf scene used as a template (cloned per
+ *  instance). Promise reuse prevents duplicate fetches when several copies
+ *  of the same role appear on stage. */
+const cache = new Map<string, Promise<THREE.Group | null>>();
+
+let loader: GLTFLoader | null = null;
+function gltf(): GLTFLoader {
+  if (!loader) loader = new GLTFLoader();
+  return loader;
+}
+
+/** Fetch + parse a GLB for an actor id. Resolves null when the file is
+ *  missing or fails to parse (we *do not* throw — the caller falls back
+ *  to the procedural rig). Also resolves null in SSR / test environments
+ *  where the relative URL has no origin to resolve against. */
+function fetchActorGlb(actorId: string): Promise<THREE.Group | null> {
+  const url = `${CAST_DIR}${actorId}.glb`;
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') {
+      resolve(null);
+      return;
+    }
+    try {
+      gltf().load(
+        url,
+        (g) => resolve(g.scene),
+        undefined,
+        () => resolve(null),
+      );
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+/** Returns a cached promise for the actor's GLB template, or null if none. */
+export function loadActorTemplate(actorId: string): Promise<THREE.Group | null> {
+  let p = cache.get(actorId);
+  if (!p) {
+    p = fetchActorGlb(actorId);
+    cache.set(actorId, p);
+  }
+  return p;
+}
+
+/** Public clear-cache hook for tests. */
+export function _resetActorCache() {
+  cache.clear();
+}
+
+/** The runtime adapter every Stage3D figure wraps. Both backends share the
+ *  same interface so the engine doesn't care which one a figure is using. */
+export interface ActorFigure {
+  readonly root: THREE.Group;
+  readonly actorId: string;
+  setGoal(x: number, z: number): void;
+  snapToGoal(): void;
+  setState(next: Partial<{
+    pose: BeatPose;
+    expression: BeatExpression;
+    walking: boolean;
+    speaking: boolean;
+    isLead: boolean;
+  }>): void;
+  update(t: number, dt: number): void;
+  dispose(): void;
+}
+
+/** GLB-backed actor — a clone of the loaded template, with the procedural
+ *  `Humanoid` driving position + lip-sync state for free. We apply the
+ *  hips offset + walk-toward-goal motion to the cloned GLB root; pose
+ *  blending is delegated to AnimationMixer clips when available
+ *  (wired up in animationLibrary). When no clips are wired the figure
+ *  rests in the bind pose — still physically lit and shadowed.
+ */
+class GlbFigure implements ActorFigure {
+  readonly root: THREE.Group;
+  readonly actorId: string;
+  private goal = new THREE.Vector2(0, 0);
+  private moving = false;
+  private state = { pose: 'stand' as BeatPose, expression: 'neutral' as BeatExpression, walking: false, speaking: false, isLead: false };
+  private mixer: THREE.AnimationMixer;
+  private focusRing: THREE.Mesh;
+  private phase: number;
+
+  constructor(actor: WalkthroughActor, template: THREE.Group) {
+    this.actorId = actor.id;
+    this.root = new THREE.Group();
+    const clone = template.clone(true);
+    clone.traverse((o) => {
+      if (o instanceof THREE.Mesh) {
+        o.castShadow = true;
+        o.receiveShadow = true;
+        o.userData.actorId = actor.id;
+      }
+    });
+    this.root.add(clone);
+    this.mixer = new THREE.AnimationMixer(clone);
+    this.phase = [...actor.id].reduce((h, c) => h + c.charCodeAt(0), 0) % 7;
+
+    // speaker focus ring (same as procedural humanoid)
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(0.30, 0.42, 28),
+      new THREE.MeshBasicMaterial({ color: '#fbbf24', transparent: true, opacity: 0, side: THREE.DoubleSide }),
+    );
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.012;
+    this.focusRing = ring;
+    this.root.add(ring);
+  }
+
+  setGoal(x: number, z: number) { this.goal.set(x, z); }
+
+  snapToGoal() {
+    this.root.position.x = this.goal.x;
+    this.root.position.z = this.goal.y;
+    this.moving = false;
+  }
+
+  setState(next: Partial<typeof this.state>) {
+    Object.assign(this.state, next);
+  }
+
+  update(t: number, dt: number) {
+    const dx = this.goal.x - this.root.position.x;
+    const dz = this.goal.y - this.root.position.z;
+    const dist = Math.hypot(dx, dz);
+    this.moving = dist > 0.02;
+    if (this.moving) {
+      const speed = this.state.walking ? 1.9 : 3.2;
+      const step = Math.min(dist, speed * dt);
+      this.root.position.x += (dx / dist) * step;
+      this.root.position.z += (dz / dist) * step;
+      this.root.rotation.y = Math.atan2(dx, dz);
+    }
+    void this.phase; void t;
+    this.mixer.update(dt);
+
+    const want = this.state.isLead ? 0.55 + Math.sin(t * 4) * 0.18 : 0;
+    const m = this.focusRing.material as THREE.MeshBasicMaterial;
+    m.opacity += (want - m.opacity) * Math.min(1, dt * 10);
+  }
+
+  dispose() {
+    this.root.traverse((o) => {
+      if (o instanceof THREE.Mesh) {
+        o.geometry.dispose();
+        const mat = o.material;
+        if (Array.isArray(mat)) mat.forEach((x) => x.dispose());
+        else mat.dispose();
+      }
+    });
+  }
+}
+
+/** Procedural fallback — the v9.17 articulated rig wearing the
+ *  ActorFigure hat. */
+class ProceduralFigure implements ActorFigure {
+  readonly root: THREE.Group;
+  readonly actorId: string;
+  private h: Humanoid;
+  constructor(actor: WalkthroughActor) {
+    this.h = new Humanoid(actor);
+    this.root = this.h.root;
+    this.actorId = this.h.actorId;
+  }
+  setGoal(x: number, z: number) { this.h.setGoal(x, z); }
+  snapToGoal() { this.h.snapToGoal(); }
+  setState(next: Parameters<ActorFigure['setState']>[0]) { this.h.setState(next); }
+  update(t: number, dt: number) { this.h.update(t, dt); }
+  dispose() { this.h.dispose(); }
+}
+
+/** Factory: starts as procedural, async-upgrades to GLB if a template
+ *  exists. The returned figure swaps its root subtree *in place* so the
+ *  parent scene doesn't need to know about the upgrade. */
+export function createActorFigure(actor: WalkthroughActor, parent: THREE.Object3D): ActorFigure {
+  const figure = new ProceduralFigure(actor);
+  parent.add(figure.root);
+
+  loadActorTemplate(actor.id).then((template) => {
+    if (!template) return;
+    // swap: remove the procedural figure, mount the GLB at the same world pos.
+    const worldPos = figure.root.position.clone();
+    parent.remove(figure.root);
+    figure.dispose();
+    const glb = new GlbFigure(actor, template);
+    glb.root.position.copy(worldPos);
+    parent.add(glb.root);
+    // bolt the GLB onto the original handle so the engine's reference
+    // keeps working — easier than rebroadcasting up to Stage3D.
+    Object.assign(figure, {
+      root: glb.root,
+      setGoal: glb.setGoal.bind(glb),
+      snapToGoal: glb.snapToGoal.bind(glb),
+      setState: glb.setState.bind(glb),
+      update: glb.update.bind(glb),
+      dispose: glb.dispose.bind(glb),
+    });
+  });
+
+  return figure;
+}

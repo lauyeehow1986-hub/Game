@@ -11,7 +11,7 @@
  * top of the canvas — same film grammar as the SVG stage, crisper than
  * canvas text.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Stage3D, type Figure3D, type Frame3D } from '../../game3d/Stage3D';
 import { stageFigures } from '../../lib/walkthrough-staging';
 import type { SceneId } from '../../lib/scenery';
@@ -37,6 +37,7 @@ export default function Walkthrough3DStage({
   const onPickRef = useRef(onPickActor);
   onPickRef.current = onPickActor;
   const prevLead = useRef<string>('');
+  const [postFx, setPostFx] = useState(false);
 
   useEffect(() => {
     if (!hostRef.current || stageRef.current) return;
@@ -48,6 +49,10 @@ export default function Walkthrough3DStage({
       stageRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    stageRef.current?.setPostFxEnabled(postFx);
+  }, [postFx]);
 
   const { figures, leadId } = stageFigures(walkthrough, chapter, activeByActor, selectedActorId);
   const leadBeat = leadId ? activeByActor.get(leadId) : undefined;
@@ -85,6 +90,20 @@ export default function Walkthrough3DStage({
   return (
     <div className="relative w-full h-full" aria-label="walkthrough stage (3D)">
       <div ref={hostRef} className="absolute inset-0" />
+      {/* PostFX toggle — SSAO + bloom + vignette + SMAA */}
+      <button
+        type="button"
+        onClick={() => setPostFx((v) => !v)}
+        aria-pressed={postFx}
+        className={`absolute bottom-2 right-2 z-10 px-2 py-1 rounded border text-[10px] uppercase tracking-wider transition-colors ${
+          postFx
+            ? 'bg-amber-300/90 border-amber-300 text-black'
+            : 'bg-black/60 border-amber-300/40 text-amber-200 hover:bg-black/80'
+        }`}
+        title="Postprocessing: ambient occlusion + bloom + vignette (heavier)"
+      >
+        {postFx ? 'PostFX on' : 'PostFX off'}
+      </button>
       {/* broadcast caption band — same grammar as the SVG stage bubble */}
       {leadBeat && (
         <div className="absolute top-2 left-1/2 -translate-x-1/2 max-w-[85%] px-3 py-1.5 rounded bg-black/70 border border-amber-300/40 backdrop-blur-[2px] pointer-events-none">

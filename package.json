@@ -12,10 +12,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "verify": "vitest run && tsc -b && vite build",
-    "bake:scenes": "vite-node scripts/bake-scenes.mjs"
+    "bake:scenes": "vite-node scripts/bake-scenes.mjs",
+    "fetch:3d": "node scripts/fetch-3d-assets.mjs"
   },
   "dependencies": {
     "phaser": "^3.80.1",
+    "postprocessing": "^6.39.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "three": "^0.184.0",
