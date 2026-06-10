@@ -13,6 +13,7 @@ import { DisclaimerBanner } from './ui/DisclaimerBanner';
 import { StreakDefenseBanner } from './ui/StreakDefenseBanner';
 import { AssignmentBanner } from './ui/AssignmentBanner';
 import { InstallPrompt } from './ui/InstallPrompt';
+import { LanguageSuggestion } from './ui/LanguageSuggestion';
 import { AchievementToast } from './ui/AchievementToast';
 import { LiveAnnouncer } from './ui/LiveAnnouncer';
 import { KeyboardHelpModal } from './ui/modals/KeyboardHelpModal';
@@ -86,6 +87,7 @@ export default function App() {
       <AssignmentBanner />
       <StreakDefenseBanner />
       <InstallPrompt />
+      <LanguageSuggestion />
 
       <main id="main-content" className="flex-1 grid grid-cols-1 lg:grid-cols-[300px_1fr_340px] gap-2 sm:gap-3 p-2 sm:p-3 min-h-0 overflow-y-auto lg:overflow-hidden">
         <aside className="space-y-2 sm:space-y-3 lg:overflow-y-auto scrollbar-thin order-2 lg:order-1">

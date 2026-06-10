@@ -47,10 +47,37 @@ export const GLOSSARY_TERMS: GlossaryEntry[] = [
 ];
 
 /**
+ * Singlish-aware glossary — colloquial terms that appear in the informal
+ * patient-perspective framing ("kopi run", "void deck", "cannot tahan").
+ * Locals don't need these explained; international learners do. Off by
+ * default and enabled via the Settings toggle (see useGlossaryPrefs),
+ * which folds them into the same scanner as the formal terms.
+ */
+export const SINGLISH_TERMS: GlossaryEntry[] = [
+  { term: 'kopitiam', def: 'Singlish — traditional coffee shop, often the ground-floor social hub of a neighbourhood.' },
+  { term: 'kopi', def: 'Singlish — local coffee brewed with condensed or evaporated milk; a "kopi run" is a coffee errand.' },
+  { term: 'void deck', def: 'The sheltered open ground floor of an HDB apartment block — a common gathering space.' },
+  { term: 'HDB', def: 'Housing & Development Board — Singapore public housing; most residents live in HDB flats.' },
+  { term: 'MC', def: 'Medical certificate — the doctor\'s note legitimising sick leave from work or school.' },
+  { term: 'heaty', def: 'Colloquial (TCM-influenced) — foods or states believed to raise internal "heat" and cause sore throat, ulcers, etc.' },
+  { term: 'giddy', def: 'Singlish usage — dizzy or light-headed ("feel giddy").' },
+  { term: 'blur', def: 'Singlish — confused, dazed or slow to catch on ("she looks blur").' },
+  { term: 'tahan', def: 'Singlish (Malay origin) — to endure or bear ("cannot tahan the pain").' },
+  { term: 'makan', def: 'Singlish (Malay origin) — to eat, or food ("never makan since morning").' },
+  { term: 'sinseh', def: 'Traditional Chinese medicine practitioner.' },
+  { term: 'kampung', def: 'Malay — village; "kampung spirit" is neighbourly mutual help.' },
+  { term: 'auntie', def: 'Respectful-informal address for an older woman, related or not.' },
+  { term: 'uncle', def: 'Respectful-informal address for an older man, related or not.' },
+];
+
+/**
  * Sort terms longest-first so multi-word matches are tried before
- * sub-strings (e.g. "MediShield Life" before "MediShield").
+ * sub-strings (e.g. "MediShield Life" beats "MediShield").
  */
 const ORDERED = [...GLOSSARY_TERMS].sort((a, b) => b.term.length - a.term.length);
+const ORDERED_WITH_SINGLISH = [...GLOSSARY_TERMS, ...SINGLISH_TERMS].sort(
+  (a, b) => b.term.length - a.term.length,
+);
 
 export interface GlossaryToken {
   kind: 'text' | 'term';
@@ -66,9 +93,16 @@ export interface GlossaryToken {
  *
  * Skips matches inside a word — "MediSave" matches but "preMediSave" does
  * not. This keeps acronyms tight without flooding text with tooltips.
+ *
+ * Pass `{ singlish: true }` to additionally match the colloquial
+ * SINGLISH_TERMS (the Settings toggle for international learners).
  */
-export function scanGlossary(input: string): GlossaryToken[] {
+export function scanGlossary(
+  input: string,
+  opts: { singlish?: boolean } = {},
+): GlossaryToken[] {
   if (!input) return [];
+  const ordered = opts.singlish ? ORDERED_WITH_SINGLISH : ORDERED;
   // Greedy left-to-right scan: at each cursor, try to match the longest
   // term that starts here.
   const tokens: GlossaryToken[] = [];
@@ -82,7 +116,7 @@ export function scanGlossary(input: string): GlossaryToken[] {
     // Word boundary check: previous char (if any) must NOT be a word char.
     const prev = cursor > 0 ? input[cursor - 1] : '';
     if (!isWordChar(prev)) {
-      for (const entry of ORDERED) {
+      for (const entry of ordered) {
         const slice = input.slice(cursor, cursor + entry.term.length);
         if (slice.toLowerCase() === entry.term.toLowerCase()) {
           const next = input[cursor + entry.term.length] ?? '';

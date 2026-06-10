@@ -22,7 +22,9 @@ tsconfig.tsbuildinfo
 # 3D renderer falls back gracefully when files are missing.
 public/3d/hdr/*.hdr
 public/3d/cast/*.glb
+public/3d/cast/_lib/
 public/3d/cast/_quaternius/
 public/3d/cast/_kenney/
+public/3d/anims/*.glb
 public/3d/props/*.glb
 public/3d/props/_quaternius-medical/

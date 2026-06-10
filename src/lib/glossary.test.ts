@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { scanGlossary } from './glossary';
+import { scanGlossary, GLOSSARY_TERMS, SINGLISH_TERMS } from './glossary';
 
 describe('scanGlossary', () => {
   it('returns a single text token when no terms appear', () => {
@@ -61,6 +61,57 @@ describe('scanGlossary', () => {
       const found = tokens.find((tk) => tk.kind === 'term' && tk.text === t);
       expect(found, `expected ${t} to be in the glossary`).toBeTruthy();
       expect(found?.def).toBeTruthy();
+    }
+  });
+});
+
+describe('scanGlossary — Singlish-aware toggle', () => {
+  it('does NOT match Singlish terms by default', () => {
+    const tokens = scanGlossary('He went on his morning kopi run to the kopitiam.');
+    expect(tokens.every((t) => t.kind === 'text')).toBe(true);
+  });
+
+  it('matches Singlish terms when the toggle is on', () => {
+    const tokens = scanGlossary('He went on his morning kopi run.', { singlish: true });
+    const term = tokens.find((t) => t.kind === 'term');
+    expect(term?.text).toBe('kopi');
+    expect(term?.def).toMatch(/coffee/i);
+  });
+
+  it('prefers the longest match (kopitiam over kopi)', () => {
+    const tokens = scanGlossary('Collapsed at the kopitiam.', { singlish: true });
+    const terms = tokens.filter((t) => t.kind === 'term').map((t) => t.text);
+    expect(terms).toEqual(['kopitiam']);
+  });
+
+  it('matches multi-word Singlish terms ("void deck")', () => {
+    const tokens = scanGlossary('Tai-chi at the void deck.', { singlish: true });
+    const terms = tokens.filter((t) => t.kind === 'term').map((t) => t.text);
+    expect(terms).toEqual(['void deck']);
+  });
+
+  it('keeps matching the formal terms alongside Singlish ones', () => {
+    const tokens = scanGlossary('CHAS card, then makan.', { singlish: true });
+    const terms = tokens.filter((t) => t.kind === 'term').map((t) => t.text);
+    expect(terms).toEqual(['CHAS', 'makan']);
+  });
+
+  it('respects word boundaries for Singlish entries ("MC" not "McDonald")', () => {
+    const tokens = scanGlossary('He ate at McDonald before getting his MC.', { singlish: true });
+    const terms = tokens.filter((t) => t.kind === 'term').map((t) => t.text);
+    expect(terms).toEqual(['MC']);
+  });
+
+  it('no term collides between the formal and Singlish lists', () => {
+    const formal = new Set(GLOSSARY_TERMS.map((t) => t.term.toLowerCase()));
+    for (const s of SINGLISH_TERMS) {
+      expect(formal.has(s.term.toLowerCase()), `${s.term} duplicated`).toBe(false);
+    }
+  });
+
+  it('every Singlish entry carries a real definition', () => {
+    for (const s of SINGLISH_TERMS) {
+      expect(s.def.length, `${s.term} def too short`).toBeGreaterThan(15);
     }
   });
 });

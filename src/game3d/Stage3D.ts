@@ -29,6 +29,7 @@ import { buildEnvironment3D, type Environment3D } from './environments';
 import { createActorFigure, type ActorFigure } from './actorLoader';
 import { loadSceneEnvironment, applyEnvironment } from './ibl';
 import type { PostFxPipeline } from './postFx';
+import type { RendererBackend } from './webgpu';
 import { CAMERA, worldX, worldZ, yawFor } from './space';
 
 export interface Figure3D {
@@ -60,7 +61,13 @@ interface FigureEntry {
 }
 
 export class Stage3D {
+  /** Typed as WebGLRenderer for the WebGL-only call sites (PostFX, PMREM
+   *  IBL); on the 'webgpu' backend this actually holds a WebGPURenderer —
+   *  API-compatible for everything Stage3D calls — and those WebGL-only
+   *  paths are guarded by `this.backend`. */
   private renderer: THREE.WebGLRenderer;
+  /** Which rendering backend this stage runs on. */
+  readonly backend: RendererBackend;
   private scene = new THREE.Scene();
   private camera: THREE.PerspectiveCamera;
   private hemi: THREE.HemisphereLight;
@@ -83,9 +90,33 @@ export class Stage3D {
    *  on the fast direct-render path. */
   private postFxEnabled = false;
 
-  constructor(host: HTMLElement) {
+  /**
+   * Async factory — the only way to request the WebGPU backend, because
+   * WebGPURenderer needs an awaited `init()` before first render. Falls
+   * back to WebGL whenever the import, adapter acquisition or init fails,
+   * so callers can request 'webgpu' unconditionally after the opt-in.
+   */
+  static async create(
+    host: HTMLElement,
+    opts: { backend?: RendererBackend } = {},
+  ): Promise<Stage3D> {
+    if (opts.backend === 'webgpu') {
+      try {
+        const { WebGPURenderer } = await import('three/webgpu');
+        const r = new WebGPURenderer({ antialias: true });
+        await r.init();
+        return new Stage3D(host, r as unknown as THREE.WebGLRenderer, 'webgpu');
+      } catch {
+        // No adapter / import failure / init failure → standard WebGL path.
+      }
+    }
+    return new Stage3D(host);
+  }
+
+  constructor(host: HTMLElement, renderer?: THREE.WebGLRenderer, backend: RendererBackend = 'webgl') {
     this.host = host;
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    this.backend = backend;
+    this.renderer = renderer ?? new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -127,6 +158,9 @@ export class Stage3D {
    *  The whole `postprocessing` package is lazy-imported on first enable
    *  so the default 3D chunk stays lean. */
   async setPostFxEnabled(on: boolean) {
+    // The `postprocessing` package is WebGL-only — on the WebGPU backend
+    // the toggle is a no-op (the host UI hides it there too).
+    if (this.backend === 'webgpu') return;
     if (on === this.postFxEnabled) return;
     this.postFxEnabled = on;
     if (on && !this.postFx) {
@@ -209,11 +243,14 @@ export class Stage3D {
     // async IBL upgrade: when public/3d/hdr/{id}.hdr is present, the
     // prefiltered envmap takes over PBR specular + ambient response.
     // On miss the per-scene preset lights stay in charge — no behaviour
-    // change for users who haven't run `pnpm fetch:3d`.
-    loadSceneEnvironment(id, this.renderer).then((entry) => {
-      if (this.disposed || this.envId !== id) return;
-      applyEnvironment(this.scene, entry);
-    });
+    // change for users who haven't run `pnpm fetch:3d`. PMREM prefiltering
+    // is WebGL-bound, so the WebGPU backend keeps the preset lights.
+    if (this.backend === 'webgl') {
+      loadSceneEnvironment(id, this.renderer).then((entry) => {
+        if (this.disposed || this.envId !== id) return;
+        applyEnvironment(this.scene, entry);
+      });
+    }
   }
 
   private tick() {

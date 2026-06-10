@@ -146,11 +146,12 @@ describe('evaluate — ops + locale + content triggers', () => {
   });
 });
 
-describe('evaluate — walkthrough-completed (v9.16)', () => {
+describe('evaluate — walkthrough-completed (v9.16, third pathway added)', () => {
   it('completing the STEMI walkthrough unlocks walk-stemi only', () => {
     const u = evaluate({ kind: 'walkthrough-completed', walkthroughId: 'stemi-pathway-v1' }, new Set(), snap());
     expect(u).toContain('walk-stemi');
     expect(u).not.toContain('walk-stroke');
+    expect(u).not.toContain('walk-sepsis');
     expect(u).not.toContain('walk-multi-pathway');
   });
   it('completing the stroke walkthrough unlocks walk-stroke only', () => {
@@ -159,13 +160,28 @@ describe('evaluate — walkthrough-completed (v9.16)', () => {
     expect(u).not.toContain('walk-stemi');
     expect(u).not.toContain('walk-multi-pathway');
   });
-  it('completing the second pathway unlocks multi-pathway in the same pass', () => {
+  it('completing the sepsis walkthrough unlocks walk-sepsis only', () => {
+    const u = evaluate({ kind: 'walkthrough-completed', walkthroughId: 'sepsis-pathway-v1' }, new Set(), snap());
+    expect(u).toContain('walk-sepsis');
+    expect(u).not.toContain('walk-stemi');
+    expect(u).not.toContain('walk-multi-pathway');
+  });
+  it('two of three pathways does NOT unlock multi-pathway', () => {
     const u = evaluate(
       { kind: 'walkthrough-completed', walkthroughId: 'stroke-pathway-v1' },
       new Set(['walk-stemi']),
       snap(),
     );
-    expect(u).toEqual(expect.arrayContaining(['walk-stroke', 'walk-multi-pathway']));
+    expect(u).toContain('walk-stroke');
+    expect(u).not.toContain('walk-multi-pathway');
+  });
+  it('completing the final pathway unlocks multi-pathway in the same pass', () => {
+    const u = evaluate(
+      { kind: 'walkthrough-completed', walkthroughId: 'sepsis-pathway-v1' },
+      new Set(['walk-stemi', 'walk-stroke']),
+      snap(),
+    );
+    expect(u).toEqual(expect.arrayContaining(['walk-sepsis', 'walk-multi-pathway']));
   });
   it('replaying an already-earned pathway unlocks nothing new', () => {
     const u = evaluate(
@@ -176,7 +192,7 @@ describe('evaluate — walkthrough-completed (v9.16)', () => {
     expect(u).toEqual([]);
   });
   it('an unknown walkthrough id unlocks nothing', () => {
-    const u = evaluate({ kind: 'walkthrough-completed', walkthroughId: 'sepsis-pathway-v1' }, new Set(), snap());
+    const u = evaluate({ kind: 'walkthrough-completed', walkthroughId: 'trauma-pathway-v1' }, new Set(), snap());
     expect(u).toEqual([]);
   });
 });

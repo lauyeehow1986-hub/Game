@@ -13,6 +13,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { Stage3D, type Figure3D, type Frame3D } from '../../game3d/Stage3D';
+import { isWebGPUOptedIn, isWebGPUSupported, resolveBackend, setWebGPUOptedIn } from '../../game3d/webgpu';
 import { stageFigures } from '../../lib/walkthrough-staging';
 import type { SceneId } from '../../lib/scenery';
 import type { Walkthrough, WalkthroughBeat, WalkthroughChapter } from '../../lib/walkthrough';
@@ -38,21 +39,34 @@ export default function Walkthrough3DStage({
   onPickRef.current = onPickActor;
   const prevLead = useRef<string>('');
   const [postFx, setPostFx] = useState(false);
+  // WebGPU opt-in (v9.18): only meaningful where navigator.gpu exists;
+  // Stage3D.create falls back to WebGL whenever adapter/init fails.
+  const [webgpu, setWebgpu] = useState(() => isWebGPUOptedIn() && isWebGPUSupported());
+  const [liveBackend, setLiveBackend] = useState<'webgl' | 'webgpu'>('webgl');
 
   useEffect(() => {
-    if (!hostRef.current || stageRef.current) return;
-    const stage = new Stage3D(hostRef.current);
-    stage.setPick((id) => onPickRef.current(id));
-    stageRef.current = stage;
+    if (!hostRef.current) return;
+    let cancelled = false;
+    const host = hostRef.current;
+    void Stage3D.create(host, { backend: resolveBackend(webgpu, isWebGPUSupported()) }).then((stage) => {
+      if (cancelled) {
+        stage.dispose();
+        return;
+      }
+      stage.setPick((id) => onPickRef.current(id));
+      stageRef.current = stage;
+      setLiveBackend(stage.backend);
+    });
     return () => {
-      stage.dispose();
+      cancelled = true;
+      stageRef.current?.dispose();
       stageRef.current = null;
     };
-  }, []);
+  }, [webgpu]);
 
   useEffect(() => {
-    stageRef.current?.setPostFxEnabled(postFx);
-  }, [postFx]);
+    stageRef.current?.setPostFxEnabled(postFx && liveBackend === 'webgl');
+  }, [postFx, liveBackend]);
 
   const { figures, leadId } = stageFigures(walkthrough, chapter, activeByActor, selectedActorId);
   const leadBeat = leadId ? activeByActor.get(leadId) : undefined;
@@ -90,20 +104,42 @@ export default function Walkthrough3DStage({
   return (
     <div className="relative w-full h-full" aria-label="walkthrough stage (3D)">
       <div ref={hostRef} className="absolute inset-0" />
-      {/* PostFX toggle — SSAO + bloom + vignette + SMAA */}
-      <button
-        type="button"
-        onClick={() => setPostFx((v) => !v)}
-        aria-pressed={postFx}
-        className={`absolute bottom-2 right-2 z-10 px-2 py-1 rounded border text-[10px] uppercase tracking-wider transition-colors ${
-          postFx
-            ? 'bg-amber-300/90 border-amber-300 text-black'
-            : 'bg-black/60 border-amber-300/40 text-amber-200 hover:bg-black/80'
-        }`}
-        title="Postprocessing: ambient occlusion + bloom + vignette (heavier)"
-      >
-        {postFx ? 'PostFX on' : 'PostFX off'}
-      </button>
+      {/* PostFX toggle — SSAO + bloom + vignette + SMAA (WebGL only) */}
+      {liveBackend === 'webgl' && (
+        <button
+          type="button"
+          onClick={() => setPostFx((v) => !v)}
+          aria-pressed={postFx}
+          className={`absolute bottom-2 right-2 z-10 px-2 py-1 rounded border text-[10px] uppercase tracking-wider transition-colors ${
+            postFx
+              ? 'bg-amber-300/90 border-amber-300 text-black'
+              : 'bg-black/60 border-amber-300/40 text-amber-200 hover:bg-black/80'
+          }`}
+          title="Postprocessing: ambient occlusion + bloom + vignette (heavier)"
+        >
+          {postFx ? 'PostFX on' : 'PostFX off'}
+        </button>
+      )}
+      {/* WebGPU opt-in — shown only when the browser exposes navigator.gpu */}
+      {isWebGPUSupported() && (
+        <button
+          type="button"
+          onClick={() => {
+            const next = !webgpu;
+            setWebGPUOptedIn(next);
+            setWebgpu(next);
+          }}
+          aria-pressed={webgpu}
+          className={`absolute bottom-2 right-24 z-10 px-2 py-1 rounded border text-[10px] uppercase tracking-wider transition-colors ${
+            liveBackend === 'webgpu'
+              ? 'bg-sky-300/90 border-sky-300 text-black'
+              : 'bg-black/60 border-sky-300/40 text-sky-200 hover:bg-black/80'
+          }`}
+          title="Render via WebGPU (beta). PostFX and HDR image-based lighting stay on the WebGL path; falls back to WebGL if the adapter fails."
+        >
+          {liveBackend === 'webgpu' ? 'WebGPU on' : 'WebGPU β'}
+        </button>
+      )}
       {/* broadcast caption band — same grammar as the SVG stage bubble */}
       {leadBeat && (
         <div className="absolute top-2 left-1/2 -translate-x-1/2 max-w-[85%] px-3 py-1.5 rounded bg-black/70 border border-amber-300/40 backdrop-blur-[2px] pointer-events-none">

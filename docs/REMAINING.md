@@ -1,7 +1,7 @@
 # SG Pathway — what's remaining on the roadmap
 
-Snapshot as of `claude/healthcare-pathway-game-X7oRQ` @ v9.17.3 ·
-**710 tests passing**, type-check clean, production build clean.
+Snapshot as of `claude/healthcare-pathway-game-X7oRQ` @ v9.18 ·
+**769 tests passing**, type-check clean, production build clean.
 
 For the full version-by-version history of shipped work, see
 [`ROADMAP.md`](./ROADMAP.md). For an at-a-glance summary of shipped
@@ -9,108 +9,97 @@ work, see [`SUMMARY.md`](./SUMMARY.md).
 
 ---
 
-## 1. Asset-population handoff — **blocks photoreal 3D**
+## 1. Asset-population handoff — ✅ DONE (v9.18)
 
-The v9.17.x photoreal pipeline (infrastructure shipped through v9.17.3)
-is wired end-to-end but the asset folder is empty because Claude's
-sandbox can't reach external CDNs. **One command on your machine
-unblocks the visible upgrade:**
+The 3D asset folder is populated on this machine and the pipeline is
+reproducible on any other machine:
 
 ```bash
-git pull
-pnpm install        # picks up `postprocessing` + `three` types
-pnpm fetch:3d       # downloads HDRIs + character/prop packs into public/3d/
-pnpm dev            # reload, switch to 3D ᴮᴱᵀᴬ, toggle PostFX on
+pnpm fetch:3d       # 12/12 HDRIs (Poly Haven CC0) + Kenney pack
+python -m gdown --folder \
+  https://drive.google.com/drive/folders/1sNi1AfenfPRrvRt5yfaj5QMMd6KKcUJ5 \
+  -O public/3d/cast/_quaternius      # Quaternius UACP (CC0, ~110 MB)
+pnpm map:cast       # → cast/_lib/*.glb (14 role characters) + anims/*.glb (7 pose clips)
 ```
 
-| Step | Who | Effort | What lands |
-| --- | --- | --- | --- |
-| **A. Auto-fetch CC0 assets** | You | 10 min | HDRIs (Poly Haven CC0) for all 12 scenes → IBL specular/ambient kicks in. Quaternius CC0 character pack + medical prop pack downloaded. Kenney CC0 props downloaded. |
-| **B. Rename Quaternius GLBs** | You | 1 hr | Unzip `public/3d/cast/_quaternius/`; rename per-actor: `patient.glb`, `paramedic.glb`, `consultant.glb`, `mo.glb`, `nurse.glb`, `bystander.glb`, `smrt-staff.glb`, etc. The procedural rig stays as the fallback for any actor without a GLB. |
-| **C. Mixamo animation clips** | You | 30 min | At [mixamo.com](https://www.mixamo.com), download these 7 clips applied to ANY rigged character as separate GLBs into `public/3d/anims/`: `idle-breathing.glb`, `walking.glb`, `kneeling.glb`, `sitting.glb`, `cpr-compressions.glb`, `lying-down.glb`, `pointing.glb`. The `PoseAnimationDriver` (v9.17.3, already shipped) auto-loads them and cross-fades on pose change. |
-| **D. Photoreal humans (optional)** | You | One evening | [MakeHuman](https://www.makehumancommunity.org) parametric humans for the recurring cast (Mr Tan, Mdm Lim, etc.); export as GLB; drop in `public/3d/cast/{actorId}.glb` to override Quaternius. |
-| **E. Custom medical attire (optional)** | You | A few hours | Marvelous Designer scrubs / SCDF orange jumpsuit / white coat draped on the MakeHuman bases. Or use Ready Player Me with their scrubs catalog. |
-
-**Smallest meaningful first slice = Step A alone.** Run it, screenshot
-the result, and we iterate from there.
-
-After Step A: I can iterate on per-scene PBR tweaks, Stage3D camera
-choreography, and animation retargeting fixes if any of the Mixamo
-clips need bone-name remapping for your downloaded characters.
+| Step | Status |
+| --- | --- |
+| A. Auto-fetch CC0 assets | ✅ All 12 HDRIs (counsel re-slugged to `hospital_room`); Kenney URL refreshed; Quaternius moved to Drive + `gdown` |
+| B. Map character GLBs per actor | ✅ Superseded by `castManifest.ts` — every actor in all three walkthroughs resolves a role-appropriate shared character from `cast/_lib/`; an authored `cast/{actorId}.glb` still overrides; procedural rig is the final fallback |
+| C. Animation clips | ✅ All 7 `BeatPose` clips extracted from the Quaternius pack's own animation set by `pnpm map:cast` — no Mixamo login needed. (Closest-equivalents: kneel←PickUp, CPR←Punch, point←Shoot_OneHanded; replace with Mixamo exports any time by overwriting `public/3d/anims/{slug}.glb`) |
+| D. Photoreal humans (optional) | ⏳ Still yours: MakeHuman parametric humans for the recurring cast (Mr Tan, Mdm Lim, Mdm Devi…) → `public/3d/cast/{actorId}.glb` overrides |
+| E. Custom medical attire (optional) | ⏳ Still yours: Marvelous Designer scrubs / SCDF jumpsuit / white coat on the MakeHuman bases, or Ready Player Me |
 
 ---
 
-## 2. Multilingual case content (paused, awaiting native review)
-
-These are content-track items, not engineering blockers. The walkthrough
-arc was prioritised over them.
+## 2. Multilingual case content (track restarted in v9.18)
 
 | Version | Deliverable | Status |
 | --- | --- | --- |
-| v9.12 | Locale translation of all walkthrough strings (zh, ms, ta) | **Held** pending native-speaker clinical review. Plumbing in place; the gating issue is content correctness, not engineering. |
-| v10.1 | Case-content `ms` (Malay) translation track — primary-care / public-health cases first | Planned, post-walkthrough arc |
-| v10.2 | Case-content `ta` (Tamil) translation track — same case ordering | Planned, post-walkthrough arc |
-| **v11.0** | Capstone: all four official languages at full UI + case parity; mother-tongue first-run suggestion from `navigator.languages`; "end-to-end translation" claim restored | Planned |
+| v9.12 | Locale translation of all walkthrough strings (zh, ms, ta) | **Held** pending native-speaker clinical review (unchanged). |
+| v10.1 | Case-content `ms` track — primary-care / public-health first | 🔄 **First slice shipped**: `paeds-vaccine-hesitancy`, `agewell-hpc` fully carry `ms` (machine-assisted, flagged). Coverage-floor test ratchets up only. |
+| v10.2 | Case-content `ta` track — same ordering | 🔄 **First slice shipped**: same two cases. |
+| **v11.0** | Four-language parity capstone | 🔄 **Infrastructure shipped**: real per-locale coverage meter (`case-locale-coverage.ts`), per-locale case-% + machine-assisted flags in the language switcher, mother-tongue first-run suggestion from `navigator.languages`. Remaining: translate the other ~36 cases ×2 locales + native review. |
 
-**Parity bar:** UI chrome 100% of `en` keys + critical-key coverage +
-case content (title, blurb, node framing, decision prompts, option
-labels, rationales, outcomes, guideline refs) all carrying the locale
-**and passing native-speaker review** before the locale is advertised
-as complete. Per-locale machine-assisted strings are flagged as
-partial-coverage in the language switcher so learners are never misled.
+**Parity bar (unchanged):** UI chrome 100% + critical keys + full case
+content carrying the locale **and passing native-speaker review** before
+a locale is advertised complete. Machine-assisted strings are flagged in
+the switcher so learners are never misled.
+
+**New honesty finding:** the coverage meter shows `zh` at ~93.7% of case
+strings (long advertised as "every case"). Floored by test; closing the
+gap is on the backlog.
 
 ---
 
-## 3. Backlog (unscheduled)
+## 3. Backlog
 
-- **Per-case audio narration for `ms` / `ta`.** Web Speech API voice
-  availability varies wildly by platform — needs a graceful-degradation
-  check before shipping. Likely a v10.x+ item once locale content is in.
-- **Singlish-aware glossary toggle** for informal patient-perspective
-  framing. Niche but high-impact for authenticity.
-- **Third walkthrough — sepsis or major trauma pathway.** Would reuse
-  the existing engine + showpiece + achievement infrastructure exactly
-  as STEMI and stroke do.
-- **Real-time GI (v9.18+ if needed).** Not currently required — IBL +
-  SSAO + bloom already covers ~90% of what feels photoreal. Would
-  revisit only if PostFX-on still looks flat after authored assets land.
-- **WebGPU renderer path.** Three.js has WebGPU support in `r170+`. A
-  capability check + opt-in flag would let modern devices render the 3D
-  walkthrough with compute-shader-driven shadows/GI. Speculative.
+Shipped in v9.18: ~~ms/ta narration degradation check~~ · ~~Singlish
+glossary toggle~~ · ~~third walkthrough (sepsis)~~ · ~~WebGPU opt-in~~.
+
+Still open:
+
+- **Translate the remaining ~36 cases** into ms + ta (the long tail of
+  v10.1/v10.2) and close the zh ~6% gap.
+- **Real-time GI (v9.19+ if needed).** Revisit only if PostFX-on still
+  looks flat now that authored assets have landed.
+- **Walkthrough ms/ta/zh strings** once native reviewers are confirmed
+  (v9.12 unhold).
+- **Fourth walkthrough — major trauma** would reuse the engine exactly as
+  STEMI / stroke / sepsis do.
 
 ---
 
 ## 4. What's NOT remaining (confirmation)
 
-These were considered and deliberately deferred or rejected:
-
 | Item | Verdict | Why |
 | --- | --- | --- |
-| Switch from Three.js to Babylon.js | **Rejected** | Babylon's 900 kB-1.2 MB core would roughly double our chunk; the photoreal bottleneck is assets, not the engine. Documented in `docs/3D-RENDERER.md`. |
-| Switch from Phaser to Unity for the canvas renderer | **Rejected** | Unity WebGL breaks offline PWA shape; no path into React/Vitest/i18n surface. Documented in `ROADMAP.md` § "Renderer / engine decision". |
-| Per-case audio assets (MP3/OGG) | **Out of scope** | PWA stays audio-asset-free; the v9.16 `sfx` indicators give the action a sound dimension without binary audio files. |
-| Server-side state / multiplayer | **Out of scope** | This is an offline PWA. All progress is `localStorage`. |
+| Switch from Three.js to Babylon.js | **Rejected** | Documented in `docs/3D-RENDERER.md`. |
+| Switch from Phaser to Unity | **Rejected** | Documented in `ROADMAP.md` § "Renderer / engine decision". |
+| Per-case audio assets (MP3/OGG) | **Out of scope** | PWA stays audio-asset-free; `sfx` indicators + Web Speech narration cover it. |
+| Server-side state / multiplayer | **Out of scope** | Offline PWA; all progress is `localStorage`. |
 
 ---
 
 ## 5. Risk / loose-thread inventory
 
-Items that aren't formal roadmap entries but could bite later:
-
-- **Three.js version pin.** Currently `^0.184.0`. Three's API has
-  semver-violating breaks at minor versions (their `r1xx` releases are
-  effectively major). Pin to an exact version before declaring v10
-  stable.
-- **`postprocessing` package compat.** Pinned to `^6.39.1`. Coupled to
-  the Three.js version above; check both together when upgrading.
-- **Quaternius / Kenney pack URLs.** The `pnpm fetch:3d` script hardcodes
-  download URLs that they occasionally rotate. If a 404 lands, the URL
-  list at the top of `scripts/fetch-3d-assets.mjs` needs an update.
-- **Resvg dependency for `pnpm bake:scenes`.** Native binary; CI runners
-  without it can't bake scenes. Document or bundle.
-- **The `claude/healthcare-pathway-game-X7oRQ` branch** is the long-lived
-  development branch. At some point it merges to `main` and the project
-  goes back to short-lived feature branches.
+- ~~Three.js version pin~~ — ✅ pinned exact (`three@0.184.0`,
+  `@types/three@0.184.1`, `postprocessing@6.39.1`) in v9.18.
+- **Quaternius / Kenney URLs.** Kenney's URL hash rotates; Quaternius now
+  comes from their Drive folder (`gdown`). If either 404s again, update
+  `scripts/fetch-3d-assets.mjs` / the README in `public/3d/`.
+- **Resvg dependency for `pnpm bake:scenes`.** `@resvg/resvg-js` is a
+  native binary (prebuilt for win32/linux/mac via npm optional deps). CI
+  runners on unusual platforms can't bake scenes — but baked PNGs are
+  committed, so CI never *needs* to run it. Document-only risk.
+- **pnpm ≥ 10 build-script allowlist.** `pnpm-workspace.yaml` carries
+  `allowBuilds` (esbuild: true; sharp: false — sharp is an unused
+  optional of gltf-transform). New native deps must be added there.
+- **WebGPU path is β.** No PostFX / PMREM IBL on WebGPU by design; falls
+  back to WebGL automatically. Revisit when three's TSL post-processing
+  matures.
+- **The `claude/healthcare-pathway-game-X7oRQ` branch** remains the
+  long-lived development branch; merge to `main` when ready.
 
 ---
 
@@ -118,10 +107,11 @@ Items that aren't formal roadmap entries but could bite later:
 
 ```bash
 pnpm dev            # serves at http://localhost:5173
-pnpm test           # 710 tests, ~9 s
+pnpm test           # 769 tests, ~7 s
 pnpm verify         # tests + tsc + production build
 pnpm bake:scenes    # regenerate 12 HD scene PNGs (~15 MB) when SVG scenery changes
-pnpm fetch:3d       # download CC0 3D assets into public/3d/ (one-off per machine)
+pnpm fetch:3d       # download CC0 HDRIs + Kenney pack into public/3d/
+pnpm map:cast       # convert Quaternius pack → cast library + pose clips
 ```
 
 ---

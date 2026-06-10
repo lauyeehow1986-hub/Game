@@ -27,7 +27,7 @@ export const SCENE_HDRI_SLUGS: Record<SceneId, string> = {
   resus:    'studio_small_09',        // bright sterile clinical
   cathlab:  'photo_studio_01',        // dim cool surgical
   imaging:  'studio_small_08',        // even soft clinical
-  counsel:  'industrial_room',        // warm consultation room
+  counsel:  'hospital_room',          // warm consultation room
   ward:     'studio_country_hall',    // soft daylight ward
   pharmacy: 'studio_small_04',        // cool fluorescent
   rehab:    'autumn_park',            // daylight through windows

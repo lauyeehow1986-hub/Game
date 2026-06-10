@@ -50,6 +50,8 @@ export const en: Record<string, string> = {
   'results.campaignFinish': '✓ Finish shift',
   'narration.speak': '🔊 Speak',
   'narration.auto': '🎙 Auto-narrate',
+  'narration.voiceFallback': 'No voice for this language is installed on this device — narration uses the English text instead.',
+  'narration.voiceFallbackShort': 'EN voice',
   'campaigns.heading': 'Campaigns',
   'campaigns.start': 'Start shift',
   'campaigns.continue': 'Continue shift',
@@ -130,6 +132,8 @@ export const en: Record<string, string> = {
   'settings.realtime.hint': 'For acute-timer cases (STEMI, stroke, sepsis): advance the in-game clock while you read. Click the timer pill to toggle from the HUD.',
   'settings.realtime.speed': 'Pacing speed',
   'settings.realtime.speedHint': 'Real seconds per in-game minute. Lower = more pressure.',
+  'settings.singlish': 'Singlish glossary',
+  'settings.singlish.hint': 'Explain colloquial Singlish terms ("kopi", "void deck", "tahan") in patient-perspective text with dotted-underline tooltips. Meant for international learners; off by default.',
   'settings.narration': 'Voice narration',
   'settings.narration.hint': 'Read every patient/caregiver/staff framing aloud via the Web Speech API. Uses the active locale; cancels stale utterances when the scene changes. Falls back silently in browsers without speech synthesis.',
   'handoff.heading': 'Pause / handoff',
@@ -261,7 +265,7 @@ export const en: Record<string, string> = {
   'certificate.namePrompt': 'Name to print on the certificate (leave blank for "Learner"):',
   'debrief.print': '📝 Generate debrief',
   'walkthrough.tag': 'Pathway walkthrough',
-  'walkthrough.open': '🎬 Pathway walkthrough — STEMI',
+  'walkthrough.open': '🎬 Pathway walkthrough',
   'walkthrough.play': '▶ Play',
   'walkthrough.pause': '⏸ Pause',
   'walkthrough.restartChapter': 'Restart chapter',
@@ -508,6 +512,14 @@ export const en: Record<string, string> = {
   'install.cta': 'Install',
   'install.dismiss': 'Not now',
   'hud.offline': 'Offline',
+
+  // First-run mother-tongue suggestion + language-coverage honesty flags
+  'langSuggest.tag': 'Language',
+  'langSuggest.body': 'Your browser prefers {{language}}. Switch SG Pathway to it?',
+  'langSuggest.dismiss': 'Keep English',
+  'lang.casesPartial': '{{pct}}% of cases',
+  'lang.partialCases': 'Case content: {{done}} of {{total}} cases translated — the rest falls back to English.',
+  'lang.machineAssisted': 'Translations are machine-assisted and pending native-speaker clinical review.',
 
   // Best-path demo
   'demo.tag': 'Best-practice walkthrough',

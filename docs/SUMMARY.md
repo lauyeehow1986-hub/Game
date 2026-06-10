@@ -10,14 +10,17 @@ full version-by-version log.
 The project is a Singapore healthcare-pathway training game with two main
 arcs running in parallel:
 
-1. **Multilingual case content** (en + zh at parity; ms + ta UI chrome
-   complete, case content awaiting native review).
+1. **Multilingual case content** (en + zh near-parity; ms + ta UI chrome
+   complete; ms + ta case-content track restarted with a first translated
+   slice, machine-assisted + flagged, awaiting native review).
 2. **Visual pathway walkthrough** — a Bandersnatch-style scrubbable
-   cinematic of full patient journeys, started v9.4, now spans 17 minor
-   versions through v9.17 (three renderers: SVG, Phaser canvas, Three.js 3D).
+   cinematic of full patient journeys, started v9.4, now spans 18 minor
+   versions through v9.18 (three renderers: SVG, Phaser canvas, Three.js
+   3D with populated CC0 assets + an opt-in WebGPU β backend; three
+   pathways: STEMI, stroke, sepsis).
 
 Current branch: `claude/healthcare-pathway-game-X7oRQ` ·
-**710 tests passing**, type-check clean, production build clean.
+**769 tests passing**, type-check clean, production build clean.
 
 ---
 
@@ -80,6 +83,33 @@ journal, smart debrief. English + Chinese at 100% parity throughout.
 - v9.17.2 — Photoreal asset pipeline (infrastructure-only landing). `actorLoader.ts` swaps the procedural humanoid for a `public/3d/cast/{actorId}.glb` when one exists, keeping the procedural rig as the synchronous fallback. `ibl.ts` loads per-scene Poly Haven HDRIs into a `PMREMGenerator`-prefiltered envmap for PBR specular + ambient response. `postFx.ts` adds SSAO + bloom + vignette + SMAA via the `postprocessing` package, **lazy-imported** on first toggle so the base 3D chunk stays lean. Stage3D corner adds a PostFX toggle button. New `pnpm fetch:3d` script downloads CC0 HDRIs (Poly Haven), CC0 rigged characters (Quaternius Ultimate Animated Character Pack + Medical Pack), and CC0 props (Kenney) — sandbox-friendly: the *script ships*, the *binary blobs do not*. Whole `public/3d/` asset folder is `.gitignore`d. Bundle: 3D base 660 kB, lazy postFx chunk 174 kB.
 - v9.17.1 — Framing + facing-direction fix. Tighter world scale (20 m × 13 m), narrower FOV 32°, closer camera so figures occupy ~33% of frame height (was ~5%); `yawFor` corrected so E faces stage-right and W stage-left (regression test included). New `docs/3D-RENDERER.md` records the Babylon.js vs Three.js decision (verdict: stay on Three.js — Babylon's 900 kB-1.2 MB core would roughly double our chunk; the bottleneck is *assets*, not the engine) and lists CC0/free rigged-character sources for the future photoreal asset swap-in.
 
+**v9.18 — asset handoff done + backlog quartet + i18n track restart** ✅
+- **3D assets populated**: all 12 Poly Haven HDRIs (counsel → `hospital_room`);
+  Quaternius UACP pulled from its CC0 Drive folder (`gdown`) and converted by
+  the new `pnpm map:cast` into 14 role-shared GLB characters
+  (`cast/_lib/`) + the 7 `BeatPose` clips (`anims/`) extracted from the
+  pack's own animations — Steps A–C of the handoff closed without Mixamo.
+  New `castManifest.ts` resolves a role-appropriate character for EVERY
+  walkthrough actor (override → library → procedural).
+- **Sepsis walkthrough** (third pathway): community urosepsis — qSOFA
+  pre-alert → SSC Hour-1 bundle → CT source hunt → emergency decompression
+  → ICU → de-escalation → post-sepsis clinic → back-of-house lab/pharmacy/
+  portering. 3 branches, 22 actors, `walk-sepsis` badge; multi-pathway now
+  needs all three.
+- **Singlish glossary toggle** (Settings, off by default): 14 colloquial
+  terms explained inline for international learners.
+- **ms/ta narration degradation**: voice capability check; missing-voice
+  locales narrate the English fallback text with an "EN voice" hint.
+- **WebGPU opt-in β**: capability check + persisted flag; `Stage3D.create`
+  renders via `three/webgpu` (lazy 644 kB chunk) with automatic WebGL
+  fallback; PostFX/IBL stay WebGL-only by design.
+- **i18n capstone infra (v11.0)**: real case-content coverage meter,
+  per-locale case-% + machine-assisted flags in the switcher,
+  mother-tongue first-run suggestion. First translated slice
+  (`paeds-vaccine-hesitancy`, `agewell-hpc`) carries full ms + ta.
+- Three.js/postprocessing pinned exact; pnpm build-script allowlist;
+  Node-25-proof test localStorage shim.
+
 ---
 
 ## Held / not shipped
@@ -90,17 +120,19 @@ journal, smart debrief. English + Chinese at 100% parity throughout.
 
 ---
 
-## Planned (post-walkthrough arc)
+## In progress / planned
 
-| Version | Deliverable |
-| - | - |
-| v10.1 | Case-content `ms` translation track (primary-care / public-health cases first) |
-| v10.2 | Case-content `ta` translation track (same case ordering) |
-| **v11.0** | Capstone: all four official languages at full UI + case parity; mother-tongue first-run suggestion from `navigator.languages`; "end-to-end translation" claim restored for all locales |
+| Version | Deliverable | Status |
+| - | - | - |
+| v10.1 | Case-content `ms` translation track (primary-care / public-health first) | 🔄 first slice shipped (2 cases), ~36 to go |
+| v10.2 | Case-content `ta` translation track (same case ordering) | 🔄 first slice shipped (2 cases), ~36 to go |
+| **v11.0** | Capstone: four-language full parity + restored "end-to-end translation" claim | 🔄 infra shipped (coverage meter, switcher flags, first-run suggestion); content + native review remain |
 
 ### Backlog (unscheduled)
-- Per-case audio narration for `ms` / `ta` (Web Speech API availability varies)
-- Singlish-aware glossary toggle for informal patient-perspective framing
+- Translate the remaining case catalogue into ms + ta; close the zh ~6% string gap surfaced by the coverage meter
+- Walkthrough zh/ms/ta strings once native reviewers are confirmed (v9.12 unhold)
+- Real-time GI (only if PostFX still looks flat with authored assets)
+- Fourth walkthrough — major trauma
 
 ### Renderer decision (locked)
 - Phaser, not Unity. Reasons: Unity WebGL breaks the offline PWA shape, no path into the React/Vitest/i18n surface, and no Unity MCP available in this environment anyway. If photoreal 3D is wanted later, Three.js behind the same renderer toggle is the lighter path.
@@ -129,7 +161,8 @@ verification — any browser at `localhost:5173` works.
 
 ## Health metrics
 
-- **Tests**: 710 passing (`pnpm test`)
+- **Tests**: 769 passing (`pnpm test`)
 - **Type-check**: clean (`pnpm exec tsc --noEmit`)
-- **Production build**: clean. Bundle chunks split correctly — Phaser is a separately-lazy 1.48 MB chunk loaded only when the Cinematic renderer is selected; each walkthrough (STEMI / Stroke) is its own lazy chunk (~29 kB / ~19 kB).
+- **Production build**: clean. Bundle chunks split correctly — Phaser is a separately-lazy 1.48 MB chunk loaded only when the Cinematic renderer is selected; each walkthrough (STEMI / Stroke / Sepsis) is its own lazy chunk; `three/webgpu` is a lazy 644 kB chunk fetched only on the WebGPU opt-in.
 - **HD scene assets**: ~15 MB across 12 PNGs in `public/walkthrough/scenes/`, served at `/walkthrough/scenes/{id}.png`, cached by the existing service worker on first fetch (offline-capable from the second visit onward).
+- **3D assets (local, gitignored)**: 12 HDRIs (~18 MB), 14 cast GLBs + 7 pose clips from the Quaternius CC0 pack; reproducible on any machine via `pnpm fetch:3d` + `gdown` + `pnpm map:cast`.

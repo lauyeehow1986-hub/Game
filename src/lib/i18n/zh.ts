@@ -46,6 +46,8 @@ export const zh: Record<string, string> = {
   'results.campaignFinish': '✓ 完成值班',
   'narration.speak': '🔊 朗读',
   'narration.auto': '🎙 自动朗读',
+  'narration.voiceFallback': '此设备未安装该语言的语音 — 朗读将改用英文文本。',
+  'narration.voiceFallbackShort': '英文语音',
   'campaigns.heading': '战役 / 值班',
   'campaigns.start': '开始值班',
   'campaigns.continue': '继续值班',
@@ -124,6 +126,8 @@ export const zh: Record<string, string> = {
   'settings.realtime.hint': '用于有时间限制的急性病例(STEMI、中风、脓毒症):阅读时游戏时钟会推进。点击 HUD 中的计时栏也可切换。',
   'settings.realtime.speed': '推进速度',
   'settings.realtime.speedHint': '每个游戏内分钟对应多少现实秒。越低压力越大。',
+  'settings.singlish': '新加坡式英语词汇表',
+  'settings.singlish.hint': '为病人视角文本中的口语化新加坡式英语("kopi"、"void deck"、"tahan")提供虚线下划线提示。面向国际学习者;默认关闭。',
   'settings.narration': '语音旁白',
   'settings.narration.hint': '通过Web Speech API朗读每个病人/陪护/工作人员视角的旁白。使用当前语言;切换场景时取消上一段。浏览器不支持时静默回落。',
   'handoff.heading': '暂停 / 交接',
@@ -255,7 +259,7 @@ export const zh: Record<string, string> = {
   'certificate.namePrompt': '打印在证书上的名字(留空则显示"学习者"):',
   'debrief.print': '📝 生成复盘',
   'walkthrough.tag': '诊疗路径演练',
-  'walkthrough.open': '🎬 完整路径演练 — STEMI',
+  'walkthrough.open': '🎬 完整路径演练',
   'walkthrough.play': '▶ 播放',
   'walkthrough.pause': '⏸ 暂停',
   'walkthrough.restartChapter': '重新开始本章',
@@ -506,6 +510,14 @@ export const zh: Record<string, string> = {
   'install.cta': '安装',
   'install.dismiss': '暂不',
   'hud.offline': '离线',
+
+  // 首次使用母语建议 + 语言覆盖率诚实标记
+  'langSuggest.tag': '语言',
+  'langSuggest.body': '您的浏览器首选{{language}}。要切换吗?',
+  'langSuggest.dismiss': '保留英文',
+  'lang.casesPartial': '{{pct}}%病例',
+  'lang.partialCases': '病例内容:{{total}}例中已翻译{{done}}例 — 其余回落到英文。',
+  'lang.machineAssisted': '翻译为机器辅助,尚待母语临床审校。',
 
   'demo.tag': '最佳实践演示',
   'demo.subtitle':

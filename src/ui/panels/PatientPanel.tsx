@@ -1,15 +1,17 @@
 import { useGame } from '../../state/gameStore';
 import { usePerspective } from '../../state/perspectiveStore';
 import { getFacility } from '../../content';
-import { useT, useTr, useLocale } from '../../lib/i18n';
+import { useT, useTr, useLocale, tr as trAs } from '../../lib/i18n';
 import { GlossaryText } from '../GlossaryText';
 import {
   cancelSpeech,
+  getVoiceSupport,
   isNarrationEnabled,
   isSpeechSupported,
   localeToBcp47,
   setNarrationEnabled,
   speak,
+  subscribeVoicesChanged,
 } from '../../lib/speech';
 import { useEffect, useState } from 'react';
 import type { WardClass } from '../../lib/financing';
@@ -25,17 +27,40 @@ export function PatientPanel() {
   const t = useT();
   const locale = useLocale((s) => s.locale);
   const [narration, setNarration] = useState(false);
+  // Voice availability for the active locale — platform ms/ta voices are
+  // frequently missing; re-checked when the async voice list lands.
+  const [voiceSupport, setVoiceSupport] = useState(
+    () => getVoiceSupport(localeToBcp47(locale)),
+  );
   useEffect(() => {
     setNarration(isNarrationEnabled());
     return () => cancelSpeech();
   }, []);
+  useEffect(() => {
+    const refresh = () => setVoiceSupport(getVoiceSupport(localeToBcp47(locale)));
+    refresh();
+    return subscribeVoicesChanged(refresh);
+  }, [locale]);
+  // When the locale has no installed voice, narrate the English fallback
+  // text rather than mangling ms/ta text through a wrong-language voice.
+  const narrate = (value: Parameters<typeof trAs>[0]) => {
+    if (voiceSupport === 'native') speak(trAs(value, locale), localeToBcp47(locale));
+    else speak(trAs(value, 'en'), localeToBcp47('en'));
+  };
   // Auto-narrate whenever the framing changes IF the user has opted in.
   useEffect(() => {
     if (!narration || !caseDef || !profile) return;
     const node = caseDef.pathway.find((n) => n.id === run.currentNodeId) ?? caseDef.pathway[0];
-    const t = tr(node.framing[perspective]);
-    if (t) speak(t, localeToBcp47(locale));
-  }, [narration, run.currentNodeId, perspective, locale, caseDef, profile, tr]);
+    const value = node.framing[perspective];
+    if (voiceSupport === 'native') {
+      const text = tr(value);
+      if (text) speak(text, localeToBcp47(locale));
+    } else {
+      const text = trAs(value, 'en');
+      if (text) speak(text, localeToBcp47('en'));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [narration, run.currentNodeId, perspective, locale, caseDef, profile, tr, voiceSupport]);
 
   if (!caseDef || !profile) {
     return (
@@ -126,11 +151,11 @@ export function PatientPanel() {
         <blockquote className="border-l-2 border-clinical-accent pl-3 text-xs text-white/90 italic leading-relaxed relative">
           <GlossaryText>{framing}</GlossaryText>
           {isSpeechSupported() && (
-            <div className="flex gap-2 mt-1 not-italic">
+            <div className="flex gap-2 mt-1 not-italic items-center">
               <button
-                onClick={() => speak(framing, localeToBcp47(locale))}
+                onClick={() => narrate(node.framing[perspective])}
                 aria-label={t('narration.speak')}
-                title={t('narration.speak')}
+                title={voiceSupport === 'native' ? t('narration.speak') : t('narration.voiceFallback')}
                 className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-clinical-border text-clinical-subtle hover:text-white"
               >
                 {t('narration.speak')}
@@ -151,6 +176,14 @@ export function PatientPanel() {
               >
                 {t('narration.auto')}
               </button>
+              {voiceSupport !== 'native' && locale !== 'en' && (
+                <span
+                  className="text-[9px] text-amber-400/90 leading-tight"
+                  title={t('narration.voiceFallback')}
+                >
+                  {t('narration.voiceFallbackShort')}
+                </span>
+              )}
             </div>
           )}
         </blockquote>

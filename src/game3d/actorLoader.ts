@@ -17,14 +17,15 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Humanoid } from './humanoid';
 import { PoseAnimationDriver, cloneRig } from './animationLibrary';
+import { CAST_LIB_DIR, resolveLibFile } from './castManifest';
 import type { BeatExpression, BeatPose, WalkthroughActor } from '../lib/walkthrough';
 
 /** Public path where authored character GLBs live. Files are optional. */
 export const CAST_DIR = '/3d/cast/';
 
-/** Cache shape: per-actor-id, the gltf scene used as a template (cloned per
+/** Cache shape: per-url, the gltf scene used as a template (cloned per
  *  instance). Promise reuse prevents duplicate fetches when several copies
- *  of the same role appear on stage. */
+ *  of the same role/file appear on stage. */
 const cache = new Map<string, Promise<THREE.Group | null>>();
 
 let loader: GLTFLoader | null = null;
@@ -33,12 +34,10 @@ function gltf(): GLTFLoader {
   return loader;
 }
 
-/** Fetch + parse a GLB for an actor id. Resolves null when the file is
- *  missing or fails to parse (we *do not* throw — the caller falls back
- *  to the procedural rig). Also resolves null in SSR / test environments
- *  where the relative URL has no origin to resolve against. */
-function fetchActorGlb(actorId: string): Promise<THREE.Group | null> {
-  const url = `${CAST_DIR}${actorId}.glb`;
+/** Fetch + parse a GLB at a url. Resolves null when the file is missing or
+ *  fails to parse (we *do not* throw — the caller falls back). Also resolves
+ *  null in SSR / test environments where the URL has no origin. */
+function fetchGlb(url: string): Promise<THREE.Group | null> {
   return new Promise((resolve) => {
     if (typeof window === 'undefined') {
       resolve(null);
@@ -57,14 +56,32 @@ function fetchActorGlb(actorId: string): Promise<THREE.Group | null> {
   });
 }
 
-/** Returns a cached promise for the actor's GLB template, or null if none. */
-export function loadActorTemplate(actorId: string): Promise<THREE.Group | null> {
-  let p = cache.get(actorId);
+/** Per-url cached template load. */
+function loadTemplateUrl(url: string): Promise<THREE.Group | null> {
+  let p = cache.get(url);
   if (!p) {
-    p = fetchActorGlb(actorId);
-    cache.set(actorId, p);
+    p = fetchGlb(url);
+    cache.set(url, p);
   }
   return p;
+}
+
+/**
+ * Returns a cached promise for an actor's GLB template, or null if none.
+ * Two-tier: a per-actor authored override (`{actorId}.glb`) wins; otherwise
+ * the shared Quaternius library file resolved from the actor's role/team.
+ */
+export function loadActorTemplate(actor: WalkthroughActor | string): Promise<THREE.Group | null> {
+  // Back-compat: a bare id only resolves the authored override.
+  if (typeof actor === 'string') {
+    return loadTemplateUrl(`${CAST_DIR}${actor}.glb`);
+  }
+  return loadTemplateUrl(`${CAST_DIR}${actor.id}.glb`).then((override) => {
+    if (override) return override;
+    const lib = resolveLibFile(actor);
+    if (!lib) return null;
+    return loadTemplateUrl(`${CAST_LIB_DIR}${lib}.glb`);
+  });
 }
 
 /** Public clear-cache hook for tests. */
@@ -215,7 +232,7 @@ export function createActorFigure(actor: WalkthroughActor, parent: THREE.Object3
   const figure = new ProceduralFigure(actor);
   parent.add(figure.root);
 
-  loadActorTemplate(actor.id).then((template) => {
+  loadActorTemplate(actor).then((template) => {
     if (!template) return;
     // swap: remove the procedural figure, mount the GLB at the same world pos.
     const worldPos = figure.root.position.clone();

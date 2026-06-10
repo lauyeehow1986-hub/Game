@@ -1,5 +1,6 @@
 import { scanGlossary } from '../lib/glossary';
 import { useLocale } from '../lib/i18n';
+import { useGlossaryPrefs } from '../state/glossaryPrefsStore';
 
 /**
  * Render a plain string with glossary terms wrapped as dotted-underline
@@ -10,12 +11,16 @@ import { useLocale } from '../lib/i18n';
  * Only activates when the active locale is English; glossary entries are
  * English-only and matching Chinese / Malay / Tamil prose for English
  * terms would produce noise.
+ *
+ * When the Singlish toggle (Settings) is on, colloquial patient-perspective
+ * terms ("kopi", "void deck", "tahan") are matched too.
  */
 export function GlossaryText({ children }: { children: string | undefined | null }) {
   const locale = useLocale((s) => s.locale);
+  const singlish = useGlossaryPrefs((s) => s.singlish);
   if (!children) return null;
   if (locale !== 'en') return <>{children}</>;
-  const tokens = scanGlossary(children);
+  const tokens = scanGlossary(children, { singlish });
   if (tokens.length === 0) return null;
   return (
     <>

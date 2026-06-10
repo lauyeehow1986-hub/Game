@@ -58,6 +58,8 @@ export const ms: Record<string, string> = {
   'results.campaignFinish': '✓ Tamatkan syif',
   'narration.speak': '🔊 Baca',
   'narration.auto': '🎙 Auto-baca',
+  'narration.voiceFallback': 'Tiada suara bahasa ini dipasang pada peranti — pembacaan menggunakan teks Inggeris.',
+  'narration.voiceFallbackShort': 'Suara EN',
   'campaigns.heading': 'Kempen',
   'campaigns.start': 'Mula syif',
   'campaigns.continue': 'Sambung syif',
@@ -138,6 +140,8 @@ export const ms: Record<string, string> = {
   'settings.realtime.hint': 'Untuk kes pemasa akut (STEMI, strok, sepsis): jam dalam permainan bergerak semasa anda membaca. Klik pil pemasa untuk togol dari HUD.',
   'settings.realtime.speed': 'Kelajuan rentak',
   'settings.realtime.speedHint': 'Saat sebenar setiap minit dalam permainan. Rendah = lebih tekanan.',
+  'settings.singlish': 'Glosari Singlish',
+  'settings.singlish.hint': 'Terangkan istilah Singlish ("kopi", "void deck", "tahan") dalam teks perspektif pesakit dengan petua bergaris putus. Untuk pelajar antarabangsa; dimatikan secara lalai.',
   'settings.narration': 'Naratif suara',
   'settings.narration.hint': 'Baca setiap bingkai pesakit/penjaga/kakitangan secara lantang melalui Web Speech API. Menggunakan bahasa aktif; membatalkan ujaran lama apabila adegan berubah. Berundur secara senyap dalam pelayar tanpa sintesis pertuturan.',
   'handoff.heading': 'Jeda / serahan',
@@ -269,7 +273,7 @@ export const ms: Record<string, string> = {
   'certificate.namePrompt': 'Nama untuk dicetak pada sijil (biarkan kosong untuk "Pelajar"):',
   'debrief.print': '📝 Jana taklimat',
   'walkthrough.tag': 'Penelusuran laluan',
-  'walkthrough.open': '🎬 Penelusuran laluan — STEMI',
+  'walkthrough.open': '🎬 Penelusuran laluan',
   'walkthrough.play': '▶ Main',
   'walkthrough.pause': '⏸ Jeda',
   'walkthrough.restartChapter': 'Mulakan semula bab',
@@ -516,6 +520,14 @@ export const ms: Record<string, string> = {
   'install.cta': 'Pasang',
   'install.dismiss': 'Bukan sekarang',
   'hud.offline': 'Luar talian',
+
+  // Cadangan bahasa ibunda kali pertama + penanda liputan bahasa
+  'langSuggest.tag': 'Bahasa',
+  'langSuggest.body': 'Pelayar anda mengutamakan {{language}}. Tukar SG Pathway kepadanya?',
+  'langSuggest.dismiss': 'Kekal Inggeris',
+  'lang.casesPartial': '{{pct}}% kes',
+  'lang.partialCases': 'Kandungan kes: {{done}} daripada {{total}} kes diterjemah — selebihnya kembali kepada Bahasa Inggeris.',
+  'lang.machineAssisted': 'Terjemahan dibantu mesin dan menunggu semakan klinikal penutur asli.',
 
   // Best-path demo
   'demo.tag': 'Panduan amalan terbaik',

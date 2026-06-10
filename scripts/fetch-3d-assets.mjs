@@ -40,7 +40,7 @@ const HDRIS = {
   resus:     'studio_small_09',
   cathlab:   'photo_studio_01',
   imaging:   'studio_small_08',
-  counsel:   'industrial_room',
+  counsel:   'hospital_room',
   ward:      'studio_country_hall',
   pharmacy:  'studio_small_04',
   rehab:     'autumn_park',
@@ -58,30 +58,22 @@ const HDR_RES = '1k';
  * ────────────────────────────────────────────────────────────────────────── */
 const PACKS = [
   {
-    id: 'quaternius-ultimate-animated-characters',
-    license: 'CC0',
-    url: 'https://quaternius.com/packs/ultimateanimatedcharacterpack.zip',
-    dest: 'cast/_quaternius/',
-    note:
-      'CC0 rigged stylized characters from Quaternius. Use these to seed ' +
-      'public/3d/cast/{actorId}.glb — rename the relevant GLBs to the ' +
-      'actor ids you want them to back (e.g. paramedic.glb, bystander.glb).',
-  },
-  {
-    id: 'quaternius-medical-pack',
-    license: 'CC0',
-    url: 'https://quaternius.com/packs/medicalpack.zip',
-    dest: 'props/_quaternius-medical/',
-    note: 'CC0 medical props: gurney, monitor, IV pole, syringe, pill bottle.',
-  },
-  {
     id: 'kenney-platformer-characters',
     license: 'CC0',
-    url: 'https://kenney.nl/media/pages/assets/platformer-characters/45ac1a8a01-1748861875/kenney_platformer-characters.zip',
+    url: 'https://kenney.nl/media/pages/assets/platformer-characters/b85f388c42-1677693768/kenney_platformer-characters.zip',
     dest: 'cast/_kenney/',
     note: 'Stylized but rigged; useful as bystander/onlooker stand-ins.',
   },
 ];
+
+/* Quaternius no longer serves direct zips — packs moved to Google Drive
+ * folders (still CC0). Download with gdown (`pip install gdown`):
+ *   python -m gdown --folder \
+ *     https://drive.google.com/drive/folders/1sNi1AfenfPRrvRt5yfaj5QMMd6KKcUJ5 \
+ *     -O public/3d/cast/_quaternius
+ * The "Ultimate Animated Character Pack" GLBs each bundle the full shared
+ * animation set, so the 7 pose clips for public/3d/anims/ can be extracted
+ * from any one of them with scripts/extract-anim-clips.mjs. */
 
 /* ────────────────────────────────────────────────────────────────────────── *
  * Helpers.

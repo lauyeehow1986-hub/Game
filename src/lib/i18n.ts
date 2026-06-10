@@ -29,13 +29,21 @@ export interface LocaleMeta {
   nativeName: string;
   englishName: string;
   coverage: LocaleCoverage;
+  /**
+   * Review status of *case content* in this locale (UI chrome is enforced at
+   * 100% separately). 'native' — authored/reviewed by native speakers and
+   * safe to advertise; 'machine' — machine-assisted translations pending
+   * native-speaker clinical review, flagged in the language switcher so
+   * learners are never misled (docs/REMAINING.md §2 parity bar).
+   */
+  caseReview: 'native' | 'machine';
 }
 
 export const LOCALES: LocaleMeta[] = [
-  { code: 'en', nativeName: 'English', englishName: 'English', coverage: 'full' },
-  { code: 'zh', nativeName: '中文', englishName: 'Chinese (Simplified)', coverage: 'full' },
-  { code: 'ms', nativeName: 'Bahasa Melayu', englishName: 'Malay', coverage: 'full' },
-  { code: 'ta', nativeName: 'தமிழ்', englishName: 'Tamil', coverage: 'full' },
+  { code: 'en', nativeName: 'English', englishName: 'English', coverage: 'full', caseReview: 'native' },
+  { code: 'zh', nativeName: '中文', englishName: 'Chinese (Simplified)', coverage: 'full', caseReview: 'native' },
+  { code: 'ms', nativeName: 'Bahasa Melayu', englishName: 'Malay', coverage: 'full', caseReview: 'machine' },
+  { code: 'ta', nativeName: 'தமிழ்', englishName: 'Tamil', coverage: 'full', caseReview: 'machine' },
 ];
 
 // English is the fallback chain and is always needed, so it stays in the

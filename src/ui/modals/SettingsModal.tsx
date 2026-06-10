@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useT, useLocale, LOCALES, type Locale } from '../../lib/i18n';
+import { contentCoverage, type ContentCoverage } from '../../lib/case-locale-coverage';
+import { listCases } from '../../content';
 import { usePacing } from '../../state/pacingStore';
 import { isMuted, setMuted } from '../../lib/audio';
 import { useFocusTrap } from '../../lib/use-focus-trap';
@@ -7,6 +9,7 @@ import { collectBackup, applyBackup, backupFilename } from '../../lib/backup';
 import { isNarrationEnabled, isSpeechSupported, setNarrationEnabled } from '../../lib/speech';
 import { getContrast, setContrast } from '../../lib/contrast';
 import { useGame } from '../../state/gameStore';
+import { useGlossaryPrefs } from '../../state/glossaryPrefsStore';
 import { buildHandoff, decodeHandoff, encodeHandoff } from '../../lib/handoff';
 
 interface Props {
@@ -24,8 +27,18 @@ export function SettingsModal({ open, onClose }: Props) {
   const cardRef = useFocusTrap<HTMLDivElement>(open);
   const locale = useLocale((s) => s.locale);
   const setLocale = useLocale((s) => s.setLocale);
+  // Case-content coverage per locale — drives the partial-translation flags
+  // in the switcher so machine-assisted locales are never advertised as done.
+  const caseCoverage = useMemo(() => {
+    const all = listCases();
+    const out: Partial<Record<Locale, ContentCoverage>> = {};
+    for (const l of LOCALES) out[l.code] = contentCoverage(all, l.code);
+    return out;
+  }, []);
   const realtime = usePacing((s) => s.realtime);
   const setRealtime = usePacing((s) => s.setRealtime);
+  const singlish = useGlossaryPrefs((s) => s.singlish);
+  const setSinglish = useGlossaryPrefs((s) => s.setSinglish);
   const sec = usePacing((s) => s.secondsPerGameMin);
   const setSec = usePacing((s) => s.setSpeed);
   const [audio, setAudioState] = useState(false);
@@ -139,13 +152,37 @@ export function SettingsModal({ open, onClose }: Props) {
               aria-label={t('hud.language')}
               className="bg-clinical-bg border border-clinical-border rounded px-2 py-1 text-white"
             >
-              {LOCALES.map((l) => (
-                <option key={l.code} value={l.code}>
-                  {l.nativeName}
-                </option>
-              ))}
+              {LOCALES.map((l) => {
+                const cov = caseCoverage[l.code];
+                const partial = cov != null && cov.caseRatio < 1;
+                return (
+                  <option key={l.code} value={l.code}>
+                    {l.nativeName}
+                    {partial ? ` — ${t('lang.casesPartial', { pct: Math.round(cov.caseRatio * 100) })}` : ''}
+                  </option>
+                );
+              })}
             </select>
           </Row>
+          {(() => {
+            const meta = LOCALES.find((l) => l.code === locale);
+            const cov = caseCoverage[locale];
+            if (!meta || !cov) return null;
+            const partial = cov.caseRatio < 1;
+            const machine = meta.caseReview === 'machine';
+            if (!partial && !machine) return null;
+            return (
+              <p className="text-[10px] text-amber-400/90 leading-snug -mt-2">
+                {partial &&
+                  t('lang.partialCases', {
+                    done: cov.localisedCases,
+                    total: cov.cases,
+                  })}
+                {partial && machine ? ' ' : ''}
+                {machine && t('lang.machineAssisted')}
+              </p>
+            );
+          })()}
 
           {/* Audio */}
           <Row label={t('settings.audio')} hint={t('settings.audio.hint')}>
@@ -162,6 +199,15 @@ export function SettingsModal({ open, onClose }: Props) {
           {/* Real-time pacing */}
           <Row label={t('settings.realtime')} hint={t('settings.realtime.hint')}>
             <Toggle checked={realtime} label={t('settings.realtime')} onChange={setRealtime} />
+          </Row>
+
+          {/* Singlish-aware glossary */}
+          <Row label={t('settings.singlish')} hint={t('settings.singlish.hint')}>
+            <Toggle
+              checked={singlish}
+              label={t('settings.singlish')}
+              onChange={setSinglish}
+            />
           </Row>
 
           {/* Voice narration */}

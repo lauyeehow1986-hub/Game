@@ -65,3 +65,43 @@ export function localeToBcp47(locale: 'en' | 'zh' | 'ms' | 'ta'): string {
       return 'en-SG';
   }
 }
+
+/**
+ * Voice availability for a language. Platform voice coverage varies wildly —
+ * most desktop/mobile stacks ship en + zh voices, but ms and especially ta
+ * voices are frequently absent. Narration UIs should check this before
+ * promising audio in the active locale.
+ *
+ *  - 'native':   at least one installed voice matches the language subtag.
+ *  - 'fallback': speech synthesis works but no voice matches — speaking the
+ *                text would use a wrong-language default voice, so callers
+ *                should narrate the English fallback text instead.
+ *  - 'none':     no speech synthesis at all (or SSR).
+ */
+export type VoiceSupport = 'native' | 'fallback' | 'none';
+
+export function getVoiceSupport(bcp47: string): VoiceSupport {
+  if (!isSpeechSupported()) return 'none';
+  const primary = bcp47.toLowerCase().split('-')[0];
+  const voices = window.speechSynthesis.getVoices() ?? [];
+  const match = voices.some(
+    (v) => (v.lang ?? '').toLowerCase().split(/[-_]/)[0] === primary,
+  );
+  return match ? 'native' : 'fallback';
+}
+
+/**
+ * Chrome populates `getVoices()` asynchronously — the first call commonly
+ * returns an empty list and a `voiceschanged` event fires once the real
+ * list lands. Subscribe to be re-notified; returns an unsubscribe handle.
+ * No-ops (returns a dummy unsubscriber) when speech is unsupported.
+ */
+export function subscribeVoicesChanged(cb: () => void): () => void {
+  if (!isSpeechSupported()) return () => {};
+  const synth = window.speechSynthesis;
+  if (typeof synth.addEventListener === 'function') {
+    synth.addEventListener('voiceschanged', cb);
+    return () => synth.removeEventListener('voiceschanged', cb);
+  }
+  return () => {};
+}

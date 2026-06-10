@@ -29,6 +29,7 @@ export type AchievementId =
   | 'completionist'
   | 'walk-stemi'
   | 'walk-stroke'
+  | 'walk-sepsis'
   | 'walk-multi-pathway';
 
 export type TriggerKind =
@@ -66,6 +67,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   { id: 'completionist',       title: 'Completionist',       description: 'Score at least once on every built-in case.' },
   { id: 'walk-stemi',          title: '🫀 Cardiac arrest to recovery', description: 'Completed the full STEMI patient pathway walkthrough.' },
   { id: 'walk-stroke',         title: '🧠 Stroke pathway hero',        description: 'Completed the large-vessel-occlusion stroke pathway walkthrough.' },
+  { id: 'walk-sepsis',         title: '🦠 Sepsis bundle champion',     description: 'Completed the community-urosepsis pathway walkthrough.' },
   { id: 'walk-multi-pathway',  title: '🏆 Multi-pathway master',       description: 'Completed every walkthrough in the catalogue.' },
 ];
 
@@ -144,11 +146,13 @@ export function evaluate(
       const id = trigger.walkthroughId;
       if (id.startsWith('stemi')) want('walk-stemi', true);
       if (id.startsWith('stroke')) want('walk-stroke', true);
-      // Multi-pathway master fires once both single-pathway badges are unlocked
+      if (id.startsWith('sepsis')) want('walk-sepsis', true);
+      // Multi-pathway master fires once every single-pathway badge is unlocked
       // — including the one we are about to unlock in this same evaluation.
       const willHaveStemi = already.has('walk-stemi') || (id.startsWith('stemi'));
       const willHaveStroke = already.has('walk-stroke') || (id.startsWith('stroke'));
-      want('walk-multi-pathway', willHaveStemi && willHaveStroke);
+      const willHaveSepsis = already.has('walk-sepsis') || (id.startsWith('sepsis'));
+      want('walk-multi-pathway', willHaveStemi && willHaveStroke && willHaveSepsis);
       break;
     }
   }

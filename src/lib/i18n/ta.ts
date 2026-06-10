@@ -58,6 +58,8 @@ export const ta: Record<string, string> = {
   'results.campaignFinish': '✓ பணியை முடி',
   'narration.speak': '🔊 படி',
   'narration.auto': '🎙 தானியங்கி',
+  'narration.voiceFallback': 'இந்தச் சாதனத்தில் இம்மொழிக்கான குரல் நிறுவப்படவில்லை — வாசிப்பு ஆங்கில உரையைப் பயன்படுத்தும்.',
+  'narration.voiceFallbackShort': 'EN குரல்',
   'campaigns.heading': 'பிரச்சாரங்கள்',
   'campaigns.start': 'பணியைத் தொடங்கு',
   'campaigns.continue': 'பணியைத் தொடரு',
@@ -138,6 +140,8 @@ export const ta: Record<string, string> = {
   'settings.realtime.hint': 'அவசர-நேர வழக்குகளுக்கு (STEMI, பக்கவாதம், சிக்கல்நிலை): நீங்கள் படிக்கும்போது விளையாட்டு கடிகாரம் முன்னேறும். HUD-இலிருந்து மாற்ற நேர பில் அழுத்தவும்.',
   'settings.realtime.speed': 'வேகம்',
   'settings.realtime.speedHint': 'விளையாட்டு நிமிடத்திற்கு உண்மை விநாடிகள். குறைவு = அதிக அழுத்தம்.',
+  'settings.singlish': 'சிங்கிலிஷ் சொற்களஞ்சியம்',
+  'settings.singlish.hint': 'நோயாளர் பார்வை உரையில் வரும் சிங்கிலிஷ் சொற்களை ("kopi", "void deck", "tahan") புள்ளி-அடிக்கோடு குறிப்புகளுடன் விளக்கும். சர்வதேச கற்பவர்களுக்கானது; இயல்பாக அணைக்கப்பட்டுள்ளது.',
   'settings.narration': 'குரல் விவரிப்பு',
   'settings.narration.hint': 'ஒவ்வொரு நோயாளி/பராமரிப்பாளர்/பணியாளர் சூழ்நிலையையும் Web Speech API மூலம் சத்தமாகப் படிக்கும். செயலில் உள்ள மொழியைப் பயன்படுத்தும்; காட்சி மாறும்போது பழைய உச்சரிப்புகளை ரத்து செய்யும். பேச்சு தொகுப்பு இல்லாத உலாவிகளில் அமைதியாக பின்வாங்கும்.',
   'handoff.heading': 'இடைநிறுத்தம் / ஒப்படைப்பு',
@@ -269,7 +273,7 @@ export const ta: Record<string, string> = {
   'certificate.namePrompt': 'சான்றிதழில் அச்சிட பெயர் ("கற்போர்"க்கு காலியாக விடவும்):',
   'debrief.print': '📝 கலந்துரையாடலை உருவாக்கு',
   'walkthrough.tag': 'பாதை நடைபயணம்',
-  'walkthrough.open': '🎬 பாதை நடைபயணம் — STEMI',
+  'walkthrough.open': '🎬 பாதை நடைபயணம்',
   'walkthrough.play': '▶ இயக்கு',
   'walkthrough.pause': '⏸ இடைநிறுத்து',
   'walkthrough.restartChapter': 'அத்தியாயத்தை மீண்டும் தொடங்கு',
@@ -516,6 +520,14 @@ export const ta: Record<string, string> = {
   'install.cta': 'நிறுவு',
   'install.dismiss': 'இப்போது இல்லை',
   'hud.offline': 'ஆஃப்லைன்',
+
+  // முதல்-இயக்க தாய்மொழி பரிந்துரை + மொழி உள்ளடக்க வெளிப்படை குறிகள்
+  'langSuggest.tag': 'மொழி',
+  'langSuggest.body': 'உங்கள் உலாவி {{language}} மொழியை விரும்புகிறது. SG Pathway-ஐ மாற்றவா?',
+  'langSuggest.dismiss': 'ஆங்கிலத்தில் தொடரவும்',
+  'lang.casesPartial': '{{pct}}% வழக்குகள்',
+  'lang.partialCases': 'வழக்கு உள்ளடக்கம்: {{total}}-இல் {{done}} வழக்குகள் மொழிபெயர்க்கப்பட்டுள்ளன — மீதம் ஆங்கிலத்திற்குத் திரும்பும்.',
+  'lang.machineAssisted': 'மொழிபெயர்ப்புகள் இயந்திர-உதவியுடன் செய்யப்பட்டவை; தாய்மொழி மருத்துவ சரிபார்ப்பு நிலுவையில் உள்ளது.',
 
   // Best-path demo
   'demo.tag': 'சிறந்த நடைமுறை வழிகாட்டி',
