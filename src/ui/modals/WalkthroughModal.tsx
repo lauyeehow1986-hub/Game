@@ -30,8 +30,10 @@ interface Props {
 
 /** Cinematic (Phaser canvas) renderer — lazy so Phaser only loads on opt-in. */
 const LazyPhaserStage = lazy(() => import('./WalkthroughPhaserStage'));
+/** 3D (Three.js WebGL) renderer — lazy so Three.js only loads on opt-in. */
+const Lazy3DStage = lazy(() => import('./Walkthrough3DStage'));
 
-type RendererKind = 'svg' | 'phaser';
+type RendererKind = 'svg' | 'phaser' | 'three';
 
 const PLAY_TICK_MS = 100; // 10 fps is plenty for prose beats
 
@@ -192,6 +194,14 @@ export function WalkthroughModal({ walkthrough, onClose }: Props) {
               >
                 Cinematic ᴮᴱᵀᴬ
               </button>
+              <button
+                onClick={() => setRenderer('three')}
+                className={`px-2 py-1 ${renderer === 'three' ? 'bg-clinical-accent text-white' : 'text-clinical-subtle hover:text-white'}`}
+                aria-pressed={renderer === 'three'}
+                title="Three.js WebGL renderer (beta) — physically-lit 3D sets, articulated characters"
+              >
+                3D ᴮᴱᵀᴬ
+              </button>
             </div>
             <div className="text-right space-y-0.5">
               {chapter.timeOfDay && (
@@ -214,22 +224,32 @@ export function WalkthroughModal({ walkthrough, onClose }: Props) {
         {/* Stage — SVG vector renderer (default) or Phaser canvas (beta) */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-0 min-h-0">
           <div className="relative bg-clinical-bg overflow-hidden">
-            {renderer === 'phaser' ? (
+            {renderer === 'phaser' || renderer === 'three' ? (
               <StageErrorBoundary onFallback={() => setRenderer('svg')}>
                 <Suspense
                   fallback={
                     <div className="absolute inset-0 grid place-items-center text-[11px] text-clinical-subtle">
-                      Loading cinematic renderer…
+                      {renderer === 'three' ? 'Loading 3D renderer…' : 'Loading cinematic renderer…'}
                     </div>
                   }
                 >
-                  <LazyPhaserStage
-                    walkthrough={walkthrough}
-                    chapter={chapter}
-                    activeByActor={activeByActor}
-                    selectedActorId={selectedActorId}
-                    onPickActor={(id) => setSelectedActorId(id)}
-                  />
+                  {renderer === 'three' ? (
+                    <Lazy3DStage
+                      walkthrough={walkthrough}
+                      chapter={chapter}
+                      activeByActor={activeByActor}
+                      selectedActorId={selectedActorId}
+                      onPickActor={(id) => setSelectedActorId(id)}
+                    />
+                  ) : (
+                    <LazyPhaserStage
+                      walkthrough={walkthrough}
+                      chapter={chapter}
+                      activeByActor={activeByActor}
+                      selectedActorId={selectedActorId}
+                      onPickActor={(id) => setSelectedActorId(id)}
+                    />
+                  )}
                 </Suspense>
               </StageErrorBoundary>
             ) : (
