@@ -146,6 +146,41 @@ describe('evaluate — ops + locale + content triggers', () => {
   });
 });
 
+describe('evaluate — walkthrough-completed (v9.16)', () => {
+  it('completing the STEMI walkthrough unlocks walk-stemi only', () => {
+    const u = evaluate({ kind: 'walkthrough-completed', walkthroughId: 'stemi-pathway-v1' }, new Set(), snap());
+    expect(u).toContain('walk-stemi');
+    expect(u).not.toContain('walk-stroke');
+    expect(u).not.toContain('walk-multi-pathway');
+  });
+  it('completing the stroke walkthrough unlocks walk-stroke only', () => {
+    const u = evaluate({ kind: 'walkthrough-completed', walkthroughId: 'stroke-pathway-v1' }, new Set(), snap());
+    expect(u).toContain('walk-stroke');
+    expect(u).not.toContain('walk-stemi');
+    expect(u).not.toContain('walk-multi-pathway');
+  });
+  it('completing the second pathway unlocks multi-pathway in the same pass', () => {
+    const u = evaluate(
+      { kind: 'walkthrough-completed', walkthroughId: 'stroke-pathway-v1' },
+      new Set(['walk-stemi']),
+      snap(),
+    );
+    expect(u).toEqual(expect.arrayContaining(['walk-stroke', 'walk-multi-pathway']));
+  });
+  it('replaying an already-earned pathway unlocks nothing new', () => {
+    const u = evaluate(
+      { kind: 'walkthrough-completed', walkthroughId: 'stemi-pathway-v1' },
+      new Set(['walk-stemi']),
+      snap(),
+    );
+    expect(u).toEqual([]);
+  });
+  it('an unknown walkthrough id unlocks nothing', () => {
+    const u = evaluate({ kind: 'walkthrough-completed', walkthroughId: 'sepsis-pathway-v1' }, new Set(), snap());
+    expect(u).toEqual([]);
+  });
+});
+
 describe('getAchievement', () => {
   it('returns by id', () => {
     expect(getAchievement('tycoon')?.title).toBe('Tycoon');

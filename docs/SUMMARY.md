@@ -70,6 +70,10 @@ journal, smart debrief. English + Chinese at 100% parity throughout.
 - v9.14 — Retired the asset-free PWA constraint. `pnpm bake:scenes` (resvg + vite-node) pre-renders every scene as a 1440×810 HD PNG into `public/walkthrough/scenes/{id}.png` (~15 MB committed). Both renderers load the PNG by default with inline-SVG fallback. New `<CinematicOverlay>` adds feTurbulence film grain + corner vignette + colour grading to every scene.
 - v9.14.1 — Per-scene cinematographic mood: warm (kopitiam, counsel), daylight (street, rehab), sterile (resus, ward, pharmacy, clinic), surgical (cathlab, imaging), transit (mrt), industrial (backhouse). Re-baked all 12 PNGs.
 
+**Character distinctness + polish quartet (v9.15 → v9.16)** ✅
+- v9.15 — Demographically-real cast: `ageBand` (young/adult/elder) derived from explicit role-text age or hash-jittered keywords; elders get gray/white hair, temple wrinkles, glasses bias; new `hasGlasses` + `beard` features (beards suppressed for female-coded roles). MRT seat-alignment fix: new foreground priority-seat bench so Mdm Lim's sit beat lands on a cushion, not mid-air.
+- v9.16 — Award-game polish quartet: (1) lip-sync mouth animation on the speaking actor (both renderers, suppressed back-facing); (2) `sfx` onomatopoeia indicators floating above the speaker (⚡ CLEAR!, 🚨 SIREN, 🔔 DING!, 📻 *kssh*) — audio dimension with zero audio assets; (3) three walkthrough achievements (`walk-stemi`, `walk-stroke`, `walk-multi-pathway`) fired at terminal chapters; (4) letterbox bars sliding in during B-roll showpieces.
+
 ---
 
 ## Held / not shipped
@@ -119,7 +123,7 @@ verification — any browser at `localhost:5173` works.
 
 ## Health metrics
 
-- **Tests**: 656 passing (`pnpm test`)
+- **Tests**: 668 passing (`pnpm test`)
 - **Type-check**: clean (`pnpm exec tsc --noEmit`)
 - **Production build**: clean. Bundle chunks split correctly — Phaser is a separately-lazy 1.48 MB chunk loaded only when the Cinematic renderer is selected; each walkthrough (STEMI / Stroke) is its own lazy chunk (~29 kB / ~19 kB).
 - **HD scene assets**: ~15 MB across 12 PNGs in `public/walkthrough/scenes/`, served at `/walkthrough/scenes/{id}.png`, cached by the existing service worker on first fetch (offline-capable from the second visit onward).

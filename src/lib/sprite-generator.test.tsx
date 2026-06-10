@@ -152,6 +152,28 @@ describe('sprite-generator — every STEMI walkthrough actor renders', () => {
   });
 });
 
+describe('sprite-generator — lip-sync (v9.16)', () => {
+  const a = () => stemiWalkthrough.actors['paramedic'];
+
+  it('speaking adds an animated mouth (SMIL <animate>) to the markup', () => {
+    const quiet = renderToStaticMarkup(<ActorSprite actor={a()} />);
+    const talking = renderToStaticMarkup(<ActorSprite actor={a()} speaking />);
+    expect(talking).not.toBe(quiet);
+    expect(talking).toContain('<animate');
+    expect(quiet).not.toContain('<animate');
+  });
+
+  it('lip-sync is suppressed on a back-facing sprite', () => {
+    const back = renderToStaticMarkup(<ActorSprite actor={a()} speaking direction="N" />);
+    expect(back).not.toContain('<animate');
+  });
+
+  it('the animated mouth loops indefinitely', () => {
+    const talking = renderToStaticMarkup(<ActorSprite actor={a()} speaking />);
+    expect(talking).toContain('repeatCount="indefinite"');
+  });
+});
+
 describe('sprite-generator — poses', () => {
   const a = () => stemiWalkthrough.actors['patient'];
 
