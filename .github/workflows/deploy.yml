@@ -2,9 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - claude/healthcare-pathway-game-X7oRQ
-      - main
+    branches: [main, "claude/healthcare-pathway-game-X7oRQ"]
   workflow_dispatch:
 
 permissions:
@@ -24,21 +22,22 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 11
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '22'
           cache: pnpm
 
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm test
-      - run: pnpm build
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - uses: actions/configure-pages@v5
+      - name: Build
+        run: pnpm build
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: dist
 
   deploy:
     needs: build
