@@ -246,9 +246,15 @@ export class Stage3D {
     // change for users who haven't run `pnpm fetch:3d`. PMREM prefiltering
     // is WebGL-bound, so the WebGPU backend keeps the preset lights.
     if (this.backend === 'webgl') {
+      const presetHemiIntensity = L.hemi.intensity;
       loadSceneEnvironment(id, this.renderer).then((entry) => {
         if (this.disposed || this.envId !== id) return;
         applyEnvironment(this.scene, entry);
+        // With an HDRI present the PMREM env supplies directional diffuse
+        // irradiance, so the constant hemisphere fill is now redundant and
+        // would only flatten contrast. Fade it to a small residual; restore
+        // the full preset value on a miss (preset lights stay in charge).
+        this.hemi.intensity = entry ? presetHemiIntensity * 0.3 : presetHemiIntensity;
       });
     }
   }

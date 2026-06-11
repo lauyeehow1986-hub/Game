@@ -9,7 +9,7 @@
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { _resetActorCache, loadActorTemplate, createActorFigure, CAST_DIR } from './actorLoader';
-import { SCENE_HDRI_SLUGS, HDR_DIR } from './ibl';
+import { SCENE_HDRI_SLUGS, HDR_DIR, applyEnvironment, ENVIRONMENT_INTENSITY } from './ibl';
 import { SCENE_IDS_3D } from './environments';
 import {
   ANIM_DIR,
@@ -73,6 +73,20 @@ describe('IBL — per-scene HDRI registry', () => {
     const slugs = Object.values(SCENE_HDRI_SLUGS);
     // At least 6 of the 12 scenes should map to a distinct HDRI.
     expect(new Set(slugs).size).toBeGreaterThanOrEqual(6);
+  });
+
+  it('applyEnvironment drives the image-based indirect term when an HDRI is present', () => {
+    const scene = new THREE.Scene();
+    const rt = new THREE.WebGLRenderTarget(1, 1);
+    const entry = { envMap: rt.texture, rt };
+    applyEnvironment(scene, entry);
+    expect(scene.environment).toBe(rt.texture);
+    expect(scene.environmentIntensity).toBe(ENVIRONMENT_INTENSITY);
+    // Detaching restores a neutral exposure and clears the map.
+    applyEnvironment(scene, null);
+    expect(scene.environment).toBeNull();
+    expect(scene.environmentIntensity).toBe(1.0);
+    rt.dispose();
   });
 });
 

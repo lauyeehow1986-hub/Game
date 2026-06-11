@@ -110,3 +110,34 @@ now occupies ~33% of frame height (was ~5% in v9.17.0).
   scene moods. Lazy-loaded only when 3D is selected.
 - **glTF skinning + animation clips** from Mixamo as a replacement for the
   procedural CPR / walk cycles, gated on a sub-toggle.
+
+## Decision — real-time GI is rejected; IBL + SSAO is the GI we ship
+
+The backlog asked us to revisit real-time global illumination "only if
+PostFX-on still looks flat now that authored assets have landed". Having
+landed the HDRIs and the GLB cast, the verdict is **rejected**, for
+concrete reasons:
+
+- **We already ship the standard approximate-GI stack.** The PMREM
+  environment (`ibl.ts`) gives every PBR material *directional* diffuse
+  irradiance **and** prefiltered specular reflections — image-based diffuse
+  + specular GI. SSAO (`postFx.ts`) adds the contact-occlusion / indirect
+  darkening that a one-bounce GI pass would contribute. IBL + SSAO under
+  ACES tone mapping is exactly the "fake GI" combination real-time GI would
+  otherwise approximate, at a fraction of the cost.
+- **True real-time GI is not in the stable toolset.** SSGI / voxel / LPV GI
+  is not in the `postprocessing` package's stable set; rolling our own would
+  be a large, fragile pass that the WebGPU β path (no PostFX by design)
+  could not share, and would blow the lean-chunk budget the PWA depends on.
+- **The flatness cause was double-counting, not missing GI.** A constant
+  `HemisphereLight` fill is the *flattest* possible ambient. When an HDRI is
+  present we now (a) set `scene.environmentIntensity` so the image-based
+  indirect drives the ambient, and (b) fade the preset hemisphere to a 30 %
+  residual so it stops washing out the env's directional diffuse. This is a
+  zero-extra-pass change (it scales existing terms) and is the real
+  anti-flatness uplift — shipped, not deferred.
+
+If a future scene still reads flat, the lever is per-scene
+`environmentIntensity` / exposure tuning and stronger authored HDRIs, **not**
+a real-time GI pass. Revisit only if three's TSL post-processing brings a
+maintained SSGI effect that also works on the WebGPU backend.

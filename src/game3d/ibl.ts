@@ -76,9 +76,21 @@ export function loadSceneEnvironment(
   return p;
 }
 
-/** Apply (or remove) an envmap to a Three.js Scene. Pass null to detach. */
+/** Strength of the image-based indirect term when an HDRI is present. The
+ *  PMREM environment supplies *directional* diffuse irradiance (form-giving),
+ *  unlike a constant hemisphere fill (flat). Driving the ambient through this
+ *  — rather than doubling it with the preset hemisphere — is what stops IBL
+ *  scenes looking flat, at zero extra GPU cost (it scales an existing term,
+ *  not a new pass). Art-directable; 1.0 is a faithful exposure. */
+export const ENVIRONMENT_INTENSITY = 1.0;
+
+/** Apply (or remove) an envmap to a Three.js Scene. Pass null to detach.
+ *  Also sets `scene.environmentIntensity` so callers get the tuned indirect
+ *  strength (three r163+; harmless when unset on the active scene). */
 export function applyEnvironment(scene: THREE.Scene, entry: CacheEntry | null) {
   scene.environment = entry?.envMap ?? null;
+  // `environmentIntensity` exists on Scene in three r163+ (our pin is 0.184).
+  scene.environmentIntensity = entry ? ENVIRONMENT_INTENSITY : 1.0;
 }
 
 /** Public clear-cache hook for tests. */
