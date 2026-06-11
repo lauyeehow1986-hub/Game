@@ -14,7 +14,8 @@
     "verify": "vitest run && tsc -b && vite build",
     "bake:scenes": "vite-node scripts/bake-scenes.mjs",
     "fetch:3d": "node scripts/fetch-3d-assets.mjs",
-    "map:cast": "node scripts/map-quaternius-cast.mjs"
+    "map:cast": "node scripts/map-quaternius-cast.mjs",
+    "make:cast": "blender --background --python scripts/make-cast.py"
   },
   "dependencies": {
     "phaser": "^3.80.1",
