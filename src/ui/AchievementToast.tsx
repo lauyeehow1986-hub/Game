@@ -77,6 +77,7 @@ const GLYPHS: Record<AchievementId, string> = {
   'walk-stemi': '🫀',
   'walk-stroke': '🧠',
   'walk-sepsis': '🦠',
+  'walk-trauma': '🩸',
   'walk-multi-pathway': '🏆',
 };
 

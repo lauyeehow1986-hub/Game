@@ -11,6 +11,7 @@ import {
 import { stemiWalkthrough } from './walkthrough-stemi';
 import { strokeWalkthrough } from './walkthrough-stroke';
 import { sepsisWalkthrough } from './walkthrough-sepsis';
+import { traumaWalkthrough } from './walkthrough-trauma';
 
 /* Small synthetic graph for unit-level tests, so the STEMI content can evolve
  * without breaking traversal coverage. */
@@ -342,6 +343,99 @@ describe('Sepsis walkthrough content', () => {
       const c = sepsisWalkthrough.chapters[id]!;
       const patientBeat = c.beats.find((b) => b.actorId === 'patient');
       expect(patientBeat, `sepsis chapter ${id} missing a patient beat`).toBeTruthy();
+    }
+  });
+});
+
+describe('Major-trauma walkthrough content', () => {
+  it('starts at the onset chapter', () => {
+    expect(traumaWalkthrough.startChapterId).toBe('onset');
+    expect(chapterOf(traumaWalkthrough, 'onset')).toBeTruthy();
+  });
+
+  it('every beat references a known actor', () => {
+    for (const c of Object.values(traumaWalkthrough.chapters)) {
+      for (const b of c.beats) {
+        expect(
+          traumaWalkthrough.actors[b.actorId],
+          `chapter ${c.id} beat at ${b.at} references unknown actor ${b.actorId}`,
+        ).toBeTruthy();
+      }
+    }
+  });
+
+  it('every branch option leads to a defined chapter', () => {
+    for (const c of Object.values(traumaWalkthrough.chapters)) {
+      if (!c.branchPoint) continue;
+      for (const opt of c.branchPoint.options) {
+        expect(
+          traumaWalkthrough.chapters[opt.nextChapterId],
+          `chapter ${c.id} branch option "${opt.label}" → missing chapter ${opt.nextChapterId}`,
+        ).toBeTruthy();
+      }
+    }
+  });
+
+  it('every defaultNextChapterId resolves', () => {
+    for (const c of Object.values(traumaWalkthrough.chapters)) {
+      if (!c.defaultNextChapterId) continue;
+      expect(
+        traumaWalkthrough.chapters[c.defaultNextChapterId],
+        `chapter ${c.id} defaultNextChapterId ${c.defaultNextChapterId} missing`,
+      ).toBeTruthy();
+    }
+  });
+
+  it('beats within a chapter are strictly within its duration', () => {
+    for (const c of Object.values(traumaWalkthrough.chapters)) {
+      for (const b of c.beats) {
+        expect(b.at).toBeGreaterThanOrEqual(0);
+        expect(b.at).toBeLessThanOrEqual(c.durationSec);
+      }
+    }
+  });
+
+  it('carries the three Bandersnatch decision points', () => {
+    const branchy = Object.values(traumaWalkthrough.chapters).filter((c) => c.branchPoint);
+    expect(branchy.map((c) => c.id).sort()).toEqual(['ambulance', 'imaging', 'resus']);
+    for (const c of branchy) {
+      expect(c.branchPoint!.options.length).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it('the off-canonical detours merge back onto the canonical path', () => {
+    expect(traumaWalkthrough.chapters['divert-delay']!.defaultNextChapterId).toBe('resus');
+    expect(traumaWalkthrough.chapters['crystalloid-delay']!.defaultNextChapterId).toBe('imaging');
+    expect(traumaWalkthrough.chapters['ct-delay']!.defaultNextChapterId).toBe('surgery');
+  });
+
+  it('the surgery chapter ships the REBOA (stent-deployment) showpiece', () => {
+    const c = traumaWalkthrough.chapters['surgery']!;
+    const s = c.beats.find((b) => b.showpiece?.kind === 'svg' && b.showpiece.id === 'stent-deployment');
+    expect(s, 'surgery chapter missing the REBOA showpiece').toBeTruthy();
+  });
+
+  it('the canonical path runs onset → backhouse', () => {
+    const ids = canonicalChapterIds(traumaWalkthrough);
+    expect(ids[0]).toBe('onset');
+    expect(ids[ids.length - 1]).toBe('backhouse');
+    expect(ids).toEqual(
+      expect.arrayContaining(['onset', 'ambulance', 'resus', 'imaging', 'surgery', 'icu', 'ward', 'rehab', 'backhouse']),
+    );
+  });
+
+  it('Mr Lim has a distinct internal id from the other patients (so sprites differ)', () => {
+    expect(traumaWalkthrough.actors['patient'].id).not.toBe(stemiWalkthrough.actors['patient'].id);
+    expect(traumaWalkthrough.actors['patient'].id).not.toBe(strokeWalkthrough.actors['patient'].id);
+    expect(traumaWalkthrough.actors['patient'].id).not.toBe(sepsisWalkthrough.actors['patient'].id);
+  });
+
+  it('every clinical chapter stages the patient figure', () => {
+    const clinical = ['ambulance', 'resus', 'imaging', 'surgery', 'icu', 'ward', 'rehab'];
+    for (const id of clinical) {
+      const c = traumaWalkthrough.chapters[id]!;
+      const patientBeat = c.beats.find((b) => b.actorId === 'patient');
+      expect(patientBeat, `trauma chapter ${id} missing a patient beat`).toBeTruthy();
     }
   });
 });

@@ -119,7 +119,7 @@ export function TrendsPanel() {
   const [duelOpen, setDuelOpen] = useState(false);
   const [goalsOpen, setGoalsOpen] = useState(false);
   const [flashcardsOpen, setFlashcardsOpen] = useState(false);
-  const [walkthroughOpen, setWalkthroughOpen] = useState<null | 'stemi' | 'stroke' | 'sepsis'>(null);
+  const [walkthroughOpen, setWalkthroughOpen] = useState<null | 'stemi' | 'stroke' | 'sepsis' | 'trauma'>(null);
   const goalTargets = useLearningGoals((s) => s.targets);
   const setGoalTargets = useLearningGoals((s) => s.setTargets);
   const bookmarks = useBookmarks((s) => s.items);
@@ -556,6 +556,12 @@ export function TrendsPanel() {
           className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-accent/60 text-clinical-accent hover:bg-clinical-accent/10"
         >
           {t('walkthrough.open')} · Sepsis
+        </button>
+        <button
+          onClick={() => setWalkthroughOpen('trauma')}
+          className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-clinical-accent/60 text-clinical-accent hover:bg-clinical-accent/10"
+        >
+          {t('walkthrough.open')} · Major trauma
         </button>
       </div>
 
@@ -1146,8 +1152,10 @@ export function TrendsPanel() {
                 void import('../../lib/walkthrough-stemi').then((m) => setW(m.stemiWalkthrough));
               } else if (which === 'stroke') {
                 void import('../../lib/walkthrough-stroke').then((m) => setW(m.strokeWalkthrough));
-              } else {
+              } else if (which === 'sepsis') {
                 void import('../../lib/walkthrough-sepsis').then((m) => setW(m.sepsisWalkthrough));
+              } else {
+                void import('../../lib/walkthrough-trauma').then((m) => setW(m.traumaWalkthrough));
               }
             }, []);
             if (!w) return null;
