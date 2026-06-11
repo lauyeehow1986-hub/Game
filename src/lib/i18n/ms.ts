@@ -273,6 +273,8 @@ export const ms: Record<string, string> = {
   'certificate.namePrompt': 'Nama untuk dicetak pada sijil (biarkan kosong untuk "Pelajar"):',
   'debrief.print': '📝 Jana taklimat',
   'walkthrough.tag': 'Penelusuran laluan',
+  'walkthrough.machineAssisted': 'bantuan mesin',
+  'walkthrough.machineAssisted.hint': 'Penelusuran ini dipaparkan dalam terjemahan bantuan mesin, menunggu semakan klinikal penutur asli.',
   'walkthrough.open': '🎬 Penelusuran laluan',
   'walkthrough.play': '▶ Main',
   'walkthrough.pause': '⏸ Jeda',

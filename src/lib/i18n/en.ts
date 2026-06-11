@@ -265,6 +265,8 @@ export const en: Record<string, string> = {
   'certificate.namePrompt': 'Name to print on the certificate (leave blank for "Learner"):',
   'debrief.print': '📝 Generate debrief',
   'walkthrough.tag': 'Pathway walkthrough',
+  'walkthrough.machineAssisted': 'machine-assisted',
+  'walkthrough.machineAssisted.hint': 'This walkthrough is shown in a machine-assisted translation, pending native-speaker clinical review.',
   'walkthrough.open': '🎬 Pathway walkthrough',
   'walkthrough.play': '▶ Play',
   'walkthrough.pause': '⏸ Pause',

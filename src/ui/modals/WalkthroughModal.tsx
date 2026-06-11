@@ -1,6 +1,6 @@
 import { Component, lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useFocusTrap } from '../../lib/use-focus-trap';
-import { useT } from '../../lib/i18n';
+import { useT, useLocale } from '../../lib/i18n';
 import {
   beatsAt,
   canonicalChapterIds,
@@ -11,6 +11,11 @@ import {
   type WalkthroughBeat,
   type WalkthroughChapter,
 } from '../../lib/walkthrough';
+import {
+  localiseWalkthrough,
+  WALKTHROUGH_I18N_PACKS,
+  type WalkthroughI18nPack,
+} from '../../lib/walkthrough-i18n';
 import { ActorSprite, INTERACTION_FRAMES, WALK_FRAMES } from '../../lib/sprite-generator';
 import {
   SceneBackground,
@@ -55,9 +60,35 @@ const TEAM_LABEL: Record<string, string> = {
  * loop is provable end-to-end; v9.5 will swap the SVG <g class="stage"> for
  * a Phaser canvas without changing the parent state machine.
  */
-export function WalkthroughModal({ walkthrough, onClose }: Props) {
+export function WalkthroughModal({ walkthrough: rawWalkthrough, onClose }: Props) {
   const t = useT();
+  const locale = useLocale((s) => s.locale);
   const cardRef = useFocusTrap<HTMLDivElement>(true);
+
+  // Localisation overlay: when the UI locale is non-English and a translation
+  // pack exists for this pathway, fetch it (lazily, so the English chunk never
+  // pays for it) and swap the strings. Falls back to English per-string.
+  const [pack, setPack] = useState<WalkthroughI18nPack | null>(null);
+  useEffect(() => {
+    let live = true;
+    const loader = locale !== 'en' ? WALKTHROUGH_I18N_PACKS[rawWalkthrough.id] : undefined;
+    if (!loader) {
+      setPack(null);
+      return;
+    }
+    void loader().then((p) => {
+      if (live) setPack(p);
+    });
+    return () => {
+      live = false;
+    };
+  }, [rawWalkthrough.id, locale]);
+
+  const walkthrough = useMemo(
+    () => localiseWalkthrough(rawWalkthrough, pack, locale),
+    [rawWalkthrough, pack, locale],
+  );
+  const machineAssisted = locale !== 'en' && !!pack?.machineAssisted;
 
   const [chapterId, setChapterId] = useState(walkthrough.startChapterId);
   const [localSec, setLocalSec] = useState(0);
@@ -168,8 +199,16 @@ export function WalkthroughModal({ walkthrough, onClose }: Props) {
         {/* Header — chapter title + chyron + close */}
         <header className="px-5 py-3 border-b border-clinical-border flex items-baseline justify-between gap-3">
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-clinical-subtle">
-              {t('walkthrough.tag')} · {walkthrough.title}
+            <div className="text-[10px] uppercase tracking-wider text-clinical-subtle flex items-center gap-1.5">
+              <span>{t('walkthrough.tag')} · {walkthrough.title}</span>
+              {machineAssisted && (
+                <span
+                  className="px-1 py-px rounded bg-amber-500/15 text-amber-300 normal-case tracking-normal"
+                  title={t('walkthrough.machineAssisted.hint')}
+                >
+                  {t('walkthrough.machineAssisted')}
+                </span>
+              )}
             </div>
             <h2 id="walkthrough-title" className="text-sm font-semibold text-white">
               {chapter.title}

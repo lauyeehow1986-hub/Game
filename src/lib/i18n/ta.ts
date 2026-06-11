@@ -273,6 +273,8 @@ export const ta: Record<string, string> = {
   'certificate.namePrompt': 'சான்றிதழில் அச்சிட பெயர் ("கற்போர்"க்கு காலியாக விடவும்):',
   'debrief.print': '📝 கலந்துரையாடலை உருவாக்கு',
   'walkthrough.tag': 'பாதை நடைபயணம்',
+  'walkthrough.machineAssisted': 'இயந்திர உதவி',
+  'walkthrough.machineAssisted.hint': 'இந்த நடைபயணம் இயந்திர உதவியுடன் மொழிபெயர்க்கப்பட்டு காட்டப்படுகிறது, தாய்மொழி மருத்துவ மதிப்பாய்வு நிலுவையில் உள்ளது.',
   'walkthrough.open': '🎬 பாதை நடைபயணம்',
   'walkthrough.play': '▶ இயக்கு',
   'walkthrough.pause': '⏸ இடைநிறுத்து',

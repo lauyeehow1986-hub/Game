@@ -259,6 +259,8 @@ export const zh: Record<string, string> = {
   'certificate.namePrompt': '打印在证书上的名字(留空则显示"学习者"):',
   'debrief.print': '📝 生成复盘',
   'walkthrough.tag': '诊疗路径演练',
+  'walkthrough.machineAssisted': '机器辅助翻译',
+  'walkthrough.machineAssisted.hint': '本演练以机器辅助翻译呈现,尚待母语临床人员审核。',
   'walkthrough.open': '🎬 完整路径演练',
   'walkthrough.play': '▶ 播放',
   'walkthrough.pause': '⏸ 暂停',
