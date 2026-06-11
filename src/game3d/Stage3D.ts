@@ -74,6 +74,8 @@ export class Stage3D {
   private key: THREE.DirectionalLight;
   private env: Environment3D | null = null;
   private envId: SceneId | null = null;
+  /** Graded sky-backdrop texture for the current scene (disposed on swap). */
+  private backdrop: THREE.Texture | null = null;
   private figures = new Map<string, FigureEntry>();
   private clock = new THREE.Clock();
   private raycaster = new THREE.Raycaster();
@@ -120,7 +122,10 @@ export class Stage3D {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    // Slightly lifted exposure — ACES rolls off the highlights, so the dusk
+    // and clinical scenes both read brighter without clipping. Tuned in the
+    // visual-research loop (docs/visual-research/RESULTS.md, iter 1).
+    this.renderer.toneMappingExposure = 1.15;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     host.appendChild(this.renderer.domElement);
     this.renderer.domElement.style.width = '100%';
@@ -219,6 +224,27 @@ export class Stage3D {
     if (frame.shake) this.shakeT = 0.45;
   }
 
+  /** Build a vertical sky→horizon gradient texture for the scene background.
+   *  Cheap (16×256 canvas), sRGB, regenerated only on scene change. */
+  private makeBackdrop(topHex: string, bottomHex: string): THREE.Texture {
+    const c = document.createElement('canvas');
+    c.width = 16;
+    c.height = 256;
+    const ctx = c.getContext('2d');
+    if (ctx) {
+      const g = ctx.createLinearGradient(0, 0, 0, 256);
+      g.addColorStop(0, topHex);
+      g.addColorStop(0.6, bottomHex);
+      g.addColorStop(1, bottomHex);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 16, 256);
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.needsUpdate = true;
+    return tex;
+  }
+
   private swapEnvironment(id: SceneId) {
     if (this.env) {
       this.scene.remove(this.env.group);
@@ -240,6 +266,17 @@ export class Stage3D {
     this.scene.fog = new THREE.FogExp2(L.fog.color, L.fog.density);
     this.renderer.setClearColor(new THREE.Color(L.clear));
 
+    // Graded sky backdrop. The HDRI lights the set (scene.environment) but
+    // leaves the background a flat dark clear-colour — reading as a black
+    // void. A cheap vertical gradient (sky tone up top → fog tone at the
+    // horizon) restores aerial depth and ties into the fog seamlessly, with
+    // no asset reliance. Rebuilt per scene change (infrequent), disposed on
+    // swap. Browser-only (canvas), so it lives here, not in the headless
+    // environment builders.
+    if (this.backdrop) this.backdrop.dispose();
+    this.backdrop = this.makeBackdrop(L.hemi.sky, L.fog.color);
+    this.scene.background = this.backdrop;
+
     // async IBL upgrade: when public/3d/hdr/{id}.hdr is present, the
     // prefiltered envmap takes over PBR specular + ambient response.
     // On miss the per-scene preset lights stay in charge — no behaviour
@@ -254,7 +291,7 @@ export class Stage3D {
         // irradiance, so the constant hemisphere fill is now redundant and
         // would only flatten contrast. Fade it to a small residual; restore
         // the full preset value on a miss (preset lights stay in charge).
-        this.hemi.intensity = entry ? presetHemiIntensity * 0.3 : presetHemiIntensity;
+        this.hemi.intensity = entry ? presetHemiIntensity * 0.42 : presetHemiIntensity;
       });
     }
   }
@@ -327,6 +364,7 @@ export class Stage3D {
     for (const entry of this.figures.values()) entry.figure.dispose();
     this.figures.clear();
     if (this.env) disposeGroup(this.env.group);
+    this.backdrop?.dispose();
     this.postFx?.dispose();
     this.renderer.dispose();
     this.renderer.domElement.remove();
