@@ -194,7 +194,7 @@ export function WalkthroughModal({ walkthrough: rawWalkthrough, onClose }: Props
     >
       <div
         ref={cardRef}
-        className="bg-clinical-panel border border-clinical-border rounded-lg max-w-5xl w-full max-h-[92vh] overflow-hidden shadow-2xl flex flex-col"
+        className="bg-clinical-panel border border-clinical-border rounded-lg max-w-5xl w-full h-[88vh] max-h-[88vh] overflow-hidden shadow-2xl flex flex-col"
       >
         {/* Header — chapter title + chyron + close */}
         <header className="px-5 py-3 border-b border-clinical-border flex items-baseline justify-between gap-3">

@@ -45,3 +45,17 @@ depth that ties into the existing fog. Verified via Playwright/preview at
 **Next biggest gaps:** E (stage is a thin letterbox — the subject is tiny) and
 C (street is sparse). iter 2 → enlarge the stage frame / tighten the hero
 camera so the subject fills more of the frame.
+
+| 2 | walkthrough modal `max-h-[92vh]` → definite `h-[88vh]` so the `flex-1` stage stops collapsing | 4 | 5 | 5 | 4 | 8 | 4 | 5 | 5.0 | ✅ |
+
+**iter 2 notes:** the root cause of the thin letterbox: the modal used a
+*max-height* (not a definite height), so `flex-1` on the stage had nothing to
+fill against and collapsed to ~146 px. A definite `h-[88vh]` gives the stage
+the leftover space — the 3D canvas went **146 px → 493 px tall** (3.4×).
+Suddenly the street reads as a real place: the HDB building facade, the SCDF
+ambulance, both figures and the iter-1 graded sky are all clearly framed where
+before it was a black strip. Controls stay visible (not clipped). No console
+errors, tsc clean, 25 modal-a11y tests pass.
+**Next biggest gaps:** G (no post-grade — SSAO/bloom/vignette default OFF), D
+(characters read blocky), A (dusk still a touch dark). iter 3 → default the
+PostFX cinematic grade ON for the 3D walkthrough.
