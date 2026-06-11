@@ -84,11 +84,13 @@ describe('contentCoverage', () => {
   });
 
   it('ms/ta coverage floor — the v10.x track only moves up', () => {
-    // Primary-care / public-health cases first, then the acute flagship
-    // (stemi-acute) joined the fully-localised set. Raise these floors as
-    // more cases are translated; never lower.
-    expect(contentCoverage(listCases(), 'ms').localisedCases).toBeGreaterThanOrEqual(3);
-    expect(contentCoverage(listCases(), 'ta').localisedCases).toBeGreaterThanOrEqual(3);
+    // The machine-assisted ms/ta case track ratchets up case-by-case:
+    // primary-care first (paeds-vaccine-hesitancy, agewell-hpc), then the
+    // acute flagship (stemi-acute), then the elective/acute long tail
+    // (elective-knee-tkr, stemi-rural-thrombolysis). Raise as more land;
+    // never lower. Native-speaker review still gates "reviewed" status.
+    expect(contentCoverage(listCases(), 'ms').localisedCases).toBeGreaterThanOrEqual(5);
+    expect(contentCoverage(listCases(), 'ta').localisedCases).toBeGreaterThanOrEqual(5);
   });
 });
 
