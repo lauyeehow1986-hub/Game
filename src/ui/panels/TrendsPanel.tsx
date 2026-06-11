@@ -46,6 +46,9 @@ const AnalyticsModal = lazy(() =>
 const DuelModal = lazy(() =>
   import('../modals/DuelModal').then((m) => ({ default: m.DuelModal })),
 );
+const ChallengeModal = lazy(() =>
+  import('../modals/ChallengeModal').then((m) => ({ default: m.ChallengeModal })),
+);
 const FlashcardsModal = lazy(() =>
   import('../modals/FlashcardsModal').then((m) => ({ default: m.FlashcardsModal })),
 );
@@ -117,6 +120,7 @@ export function TrendsPanel() {
   const [educatorOpen, setEducatorOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [duelOpen, setDuelOpen] = useState(false);
+  const [challengeOpen, setChallengeOpen] = useState(false);
   const [goalsOpen, setGoalsOpen] = useState(false);
   const [flashcardsOpen, setFlashcardsOpen] = useState(false);
   const [walkthroughOpen, setWalkthroughOpen] = useState<null | 'stemi' | 'stroke' | 'sepsis' | 'trauma'>(null);
@@ -506,6 +510,13 @@ export function TrendsPanel() {
         className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-amber-500/40 bg-amber-500/5 text-amber-300 hover:bg-amber-500/15"
       >
         {t('duel.open')}
+      </button>
+
+      <button
+        onClick={() => setChallengeOpen(true)}
+        className="tap-target w-full text-[11px] px-2 py-1.5 rounded border border-amber-500/40 bg-amber-500/5 text-amber-300 hover:bg-amber-500/15"
+      >
+        {t('challenge.open')}
       </button>
 
       <button
@@ -1134,6 +1145,9 @@ export function TrendsPanel() {
         )}
         {duelOpen && (
           <DuelModal pool={catalogue} onClose={() => setDuelOpen(false)} />
+        )}
+        {challengeOpen && (
+          <ChallengeModal pool={catalogue} onClose={() => setChallengeOpen(false)} />
         )}
         {flashcardsOpen && (() => {
           const playedIds = Object.keys(bestScores);
