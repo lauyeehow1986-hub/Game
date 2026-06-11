@@ -64,10 +64,13 @@ describe('contentCoverage', () => {
   it('zh coverage floor — authored bilingual, must not regress', () => {
     const cov = contentCoverage(listCases(), 'zh');
     expect(cov.cases).toBeGreaterThan(30);
-    // Honesty note: zh was long advertised as "every case" but measures
-    // ~93.7% of strings — the coverage meter exists precisely to surface
-    // this. Floor it so it never regresses; raise as gaps are closed.
-    expect(cov.stringRatio).toBeGreaterThan(0.93);
+    // History: zh was long advertised as "every case" but the meter exposed
+    // it at ~93.7% — the one untranslated case was stemi-acute, whose later
+    // pathway nodes used plain English strings. That gap is now closed: zh
+    // carries every translatable string in every case. Floor at full parity;
+    // this only ever ratchets up.
+    expect(cov.stringRatio).toBe(1);
+    expect(cov.caseRatio).toBe(1);
   });
 
   it('reports ms/ta partial coverage without throwing', () => {
@@ -81,10 +84,11 @@ describe('contentCoverage', () => {
   });
 
   it('ms/ta coverage floor — the v10.x track only moves up', () => {
-    // First slice shipped in this session: primary-care / public-health
-    // cases. Raise these floors as more cases are translated; never lower.
-    expect(contentCoverage(listCases(), 'ms').localisedCases).toBeGreaterThanOrEqual(2);
-    expect(contentCoverage(listCases(), 'ta').localisedCases).toBeGreaterThanOrEqual(2);
+    // Primary-care / public-health cases first, then the acute flagship
+    // (stemi-acute) joined the fully-localised set. Raise these floors as
+    // more cases are translated; never lower.
+    expect(contentCoverage(listCases(), 'ms').localisedCases).toBeGreaterThanOrEqual(3);
+    expect(contentCoverage(listCases(), 'ta').localisedCases).toBeGreaterThanOrEqual(3);
   });
 });
 
