@@ -7,20 +7,24 @@ full version-by-version log.
 
 ## At a glance
 
-The project is a Singapore healthcare-pathway training game with two main
-arcs running in parallel:
+The project is a Singapore healthcare-pathway training game with three main
+arcs:
 
-1. **Multilingual case content** (en + zh near-parity; ms + ta UI chrome
-   complete; ms + ta case-content track restarted with a first translated
-   slice, machine-assisted + flagged, awaiting native review).
+1. **Multilingual case content** (en + zh now at **100%** case parity; ms +
+   ta UI chrome complete; ms + ta case-content track at 5/38, machine-assisted
+   + flagged, awaiting native review). Walkthrough strings now localise too
+   via an overlay pack (sepsis shipped in zh/ms/ta, flagged machine-assisted).
 2. **Visual pathway walkthrough** — a Bandersnatch-style scrubbable
-   cinematic of full patient journeys, started v9.4, now spans 18 minor
-   versions through v9.18 (three renderers: SVG, Phaser canvas, Three.js
-   3D with populated CC0 assets + an opt-in WebGPU β backend; three
-   pathways: STEMI, stroke, sepsis).
+   cinematic of full patient journeys, started v9.4, now through v11.0 (three
+   renderers: SVG, Phaser canvas, Three.js 3D with populated CC0 assets, a
+   headless MakeHuman/MPFB photoreal-cast generator, and an opt-in WebGPU β
+   backend; **four pathways: STEMI, stroke, sepsis, major trauma**).
+3. **Async head-to-head** — a PWA-safe "challenge a friend" share-code: a
+   seeded paper + the challenger's score in a short offline token, replayed
+   head-to-head with no server.
 
 Current branch: `claude/healthcare-pathway-game-X7oRQ` ·
-**769 tests passing**, type-check clean, production build clean.
+**820 tests passing**, type-check clean, production build clean.
 
 ---
 
