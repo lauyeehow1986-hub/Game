@@ -283,6 +283,21 @@ function buildKopitiam(): Environment3D {
 function buildStreet(): Environment3D {
   const g = new THREE.Group();
   floor(g, '#3f4650', '#c8cdd4'); // asphalt + lane markings
+  // Skyline behind the main block — staggered HDB towers at varying heights
+  // and depths give the now-visible gradient sky a real city silhouette.
+  for (const [bx, bw, bh, bz, tone] of [
+    [-15, 9, 22, -23, '#3a4350'], [14, 11, 27, -25, '#333b47'], [2, 8, 18, -21, '#404a57'],
+  ] as const) {
+    const tower = box(bw, bh, 2, std(tone, 0.95), bx, bh / 2, bz, false);
+    g.add(tower);
+    for (let wy = 3; wy <= bh - 2; wy += 2.4) {
+      for (let wx = -bw / 2 + 1; wx <= bw / 2 - 1; wx += 2.2) {
+        if ((Math.round(wx) * 7 + Math.round(wy) * 13 + bx) % 3 === 0) {
+          g.add(box(0.9, 0.8, 0.1, emissive('#ffdf9e', 0.5), bx + wx, wy, bz + 1.05, false));
+        }
+      }
+    }
+  }
   // HDB block facade with lit windows
   const facade = box(34, 14, 0.5, std('#aab4be', 0.95), 0, 7, -16.5, false);
   g.add(facade);
@@ -290,6 +305,19 @@ function buildStreet(): Environment3D {
     for (let fy = 2.5; fy <= 12; fy += 2.2) {
       if ((fx * 7 + fy * 13) % 3 < 2) g.add(box(1.1, 0.9, 0.1, emissive('#ffe9b0', 0.7), fx, fy, -16.2, false));
     }
+  }
+  // kerb line + double-yellow no-parking marking along the near road edge
+  g.add(box(40, 0.18, 0.5, std('#9aa3ad', 0.85), 0, 0.09, 1.6, false));
+  g.add(box(40, 0.02, 0.08, emissive('#f4c430', 0.5), 0, 0.2, 1.35, false));
+  // roadside rain-tree silhouettes (Singapore streetscape)
+  for (const [tx, tz] of [[-11, -2], [10.5, -12]] as const) {
+    const tree = new THREE.Group();
+    tree.add(cylinder(0.22, 0.32, 4.2, std('#4a3b2e', 0.9), 0, 2.1, 0, 7));
+    const canopy = new THREE.Mesh(new THREE.SphereGeometry(2.4, 10, 8), std('#2f5233', 0.95));
+    canopy.position.y = 4.8; canopy.scale.set(1.3, 0.8, 1.3); canopy.castShadow = true;
+    tree.add(canopy);
+    tree.position.set(tx, 0, tz);
+    g.add(tree);
   }
   // SCDF ambulance — white box van, red stripe, beacon
   const amb = new THREE.Group();
@@ -310,9 +338,14 @@ function buildStreet(): Environment3D {
   amb.position.set(5.5, 0, -7.5);
   amb.rotation.y = -0.25;
   g.add(amb);
-  // street lamp
-  g.add(cylinder(0.07, 0.09, 6.5, std('#52525b', 0.6), -7.5, 3.25, -10, 8));
-  g.add(box(1.2, 0.12, 0.4, emissive('#ffedb8', 1.8), -7.0, 6.45, -10, false));
+  // street lamps with warm glow pools, staggered down the road for depth
+  for (const [lx, lz] of [[-7.5, -10], [8.5, -13], [-9.5, -2]] as const) {
+    g.add(cylinder(0.07, 0.09, 6.5, std('#52525b', 0.6), lx, 3.25, lz, 8));
+    g.add(box(1.2, 0.12, 0.4, emissive('#ffd27a', 2.0), lx + 0.5, 6.45, lz, false));
+    const lamp = new THREE.PointLight('#ffcaa0', 10, 13, 1.6);
+    lamp.position.set(lx + 0.5, 6.2, lz);
+    g.add(lamp);
+  }
   trolley(g, -2.5, -4.5, 0.1);
   g.userData.animate = (t: number) => {
     const on = Math.sin(t * 7) > 0;
@@ -322,10 +355,12 @@ function buildStreet(): Environment3D {
   return {
     group: g,
     lighting: {
-      hemi: { sky: '#aebdd4', ground: '#2c3240', intensity: 0.7 },
-      key: { color: '#cfe0f4', intensity: 1.1, pos: [-6, 10, 7] },
-      fog: { color: '#39404e', density: 0.015 },
-      clear: '#202633',
+      // 17:50 SGT golden hour — warm key + amber haze, cool-blue ground fill
+      // in the shadows so the red beacon and warm lamps read against dusk.
+      hemi: { sky: '#e8c79a', ground: '#2b3340', intensity: 0.8 },
+      key: { color: '#ffcf94', intensity: 1.5, pos: [-7, 8, 6] },
+      fog: { color: '#5a4a3c', density: 0.014 },
+      clear: '#2c2a2e',
     },
   };
 }

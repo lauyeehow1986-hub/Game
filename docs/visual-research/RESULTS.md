@@ -86,3 +86,19 @@ for every scene (clinic tile, street asphalt, MRT, ward). No console errors,
 tsc clean, 61 game3d tests pass.
 **Next biggest gaps:** D (characters read simple up close) and C (sets sparse
 in places). iter 5 → richer characters or denser story-specific set dressing.
+
+| 5 | enrich the dusk street hero: warm golden-hour grade + 3 lamp light-pools + roadside rain-trees + kerb/double-yellow + staggered skyline towers | 6 | 7 | 7 | 5 | 8 | 7 | 8 | 6.9 | ✅ |
+
+**iter 5 notes:** the opening street (the first 3D shot a learner sees) was
+cold-blue and sparse. Regraded to 17:50 SGT golden hour (warm key + amber
+fog, cool-blue shadow fill so the red beacon still pops), added three street
+lamps each with a warm point-light pool, two roadside rain-tree silhouettes, a
+kerb + double-yellow marking, and three staggered HDB skyline towers with lit
+windows so the now-visible gradient sky carries a real city silhouette.
+Verified via Playwright/preview at the SCDF-on-scene beat: the orange paramedic,
+ambulance and lit facade sit in warm dusk light — reads as an authentic
+Singapore street emergency, not a cold void. No console errors, tsc clean, 61
+game3d tests pass. (Scene-specific; other scenes already lifted by iters 1-4.)
+**Next biggest gaps:** D (low-poly cast up close), and the same enrichment pass
+for the other hero scenes (resus already strong). iter 6 → character fidelity,
+or carry the warm-accent-lighting idea into another scene.
