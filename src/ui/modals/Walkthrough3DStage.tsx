@@ -38,7 +38,11 @@ export default function Walkthrough3DStage({
   const onPickRef = useRef(onPickActor);
   onPickRef.current = onPickActor;
   const prevLead = useRef<string>('');
-  const [postFx, setPostFx] = useState(false);
+  // Cinematic grade (SSAO + bloom + vignette + SMAA) ON by default — the
+  // walkthrough is a "watch", not an interactive game loop, so the ~15-25%
+  // frame cost buys a much richer image. WebGL-only; the toggle still lets a
+  // low-end device drop it. (Visual-research loop iter 3.)
+  const [postFx, setPostFx] = useState(true);
   // WebGPU opt-in (v9.18): only meaningful where navigator.gpu exists;
   // Stage3D.create falls back to WebGL whenever adapter/init fails.
   const [webgpu, setWebgpu] = useState(() => isWebGPUOptedIn() && isWebGPUSupported());

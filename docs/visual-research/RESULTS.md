@@ -59,3 +59,17 @@ errors, tsc clean, 25 modal-a11y tests pass.
 **Next biggest gaps:** G (no post-grade — SSAO/bloom/vignette default OFF), D
 (characters read blocky), A (dusk still a touch dark). iter 3 → default the
 PostFX cinematic grade ON for the 3D walkthrough.
+
+| 3 | default the PostFX grade (SSAO + bloom + vignette + SMAA) ON for the 3D walkthrough | 5 | 5 | 5 | 5 | 8 | 5 | 8 | 5.9 | ✅ |
+
+**iter 3 notes:** the walkthrough is a "watch", not an interactive game loop,
+so the ~15-25% frame cost of PostFX buys a much richer image; the toggle still
+lets a low-end device drop it. Verified across two scene types via
+Playwright/preview: in the **dusk street** the vignette frames and SSAO grounds
+the figures without over-darkening (iter-1 exposure lift carries it); in the
+**bright trauma bay** the resus equipment + colour-scrubbed cast read as a real
+room, grounded by contact shadows. No console errors (only pre-existing three
+0.184 deprecation warnings — Clock/RGBELoader/PCFSoftShadowMap), tsc clean.
+**Next biggest gaps:** D (characters still read simple up close), C (sets could
+be denser/more story-specific), F (ground is a flat slab). iter 4 → ground
+material / set-dressing density, or richer characters.
