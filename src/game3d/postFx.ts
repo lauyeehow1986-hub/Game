@@ -20,6 +20,8 @@ import {
   VignetteEffect,
   SMAAEffect,
   NormalPass,
+  BrightnessContrastEffect,
+  HueSaturationEffect,
 } from 'postprocessing';
 
 export interface PostFxPipeline {
@@ -60,9 +62,15 @@ export function buildPostFx(
     offset: 0.35,
     darkness: 0.55,
   });
+  // Cinematic colour grade — a gentle contrast + saturation push so every
+  // scene gets a filmic finish instead of a flat-lit look. Applied after
+  // bloom (grades the composited image) and before the vignette/AA. Cheap:
+  // two fullscreen shader ops folded into the same EffectPass.
+  const grade = new BrightnessContrastEffect({ brightness: 0.01, contrast: 0.14 });
+  const colour = new HueSaturationEffect({ saturation: 0.14 });
   const smaa = new SMAAEffect();
 
-  composer.addPass(new EffectPass(camera, ssao, bloom, vignette, smaa));
+  composer.addPass(new EffectPass(camera, ssao, bloom, grade, colour, vignette, smaa));
 
   return {
     composer,

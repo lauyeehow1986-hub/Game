@@ -102,3 +102,17 @@ game3d tests pass. (Scene-specific; other scenes already lifted by iters 1-4.)
 **Next biggest gaps:** D (low-poly cast up close), and the same enrichment pass
 for the other hero scenes (resus already strong). iter 6 → character fidelity,
 or carry the warm-accent-lighting idea into another scene.
+
+| 6 | cinematic colour grade in PostFX — BrightnessContrast (+0.14) + HueSaturation (+0.14) after bloom | 6 | 7 | 7 | 6 | 8 | 7 | 9 | 7.1 | ✅ |
+
+**iter 6 notes:** the procedural `Humanoid` is already detailed (capsule limbs,
+glasses/beard/coat/apron) and the local cast is smooth Quaternius, so character
+meshes weren't the cheap win. Instead added a gentle colour grade to the
+EffectPass — two fullscreen ops folded into the existing pass, so near-zero
+cost, and it lifts **every** scene at once. Verified in the trauma bay: the
+yellow/purple/red scrubs and the red crash cart now pop with punchier contrast
+where they read washed-out before; no clipping/over-saturation. Works on the
+deployed site too (PostFX is the WebGL default). No console errors, tsc clean.
+**Next biggest gaps:** D (cast still low-poly up close), C (clinical sets could
+gain a warm overhead-light pool + more equipment). iter 7 → clinical-scene
+light pools / equipment density, or a cleaner figure ground-shadow.
