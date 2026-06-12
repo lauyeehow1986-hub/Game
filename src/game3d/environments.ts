@@ -92,8 +92,46 @@ function cylinder(
 }
 
 /** Floor slab + optional accent strips (tile joints / lane markings). */
+/** Node-safe procedural ground texture: subtle per-texel speckle plus faint
+ *  tile/grout seams, so the floor reads as a real surface (clinic tile, street
+ *  asphalt) instead of a flat slab under PostFX + IBL. Uses a DataTexture (raw
+ *  bytes) rather than a canvas, so the headless environment-builder tests still
+ *  construct cleanly. Bytes are written in sRGB (parsed straight from the hex)
+ *  to match the SRGBColorSpace tag without a linear double-convert. */
+function groundTexture(hex: string, tilePx = 32): THREE.DataTexture {
+  const size = 128;
+  const r0 = parseInt(hex.slice(1, 3), 16);
+  const g0 = parseInt(hex.slice(3, 5), 16);
+  const b0 = parseInt(hex.slice(5, 7), 16);
+  const data = new Uint8Array(size * size * 4);
+  const noise = (x: number, y: number) => {
+    const s = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+    return s - Math.floor(s);
+  };
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const i = (y * size + x) * 4;
+      let f = 0.92 + noise(x, y) * 0.16; // ±8% speckle
+      if (x % tilePx < 1 || y % tilePx < 1) f *= 0.8; // grout seam
+      data[i] = Math.min(255, r0 * f);
+      data[i + 1] = Math.min(255, g0 * f);
+      data[i + 2] = Math.min(255, b0 * f);
+      data[i + 3] = 255;
+    }
+  }
+  const tex = new THREE.DataTexture(data, size, size);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(6, 5);
+  tex.needsUpdate = true;
+  return tex;
+}
+
 function floor(group: THREE.Group, color: string, stripColor?: string) {
-  const slab = new THREE.Mesh(new THREE.PlaneGeometry(40, 30), std(color, 0.9));
+  const mat = std(color, 0.82);
+  mat.map = groundTexture(color);
+  const slab = new THREE.Mesh(new THREE.PlaneGeometry(40, 30), mat);
   slab.rotation.x = -Math.PI / 2;
   slab.position.set(0, 0, -7);
   slab.receiveShadow = true;

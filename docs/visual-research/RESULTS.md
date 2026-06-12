@@ -73,3 +73,16 @@ room, grounded by contact shadows. No console errors (only pre-existing three
 **Next biggest gaps:** D (characters still read simple up close), C (sets could
 be denser/more story-specific), F (ground is a flat slab). iter 4 → ground
 material / set-dressing density, or richer characters.
+
+| 4 | procedural ground texture (speckle + tile/grout seams) on every floor, roughness 0.9→0.82 | 5 | 6 | 6 | 5 | 8 | 7 | 8 | 6.4 | ✅ |
+
+**iter 4 notes:** `groundTexture()` builds a node-safe `DataTexture` (raw sRGB
+bytes, not a canvas — so the headless builders still construct) with ±8 %
+speckle and faint tile/grout seams, tiled 6×5 across the 40×30 floor, applied
+as the slab `map` with lowered roughness so the IBL reflects. Verified in the
+trauma bay: the floor now reads as a real tiled clinical surface whose seams
+recede in perspective (adding depth + scale), where it was a flat slab. Works
+for every scene (clinic tile, street asphalt, MRT, ward). No console errors,
+tsc clean, 61 game3d tests pass.
+**Next biggest gaps:** D (characters read simple up close) and C (sets sparse
+in places). iter 5 → richer characters or denser story-specific set dressing.
