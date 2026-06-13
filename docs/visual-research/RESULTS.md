@@ -146,3 +146,18 @@ Measured via Playwright/preview: at 900px the canvas is now 606×457 side-by-sid
 (was ~50/50). No console errors, tsc clean, 25 modal-a11y tests pass.
 **Next biggest gaps:** D (low-poly cast), per-scene prop/equipment density,
 subtle idle life (ambient motion). iter 9 → prop density or ambient motion.
+
+| 9 | gentle idle camera "breathing" — slow ≤7cm parallax sway under the speaker dolly + shock shake | 8 | 7 | 7 | 6 | 9 | 7 | 9 | 7.6 | ✅ |
+
+**iter 9 notes:** between beats the camera was frozen (it only dollied toward
+the speaker / shook on shock beats), so static moments read as a diorama. Added
+a tiny handheld sway (two incommensurate periods ~14 s / ~19 s, ≤7 cm) on the
+camera position against the fixed look target — gentle parallax that layers
+under the existing dolly/shake without fighting them. *Measurement honesty:* a
+still screenshot can't show motion, so this is verified by-construction (a
+bounded sine oscillation added every frame) + render integrity (framing intact
+at the offset, no console errors, tsc clean). Easy to tune/revert if it ever
+reads as distracting.
+**Next biggest gaps:** D (low-poly cast up close), per-scene prop/equipment
+density, animated medical screens (ECG trace). iter 10 → prop density or a live
+vitals-monitor trace.

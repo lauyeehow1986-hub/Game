@@ -323,6 +323,14 @@ export class Stage3D {
       camX += (Math.random() - 0.5) * a;
       camY += (Math.random() - 0.5) * a;
     }
+    // Idle "breathing" — a tiny, slow handheld sway against the fixed look
+    // target adds gentle parallax so every shot reads alive instead of a
+    // frozen diorama. Sub-frame amplitude (≤7 cm), two incommensurate
+    // periods (~14 s / ~19 s) so it never visibly repeats; layers under the
+    // speaker dolly and the shock shake without fighting them.
+    const breath = t * 0.45;
+    camX += Math.sin(breath) * 0.07;
+    camY += Math.sin(breath * 0.73 + 1.1) * 0.05;
     this.camera.position.set(camX, camY, CAMERA.pos.z);
     this.camera.lookAt(this.lookX, CAMERA.lookAt.y, CAMERA.lookAt.z);
 
