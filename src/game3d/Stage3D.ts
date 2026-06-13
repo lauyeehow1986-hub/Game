@@ -19,6 +19,7 @@
  * environments.ts instead.
  */
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import type { SceneId } from '../lib/scenery';
 import type {
   BeatExpression,
@@ -76,6 +77,9 @@ export class Stage3D {
   private envId: SceneId | null = null;
   /** Scrolling emissive screens (live ECG monitors), advanced each tick. */
   private scrollScreens: { tex: THREE.Texture; speed: number }[] = [];
+  /** Procedural studio IBL used when no per-scene HDRI is on disk (the
+   *  deployed site / pre-`fetch:3d`). Built once, reused across scenes. */
+  private fallbackEnv: THREE.Texture | null = null;
   /** Graded sky-backdrop texture for the current scene (disposed on swap). */
   private backdrop: THREE.Texture | null = null;
   private figures = new Map<string, FigureEntry>();
@@ -301,14 +305,35 @@ export class Stage3D {
       const presetHemiIntensity = L.hemi.intensity;
       loadSceneEnvironment(id, this.renderer).then((entry) => {
         if (this.disposed || this.envId !== id) return;
-        applyEnvironment(this.scene, entry);
-        // With an HDRI present the PMREM env supplies directional diffuse
-        // irradiance, so the constant hemisphere fill is now redundant and
-        // would only flatten contrast. Fade it to a small residual; restore
-        // the full preset value on a miss (preset lights stay in charge).
-        this.hemi.intensity = entry ? presetHemiIntensity * 0.42 : presetHemiIntensity;
+        if (entry) {
+          // Per-scene HDRI present: it supplies directional diffuse irradiance,
+          // so fade the now-redundant constant hemisphere fill for contrast.
+          applyEnvironment(this.scene, entry);
+          this.hemi.intensity = presetHemiIntensity * 0.42;
+        } else {
+          // No HDRI on disk (deployed site / pre-`fetch:3d`). Rather than leave
+          // materials with no image-based lighting (flat, no specular), fall
+          // back to a procedural studio environment so metal/glass/floors get
+          // real reflections + ambient everywhere — asset-free.
+          this.scene.environment = this.fallbackEnvironment();
+          this.scene.environmentIntensity = 0.6;
+          this.hemi.intensity = presetHemiIntensity * 0.7;
+        }
       });
     }
+  }
+
+  /** Build (once) a PMREM-prefiltered procedural studio IBL from three's
+   *  RoomEnvironment — a neutral lit room that gives PBR materials specular
+   *  reflections + ambient response without any downloaded HDRI. */
+  private fallbackEnvironment(): THREE.Texture {
+    if (!this.fallbackEnv) {
+      const pmrem = new THREE.PMREMGenerator(this.renderer);
+      const room = new RoomEnvironment();
+      this.fallbackEnv = pmrem.fromScene(room, 0.04).texture;
+      pmrem.dispose();
+    }
+    return this.fallbackEnv;
   }
 
   private tick() {
@@ -393,6 +418,7 @@ export class Stage3D {
     this.figures.clear();
     if (this.env) disposeGroup(this.env.group);
     this.backdrop?.dispose();
+    this.fallbackEnv?.dispose();
     this.postFx?.dispose();
     this.renderer.dispose();
     this.renderer.domElement.remove();

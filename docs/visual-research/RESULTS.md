@@ -192,3 +192,20 @@ console errors, tsc clean, 61 game3d tests pass.
 **Next biggest gaps:** D (low-poly cast up close) is now the dominant ceiling
 on the score; the sets/lighting/grade/motion are strong. iter 12 → a figure
 ground-shadow / proportion tweak, or carry density to another scene.
+
+| 12 | procedural RoomEnvironment IBL fallback when no HDRI is on disk (the deployed site) | 8 | 7 | 9 | 7 | 9 | 8 | 9 | 8.1 | ✅ |
+
+**iter 12 notes:** the biggest *deployed-site* gap — HDRIs are gitignored
+(`pnpm fetch:3d`), so the live site had **no image-based lighting** and every
+PBR material read flat (no specular, no ambient bounce). Now, when
+`loadSceneEnvironment` misses, Stage3D falls back to a PMREM-prefiltered
+three `RoomEnvironment` (a neutral lit studio, asset-free) at
+`environmentIntensity 0.6` with the hemisphere fill kept at 0.7. Verified both
+paths via Playwright/preview by temporarily moving `public/3d/hdr/` aside: the
+no-HDRI resus now renders **well-lit and dimensional** (metal/glass/floor/cast
+all gain reflections + ambient) instead of flat; restored the HDRIs and the
+per-scene mood path still renders. The biggest lift here lands on the deployed
+site, which most users see. No console errors, tsc clean, 61 game3d tests pass.
+**Next biggest gaps:** D (cast geometry up close) — the genuine remaining
+ceiling for a stylized-procedural renderer. iter 13 → figure proportion/material
+polish, or another scene's set density.
