@@ -594,6 +594,20 @@ function buildImaging(): Environment3D {
   gantry.add(box(3.4, 0.5, 1.4, clearcoatMetal('#e2e8f0', 0.4), 0, -1.75, 0));
   gantry.position.set(0, 2.0, -11);
   g.add(gantry);
+  // glowing scanner light-ring around the bore opening (the iconic CT/MRI
+  // look) + a soft cool pool so the patient table catches the scanner glow.
+  const lightRing = new THREE.Mesh(
+    new THREE.TorusGeometry(0.98, 0.07, 10, 32),
+    new THREE.MeshStandardMaterial({
+      color: '#0a0f16', emissive: '#bfe4ff', emissiveIntensity: 2.6,
+      roughness: 0.4, toneMapped: false,
+    }),
+  );
+  lightRing.position.set(0, 2.0, -10.2);
+  g.add(lightRing);
+  const scanGlow = new THREE.PointLight('#cdeaff', 14, 7.5, 1.8);
+  scanGlow.position.set(0, 2.0, -9.4);
+  g.add(scanGlow);
   // sliding patient table into the bore
   g.add(box(0.75, 0.10, 3.6, std('#dbeafe', 0.8), 0, 1.05, -8.2));
   g.add(box(0.5, 0.95, 1.2, std('#cbd5e1', 0.6), 0, 0.5, -7.2));

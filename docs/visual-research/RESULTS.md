@@ -226,3 +226,17 @@ tsc clean, 61 game3d tests pass.
 **Next biggest gaps:** rubric is saturating ~8.2 for the stylized-procedural
 ceiling; D (cast up close) needs the photoreal GLB cast to move further. iter 14
 → another shared scene's hero lighting (imaging/ward), or soft-shadow quality.
+
+| 14 | glowing CT/MRI scanner light-ring + scan glow in the imaging suite (shared by stroke/sepsis/trauma) | 8 | 7 | 9 | 7 | 9 | 8 | 9 | 8.3 | ✅ |
+
+**iter 14 notes:** the scanner gantry had a dark, lifeless bore. Added an
+emissive cyan-white light-ring around the bore opening (`toneMapped:false` so it
+stays CRT-bright + blooms) plus a soft cool PointLight pool so the patient table
+catches the scanner glow — the iconic CT/MRI look. Verified in the trauma
+"To theatre or to the scanner?" chapter via Playwright/preview: the bore now
+glows like a real scanner; striking hero moment for the imaging beat. Shared by
+the stroke / sepsis / trauma imaging chapters. No console errors, tsc clean, 61
+game3d tests pass.
+**Next biggest gaps:** the procedural-renderer ceiling (~8.3) is close; further
+jumps need the photoreal GLB cast (D) or authored environment art. iter 15 →
+ward/kopitiam hero lighting, or soft-shadow quality across all scenes.
