@@ -240,3 +240,19 @@ game3d tests pass.
 **Next biggest gaps:** the procedural-renderer ceiling (~8.3) is close; further
 jumps need the photoreal GLB cast (D) or authored environment art. iter 15 →
 ward/kopitiam hero lighting, or soft-shadow quality across all scenes.
+
+| 15 | VSM soft shadows (real penumbra) across all scenes — replaces hard PCF | 8 | 7 | 9 | 7 | 9 | 8 | 9 | 8.4 | ✅ |
+
+**iter 15 notes:** three downgrades the deprecated `PCFSoftShadowMap` to hard
+PCF, so every figure/prop cast a crisp-edged shadow. Switched to
+`VSMShadowMap` with `radius 4` + `blurSamples 16`, tight shadow-camera
+near/far (1/42) for depth precision, and `normalBias 0.03` to kill VSM
+peter-panning. Verified in the dusk street and bright ward via
+Playwright/preview: contact shadows now have a soft penumbra that grounds the
+figures naturally, with **no VSM artifacts** (no light-bleed, banding, or
+detachment). Bonus: the `PCFSoftShadowMap` deprecation console-warning is gone.
+Subtle but real, and it lifts every scene at once. No console errors, tsc clean.
+**Next biggest gaps:** the stylized-procedural ceiling (~8.4) is essentially
+reached on lighting/atmosphere; the remaining headroom is character-mesh
+fidelity (the photoreal GLB cast) + authored art. iter 16 → kopitiam/clinic
+hero polish, or a volumetric light-shaft accent.

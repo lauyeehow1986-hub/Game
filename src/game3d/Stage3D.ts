@@ -126,7 +126,10 @@ export class Stage3D {
     this.backend = backend;
     this.renderer = renderer ?? new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // VSM (variance) shadows give a real blur radius — three downgrades the
+    // deprecated PCFSoftShadowMap to hard PCF, so figures/props were cast with
+    // crisp edges. VSM softens every contact shadow across all scenes.
+    this.renderer.shadowMap.type = THREE.VSMShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     // Slightly lifted exposure — ACES rolls off the highlights, so the dusk
     // and clinical scenes both read brighter without clipping. Tuned in the
@@ -149,7 +152,14 @@ export class Stage3D {
     this.key.shadow.camera.right = 11;
     this.key.shadow.camera.top = 11;
     this.key.shadow.camera.bottom = -11;
-    this.key.shadow.bias = -0.0008;
+    // VSM: a soft penumbra (radius + blur samples), tight near/far for depth
+    // precision, and normalBias to kill the peter-panning VSM is prone to.
+    this.key.shadow.camera.near = 1;
+    this.key.shadow.camera.far = 42;
+    this.key.shadow.radius = 4;
+    this.key.shadow.blurSamples = 16;
+    this.key.shadow.bias = -0.0004;
+    this.key.shadow.normalBias = 0.03;
     this.scene.add(this.hemi, this.key, this.key.target);
 
     this.resize();
