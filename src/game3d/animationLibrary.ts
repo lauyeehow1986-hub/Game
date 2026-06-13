@@ -21,7 +21,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import type { BeatPose } from '../lib/walkthrough';
 
-export const ANIM_DIR = '/3d/anims/';
+export const ANIM_DIR = `${import.meta.env.BASE_URL}3d/anims/`;
 
 /** BeatPose → clip-file slug. The fetch script downloads these clips
  *  (Mixamo terms): file names are stable handles the runtime looks up. */

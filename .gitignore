@@ -22,9 +22,18 @@ tsconfig.tsbuildinfo
 # 3D renderer falls back gracefully when files are missing.
 public/3d/hdr/*.hdr
 public/3d/cast/*.glb
-public/3d/cast/_lib/
+# EXCEPTION: the generated photoreal archetype cast (scripts/make-cast-photoreal.py)
+# IS committed — these 14 WebP-textured GLBs (~19 MB total) are the deploy
+# artifact that upgrades the live GitHub Pages site from the procedural capsule
+# fallback to real MakeHuman humans. Everything else in _lib stays ignored.
+public/3d/cast/_lib/*
+!public/3d/cast/_lib/*.glb
 public/3d/cast/_quaternius/
 public/3d/cast/_kenney/
+public/3d/cast/_stash_overrides/
+# photoreal-cast QA scratch (renders / logs from make-cast-photoreal + render-glb)
+scripts/_qa*
+scripts/_gen_all.log
 public/3d/anims/*.glb
 public/3d/props/*.glb
 public/3d/props/_quaternius-medical/

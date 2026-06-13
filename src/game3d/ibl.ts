@@ -15,7 +15,7 @@ import * as THREE from 'three';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import type { SceneId } from '../lib/scenery';
 
-export const HDR_DIR = '/3d/hdr/';
+export const HDR_DIR = `${import.meta.env.BASE_URL}3d/hdr/`;
 
 /** Per-scene-id → HDRI slug suggestion. Used by `scripts/fetch-3d-assets.mjs`
  *  to pick which Poly Haven HDRI to download for each scene, and at runtime

@@ -1,38 +1,47 @@
 """
-make-cast-photoreal.py — generate the 14 shared `_lib` cast archetypes as
-clothed MakeHuman humans, headless in Blender 5.x + MPFB.
+make-cast-photoreal.py — generate the 14 shared `_lib` cast archetypes as real
+photoreal MakeHuman humans, headless in Blender 5.x + MPFB.
 
 This is the v12 "photoreal asset pipeline" step. `castManifest.ts` routes every
 actor across all four walkthroughs to one of 14 role archetypes in
-`public/3d/cast/_lib/` (doctor-old, worker, patient, casual, suit…). Replacing
-those GLBs with real human meshes upgrades *every* figure at once — and once
-committed (the `_lib/` gitignore rule is removed) the **deployed** site shows
-clothed humans instead of the procedural capsule rig.
+`public/3d/cast/_lib/`. Replacing those GLBs with real human meshes upgrades
+*every* figure at once — and once committed (the `_lib/` gitignore rule is
+removed) the **deployed** site shows photoreal humans instead of capsules.
 
-Honest scope: MPFB on a locked-down box has no skin/clothing/hair *asset packs*
-(those need a MakeHuman download), and complex skin shaders don't survive GLB
-export. So we build everything GLB-safe and asset-free:
-  • a real MakeHuman base body (realistic proportions, ~19k verts, default rig);
-  • a PBR **skin** material (Principled base tone + subsurface for flesh) on the
-    head / neck / hands / forearms;
-  • a role-coloured **clothing** material on the rest of the body, split by the
-    rig's joint vertex-groups (short-sleeve scrubs / coat / gown / hi-vis / suit);
-  • a simple **hair** cap on the scalp.
-The result is a clothed, skin-shaded human — far past the capsule rig, short of a
-scanned photoreal model (which the offline tools here can't reach).
+What makes this photoreal (vs. the earlier white-mannequin attempt) is the real
+MakeHuman **System Assets CC0** pack (~268 MB, fetched once by
+`scripts/fetch-makehuman-assets.ps1` into `MH_ASSETS`):
+
+  • SKIN  — per age×ethnicity×sex photo **diffuse textures** mapped onto the
+            base-mesh UVs (the dominant realism factor: real human skin, eyes,
+            lips painted into the face).
+  • CLOTHES — fitted garment meshes (suits / coverall) with fabric **diffuse +
+            normal** maps, draped onto the body shape and rigged to the skeleton
+            via MPFB's `add_mhclo_asset`.
+  • HAIR  — a hair mesh with diffuse+alpha cards.
+  • EYEBROWS — alpha-mapped brow cards (a surprisingly large life/realism cue).
+
+GLB-export safety: MPFB's own "v2 skin" is a complex node group the glTF
+exporter can't trace, so we DON'T use it. Every material here is a plain
+Principled BSDF wired exactly how the glTF exporter understands — image-texture
+→ Base Color, normal-map → Normal, texture-alpha → Alpha. That survives GLB
+intact, so the deployed humans look the same as the Blender render.
 
 Run:
     blender --background --python scripts/make-cast-photoreal.py            # all 14
     blender --background --python scripts/make-cast-photoreal.py -- --only doctor-male-old
+Override the asset pack location with the MH_ASSETS env var.
 """
 import bpy
 import os
 import sys
+import glob
 import math
 
 PKG = "bl_ext.blender_org.mpfb"
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 LIB_DIR = os.path.join(REPO_ROOT, "public", "3d", "cast", "_lib")
+ASSETS = os.environ.get("MH_ASSETS", r"C:\Users\lauye\Documents\makehuman_assets")
 
 
 def log(*a):
@@ -44,114 +53,226 @@ def _hs():
     return __import__(PKG + ".services.humanservice", fromlist=["HumanService"]).HumanService
 
 
+# ---- phenotype tables -------------------------------------------------------
+# race macro drives bone structure (nose/brow); the skin texture drives colour.
 RACE = {
-    "chinese": {"asian": 0.85, "caucasian": 0.10, "african": 0.05},
-    "malay": {"asian": 0.70, "caucasian": 0.12, "african": 0.18},
-    "indian": {"asian": 0.45, "caucasian": 0.40, "african": 0.15},
-    "mixed": {"asian": 0.6, "caucasian": 0.28, "african": 0.12},
+    "chinese": {"asian": 0.92, "caucasian": 0.05, "african": 0.03},
+    "malay":   {"asian": 0.80, "caucasian": 0.08, "african": 0.12},
+    "indian":  {"asian": 0.40, "caucasian": 0.45, "african": 0.15},
+    "mixed":   {"asian": 0.62, "caucasian": 0.28, "african": 0.10},
 }
-SKIN = {
-    "chinese": (0.82, 0.62, 0.49),
-    "malay": (0.66, 0.47, 0.34),
-    "indian": (0.55, 0.38, 0.27),
-    "mixed": (0.72, 0.54, 0.42),
+# Which photo-skin folder ethnicity to draw the diffuse from, plus an optional
+# multiply tint to nudge a "lightskinned" texture toward an authentic SG tone.
+SKIN_SRC = {
+    "chinese": ("asian",     None),
+    "malay":   ("asian",     (0.90, 0.80, 0.70)),   # slightly tanned
+    "indian":  ("caucasian", (0.66, 0.50, 0.39)),   # warm brown
+    "mixed":   ("asian",     (0.96, 0.90, 0.84)),
 }
-HAIR = {"black": (0.04, 0.03, 0.03), "darkbrown": (0.10, 0.07, 0.05), "grey": (0.55, 0.55, 0.57)}
+HAIR_RGB = {"black": (0.035, 0.028, 0.025), "darkbrown": (0.09, 0.06, 0.04), "grey": (0.55, 0.55, 0.57)}
 
-# The 14 archetypes from castManifest.CAST_LIB_FILES, each with a phenotype +
-# role-appropriate clothing colour and the clothing "type" (affects sleeves).
+# 14 archetypes from castManifest.CAST_LIB_FILES. garment_tint=None keeps the
+# real fabric texture; a tint recolours (keeping the fabric normal map) for
+# roles the CC0 pack has no garment for (scrubs / coat / hi-vis).
+SCRUBS = (0.36, 0.62, 0.66)   # teal scrubs
+COAT   = (0.95, 0.96, 0.97)   # white coat
+HIVIS  = (0.94, 0.46, 0.08)   # hi-vis orange
+NAVY   = (0.13, 0.15, 0.22)
+GREY   = (0.50, 0.52, 0.56)
+
 CAST = {
-    "doctor-male-young":   dict(sex=0.9, age=0.42, eth="indian",  hair="black",    cloth=(0.93, 0.94, 0.96), kind="coat"),
-    "doctor-female-young": dict(sex=0.15, age=0.42, eth="chinese", hair="black",    cloth=(0.93, 0.94, 0.96), kind="coat"),
-    "doctor-male-old":     dict(sex=0.85, age=0.7,  eth="chinese", hair="grey",     cloth=(0.93, 0.94, 0.96), kind="coat"),
-    "doctor-female-old":   dict(sex=0.15, age=0.7,  eth="indian",  hair="grey",     cloth=(0.93, 0.94, 0.96), kind="coat"),
-    "suit-male":           dict(sex=0.9, age=0.5,  eth="chinese", hair="darkbrown", cloth=(0.16, 0.18, 0.24), kind="long"),
-    "suit-female":         dict(sex=0.15, age=0.5,  eth="chinese", hair="black",    cloth=(0.18, 0.20, 0.26), kind="long"),
-    "worker-male":         dict(sex=0.9, age=0.45, eth="malay",   hair="black",    cloth=(0.86, 0.36, 0.10), kind="long"),
-    "worker-female":       dict(sex=0.2, age=0.45, eth="malay",   hair="black",    cloth=(0.86, 0.36, 0.10), kind="long"),
-    "oldclassy-male":      dict(sex=0.85, age=0.78, eth="chinese", hair="grey",     cloth=(0.55, 0.60, 0.66), kind="gown"),
-    "oldclassy-female":    dict(sex=0.15, age=0.78, eth="indian",  hair="grey",     cloth=(0.55, 0.60, 0.66), kind="gown"),
-    "casual-male":         dict(sex=0.9, age=0.4,  eth="malay",   hair="black",    cloth=(0.20, 0.45, 0.55), kind="short"),
-    "casual-female":       dict(sex=0.15, age=0.4,  eth="chinese", hair="black",    cloth=(0.62, 0.28, 0.40), kind="short"),
-    "casual2-female":      dict(sex=0.2, age=0.5,  eth="indian",  hair="darkbrown", cloth=(0.45, 0.50, 0.30), kind="short"),
-    "casual3-male":        dict(sex=0.88, age=0.55, eth="chinese", hair="darkbrown", cloth=(0.30, 0.34, 0.42), kind="short"),
+    "doctor-male-young":   dict(sex=0.95, age=0.40, eth="indian",  hair=("short02",   "black"),     garment="male_casualsuit01",   tint=SCRUBS),
+    "doctor-female-young": dict(sex=0.10, age=0.40, eth="chinese", hair=("ponytail01", "black"),    garment="female_casualsuit01", tint=SCRUBS),
+    "doctor-male-old":     dict(sex=0.90, age=0.72, eth="chinese", hair=("short03",   "grey"),      garment="male_elegantsuit01",  tint=COAT),
+    "doctor-female-old":   dict(sex=0.12, age=0.72, eth="indian",  hair=("bob01",     "grey"),      garment="female_elegantsuit01", tint=COAT),
+    "suit-male":           dict(sex=0.95, age=0.50, eth="chinese", hair=("short01",   "darkbrown"), garment="male_elegantsuit01",  tint=NAVY),
+    "suit-female":         dict(sex=0.10, age=0.50, eth="chinese", hair=("bob02",     "black"),     garment="female_elegantsuit01", tint=NAVY),
+    "worker-male":         dict(sex=0.95, age=0.46, eth="malay",   hair=("short04",   "black"),     garment="male_worksuit01",     tint=HIVIS),
+    "worker-female":       dict(sex=0.18, age=0.46, eth="malay",   hair=("ponytail01", "black"),    garment="female_sportsuit01",  tint=HIVIS),
+    "oldclassy-male":      dict(sex=0.88, age=0.80, eth="chinese", hair=("short03",   "grey"),      garment="male_elegantsuit01",  tint=GREY),
+    "oldclassy-female":    dict(sex=0.12, age=0.80, eth="indian",  hair=("bob01",     "grey"),      garment="female_elegantsuit01", tint=GREY),
+    "casual-male":         dict(sex=0.95, age=0.38, eth="malay",   hair=("short02",   "black"),     garment="male_casualsuit02",   tint=None),
+    "casual-female":       dict(sex=0.12, age=0.38, eth="chinese", hair=("long01",    "black"),     garment="female_casualsuit01", tint=None),
+    "casual2-female":      dict(sex=0.18, age=0.50, eth="indian",  hair=("braid01",   "darkbrown"), garment="female_casualsuit02", tint=None),
+    "casual3-male":        dict(sex=0.90, age=0.55, eth="chinese", hair=("short01",   "darkbrown"), garment="male_casualsuit03",   tint=None),
 }
 
-# Joint vertex-groups whose vertices stay bare skin. "coat"/"long" keep sleeves,
-# so forearms become clothing; "short"/scrubs expose the forearm.
-SKIN_PARTS_BASE = ["head", "neck", "hand", "finger", "thumb"]
-SKIN_PARTS_SHORT = SKIN_PARTS_BASE + ["lowerarm"]
+
+# ---- asset path resolution --------------------------------------------------
+def _agegroup(age):
+    return "young" if age < 0.5 else ("middleage" if age < 0.7 else "old")
 
 
-def pbr(name, rgb, roughness, subsurface=0.0):
+def skin_diffuse(eth, age, sex):
+    src_eth, tint = SKIN_SRC[eth]
+    s = "male" if sex >= 0.5 else "female"
+    folder = os.path.join(ASSETS, "skins", f"{_agegroup(age)}_{src_eth}_{s}")
+    pngs = glob.glob(os.path.join(folder, "*diffuse*.png"))
+    return (pngs[0] if pngs else None), tint
+
+
+def garment_paths(name):
+    d = os.path.join(ASSETS, "clothes", name)
+    mhclo = os.path.join(d, name + ".mhclo")
+    diff = glob.glob(os.path.join(d, "*_diffuse.png"))
+    norm = glob.glob(os.path.join(d, "*_normal.png"))
+    return (mhclo if os.path.exists(mhclo) else None,
+            diff[0] if diff else None, norm[0] if norm else None)
+
+
+def hair_paths(style):
+    d = os.path.join(ASSETS, "hair", style)
+    mhclo = os.path.join(d, style + ".mhclo")
+    diff = glob.glob(os.path.join(d, "*diffuse*.png")) or glob.glob(os.path.join(d, style + ".png"))
+    return (mhclo if os.path.exists(mhclo) else None, diff[0] if diff else None)
+
+
+def eyebrow_paths(idx="eyebrow006"):
+    d = os.path.join(ASSETS, "eyebrows", idx)
+    mhclo = os.path.join(d, idx + ".mhclo")
+    diff = os.path.join(d, idx + ".png")
+    return (mhclo if os.path.exists(mhclo) else None, diff if os.path.exists(diff) else None)
+
+
+# ---- material builders (all plain Principled, GLB-export safe) ---------------
+def _img(path, non_color=False, maxdim=1024):
+    img = bpy.data.images.load(path, check_existing=True)
+    if non_color:
+        try:
+            img.colorspace_settings.name = "Non-Color"
+        except Exception:  # noqa: BLE001
+            pass
+    # Downscale so the WebP-embedded GLBs stay web-light (skin/garment 1K,
+    # hair/brow 512). Keeps aspect; only shrinks oversized source textures.
+    w, h = img.size
+    if w > 0 and h > 0 and max(w, h) > maxdim:
+        if w >= h:
+            nw, nh = maxdim, max(1, round(h * maxdim / w))
+        else:
+            nw, nh = max(1, round(w * maxdim / h)), maxdim
+        try:
+            img.scale(nw, nh)
+        except Exception:  # noqa: BLE001
+            pass
+    return img
+
+
+def principled(name):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
-    b = m.node_tree.nodes.get("Principled BSDF")
-    if b:
-        b.inputs["Base Color"].default_value = (rgb[0], rgb[1], rgb[2], 1.0)
-        if "Roughness" in b.inputs:
-            b.inputs["Roughness"].default_value = roughness
-        # Subsurface gives skin its fleshy translucency. Input names shifted
-        # across Blender versions — set whatever exists.
-        for key, val in (("Subsurface Weight", subsurface), ("Subsurface", subsurface)):
-            if key in b.inputs:
-                try:
-                    b.inputs[key].default_value = val
-                except Exception:  # noqa: BLE001
-                    pass
-        if subsurface > 0 and "Subsurface Radius" in b.inputs:
+    nt = m.node_tree
+    bsdf = nt.nodes.get("Principled BSDF")
+    return m, nt, bsdf
+
+
+def _set(bsdf, key_options, val):
+    for k in key_options:
+        if k in bsdf.inputs:
             try:
-                b.inputs["Subsurface Radius"].default_value = (0.30, 0.12, 0.07)
+                bsdf.inputs[k].default_value = val
+                return
             except Exception:  # noqa: BLE001
                 pass
+
+
+def skin_material(name, diffuse_png, tint, roughness=0.48):
+    m, nt, b = principled(name)
+    _set(b, ("Roughness",), roughness)
+    _set(b, ("Subsurface Weight", "Subsurface"), 0.12)
+    if "Subsurface Radius" in b.inputs:
+        try:
+            b.inputs["Subsurface Radius"].default_value = (0.28, 0.12, 0.07)
+        except Exception:  # noqa: BLE001
+            pass
+    _set(b, ("Specular IOR Level", "Specular"), 0.35)
+    if diffuse_png and os.path.exists(diffuse_png):
+        tex = nt.nodes.new("ShaderNodeTexImage")
+        tex.image = _img(diffuse_png)
+        tex.location = (-600, 300)
+        if tint:
+            mix = nt.nodes.new("ShaderNodeMixRGB")
+            mix.blend_type = "MULTIPLY"
+            mix.inputs["Fac"].default_value = 1.0
+            mix.inputs["Color2"].default_value = (tint[0], tint[1], tint[2], 1.0)
+            mix.location = (-300, 300)
+            nt.links.new(tex.outputs["Color"], mix.inputs["Color1"])
+            nt.links.new(mix.outputs["Color"], b.inputs["Base Color"])
+        else:
+            nt.links.new(tex.outputs["Color"], b.inputs["Base Color"])
+    else:
+        base = tint or (0.78, 0.60, 0.48)
+        b.inputs["Base Color"].default_value = (base[0], base[1], base[2], 1.0)
     return m
 
 
-def split_skin_clothing(obj, skin_mat, cloth_mat, skin_parts):
+def cloth_material(name, diffuse_png, normal_png, tint, roughness=0.7):
+    """tint=None → keep real fabric diffuse; tint set → role colour + keep the
+    fabric normal map so folds/weave still read."""
+    m, nt, b = principled(name)
+    _set(b, ("Roughness",), roughness)
+    _set(b, ("Specular IOR Level", "Specular"), 0.25)
+    if tint is None and diffuse_png and os.path.exists(diffuse_png):
+        tex = nt.nodes.new("ShaderNodeTexImage")
+        tex.image = _img(diffuse_png)
+        tex.location = (-600, 300)
+        nt.links.new(tex.outputs["Color"], b.inputs["Base Color"])
+    else:
+        c = tint or (0.5, 0.5, 0.5)
+        b.inputs["Base Color"].default_value = (c[0], c[1], c[2], 1.0)
+    if normal_png and os.path.exists(normal_png):
+        ntex = nt.nodes.new("ShaderNodeTexImage")
+        ntex.image = _img(normal_png, non_color=True)
+        ntex.location = (-600, -100)
+        nmap = nt.nodes.new("ShaderNodeNormalMap")
+        nmap.location = (-300, -100)
+        nmap.inputs["Strength"].default_value = 0.8
+        nt.links.new(ntex.outputs["Color"], nmap.inputs["Color"])
+        nt.links.new(nmap.outputs["Normal"], b.inputs["Normal"])
+    return m
+
+
+def alpha_material(name, diffuse_png, rgb=None, roughness=0.7):
+    """Hair / eyebrow cards: diffuse colour (or tint) + texture alpha cutout."""
+    m, nt, b = principled(name)
+    _set(b, ("Roughness",), roughness)
+    if diffuse_png and os.path.exists(diffuse_png):
+        tex = nt.nodes.new("ShaderNodeTexImage")
+        tex.image = _img(diffuse_png, maxdim=512)
+        tex.location = (-600, 300)
+        if rgb:
+            mix = nt.nodes.new("ShaderNodeMixRGB")
+            mix.blend_type = "MULTIPLY"
+            mix.inputs["Fac"].default_value = 0.85
+            mix.inputs["Color2"].default_value = (rgb[0], rgb[1], rgb[2], 1.0)
+            mix.location = (-300, 300)
+            nt.links.new(tex.outputs["Color"], mix.inputs["Color1"])
+            nt.links.new(mix.outputs["Color"], b.inputs["Base Color"])
+        else:
+            nt.links.new(tex.outputs["Color"], b.inputs["Base Color"])
+        if "Alpha" in b.inputs:
+            nt.links.new(tex.outputs["Alpha"], b.inputs["Alpha"])
+        try:
+            m.blend_method = "HASHED"
+            m.shadow_method = "HASHED"
+        except Exception:  # noqa: BLE001
+            pass
+    elif rgb:
+        b.inputs["Base Color"].default_value = (rgb[0], rgb[1], rgb[2], 1.0)
+    return m
+
+
+def replace_materials(obj, mat):
     obj.data.materials.clear()
-    obj.data.materials.append(skin_mat)   # index 0
-    obj.data.materials.append(cloth_mat)  # index 1
-    skin_vg = {g.index for g in obj.vertex_groups
-               if any(p in g.name.lower() for p in skin_parts)}
-    skin_verts = set()
-    for v in obj.data.vertices:
-        for ge in v.groups:
-            if ge.group in skin_vg and ge.weight > 0.5:
-                skin_verts.add(v.index)
-                break
-    for poly in obj.data.polygons:
-        n_skin = sum(1 for vi in poly.vertices if vi in skin_verts)
-        poly.material_index = 0 if n_skin * 2 >= len(poly.vertices) else 1
+    obj.data.materials.append(mat)
+    for p in obj.data.polygons:
+        p.material_index = 0
 
 
-def add_hair(obj, group, hair_rgb):
-    # head centre = centroid of the joint-head group's vertices
-    hidx = {g.index for g in obj.vertex_groups if g.name.lower() in ("joint-head", "joint-head-2")}
-    pts = [v.co for v in obj.data.vertices
-           if any(ge.group in hidx and ge.weight > 0.4 for ge in v.groups)]
-    if not pts:
-        return
-    cx = sum(p.x for p in pts) / len(pts)
-    cy = sum(p.y for p in pts) / len(pts)
-    cz = sum(p.z for p in pts) / len(pts)
-    top = max(p.z for p in pts)
-    r = (max(p.x for p in pts) - min(p.x for p in pts)) * 0.62
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=max(r, 0.06), segments=20, ring_count=12,
-                                         location=(cx, cy, top - r * 0.55))
-    hair = bpy.context.active_object
-    hair.scale = (1.06, 1.12, 1.0)
-    hair.data.materials.append(pbr("hair", hair_rgb, 0.65))
-    hair.name = "hair"
-    hair.parent = obj
-    for p in hair.data.polygons:  # drop the lower hemisphere so it's a cap
-        pass
-    return hair
-
-
+# ---- build ------------------------------------------------------------------
 def clear_scene():
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
-    for block in (bpy.data.meshes, bpy.data.materials, bpy.data.armatures):
+    for block in (bpy.data.meshes, bpy.data.materials, bpy.data.armatures, bpy.data.images):
         for b in list(block):
             if b.users == 0:
                 block.remove(b)
@@ -171,17 +292,77 @@ def build(name, spec):
     except Exception as e:  # noqa: BLE001
         log("  rig warn:", e)
 
-    skin_mat = pbr(name + "_skin", SKIN[spec["eth"]], 0.52, subsurface=0.13)
-    cloth_mat = pbr(name + "_cloth", spec["cloth"], 0.74)
-    skin_parts = SKIN_PARTS_SHORT if spec["kind"] in ("short", "gown") else SKIN_PARTS_BASE
-    split_skin_clothing(human, skin_mat, cloth_mat, skin_parts)
-    add_hair(human, name, HAIR[spec["hair"]])
+    # 1) photoreal skin diffuse on the body
+    diff, tint = skin_diffuse(spec["eth"], spec["age"], spec["sex"])
+    replace_materials(human, skin_material(name + "_skin", diff, tint))
+    log(f"  skin: {os.path.basename(diff) if diff else 'flat'} tint={tint}")
 
+    # 2) fitted, rigged garment mesh (parented under the armature, so track new
+    #    objects rather than human.children).
+    g_mhclo, g_diff, g_norm = garment_paths(spec["garment"])
+    if g_mhclo:
+        try:
+            before = set(bpy.data.objects)
+            HS.add_mhclo_asset(g_mhclo, human, asset_type="Clothes", subdiv_levels=0,
+                               material_type="MAKESKIN", set_up_rigging=True,
+                               interpolate_weights=True, import_subrig=False, import_weights=False)
+            new = [o for o in bpy.data.objects if o not in before and o.type == "MESH"]
+            if new:
+                replace_materials(new[-1], cloth_material(name + "_cloth", g_diff, g_norm, spec["tint"]))
+                log(f"  garment: {spec['garment']} -> {new[-1].name} tint={spec['tint']}")
+            else:
+                log("  garment: loaded but no new mesh found")
+        except Exception as e:  # noqa: BLE001
+            import traceback
+            traceback.print_exc()
+            log("  garment FAILED:", e)
+
+    # 3) hair mesh
+    h_style, h_color = spec["hair"]
+    h_mhclo, h_diff = hair_paths(h_style)
+    if h_mhclo:
+        try:
+            before = set(bpy.data.objects)
+            HS.add_mhclo_asset(h_mhclo, human, asset_type="Hair", subdiv_levels=0,
+                               material_type="MAKESKIN", set_up_rigging=True,
+                               interpolate_weights=True, import_subrig=False, import_weights=False)
+            new = [o for o in bpy.data.objects if o not in before and o.type == "MESH"]
+            if new:
+                replace_materials(new[-1], alpha_material(name + "_hair", h_diff, HAIR_RGB[h_color]))
+                log(f"  hair: {h_style} ({h_color})")
+        except Exception as e:  # noqa: BLE001
+            log("  hair FAILED:", e)
+
+    # 4) eyebrows (alpha cards) — big realism cue on the face
+    eb_mhclo, eb_diff = eyebrow_paths()
+    if eb_mhclo:
+        try:
+            before = set(bpy.data.objects)
+            HS.add_mhclo_asset(eb_mhclo, human, asset_type="Eyebrows", subdiv_levels=0,
+                               material_type="MAKESKIN", set_up_rigging=False,
+                               interpolate_weights=False, import_subrig=False, import_weights=False)
+            new = [o for o in bpy.data.objects if o not in before and o.type == "MESH"]
+            if new:
+                replace_materials(new[-1], alpha_material(name + "_brow", eb_diff, HAIR_RGB[h_color]))
+                log("  eyebrows applied")
+        except Exception as e:  # noqa: BLE001
+            log("  eyebrows FAILED:", e)
+
+    # export everything (body + rig + clothes + hair + brows) to one GLB
     out = os.path.join(LIB_DIR, name + ".glb")
     os.makedirs(LIB_DIR, exist_ok=True)
     bpy.ops.object.select_all(action="SELECT")
-    bpy.ops.export_scene.gltf(filepath=out, export_format="GLB", use_selection=True,
-                              export_apply=True, export_yup=True)
+    export_kwargs = dict(filepath=out, export_format="GLB", use_selection=True,
+                         export_apply=True, export_yup=True)
+    # WebP-embed textures (EXT_texture_webp; three.js GLTFLoader supports it) to
+    # keep the deployed cast web-light. Fall back to default PNG if unsupported.
+    try:
+        bpy.ops.export_scene.gltf(image_format="WEBP", export_image_quality=82, **export_kwargs)
+    except TypeError:
+        try:
+            bpy.ops.export_scene.gltf(export_image_format="WEBP", export_image_quality=82, **export_kwargs)
+        except Exception:  # noqa: BLE001
+            bpy.ops.export_scene.gltf(**export_kwargs)
     log(f"  -> {name}.glb ({os.path.getsize(out)//1024} KB)")
 
 
@@ -191,8 +372,11 @@ def main():
         extra = sys.argv[sys.argv.index("--") + 1:]
         if "--only" in extra:
             only = set(extra[extra.index("--only") + 1].split(","))
+    if not os.path.isdir(ASSETS):
+        log(f"ASSETS not found: {ASSETS} (run scripts/fetch-makehuman-assets.ps1)")
+        return
     names = [n for n in CAST if (only is None or n in only)]
-    log(f"generating {len(names)} archetype(s) into {LIB_DIR}")
+    log(f"generating {len(names)} archetype(s) into {LIB_DIR}; assets={ASSETS}")
     for n in names:
         try:
             build(n, CAST[n])

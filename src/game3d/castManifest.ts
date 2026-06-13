@@ -21,8 +21,9 @@
  */
 import type { WalkthroughActor } from '../lib/walkthrough';
 
-/** Where the shared Quaternius library GLBs live (gitignored, fetched). */
-export const CAST_LIB_DIR = '/3d/cast/_lib/';
+/** Where the shared archetype library GLBs live. Base-prefixed so it resolves
+ *  under the GitHub Pages sub-path (`/Game/`) as well as at root (dev/tests). */
+export const CAST_LIB_DIR = `${import.meta.env.BASE_URL}3d/cast/_lib/`;
 
 /**
  * The shared character files we map onto. Each is a Quaternius UACP figure

@@ -20,8 +20,11 @@ import { PoseAnimationDriver, cloneRig } from './animationLibrary';
 import { CAST_LIB_DIR, resolveLibFile } from './castManifest';
 import type { BeatExpression, BeatPose, WalkthroughActor } from '../lib/walkthrough';
 
-/** Public path where authored character GLBs live. Files are optional. */
-export const CAST_DIR = '/3d/cast/';
+/** Public path where authored character GLBs live. Files are optional.
+ *  Base-prefixed (`import.meta.env.BASE_URL`) so it resolves correctly when the
+ *  app is hosted under a sub-path on GitHub Pages (`/Game/`) as well as at root
+ *  (dev/tests, where BASE_URL is `/`). */
+export const CAST_DIR = `${import.meta.env.BASE_URL}3d/cast/`;
 
 /** Cache shape: per-url, the gltf scene used as a template (cloned per
  *  instance). Promise reuse prevents duplicate fetches when several copies

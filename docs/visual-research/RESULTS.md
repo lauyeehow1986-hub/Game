@@ -340,3 +340,41 @@ generator as a documented starting point. The real fork is now the user's
    realistic, but need **network + (maybe) auth**, currently blocked.
 3. **Stay stylized** — accept the 8.5 stylized-cinematic ceiling we reached in
    iters 1-18 (it's a coherent, polished art direction in its own right).
+
+| 20 | **photoreal cast SHIPPED** (network enabled → real MakeHuman assets) | +1 | — | — | **+3** | — | **+2** | — | **D 4→9** | ✅ deployed |
+
+**iter 20 notes (the photoreal pipeline, delivered):** the user chose path 2
+("enable network for true photoreal"). Fetched the **MakeHuman System Assets CC0
+pack** (267 MB, `scripts/fetch-makehuman-assets.ps1`) — the exact thing iter 19
+lacked: photo **skin diffuse** textures across the full age×ethnicity×sex matrix,
+fitted **garment meshes** (suits / coverall) with fabric diffuse+normal maps,
+**hair** meshes, and **eyebrows**. Rewrote `scripts/make-cast-photoreal.py` to:
+  • build the MakeHuman base body + rig (as before);
+  • apply the real skin diffuse as a **plain Principled BSDF image texture** (NOT
+    MPFB's v2 skin node-group, which the glTF exporter can't trace) — the
+    dominant realism win, and it survives GLB export intact;
+  • load + fit + rig real garments via `HumanService.add_mhclo_asset`, then
+    re-material them to a plain Principled (role tint + fabric normal map) so
+    scrubs/coat/hi-vis read correctly for roles the CC0 pack has no garment for;
+  • add a hair mesh + eyebrow cards (alpha cut-out Principled);
+  • **downscale textures (1K/512) + export WebP** (`EXT_texture_webp`, which
+    three.js `GLTFLoader` supports natively) → each archetype **~1.3 MB** (vs.
+    ~12 MB PNG), 14-cast total **~19 MB**.
+Render-verified one archetype (real older-Chinese-man face, white coat, grey
+hair — unmistakably a photoreal human, not a mannequin), then generated all 14
+and built a contact sheet (diverse, coherent, role-correct: teal scrubs, white
+coats, hi-vis, suits, casual tees).
+
+**Deploy + the latent base-path bug:** un-gitignored `_lib/*.glb` (the deploy
+artifact). In-browser QA exposed a pre-existing bug that had been masked because
+**no cast GLB had ever been committed**: `CAST_DIR` / `CAST_LIB_DIR` / `HDR_DIR`
+/ `ANIM_DIR` were absolute (`/3d/…`), so under the GitHub Pages sub-path
+(`/Game/`) every asset 404'd and silently fell back to capsules. Fixed all four
+to be base-aware (`${import.meta.env.BASE_URL}3d/…`; BASE_URL is `/` in
+dev/tests, so the existing `CAST_DIR === '/3d/cast/'` assertion still holds).
+After the fix, Playwright confirmed the photoreal `_lib` cast loads (200, WebP
+parses) and **renders real clothed humans in the trauma bay** — capsules gone.
+**Character fidelity D jumps 4→9**: the single biggest visual lever in the whole
+loop. (Mean would land ~9.x; rubric was built for environment, so D dominates.)
+**Next:** eye meshes for catch-lights, more authentic SG-Indian skin tone, then
+back to environment/atmosphere polish (dust motes, kopitiam warmth).
