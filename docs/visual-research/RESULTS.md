@@ -132,3 +132,17 @@ squeezes it — a responsive follow-up for a later iter.)
 **Next biggest gaps:** D (cast low-poly up close), responsive stage at narrow
 widths, equipment density. iter 8 → narrow-width stage layout, or per-scene
 prop density.
+
+| 8 | responsive stage: side-by-side from md (768px not 1024px); when stacked, stage gets the 1fr row + sidebar capped at 26vh | 7 | 7 | 7 | 6 | 9 | 7 | 9 | 7.4 | ✅ |
+
+**iter 8 notes:** the modal only went side-by-side at `lg` (1024px); the whole
+768-1024px band (laptops, tablets, un-maximised windows) stacked the 280px
+sidebar under the stage and halved its height — the iter-2 letterbox returning
+at common widths. Fix: `md:grid-cols-[1fr_260px]` (side-by-side from 768px) plus
+`grid-rows-[1fr_auto] md:grid-rows-none` and an `aside max-h-[26vh] md:max-h-none`
+so the truly-narrow stacked case still gives the stage the dominant row.
+Measured via Playwright/preview: at 900px the canvas is now 606×457 side-by-side
+(was a squeezed strip); at 700px the grid rows are 318px stage / 117px sidebar
+(was ~50/50). No console errors, tsc clean, 25 modal-a11y tests pass.
+**Next biggest gaps:** D (low-poly cast), per-scene prop/equipment density,
+subtle idle life (ambient motion). iter 9 → prop density or ambient motion.

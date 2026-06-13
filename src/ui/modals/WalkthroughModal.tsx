@@ -261,7 +261,7 @@ export function WalkthroughModal({ walkthrough: rawWalkthrough, onClose }: Props
         </header>
 
         {/* Stage — SVG vector renderer (default) or Phaser canvas (beta) */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-0 min-h-0">
+        <div className="flex-1 grid grid-cols-1 grid-rows-[1fr_auto] md:grid-rows-none md:grid-cols-[1fr_260px] gap-0 min-h-0">
           <div className="relative bg-clinical-bg overflow-hidden">
             {renderer === 'phaser' || renderer === 'three' ? (
               <StageErrorBoundary onFallback={() => setRenderer('svg')}>
@@ -314,7 +314,7 @@ export function WalkthroughModal({ walkthrough: rawWalkthrough, onClose }: Props
           </div>
 
           {/* Side panel — selected actor card or active beats list */}
-          <aside className="border-l border-clinical-border bg-clinical-bg/50 overflow-y-auto scrollbar-thin p-3 text-[11px] text-clinical-subtle space-y-3">
+          <aside className="border-t md:border-t-0 md:border-l border-clinical-border bg-clinical-bg/50 overflow-y-auto scrollbar-thin p-3 text-[11px] text-clinical-subtle space-y-3 max-h-[26vh] md:max-h-none">
             {selectedActorId ? (
               <ActorCard
                 actor={walkthrough.actors[selectedActorId]}
