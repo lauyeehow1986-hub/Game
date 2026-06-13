@@ -304,3 +304,39 @@ calm, serene morning mood. No console errors, tsc clean, 61 game3d tests pass.
 not a structural jump — B nudged for the added aerial depth.)
 **Next biggest gaps:** kopitiam/MRT atmosphere, or particulate dust motes in the
 light shafts. iter 19 → dust motes in the god-rays, or kopitiam warmth.
+
+| 19 | **photoreal asset-pipeline investigation** (different pipeline for a "10" cast) | — | — | — | — | — | — | — | — | ⚠ blocked offline |
+
+**iter 19 notes (the photoreal pivot — honest negative result):** the user
+redirected the loop to chase a *photoreal* cast via a different asset pipeline.
+Mapped the cast architecture (`castManifest` routes every actor → one of 14
+shared `_lib` archetypes; `_lib/` is **gitignored**, so the deployed site shows
+the procedural capsule rig). Probed MPFB/MakeHuman headlessly and hit a hard
+**offline ceiling**:
+  • MPFB bundles the base body + rig + procedural-skin node-trees, but **no
+    skin-material / clothing / hair asset packs** — those need a MakeHuman asset
+    download that this locked-down box's network (corporate certs) blocks.
+  • The procedural ENHANCED_SSS skin is a complex node tree that **does not
+    survive GLB/web export** (three.js needs baked PBR textures).
+  • No `.mhclo` garments → clothing can only be faked by a joint-group material
+    split (skin on head/hands, role-colour on the body).
+Built `scripts/make-cast-photoreal.py` (clothed MakeHuman: PBR skin + joint-group
+skin/clothing split + hair cap) and test-generated `doctor-male-old` (15.9k
+verts, 163-bone rig, 3 materials, body split into 2 prims — the split *works*).
+But a Blender render showed a **white-painted mannequin with an odd hair-bun**:
+flat skin tone (no scan textures), painted-on (not modelled) clothing — i.e. the
+realistic ceiling here is a *clothed MakeHuman mannequin* (~6/10), which is **not
+clearly better than the existing clothed Quaternius `_lib` cast** and is far from
+scan-photoreal. Conclusion: **a true photoreal "10" is not reachable with the
+offline tools on this box.** Reverted the test (restored Quaternius), kept the
+generator as a documented starting point. The real fork is now the user's
+(see below) — it's a genuine trade-off, not an engineering blocker.
+
+**Paths to an actually-photoreal cast (all need something this box lacks):**
+1. **Deploy the existing CC0 Quaternius cast** (un-gitignore + commit ~16 MB) —
+   *not* photoreal, but upgrades the **live site** from capsules → clothed
+   stylised humans, reliably and offline. Trade-off: repo binary bloat.
+2. **Ready Player Me / MakeHuman asset-pack / CC0 scanned humans** — genuinely
+   realistic, but need **network + (maybe) auth**, currently blocked.
+3. **Stay stylized** — accept the 8.5 stylized-cinematic ceiling we reached in
+   iters 1-18 (it's a coherent, polished art direction in its own right).
