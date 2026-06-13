@@ -183,14 +183,62 @@ function trolley(group: THREE.Group, x: number, z: number, ry = 0, mattressColor
   group.add(g);
 }
 
-/** Vitals monitor on a rolling stand, screen facing the camera. */
+/** Node-safe ECG waveform texture: a green PQRST line on a near-black screen,
+ *  tiling 2 beats across its width so a horizontal scroll (offset.x, advanced
+ *  by Stage3D) reads as a live monitor sweep. DataTexture, not canvas, so the
+ *  headless builders still construct. */
+function ecgTexture(): THREE.DataTexture {
+  const w = 256;
+  const h = 32;
+  const data = new Uint8Array(w * h * 4);
+  const baseY = h * 0.52;
+  const lineY = (x: number) => {
+    const p = (x % (w / 2)) / (w / 2); // phase within one beat
+    if (p > 0.46 && p < 0.5) return baseY - 12 * ((p - 0.46) / 0.04); // R upstroke
+    if (p >= 0.5 && p < 0.54) return baseY - 12 + 17 * ((p - 0.5) / 0.04); // S down
+    if (p >= 0.54 && p < 0.575) return baseY + 5 - 5 * ((p - 0.54) / 0.035); // back to base
+    if (p > 0.16 && p < 0.24) return baseY - 3 * Math.sin(((p - 0.16) / 0.08) * Math.PI); // P
+    if (p > 0.66 && p < 0.82) return baseY - 5 * Math.sin(((p - 0.66) / 0.16) * Math.PI); // T
+    return baseY;
+  };
+  for (let x = 0; x < w; x += 1) {
+    const y0 = lineY(x);
+    const y1 = lineY((x + 1) % w);
+    const lo = Math.min(y0, y1) - 1;
+    const hi = Math.max(y0, y1) + 1;
+    for (let y = 0; y < h; y += 1) {
+      const i = (y * w + x) * 4;
+      const on = y >= lo && y <= hi;
+      data[i] = on ? 60 : 4;
+      data[i + 1] = on ? 255 : 22;
+      data[i + 2] = on ? 130 : 14;
+      data[i + 3] = 255;
+    }
+  }
+  const tex = new THREE.DataTexture(data, w, h);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+/** Vitals monitor on a rolling stand, screen facing the camera, with a live
+ *  scrolling ECG trace (scrolled by Stage3D via `userData.scrollU`). */
 function monitor(group: THREE.Group, x: number, z: number) {
   const g = new THREE.Group();
   g.add(cylinder(0.04, 0.18, 1.25, std('#64748b', 0.4, 0.7), 0, 0.63, 0, 10));
   g.add(box(0.55, 0.42, 0.10, std('#1e293b', 0.6), 0, 1.45, 0));
-  g.add(box(0.46, 0.33, 0.012, emissive('#10331f', 0.9), 0, 1.45, 0.055, false));
-  g.add(box(0.36, 0.025, 0.014, emissive('#34d399', 1.8), 0, 1.50, 0.058, false));
-  g.add(box(0.36, 0.02, 0.014, emissive('#fbbf24', 1.5), 0, 1.42, 0.058, false));
+  g.add(box(0.46, 0.33, 0.012, emissive('#08170e', 0.6), 0, 1.45, 0.054, false));
+  const ecgMat = new THREE.MeshStandardMaterial({
+    color: '#000000', emissive: '#ffffff', emissiveMap: ecgTexture(),
+    emissiveIntensity: 2.8, roughness: 0.5, toneMapped: false,
+  });
+  const ecg = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.16), ecgMat);
+  ecg.position.set(0, 1.5, 0.058);
+  ecg.userData.scrollU = 0.55; // texture-U per second (Stage3D animates this)
+  g.add(ecg);
+  g.add(box(0.36, 0.02, 0.014, emissive('#fbbf24', 1.5), 0, 1.40, 0.058, false));
   g.position.set(x, 0, z);
   group.add(g);
 }

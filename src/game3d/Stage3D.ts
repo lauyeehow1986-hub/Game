@@ -74,6 +74,8 @@ export class Stage3D {
   private key: THREE.DirectionalLight;
   private env: Environment3D | null = null;
   private envId: SceneId | null = null;
+  /** Scrolling emissive screens (live ECG monitors), advanced each tick. */
+  private scrollScreens: { tex: THREE.Texture; speed: number }[] = [];
   /** Graded sky-backdrop texture for the current scene (disposed on swap). */
   private backdrop: THREE.Texture | null = null;
   private figures = new Map<string, FigureEntry>();
@@ -255,6 +257,19 @@ export class Stage3D {
     this.envId = id;
     this.scene.add(env.group);
 
+    // Collect scrolling screens (live ECG monitors) tagged by the builders, so
+    // tick() can advance their texture offset — a single generic pass that
+    // animates every monitor regardless of whether its scene has an animate
+    // hook. Re-collected per scene swap.
+    this.scrollScreens = [];
+    env.group.traverse((o) => {
+      const u = (o as THREE.Mesh).userData;
+      const m = (o as THREE.Mesh).material as THREE.MeshStandardMaterial | undefined;
+      if (u?.scrollU && m?.emissiveMap) {
+        this.scrollScreens.push({ tex: m.emissiveMap, speed: u.scrollU as number });
+      }
+    });
+
     const L = env.lighting;
     this.hemi.color.set(L.hemi.sky);
     this.hemi.groundColor.set(L.hemi.ground);
@@ -302,6 +317,11 @@ export class Stage3D {
     const t = this.clock.elapsedTime;
 
     this.env?.group.userData.animate?.(t);
+
+    // Advance any live ECG monitor traces (scroll the waveform leftward).
+    for (const s of this.scrollScreens) {
+      s.tex.offset.x = (s.tex.offset.x + s.speed * dt) % 1;
+    }
 
     for (const entry of this.figures.values()) {
       entry.figure.update(t, dt);

@@ -161,3 +161,19 @@ reads as distracting.
 **Next biggest gaps:** D (low-poly cast up close), per-scene prop/equipment
 density, animated medical screens (ECG trace). iter 10 → prop density or a live
 vitals-monitor trace.
+
+| 10 | live scrolling ECG trace on the vitals monitors (resus/cathlab/ward) | 8 | 7 | 8 | 6 | 9 | 7 | 9 | 7.7 | ✅ |
+
+**iter 10 notes:** the vitals monitors had a static green bar for a "screen".
+Now `ecgTexture()` bakes a green PQRST waveform into a node-safe DataTexture
+(tiling 2 beats), emissive-mapped onto the screen with `toneMapped:false` so it
+stays CRT-bright + blooms; a generic Stage3D pass collects any mesh tagged
+`userData.scrollU` per scene swap and advances `tex.offset.x` each frame, so the
+trace sweeps like a real monitor — one mechanism, every monitor, no per-scene
+hook. Verified in the trauma bay via Playwright/preview: the monitor screen now
+reads as a glowing green vitals display (was a dark box); subtle at the wide
+mid-background framing, clearer up close; sweep is by-construction. No console
+errors, tsc clean, 61 game3d tests pass.
+**Next biggest gaps:** D (low-poly cast), prominence of the monitors (mid-bg),
+per-scene prop density. iter 11 → prop density, or pull a monitor nearer the
+action.
