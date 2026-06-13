@@ -177,3 +177,18 @@ errors, tsc clean, 61 game3d tests pass.
 **Next biggest gaps:** D (low-poly cast), prominence of the monitors (mid-bg),
 per-scene prop density. iter 11 → prop density, or pull a monitor nearer the
 action.
+
+| 11 | densify the resus bay: bedside monitor + mobile ventilator + defibrillator + sharps bin, flanking the bed | 8 | 7 | 9 | 6 | 9 | 7 | 9 | 7.9 | ✅ |
+
+**iter 11 notes:** the trauma bay's only monitor sat mid-background. Added a
+bedside vitals monitor (so the iter-10 ECG reads in-frame), a mobile ventilator
+with a blue screen, a defibrillator on the crash cart, and a sharps bin — all
+flanking the bed (x≈±2.7-4, z≈-6) so they densify without occluding the centre
+action. Verified in the trauma bay via Playwright/preview: it now reads as a
+properly-equipped resus bay. (A transient black frame on first capture was a
+load-timing artefact of rapid re-navigation, not a regression — the street
+scene rendered throughout and the resus renders correctly once settled.) No
+console errors, tsc clean, 61 game3d tests pass.
+**Next biggest gaps:** D (low-poly cast up close) is now the dominant ceiling
+on the score; the sets/lighting/grade/motion are strong. iter 12 → a figure
+ground-shadow / proportion tweak, or carry density to another scene.

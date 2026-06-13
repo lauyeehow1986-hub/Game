@@ -481,6 +481,19 @@ function buildResus(): Environment3D {
   walls(g, '#dfe8e6');
   trolley(g, 0, -7.5);
   monitor(g, -2.6, -9); ivPole(g, 2.4, -8.8);
+  // bedside vitals monitor pulled near the trolley + flanked the bed so the
+  // live ECG actually reads in-frame; bedside ventilator on the other flank.
+  monitor(g, 2.7, -6.4);
+  const vent = new THREE.Group();
+  vent.add(box(0.7, 1.4, 0.5, std('#cbd5e1', 0.6), 0, 0.7, 0));
+  vent.add(box(0.5, 0.32, 0.04, emissive('#0ea5e9', 1.1), 0, 1.18, 0.27, false)); // screen
+  vent.add(cylinder(0.03, 0.03, 0.7, std('#94a3b8', 0.4, 0.7), 0.28, 1.75, 0, 8));
+  vent.position.set(-2.7, 0, -6.4);
+  g.add(vent);
+  // defibrillator on the crash cart + a sharps bin
+  g.add(box(0.6, 0.3, 0.45, std('#0f172a', 0.5), 5.5, 1.25, -10));
+  g.add(box(0.42, 0.16, 0.02, emissive('#22d3ee', 1.0), 5.5, 1.32, -9.77, false));
+  g.add(box(0.3, 0.42, 0.3, std('#f59e0b', 0.7), -4.0, 0.86, -6.2)); // sharps bin
   // overhead exam light
   g.add(cylinder(0.5, 0.65, 0.22, emissive('#fdfdf2', 2.0), 0, 4.6, -7.5, 16));
   g.add(cylinder(0.04, 0.04, 1.2, std('#94a3b8', 0.4, 0.7), 0, 5.4, -7.5, 8));
