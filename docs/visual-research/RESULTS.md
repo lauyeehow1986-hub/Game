@@ -256,3 +256,21 @@ Subtle but real, and it lifts every scene at once. No console errors, tsc clean.
 reached on lighting/atmosphere; the remaining headroom is character-mesh
 fidelity (the photoreal GLB cast) + authored art. iter 16 → kopitiam/clinic
 hero polish, or a volumetric light-shaft accent.
+
+| 16 | smoother procedural `Humanoid` rig (limb/pelvis/torso/hand tessellation ↑) — the deployed-site figures | — | — | — | — | — | — | — | 8.4 | ✅ (deployed-only) |
+
+**iter 16 notes:** the procedural rig is the *only* cast the **deployed site**
+renders (GLBs are gitignored), and its limbs were 8-segment octagonal capsules.
+Bumped the tessellation: limbs 8→14 radial / 3→4 cap, pelvis →(4,12), torso
+→(5,16), hands →(8,8)→(12,12) so the silhouette reads smooth (the strongest
+tell at figure scale, and the IBL + soft shadows now reward the curvature).
+*Measurement honesty:* this is **not locally screenshot-verifiable** — local
+renders the Quaternius `_lib` cast for every actor, and the procedural fallback
+only shows when no GLB resolves (the deployed path); the `public/3d/cast` dir
+was OS-locked so I couldn't force the fallback aside. It's a pure tessellation
+increase (no proportion/material/position change) so it cannot regress
+behaviour or rendering — verified by tsc, 61 game3d tests, a clean production
+build, and the app rendering error-free. The **local** rubric is unchanged
+(it scores the Quaternius hero scenes); the lift lands on the deployed audience.
+**Next biggest gaps:** back to locally-verifiable scene work — iter 17 →
+kopitiam/clinic hero polish or a volumetric light-shaft accent.

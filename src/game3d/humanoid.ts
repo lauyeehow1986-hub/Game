@@ -92,9 +92,13 @@ function mat(color: string, roughness = 0.8): THREE.MeshStandardMaterial {
   return new THREE.MeshStandardMaterial({ color, roughness, metalness: 0.02 });
 }
 
-/** A capsule whose group-origin is the TOP (the joint pivot). */
+/** A capsule whose group-origin is the TOP (the joint pivot). Rounder
+ *  cross-section (14 radial / 4 cap segments) so limbs read smooth, not
+ *  octagonal — the silhouette is the strongest tell at the figure's scale,
+ *  and the IBL (iter 12) + soft shadows (iter 15) now reward the extra
+ *  curvature. Still trivially cheap. */
 function limb(radius: number, length: number, material: THREE.Material): THREE.Mesh {
-  const m = new THREE.Mesh(new THREE.CapsuleGeometry(radius, length, 3, 8), material);
+  const m = new THREE.Mesh(new THREE.CapsuleGeometry(radius, length, 4, 14), material);
   m.position.y = -(length / 2);
   m.castShadow = true;
   return m;
@@ -162,7 +166,7 @@ export class Humanoid {
     this.hips.position.y = HIPS_Y;
 
     // pelvis
-    const pelvis = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, 0.10, 3, 8), uniformDark);
+    const pelvis = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, 0.10, 4, 12), uniformDark);
     pelvis.castShadow = true;
     this.hips.add(pelvis);
 
@@ -185,7 +189,7 @@ export class Humanoid {
 
     // spine + torso
     this.spine.position.y = 0.10;
-    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.185, TORSO - 0.18, 4, 10), uniform);
+    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.185, TORSO - 0.18, 5, 16), uniform);
     torso.position.y = TORSO / 2;
     torso.castShadow = true;
     this.spine.add(torso);
@@ -200,7 +204,7 @@ export class Humanoid {
       shoulderGrp.add(limb(0.06, ARM_UPPER, uniform));
       elbowGrp.position.y = -(ARM_UPPER + 0.02);
       elbowGrp.add(limb(0.052, ARM_FORE, skin));
-      const hand = new THREE.Mesh(new THREE.SphereGeometry(0.058, 8, 8), skin);
+      const hand = new THREE.Mesh(new THREE.SphereGeometry(0.058, 12, 12), skin);
       hand.position.y = -(ARM_FORE + 0.03);
       hand.castShadow = true;
       elbowGrp.add(hand);
