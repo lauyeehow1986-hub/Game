@@ -209,3 +209,20 @@ site, which most users see. No console errors, tsc clean, 61 game3d tests pass.
 **Next biggest gaps:** D (cast geometry up close) — the genuine remaining
 ceiling for a stylized-procedural renderer. iter 13 → figure proportion/material
 polish, or another scene's set density.
+
+| 13 | cathlab surgical-light dome + focused SpotLight pool on the OT table (shared by all 4 walkthroughs) | 8 | 7 | 9 | 7 | 9 | 8 | 9 | 8.2 | ✅ |
+
+**iter 13 notes:** the cathlab had a C-arm + monitors but lacked the *defining*
+OT element — an overhead surgical light. Added a dome of emissive lamp discs on
+a ceiling arm + a focused `SpotLight` (penumbra 0.5) that pools warm light on
+the table, leaving the surround dramatically dim. Verified in the trauma
+"Damage control — laparotomy and REBOA" chapter via Playwright/preview: the dome
+glows/blooms above the table and the scene reads as a real operating theatre.
+Broad impact — STEMI/stroke/sepsis/trauma all route through the cathlab.
+(Note: local testing renders the *Quaternius* cast, not the procedural rig, so
+figure-mesh tweaks aren't locally verifiable without moving `public/3d/cast`
+aside — scene work is the better-measured lever for now.) No console errors,
+tsc clean, 61 game3d tests pass.
+**Next biggest gaps:** rubric is saturating ~8.2 for the stylized-procedural
+ceiling; D (cast up close) needs the photoreal GLB cast to move further. iter 14
+→ another shared scene's hero lighting (imaging/ward), or soft-shadow quality.

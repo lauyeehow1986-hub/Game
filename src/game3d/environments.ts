@@ -535,6 +535,21 @@ function buildCathlab(): Environment3D {
   g.add(cArm);
   g.add(box(0.55, 0.4, 0.55, clearcoatMetal('#cbd5e1', 0.3), 0.8, 2.65, -7.5));   // detector
   g.add(box(0.55, 0.4, 0.55, clearcoatMetal('#cbd5e1', 0.3), 0.8, -0.2 + 0.65, -7.5)); // tube
+  // surgical light dome — the defining OT element. A cluster of emissive
+  // lamp discs on a ceiling arm + a focused SpotLight that pools bright warm
+  // light on the table, leaving the surround dramatically dim. Reads as a
+  // real operating theatre and gives the procedure beats their hero light.
+  const surg = new THREE.Group();
+  for (const [sx, sz] of [[0, 0], [0.46, 0.22], [-0.46, 0.22], [0.24, -0.42], [-0.24, -0.42]] as const) {
+    surg.add(cylinder(0.27, 0.27, 0.07, emissive('#fffdf3', 2.6), sx, 0, sz, 18));
+  }
+  surg.add(cylinder(0.04, 0.04, 1.5, std('#cbd5e1', 0.4, 0.7), 0, 0.78, 0, 8));
+  surg.position.set(-0.6, 3.35, -7.3);
+  g.add(surg);
+  const surgSpot = new THREE.SpotLight('#fff6e8', 70, 9.5, 0.62, 0.5, 1.6);
+  surgSpot.position.set(-0.6, 3.2, -7.2);
+  surgSpot.target.position.set(0, 0.95, -7.5);
+  g.add(surgSpot, surgSpot.target);
   // ceiling monitor boom (bank of 4 screens)
   const boom = new THREE.Group();
   for (let i = 0; i < 4; i += 1) {
