@@ -155,9 +155,15 @@ function walls(group: THREE.Group, color: string, backZ = -16) {
   group.add(back, left, right);
 }
 
-/** A fluorescent ceiling bar with a soft glow plane. */
+/** A fluorescent ceiling bar: emissive panel (blooms under PostFX) PLUS a soft
+ *  downward light pool, so the bar actually illuminates the room from above
+ *  instead of only glowing. Only the active scene is rendered, so a few of
+ *  these per scene is cheap. */
 function ceilingBar(group: THREE.Group, x: number, z: number, color = '#eef6ff') {
   group.add(box(3.2, 0.08, 0.35, emissive(color, 1.6), x, 5.6, z, false));
+  const pool = new THREE.PointLight(color, 10, 12, 2.0);
+  pool.position.set(x, 5.1, z);
+  group.add(pool);
 }
 
 /** Hospital trolley / bed: frame, mattress, pillow, side rails. */

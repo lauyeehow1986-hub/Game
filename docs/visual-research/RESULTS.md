@@ -116,3 +116,19 @@ deployed site too (PostFX is the WebGL default). No console errors, tsc clean.
 **Next biggest gaps:** D (cast still low-poly up close), C (clinical sets could
 gain a warm overhead-light pool + more equipment). iter 7 → clinical-scene
 light pools / equipment density, or a cleaner figure ground-shadow.
+
+| 7 | `ceilingBar` now emits a real downward PointLight pool (not just an emissive panel) — lifts all 8 scenes that use it | 7 | 7 | 7 | 6 | 8 | 7 | 9 | 7.3 | ✅ |
+
+**iter 7 notes:** the fluorescent ceiling bars were emissive-only — they
+bloomed but cast no light. Each now adds a soft downward `PointLight` (10 cd,
+12 m, decay 2) so the panel actually illuminates the room from above. Only the
+active scene renders, so 1-3 extra point lights is cheap. Verified in the ward
+("Relook and closure"): the bars pool light onto the beds + tiled floor and the
+room reads as a real, properly-lit ward — exposure balanced, not blown out; the
+cathlab stays moody-dark by design. Touches kopitiam, resus, cathlab, imaging,
+ward, pharmacy, clinic, backhouse. No console errors, tsc clean, 61 game3d
+tests pass. (Note: at <1024px the modal stacks the sidebar under the stage and
+squeezes it — a responsive follow-up for a later iter.)
+**Next biggest gaps:** D (cast low-poly up close), responsive stage at narrow
+widths, equipment density. iter 8 → narrow-width stage layout, or per-scene
+prop density.
