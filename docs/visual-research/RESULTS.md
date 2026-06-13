@@ -289,3 +289,18 @@ artifacts, no console errors, tsc clean, 61 game3d tests pass.
 **Next biggest gaps:** window god-rays for the ward/clinic (morning light), or
 kopitiam/MRT atmosphere. iter 18 → a window light-shaft, or another scene's
 hero accent.
+
+| 18 | morning sunbeam shafts through the ward window (Day 2, 09:00) | 8 | 8 | 9 | 7 | 9 | 8 | 9 | 8.5 | ✅ |
+
+**iter 18 notes:** carried the god-ray technique to the ward — four parallel
+slanted additive slabs as morning sunbeams through the window in the dusty air
+(opacity 0.065, no depth-write, `rotation.x -0.72`). First placement hugged the
+bright window and washed out; on screenshot review I pulled them forward into
+the room (z -12.2→-11) and steepened the slant so they read against the floor.
+Verified in the trauma "Relook and closure" (Day 2) chapter via
+Playwright/preview: soft light shafts now angle across the recovery ward — a
+calm, serene morning mood. No console errors, tsc clean, 61 game3d tests pass.
+(Rubric holds at the stylized ceiling ~8.5; this is genuine atmosphere polish,
+not a structural jump — B nudged for the added aerial depth.)
+**Next biggest gaps:** kopitiam/MRT atmosphere, or particulate dust motes in the
+light shafts. iter 19 → dust motes in the god-rays, or kopitiam warmth.

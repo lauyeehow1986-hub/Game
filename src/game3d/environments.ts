@@ -695,6 +695,19 @@ function buildWard(): Environment3D {
   // it; without IBL the emissive backdrop still reads as daylight.
   g.add(box(7, 2.4, 0.15, emissive('#dff1ff', 0.85), 0, 3.4, -15.6, false));
   g.add(box(7, 2.4, 0.06, transmissiveGlass('#f0f8ff', 0.06), 0, 3.4, -15.52, false));
+  // morning sunbeams (Day 2, 09:00) — parallel slanted additive slabs that
+  // read as light shafts through the window in the dusty ward air. Very low
+  // opacity + no depth-write so they stay hazy; PostFX bloom lifts them.
+  const beamMat = new THREE.MeshBasicMaterial({
+    color: '#fff1d2', transparent: true, opacity: 0.065,
+    depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+  });
+  for (const bx of [-2.6, -0.9, 0.9, 2.6]) {
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(0.5, 9.2, 0.16), beamMat);
+    beam.position.set(bx, 1.5, -11.0);
+    beam.rotation.x = -0.72; // slant from the high window down across the room
+    g.add(beam);
+  }
   ceilingBar(g, -4, -8); ceilingBar(g, 4, -8);
   return {
     group: g,
