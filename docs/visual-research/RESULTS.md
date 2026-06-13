@@ -274,3 +274,18 @@ build, and the app rendering error-free. The **local** rubric is unchanged
 (it scores the Quaternius hero scenes); the lift lands on the deployed audience.
 **Next biggest gaps:** back to locally-verifiable scene work — iter 17 →
 kopitiam/clinic hero polish or a volumetric light-shaft accent.
+
+| 17 | volumetric god-ray light shaft from the cathlab surgical dome onto the OT table | 8 | 7 | 9 | 7 | 9 | 8 | 9 | 8.5 | ✅ |
+
+**iter 17 notes:** added a faint additive cone (narrow at the lamp, widening
+onto the table) as the *visible beam* of the surgical light through theatre
+haze — `BackSide` + opacity 0.045 + no depth-write so it reads as a soft hollow
+shaft, never a solid CG cone, and PostFX bloom lifts it into a god-ray. First
+pass at opacity 0.07/DoubleSide looked too geometric; softened to 0.045/BackSide
+on screenshot review. Verified in the trauma REBOA chapter via Playwright/preview:
+an elegant beam descends from the glowing dome, completing the OT hero light.
+Shared by all four walkthroughs' procedure chapters; no transparency-sorting
+artifacts, no console errors, tsc clean, 61 game3d tests pass.
+**Next biggest gaps:** window god-rays for the ward/clinic (morning light), or
+kopitiam/MRT atmosphere. iter 18 → a window light-shaft, or another scene's
+hero accent.

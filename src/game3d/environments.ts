@@ -550,6 +550,19 @@ function buildCathlab(): Environment3D {
   surgSpot.position.set(-0.6, 3.2, -7.2);
   surgSpot.target.position.set(0, 0.95, -7.5);
   g.add(surgSpot, surgSpot.target);
+  // volumetric light shaft — a faint additive cone (narrow at the lamp,
+  // widening onto the table) reads as the visible beam of the surgical light
+  // through the theatre haze. Additive + very low opacity + no depth-write so
+  // it never looks like a solid cone; PostFX bloom lifts it into a god-ray.
+  const shaft = new THREE.Mesh(
+    new THREE.ConeGeometry(0.82, 2.35, 28, 1, true),
+    new THREE.MeshBasicMaterial({
+      color: '#fff3df', transparent: true, opacity: 0.045,
+      depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.BackSide,
+    }),
+  );
+  shaft.position.set(-0.3, 2.05, -7.42);
+  g.add(shaft);
   // ceiling monitor boom (bank of 4 screens)
   const boom = new THREE.Group();
   for (let i = 0; i < 4; i += 1) {
