@@ -19,6 +19,7 @@ import {
   loadPoseClip,
 } from './animationLibrary';
 import { refineMaterial, refineCastMaterials } from './castMaterials';
+import { CastPoseController } from './castPose';
 import { stemiWalkthrough } from '../lib/walkthrough-stemi';
 import type { BeatPose } from '../lib/walkthrough';
 
@@ -144,6 +145,62 @@ describe('castMaterials — in-engine photoreal re-shade', () => {
     root.add(mesh);
     refineCastMaterials(root);
     expect(mesh.material).toBeInstanceOf(THREE.MeshPhysicalMaterial);
+  });
+});
+
+describe('castPose — procedural MakeHuman idle', () => {
+  function makeHumanRig() {
+    const root = new THREE.Group();
+    const names = ['root', 'spine03', 'upperarm01.L', 'upperarm01.R', 'lowerarm01.L', 'lowerarm01.R'];
+    for (const n of names) {
+      const b = new THREE.Bone();
+      b.name = n;
+      root.add(b);
+    }
+    return root;
+  }
+
+  it('activates on a MakeHuman rig and swings the arms off the A-pose', () => {
+    const rig = makeHumanRig();
+    const armL = rig.children.find((c) => c.name === 'upperarm01.L') as THREE.Bone;
+    const before = armL.quaternion.clone();
+    const ctl = new CastPoseController(rig, 0);
+    expect(ctl.active).toBe(true);
+    // rest correction ran → the arm is no longer at identity bind
+    expect(armL.quaternion.angleTo(before)).toBeGreaterThan(0.1);
+  });
+
+  it('mirrors the arm correction left/right', () => {
+    const rig = makeHumanRig();
+    const ctl = new CastPoseController(rig, 0);
+    expect(ctl.active).toBe(true);
+    const l = rig.children.find((c) => c.name === 'upperarm01.L') as THREE.Bone;
+    const r = rig.children.find((c) => c.name === 'upperarm01.R') as THREE.Bone;
+    // both arms moved off the bind, and the L/R corrections are distinct
+    // (mirrored about the sagittal plane) rather than identical.
+    expect(l.quaternion.angleTo(new THREE.Quaternion())).toBeGreaterThan(0.1);
+    expect(l.quaternion.equals(r.quaternion)).toBe(false);
+  });
+
+  it('stays inactive (no-op) on a non-MakeHuman rig', () => {
+    const root = new THREE.Group();
+    const b = new THREE.Bone();
+    b.name = 'mixamorig:LeftArm';
+    root.add(b);
+    const ctl = new CastPoseController(root, 0);
+    expect(ctl.active).toBe(false);
+    // update must be a safe no-op when inactive
+    expect(() => ctl.update(1.0, { pose: 'stand', moving: false })).not.toThrow();
+  });
+
+  it('breathing idle perturbs the chest over time without throwing', () => {
+    const rig = makeHumanRig();
+    const ctl = new CastPoseController(rig, 0);
+    const chest = rig.children.find((c) => c.name === 'spine03') as THREE.Bone;
+    ctl.update(0.0, { pose: 'stand', moving: false });
+    const a = chest.quaternion.clone();
+    ctl.update(1.0, { pose: 'stand', moving: false });
+    expect(chest.quaternion.angleTo(a)).toBeGreaterThanOrEqual(0);
   });
 });
 

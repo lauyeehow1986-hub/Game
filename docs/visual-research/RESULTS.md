@@ -489,3 +489,33 @@ Quaternius→MakeHuman bone-name map + rest-pose compensation via
 826 tests + tsc + build green. **Next:** the animation retarget (living, naturally
 posed cast — the highest-remaining *asset-pipeline* win), then per-scene lighting
 passes for the non-resus clinical scenes.
+
+| 25 | **cast no longer frozen — procedural MakeHuman idle** (arms-down + breathing) | — | — | — | **+2** | — | **+½** | — | **D ↑↑ — people, not A-pose mannequins** | ✅ kept |
+
+**iter 25 notes — the frozen-A-pose bug, fixed the robust way.** Rather than
+fight `retargetClip` across two very different skeletons, the new
+`src/game3d/castPose.ts` drives the cast's *own* bones (we know their exact
+names): a one-time rest correction swings the upper arms down off the A-pose to a
+natural hang, plus a subtle phased breathing/sway so the standing cast is alive.
+`GlbFigure` uses it when the rig is recognised and leaves the (never-binding)
+clip driver idle.
+
+Two real debugging finds, both caught by the in-browser loop:
+  • **Dot-stripping.** `active` was silently false at first — `GLTFLoader`
+    sanitises node names and strips the `.`, so the bone arrives as `upperarm01L`,
+    not `upperarm01.L`. (The tell: the console warned about clip track
+    `PoleTargetR`, not `PoleTarget.R`.) Fixed by matching on a normalised name
+    (`replace(/[.\s]/g,'')`). With that, `active=true` for all actors and the
+    `PropertyBinding: No target node` spam from the dead clip driver vanished.
+  • **Swing axis.** First guess (local Z) only half-lowered the arms and at 58°
+    curled them into a forward "zombie reach"; the clean coronal swing is about
+    local **X** at ~45° — arms now hang naturally at the sides.
+**A/B on the trauma bay:** the team reads as **people standing**, not splayed
+mannequins — the biggest single jump in character believability since the
+photoreal cast itself landed (and it compounds with iter 24's tighter framing,
+which made the stiffness impossible to ignore). 830 tests (incl. 4 new castPose)
++ tsc + build green. **Scope/limits:** this nails the dominant *standing* pose;
+non-stand poses (kneel/collapsed/cpr) still show the actor standing (arms-down,
+not lying) — a known follow-up that needs per-pose procedural work or a true
+clip retarget. **Next:** per-pose procedural states (at least collapsed + kneel),
+then per-scene lighting passes for the non-resus clinical scenes.
