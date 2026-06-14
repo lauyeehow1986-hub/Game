@@ -238,6 +238,16 @@ describe('atmosphere — drifting dust motes', () => {
     dust.dispose();
   });
 
+  it('setTint shifts the mote colour toward the key light (kept bright)', () => {
+    const dust = new DustMotes({ count: 10 });
+    dust.setTint('#ff8000'); // warm
+    const c = (dust.points.material as THREE.PointsMaterial).color;
+    expect(c.r).toBeGreaterThan(c.b); // warm: red > blue
+    // lerped toward white, so it never collapses to the raw saturated tint
+    expect(c.b).toBeGreaterThan(0.2);
+    dust.dispose();
+  });
+
   it('drifts motes over time and keeps them inside the volume', () => {
     const dust = new DustMotes({ count: 50, y: [0, 4] });
     const pos = dust.points.geometry.getAttribute('position') as THREE.BufferAttribute;

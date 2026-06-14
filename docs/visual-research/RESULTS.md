@@ -602,3 +602,22 @@ reads in shadow + shafts and stays *invisible against bright washes* (so it neve
 looks like snow). Best appreciated in motion. 834 tests (+2 atmosphere) + build
 green. **Next:** the queued `point`/`sit` poses or the table-patient re-staging;
 or extend atmosphere with mild per-scene tint (cool clinical vs warm kopitiam).
+
+| 30 | **per-scene dust tint** (motes take the key-light colour) | — | +¼ | — | — | — | — | +¼ | **B/G — warm kopitiam air, cool clinical** | ✅ kept |
+
+**iter 30 notes — a reverted detour, then a clean refinement.** First tried the
+queued **`point`** gesture (raise one arm); abandoned and **reverted** it: the
+beat is brief + auto-advancing and eval-scrub doesn't reach the player, so I
+couldn't honestly A/B it, and a forced-on-all-cast check showed the local-X raise
+throws the arm *sideways* (a T-pose-y "presenting"), not a forward point — not
+worth shipping unverified/mediocre. Pivoted to a bounded, physically-grounded
+win: `DustMotes.setTint(keyColour)` called on each scene swap, so the iter-29 air
+takes the colour of the light lighting it — **warm in the kopitiam / street,
+cool-white in resus/cathlab/imaging** (lerped 0.4 toward white so motes stay
+bright, never dimmed by a saturated tint). Verified on the STEMI kopitiam
+collapse (warm motes, no console errors). Subtle by nature but correct, tested,
+zero new cost. 835 tests (+1) + build green. **Process note:** reverting the
+point detour was the right call — keep-if-better needs *seeing* it better, and a
+pose I can't frame in the A/B harness can't be honestly scored. **Next:** the
+table-patient re-staging (#37, the biggest visible gap, needs ~30 beat edits) or
+`sit` (needs leg articulation) — both meatier than a quick tick.

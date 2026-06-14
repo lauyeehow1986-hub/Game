@@ -300,6 +300,9 @@ export class Stage3D {
     this.key.intensity = L.key.intensity;
     this.key.position.set(...L.key.pos);
     this.key.target.position.set(0, 0, -7);
+    // Tint the dust to this scene's key light so the air reads warm (kopitiam)
+    // or cool (clinical) — dust is lit by the key, so it takes its colour.
+    this.dust?.setTint(L.key.color);
     this.scene.fog = new THREE.FogExp2(L.fog.color, L.fog.density);
     this.renderer.setClearColor(new THREE.Color(L.clear));
 

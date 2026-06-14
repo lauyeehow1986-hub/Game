@@ -95,6 +95,15 @@ export class DustMotes {
     this.points.renderOrder = 2;
   }
 
+  /** Tint the motes to the colour of the light lighting them — warm air in the
+   *  kopitiam, cool in the clinical suites. Lerped toward white by `mix` so the
+   *  motes stay bright (a fully-saturated tint would dim them). Called on each
+   *  scene swap with that scene's key-light colour. */
+  setTint(color: THREE.ColorRepresentation, mix = 0.4) {
+    const m = this.points.material as THREE.PointsMaterial;
+    m.color.set(color).lerp(new THREE.Color(0xffffff), mix);
+  }
+
   /** Drift the motes; wrap any that leave the volume back in at the bottom. */
   update(dt: number) {
     const attr = this.points.geometry.getAttribute('position') as THREE.BufferAttribute;
