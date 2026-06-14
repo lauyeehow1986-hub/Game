@@ -205,7 +205,7 @@ class GlbFigure implements ActorFigure {
       this.root.rotation.y = Math.atan2(dx, dz);
     }
     if (this.castPose.active) {
-      this.castPose.update(t, { pose: this.state.pose, moving: this.moving });
+      this.castPose.update(t, dt, { pose: this.state.pose, moving: this.moving });
     } else {
       this.driver.update(dt);
     }

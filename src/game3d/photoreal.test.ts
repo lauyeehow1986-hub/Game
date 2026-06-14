@@ -190,17 +190,29 @@ describe('castPose — procedural MakeHuman idle', () => {
     const ctl = new CastPoseController(root, 0);
     expect(ctl.active).toBe(false);
     // update must be a safe no-op when inactive
-    expect(() => ctl.update(1.0, { pose: 'stand', moving: false })).not.toThrow();
+    expect(() => ctl.update(1.0, 1 / 60, { pose: 'stand', moving: false })).not.toThrow();
   });
 
   it('breathing idle perturbs the chest over time without throwing', () => {
     const rig = makeHumanRig();
     const ctl = new CastPoseController(rig, 0);
     const chest = rig.children.find((c) => c.name === 'spine03') as THREE.Bone;
-    ctl.update(0.0, { pose: 'stand', moving: false });
+    ctl.update(0.0, 1 / 60, { pose: 'stand', moving: false });
     const a = chest.quaternion.clone();
-    ctl.update(1.0, { pose: 'stand', moving: false });
+    ctl.update(1.0, 1 / 60, { pose: 'stand', moving: false });
     expect(chest.quaternion.angleTo(a)).toBeGreaterThanOrEqual(0);
+  });
+
+  it('pitches the whole body when collapsed, and not when standing', () => {
+    const rig = makeHumanRig();
+    const ctl = new CastPoseController(rig, 0);
+    const upright = rig.quaternion.clone();
+    // many frames so the smoothed pitch settles
+    for (let i = 0; i < 200; i += 1) ctl.update(i / 60, 1 / 60, { pose: 'collapsed', moving: false });
+    expect(rig.quaternion.angleTo(upright)).toBeGreaterThan(1.0); // ~90° pitch
+    // returning to stand brings it back upright
+    for (let i = 0; i < 200; i += 1) ctl.update(i / 60, 1 / 60, { pose: 'stand', moving: false });
+    expect(rig.quaternion.angleTo(upright)).toBeLessThan(0.1);
   });
 });
 

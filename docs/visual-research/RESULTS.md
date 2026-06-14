@@ -519,3 +519,21 @@ non-stand poses (kneel/collapsed/cpr) still show the actor standing (arms-down,
 not lying) — a known follow-up that needs per-pose procedural work or a true
 clip retarget. **Next:** per-pose procedural states (at least collapsed + kneel),
 then per-scene lighting passes for the non-resus clinical scenes.
+
+| 26 | **collapsed actors actually lie down** (whole-body pitch in castPose) | — | — | — | **+1** | **+½** | — | — | **D/narrative ↑ — "rider down" reads** | ✅ kept |
+
+**iter 26 notes — the patient finally lies down.** iter 25 fixed standing; the
+glaring remainder was the `collapsed` patient *standing* in every emergency beat.
+One variable: `CastPoseController` now pitches the **whole clone** about its feet
+origin (`COLLAPSE_PITCH = −90°` about local X) when `pose === 'collapsed'`,
+smoothed (`lerp dt·6`) so the beat transition reads as settling, not a snap.
+Whole-body pitch (not per-bone leg work) is the robust path — no knee-axis
+guessing, and the GLB origin sitting at the feet means a −90° pitch lays the body
+flat with the feet staying on the actor's mark and the head extending forward.
+**A/B on the street "Impact" beat:** the motorbike-rider patient now lies supine
+on the road while the bystander stands over them — the scene finally matches its
+own narration ("rider down, heavy bleeding"). Standing actors untouched. 831
+tests (+1 collapsed-pitch) + tsc + build green. **Scope:** kneel/sit/cpr still
+stand — they need per-bone leg flexion (the knee/hip axes, dialed in-engine like
+the arm swing was). **Next:** kneel + cpr procedural states, then per-scene
+lighting passes for the non-resus clinical scenes.

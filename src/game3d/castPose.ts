@@ -35,6 +35,11 @@ const ELBOW_BEND_DEG = 0;
 const SWING_AXIS = new THREE.Vector3(1, 0, 0);
 /** Elbow flex axis (local X bends the forearm forward). */
 const ELBOW_AXIS = new THREE.Vector3(1, 0, 0);
+/** Whole-body pitch for a `collapsed` actor. The GLB origin sits at the feet,
+ *  so pitching the clone about local X lays it flat on the floor (head extends
+ *  forward, feet stay at the actor's mark). Sign tuned in-engine. */
+const COLLAPSE_PITCH = -Math.PI / 2;
+const BODY_X = new THREE.Vector3(1, 0, 0);
 
 interface Tracked {
   bone: THREE.Bone;
@@ -58,10 +63,17 @@ export class CastPoseController {
   private chest?: Tracked;
   private rootBone?: Tracked;
   private phase: number;
+  /** The clone root — pitched as a whole for `collapsed` (and future supine
+   *  poses), independent of the per-bone idle. */
+  private body: THREE.Object3D;
+  private bodyRest: THREE.Quaternion;
+  private bodyPitch = 0;
   readonly active: boolean;
 
   constructor(root: THREE.Object3D, phase = 0) {
     this.phase = phase;
+    this.body = root;
+    this.bodyRest = root.quaternion.clone();
     // GLTFLoader sanitises node names — it strips `.` (and whitespace) — so the
     // MakeHuman bone `upperarm01.L` arrives as `upperarm01L`. Match on the
     // normalised name so we resolve regardless of the loader's munging.
@@ -108,8 +120,14 @@ export class CastPoseController {
 
   /** Subtle life: breathing on the chest + a slow arm sway. Only meaningful
    *  for the standing idle; callers can skip it while a figure is walking. */
-  update(t: number, opts: { pose: BeatPose; moving: boolean }) {
+  update(t: number, dt: number, opts: { pose: BeatPose; moving: boolean }) {
     if (!this.active) return;
+    // Whole-body pose: lay a `collapsed` actor flat (smoothed so the beat
+    // transition reads as falling/settling rather than a snap).
+    const targetPitch = opts.pose === 'collapsed' ? COLLAPSE_PITCH : 0;
+    this.bodyPitch += (targetPitch - this.bodyPitch) * Math.min(1, dt * 6);
+    this.body.quaternion.copy(this.bodyRest)
+      .multiply(new THREE.Quaternion().setFromAxisAngle(BODY_X, this.bodyPitch));
     const breathe = Math.sin(t * 1.5 + this.phase) * 0.5 + 0.5; // 0..1, ~0.24Hz
     // Chest rises a hair on the in-breath.
     if (this.chest) {
