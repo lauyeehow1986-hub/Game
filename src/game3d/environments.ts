@@ -642,8 +642,8 @@ function buildImaging(): Environment3D {
   return {
     group: g,
     lighting: {
-      hemi: { sky: '#dbe7f6', ground: '#69788c', intensity: 0.9 },
-      key: { color: '#e8f1ff', intensity: 1.15, pos: [5, 9, 6] },
+      hemi: { sky: '#dbe7f6', ground: '#69788c', intensity: 0.6 },
+      key: { color: '#eef4ff', intensity: 1.9, pos: [4, 8, 5] },
       fog: { color: '#7e8ca0', density: 0.012 },
       clear: '#c2cedd',
     },
@@ -723,8 +723,8 @@ function buildWard(): Environment3D {
   return {
     group: g,
     lighting: {
-      hemi: { sky: '#eef7f0', ground: '#90998c', intensity: 1.0 },
-      key: { color: '#fdfdf2', intensity: 1.25, pos: [6, 9, 7] },
+      hemi: { sky: '#eef7f0', ground: '#90998c', intensity: 0.72 },
+      key: { color: '#fff4dc', intensity: 1.85, pos: [6, 8.5, 7] },
       fog: { color: '#aab3a4', density: 0.011 },
       clear: '#ccd4c6',
     },

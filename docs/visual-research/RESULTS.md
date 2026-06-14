@@ -558,3 +558,28 @@ the emergency beats that carry the most dramatic weight. **Next:** pivot back to
 environment — per-scene lighting passes for the non-resus clinical scenes
 (cathlab dim-cool surgical, imaging, ward) and atmosphere (dust motes / volumetric
 warmth) now that the cast is believable.
+
+| 28 | **imaging + ward lighting contrast** (lower fill, raise/warm key) | **+½** | — | — | — | — | — | — | **A ↑ — dimensional CT suite, warm ward** | ✅ kept |
+
+**iter 28 notes — environment lighting pass, and a diagnosis that redirected
+it.** Diagnose-first paid off: the **cathlab was already moody** (surgical
+SpotLight pooling on the table, dim 0.55 hemisphere, volumetric shaft) — touching
+it would have *worsened* a well-art-directed scene, so it was left alone. The two
+genuinely flat clinical scenes got the iter-23 treatment, art-directed per mood:
+**imaging** (CT suite) hemi 0.9→0.6, key 1.15→**1.9** — the scanner now reads as a
+hero element with directional sheen instead of flat even blue; **ward** hemi
+1.0→0.72, key 1.25→**1.85** and **warmed** (`#fdfdf2`→`#fff4dc`) so the day-2
+morning round glows with directional window light. Both A/B'd on their STEMI
+beats (ch6 CTA, ch11 ward); both stay legible (rubric A — bright clinical, never
+a void). 832 tests + build green.
+
+**Logged for a dedicated iteration — the table-patient staging gap.** Every
+"on the cath/CT/MRI table / trolley / stretcher" beat authors the patient as
+`pose: 'collapsed'`, so iter 26 lays them flat **on the floor** (feet-pivot),
+not on the ~0.9 m surface — and the stage positions don't even align with the
+table props (cath patient world ≈ (−1.25, −5.2) vs table at (0, −7.5)). Fixing it
+right needs per-beat re-staging (align to the surface + a per-scene surface
+height), ~30 beats across the four walkthroughs — too large for a keep-if-better
+tick, so it's its own task. **Next:** the table-patient re-staging, or a
+`point`/`sit` procedural pose (gesturing dispatcher, seated family) — both
+cleaner than the staging job.
