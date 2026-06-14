@@ -669,3 +669,30 @@ road-collapse *and* on-stretcher patients), or a **genuinely new asset source**
 (scanned/RPM avatars) to push face fidelity past the MakeHuman ceiling. Next
 iterations should pick one of those and commit to it rather than chase marginal
 ticks.
+
+| 33 | **deploy-green consolidation; `sit` attempted → reverted** | — | — | — | — | — | — | — | **plateau confirmed (3rd revert)** | ❌ reverted |
+
+**iter 33 notes — plateau, definitively.** Two things. (1) **Consolidation:** the
+GitHub Pages deploy is **green on every push** (iters 28-32 all "completed
+success"), so all 11 shipped iterations are live — the photoreal cast, in-engine
+sheen/eyes, glossy floors, per-scene lighting, dust, and bed-staging are serving
+on the deployed site. The user's deliverable is current. (2) **`sit` attempted
+and reverted:** the last visible pose gap. Implemented pelvis-drop + hip/knee
+flex and force-tested on the standing team — it read as an **awkward low
+seated-on-the-floor crouch** (shins splay forward, feet unplanted), because a
+clean chair-sit needs real 2-bone leg **IK** (coupled hip-drop / thigh / shin /
+ankle), not hand-tuned forward kinematics. Reverted rather than ship rough.
+
+**The plateau is now established by evidence:** three consecutive direct attempts
+— iter 30 `point`, iter 32 ward-bed, iter 33 `sit` — each hit the same wall
+(fiddly to dial, poorly framed to A/B, or marginal) and were honestly reverted.
+The cheap keep-if-better wins are genuinely exhausted; the walkthrough is strong
+end-to-end (cast believability D ~9, environment/lighting/atmosphere/staging all
+addressed). **What's actually left is bigger-than-a-tick work:** `sit` with real
+leg IK; a **new scanned/RPM avatar source** to lift *face* fidelity past the
+MakeHuman ceiling (the only thing still capping a literal "10", and only visible
+at role-card range); or higher-res skin **normal maps** (the pack ships
+diffuse-only, so they'd need generating/fetching + a GLB regen, and are
+sub-perceptual at gameplay distance). Each is a deliberate engineering project,
+not a 20-minute loop tick — the right call is to pick one intentionally rather
+than keep forcing marginal changes through the rapid loop.
