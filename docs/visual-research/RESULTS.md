@@ -583,3 +583,22 @@ height), ~30 beats across the four walkthroughs — too large for a keep-if-bett
 tick, so it's its own task. **Next:** the table-patient re-staging, or a
 `point`/`sit` procedural pose (gesturing dispatcher, seated family) — both
 cleaner than the staging job.
+
+| 29 | **atmospheric dust motes** (drifting additive Points across every scene) | — | **+½** | — | — | — | — | **+½** | **B/G ↑ — cinematic air, beams read** | ✅ kept |
+
+**iter 29 notes — cinematic air.** With the cast solid, picked the broad
+atmosphere lever over more pose polish: a global drifting **dust-mote** layer
+(`src/game3d/atmosphere.ts`) — ~420 soft additive `Points` over the stage volume,
+slow updraft + lateral wander, wrapping at the top, one draw call on the Stage3D
+scene so it's scene-agnostic. The point: the scenes already throw volumetric
+shafts (surgical cone, ward sunbeams, resus god-rays) but the air between them
+read as vacuum; motes that drift through a shaft twinkle under the PostFX bloom
+and sell the beam as a real light path. Sprite is a DataTexture radial falloff
+(no canvas → headless-testable). **A/B'd on the dim cathlab** (where additive
+motes show best): tuned over two passes — count 260→420, opacity 0.4→0.62, and
+**confined to the mid-tone band** (`y 0.15–5.2`→`0.1–3.6`) since additive motes
+wash out against the bright IBL ceiling. Net: a genuine "room full of air" that
+reads in shadow + shafts and stays *invisible against bright washes* (so it never
+looks like snow). Best appreciated in motion. 834 tests (+2 atmosphere) + build
+green. **Next:** the queued `point`/`sit` poses or the table-patient re-staging;
+or extend atmosphere with mild per-scene tint (cool clinical vs warm kopitiam).

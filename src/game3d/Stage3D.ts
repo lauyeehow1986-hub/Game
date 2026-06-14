@@ -32,6 +32,7 @@ import { loadSceneEnvironment, applyEnvironment } from './ibl';
 import type { PostFxPipeline } from './postFx';
 import type { RendererBackend } from './webgpu';
 import { CAMERA, worldX, worldZ, yawFor } from './space';
+import { DustMotes } from './atmosphere';
 
 export interface Figure3D {
   id: string;
@@ -82,6 +83,8 @@ export class Stage3D {
   private fallbackEnv: THREE.Texture | null = null;
   /** Graded sky-backdrop texture for the current scene (disposed on swap). */
   private backdrop: THREE.Texture | null = null;
+  /** Global drifting dust-mote layer — cinematic air across every scene. */
+  private dust: DustMotes | null = null;
   private figures = new Map<string, FigureEntry>();
   private clock = new THREE.Clock();
   private raycaster = new THREE.Raycaster();
@@ -161,6 +164,11 @@ export class Stage3D {
     this.key.shadow.bias = -0.0004;
     this.key.shadow.normalBias = 0.03;
     this.scene.add(this.hemi, this.key, this.key.target);
+
+    // Cinematic air: a global drifting dust-mote layer (one draw call) so the
+    // light shafts read as real beams and the room never looks vacuum-empty.
+    this.dust = new DustMotes();
+    this.scene.add(this.dust.points);
 
     this.resize();
     this.resizeObserver = new ResizeObserver(() => this.resize());
@@ -352,6 +360,7 @@ export class Stage3D {
     const t = this.clock.elapsedTime;
 
     this.env?.group.userData.animate?.(t);
+    this.dust?.update(dt);
 
     // Advance any live ECG monitor traces (scroll the waveform leftward).
     for (const s of this.scrollScreens) {
@@ -429,6 +438,7 @@ export class Stage3D {
     if (this.env) disposeGroup(this.env.group);
     this.backdrop?.dispose();
     this.fallbackEnv?.dispose();
+    this.dust?.dispose();
     this.postFx?.dispose();
     this.renderer.dispose();
     this.renderer.domElement.remove();

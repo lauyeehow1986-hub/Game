@@ -20,6 +20,7 @@ import {
 } from './animationLibrary';
 import { refineMaterial, refineCastMaterials } from './castMaterials';
 import { CastPoseController } from './castPose';
+import { DustMotes } from './atmosphere';
 import { stemiWalkthrough } from '../lib/walkthrough-stemi';
 import type { BeatPose } from '../lib/walkthrough';
 
@@ -224,6 +225,35 @@ describe('castPose — procedural MakeHuman idle', () => {
     // returning to stand brings it back upright
     for (let i = 0; i < 200; i += 1) ctl.update(i / 60, 1 / 60, { pose: 'stand', moving: false });
     expect(rig.quaternion.angleTo(upright)).toBeLessThan(0.1);
+  });
+});
+
+describe('atmosphere — drifting dust motes', () => {
+  it('builds a Points cloud with the requested count', () => {
+    const dust = new DustMotes({ count: 120 });
+    expect(dust.points).toBeInstanceOf(THREE.Points);
+    const pos = dust.points.geometry.getAttribute('position');
+    expect(pos.count).toBe(120);
+    expect((dust.points.material as THREE.PointsMaterial).blending).toBe(THREE.AdditiveBlending);
+    dust.dispose();
+  });
+
+  it('drifts motes over time and keeps them inside the volume', () => {
+    const dust = new DustMotes({ count: 50, y: [0, 4] });
+    const pos = dust.points.geometry.getAttribute('position') as THREE.BufferAttribute;
+    const before = (pos.array as Float32Array).slice();
+    for (let i = 0; i < 120; i += 1) dust.update(1 / 60);
+    const after = pos.array as Float32Array;
+    // something moved
+    let moved = false;
+    for (let i = 0; i < after.length; i += 1) if (Math.abs(after[i] - before[i]) > 1e-4) { moved = true; break; }
+    expect(moved).toBe(true);
+    // y stays within [0,4] (wrapped)
+    for (let i = 1; i < after.length; i += 3) {
+      expect(after[i]).toBeGreaterThanOrEqual(0);
+      expect(after[i]).toBeLessThanOrEqual(4);
+    }
+    dust.dispose();
   });
 });
 
