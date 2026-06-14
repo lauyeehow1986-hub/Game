@@ -696,3 +696,36 @@ diffuse-only, so they'd need generating/fetching + a GLB regen, and are
 sub-perceptual at gameplay distance). Each is a deliberate engineering project,
 not a 20-minute loop tick — the right call is to pick one intentionally rather
 than keep forcing marginal changes through the rapid loop.
+
+| 34 | **face-fidelity push (user-chosen) → documented rejection** | — | — | — | — | — | — | — | **ceiling reached: new mesh needs user input** | ❌ rejected |
+
+**iter 34 notes — the photoreal-10 face push, researched + attempted + rejected.**
+User explicitly chose to chase a *new avatar source* to lift face fidelity past
+the MakeHuman mesh. Two prongs, both dead-ended **autonomously**:
+  • **New-mesh avatar source — auth-blocked.** Web research (Jun 2026):
+    **Ready Player Me is sunset (Jan 31 2026)** — the free GLB-by-URL pipeline is
+    gone. Every live alternative that's actually more photoreal — **Avaturn,
+    Avatar SDK, Renderpeople, Sketchfab, CGTrader** — gates downloads behind
+    **account creation + API keys / login**, which the agent cannot do (safety:
+    no creating accounts, no handling credentials). The only no-auth CC0 source
+    (**Meshy**) is AI-*generated*, not photoscanned, so not clearly better than
+    the tuned MakeHuman cast. This is the same wall iter 19/20 hit, now harder
+    (RPM gone). A genuinely new mesh therefore needs the **user** to create an
+    avatar (the account step is theirs) and drop the GLB in `public/3d/cast/_lib/`
+    — the agent will then wire + bone-map + A/B it.
+  • **Skin detail-normal (the autonomous alternative) — sub-perceptual.** Added a
+    procedural fine-pore tangent normal (numpy height-field → tiled normal, baked
+    into the GLB, export-safe) to the skin material. Face-crop renders at strength
+    0.45 *and* 1.2 were **indistinguishable** from the flat-diffuse face: micro-
+    normals only reveal under raking light, and both the QA render and the in-game
+    IBL use soft frontal light — so it's invisible where it matters and adds
+    weight for nothing. Reverted.
+
+**Verdict — the autonomous photoreal loop is complete.** Across 34 iterations the
+walkthrough went from black-void capsules (mean 3.7) to a believable, posed,
+bed-staged, IBL-lit, dust-filled photoreal cast on glossy clinical floors, fully
+deployed and green on GitHub Pages. The *face*-geometry ceiling is the MakeHuman
+mesh itself, and replacing it is gated on a **user-supplied avatar GLB**, not on
+more agent effort. Remaining optional polish (`sit` leg-IK) is a contained
+engineering task, not a perceptual mover. The loop has delivered its goal; the
+next real jump in photoreal fidelity is a human-in-the-loop asset hand-off.
