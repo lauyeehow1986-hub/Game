@@ -436,3 +436,24 @@ thesis that, with the cast saturated, the floor/light/set are where the visible
 points now live. 826 tests + tsc + build green. **Next:** lighting contrast
 (A — drop the flat hemisphere fill, carve the scene with the key + shadows) and
 composition (E — a tighter cinematic two-shot so the photoreal cast reads).
+
+| 23 | **resus key/fill contrast** (key 1.35→2.2, hemi 1.05→0.7, raking angle) | **+½** | — | — | — | — | — | — | **A ↑ — sculpts form, stays legible** | ✅ kept |
+
+**iter 23 notes — lighting, scoped to one scene because lighting is
+art-directed.** Diagnosis first: locally `resus.hdr` is present, so Stage3D
+already auto-drops the hemisphere ×0.42 — the flatness wasn't the hemisphere, it
+was the **bright sterile IBL ambient filling every shadow** while the key (1.35)
+was too weak to dominate it. One variable (the key/fill balance): key intensity
+1.35→**2.2**, hemisphere 1.05→**0.7**, and a slightly lower raking angle
+(`[3,9,6]`→`[4,8,5]`) for longer form-revealing shadows. **A/B on the trauma bay:**
+the figures now carry a brighter keyed side + a touch more shadow definition and
+the frame has more pop — but **deliberately kept legible, not chiaroscuro**: a
+real resus bay is flood-lit for the team, so crushing it into dramatic shadow
+would be *less* authentic, not more (rubric A=10 is "legibly lit… never a black
+void"). Unlike iter 22's uniform floor material, lighting is per-scene
+art-directed (cathlab dim-cool, ward soft-daylight…), so this stays scoped to
+resus; other scenes get their own passes if a screenshot shows they need one.
+826 tests + tsc + build green. **Next:** E (composition — the remaining lever:
+the cast is still small because the cinematic camera frames the whole wide
+stage; a tighter two-shot or per-beat dolly would finally let the photoreal cast
++ glossy floor + keyed light read at the scale they deserve).

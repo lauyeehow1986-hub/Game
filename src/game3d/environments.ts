@@ -519,8 +519,8 @@ function buildResus(): Environment3D {
   return {
     group: g,
     lighting: {
-      hemi: { sky: '#f0fbf7', ground: '#8fa6a2', intensity: 1.05 },
-      key: { color: '#eafff5', intensity: 1.35, pos: [3, 9, 6] },
+      hemi: { sky: '#f0fbf7', ground: '#8fa6a2', intensity: 0.7 },
+      key: { color: '#eafff5', intensity: 2.2, pos: [4, 8, 5] },
       fog: { color: '#aebfbd', density: 0.011 },
       clear: '#d7e4e1',
     },
