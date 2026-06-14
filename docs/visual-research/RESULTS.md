@@ -457,3 +457,35 @@ resus; other scenes get their own passes if a screenshot shows they need one.
 the cast is still small because the cinematic camera frames the whole wide
 stage; a tighter two-shot or per-beat dolly would finally let the photoreal cast
 + glossy floor + keyed light read at the scale they deserve).
+
+| 24 | **tighter cinematic framing** (fov 32→29, dolly in, raise look-at) | — | — | — | **+1** | **+1½** | — | — | **E/D ↑ — cast finally reads at scale** | ✅ kept |
+
+**iter 24 notes — composition, and a confirmed asset-pipeline bug parked for its
+own iteration.** The recurring root cause across iters 21-23 was scale: the
+global rig (`space.ts CAMERA`) framed the whole 20m-wide stage, so the photoreal
+cast sat at ~80 px no matter how good its skin/floor/light got. One variable
+(camera framing): **fov 32→29**, a small dolly-in (`pos.z 8.5→8.2`, `y 3.6→3.5`)
+and a raised look-at (`y 1.1→1.15`) to spend less frame on dead foreground floor.
+Risk was clipping, so it was **A/B'd on the two worst cases**: the trauma bay
+(widest *actor* spread — 5 figures) and the street "Impact" beat (widest
+*scenery* — the ambulance). Both held: figures are visibly larger and read as
+hero subjects, edge actors stay in-frame, the ambulance crops gracefully to
+background. This is the change that finally **cashes in iters 21-23** — the
+glossy floor, keyed light and sheened cast all read now that the camera is close
+enough. Staging data backed the safety: actors cluster centrally (street beat
+world-X ≈ −1.4…+0.75), so a modest tighten can't clip them.
+
+**Confirmed bug, deferred (not a regression):** while diagnosing the stiff
+stance I found the cast is **frozen in its A-pose bind** — the CC0 idle/walk
+clips are Quaternius-rigged (`UpperArm.L`, `Hips`, `Torso`…) but the MakeHuman
+cast rig is named `upperarm01.L` / `spine0X` / `pelvis.L`, and
+`PoseAnimationDriver` binds clips by name with no remap → **zero tracks bind, no
+actor ever animates.** A generator-side fix (bake a relaxed arms-down rest via
+`pose.armature_apply`) was attempted and **reverted**: in headless MPFB the bone
+rest-rotation re-baked but the *mesh verts didn't follow*, so the export still
+rendered the A-pose. The right fix is in-engine retargeting (a
+Quaternius→MakeHuman bone-name map + rest-pose compensation via
+`SkeletonUtils.retargetClip`), which is unit-testable and gets its own iteration.
+826 tests + tsc + build green. **Next:** the animation retarget (living, naturally
+posed cast — the highest-remaining *asset-pipeline* win), then per-scene lighting
+passes for the non-resus clinical scenes.

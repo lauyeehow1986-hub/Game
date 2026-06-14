@@ -45,9 +45,9 @@ export function yawFor(direction: 'N' | 'S' | 'E' | 'W'): number {
 
 /** Camera rig constants shared by the engine and tests. */
 export const CAMERA = {
-  fov: 32,
-  pos: { x: 0, y: 3.6, z: 8.5 },
-  lookAt: { x: 0, y: 1.1, z: -3.0 },
+  fov: 29,
+  pos: { x: 0, y: 3.5, z: 8.2 },
+  lookAt: { x: 0, y: 1.15, z: -3.0 },
   near: 0.1,
   far: 80,
 } as const;
