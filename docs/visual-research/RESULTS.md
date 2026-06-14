@@ -621,3 +621,27 @@ point detour was the right call — keep-if-better needs *seeing* it better, and
 pose I can't frame in the A/B harness can't be honestly scored. **Next:** the
 table-patient re-staging (#37, the biggest visible gap, needs ~30 beat edits) or
 `sit` (needs leg articulation) — both meatier than a quick tick.
+
+| 31 | **patients lie ON the bed** (per-scene BedSpot: snap + face + lift collapsed patient) | — | — | **+1** | **+1** | **+½** | — | — | **C/D/E ↑ — "on the cath table" finally true** | ✅ kept |
+
+**iter 31 notes — the biggest remaining gap, fixed without 30 beat edits.** The
+2D staging puts a `collapsed` patient *in front of* the trolley/table (reads fine
+flat); in 3D that left them lying on the floor ~2 m short of it, and the authored
+positions don't align with the props. Instead of re-staging every beat, scenes
+now declare one **`BedSpot`** — `{x, z, y, yaw}` for the bed surface — and
+`Stage3D.setFrame` snaps any collapsed patient onto it: centre (x/z), **yaw to
+lie *along* the bed's length** (trolley/cath table run along X → yaw π/2; CT
+table runs along Z → yaw 0), and a `surfaceY` lift threaded to
+`CastPoseController`, which raises the body **in sync with the collapse pitch**
+(no floating-upright transition). Beds added to **resus (0.85 m), cathlab
+(1.02 m), imaging (1.10 m)**; floor scenes (street/kopitiam) declare none, so
+their patients stay on the ground (correct). **A/B verified:** the STEMI patient
+now lies **on the resus trolley** ("on the resus trolley — anterior STEMI") and
+**on the cath table under the C-arm** ("on the cath table through the diagnostic
+study") — both finally match their narration, the single most-watched actor in
+every clinical beat. Imaging uses the same mechanism but is hard to confirm in a
+still (washed out by the gantry bore glow) — applied, not visually banked. 836
+tests (+1 bed-lift) + tsc + build green. **Scope:** ward/CCU "in bed" patients
+are `sit` not `collapsed` (sitting up) — a future `sit`-on-bed pass. **Next:**
+`sit` (seated family / patients sitting up) or extend BedSpots to stroke/sepsis
+clinical beats.

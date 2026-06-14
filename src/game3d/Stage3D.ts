@@ -211,29 +211,40 @@ export class Stage3D {
     if (sceneChanged) this.swapEnvironment(frame.scene);
 
     const seen = new Set<string>();
+    const bed = this.env?.bed;
     for (const f of frame.figures) {
       seen.add(f.id);
+      // A `collapsed` patient in a scene with a bed lies *on* the trolley/table:
+      // snap to its centre, face along its length, and lift to its surface
+      // (the 2D staging puts them on the floor in front of it). Everyone else
+      // keeps their authored mark.
+      const onBed = !!bed && f.pose === 'collapsed';
+      const gx = onBed ? bed!.x : worldX(f.x);
+      const gz = onBed ? bed!.z : worldZ(f.y);
+      const yaw = onBed ? bed!.yaw : yawFor(f.facing);
       let entry = this.figures.get(f.id);
       if (!entry) {
         const figure = createActorFigure(f.actor, this.scene);
-        entry = { figure, yawTarget: yawFor(f.facing) };
+        entry = { figure, yawTarget: yaw };
         this.figures.set(f.id, entry);
-        figure.setGoal(worldX(f.x), worldZ(f.y));
+        figure.setGoal(gx, gz);
         figure.snapToGoal();
         // walk-in: new figures during a chapter enter from their off-side
-        if (!sceneChanged) {
+        // (skip for a bed patient — they're already on the table).
+        if (!sceneChanged && !onBed) {
           figure.root.position.x += f.x < 240 ? -4 : 4;
         }
       }
-      entry.figure.setGoal(worldX(f.x), worldZ(f.y));
+      entry.figure.setGoal(gx, gz);
       if (sceneChanged) entry.figure.snapToGoal();
-      entry.yawTarget = yawFor(f.facing);
+      entry.yawTarget = yaw;
       entry.figure.setState({
         pose: f.pose,
         expression: f.expression,
         walking: f.walking,
         speaking: f.speaking,
         isLead: f.isLead,
+        surfaceY: onBed ? bed!.y : 0,
       });
       if (f.isLead) this.leadWorldX = worldX(f.x);
     }

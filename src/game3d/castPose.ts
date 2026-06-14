@@ -135,14 +135,19 @@ export class CastPoseController {
 
   /** Subtle life: breathing on the chest + a slow arm sway. Only meaningful
    *  for the standing idle; callers can skip it while a figure is walking. */
-  update(t: number, dt: number, opts: { pose: BeatPose; moving: boolean }) {
+  update(t: number, dt: number, opts: { pose: BeatPose; moving: boolean; surfaceY?: number }) {
     if (!this.active) return;
     // Whole-body pose: lay a `collapsed` actor flat (smoothed so the beat
-    // transition reads as falling/settling rather than a snap).
-    const targetPitch = opts.pose === 'collapsed' ? COLLAPSE_PITCH : 0;
+    // transition reads as falling/settling rather than a snap). When the scene
+    // gives a bed height, lift the body onto it *in sync* with the pitch so it
+    // settles onto the trolley/table rather than the floor.
+    const collapsed = opts.pose === 'collapsed';
+    const targetPitch = collapsed ? COLLAPSE_PITCH : 0;
     this.bodyPitch += (targetPitch - this.bodyPitch) * Math.min(1, dt * 6);
     this.body.quaternion.copy(this.bodyRest)
       .multiply(new THREE.Quaternion().setFromAxisAngle(BODY_X, this.bodyPitch));
+    const targetLift = collapsed ? (opts.surfaceY ?? 0) : 0;
+    this.body.position.y += (targetLift - this.body.position.y) * Math.min(1, dt * 6);
     // Waist fold: bend over a patient for `kneel` (assess / press a wound) and
     // `cpr` (compressions, with a chest-compression bob). Feet stay planted.
     let foldTarget = 0;

@@ -25,9 +25,23 @@ export interface LightingPreset {
   clear: string;
 }
 
+/** Where a `collapsed` patient should lie in a clinical scene. The 2D/SVG
+ *  staging puts the patient *in front of* the bed (reads fine flat); in true 3D
+ *  that leaves them lying on the floor a couple of metres short of the trolley.
+ *  When a scene declares a `bed`, Stage3D snaps the collapsed patient onto it:
+ *  centre (world x/z), surface height `y`, and the `yaw` that lays the body
+ *  *along* the bed's length rather than across it. */
+export interface BedSpot {
+  x: number;
+  z: number;
+  y: number;
+  yaw: number;
+}
+
 export interface Environment3D {
   group: THREE.Group;
   lighting: LightingPreset;
+  bed?: BedSpot;
 }
 
 /* ── shared kit ───────────────────────────────────────────────────────── */
@@ -524,6 +538,7 @@ function buildResus(): Environment3D {
       fog: { color: '#aebfbd', density: 0.011 },
       clear: '#d7e4e1',
     },
+    bed: { x: 0, z: -7.5, y: 0.85, yaw: Math.PI / 2 }, // resus trolley (length along X)
   };
 }
 
@@ -595,6 +610,7 @@ function buildCathlab(): Environment3D {
       fog: { color: '#2c3442', density: 0.016 },
       clear: '#1d2430',
     },
+    bed: { x: 0, z: -7.5, y: 1.02, yaw: Math.PI / 2 }, // cath table (length along X)
   };
 }
 
@@ -647,6 +663,7 @@ function buildImaging(): Environment3D {
       fog: { color: '#7e8ca0', density: 0.012 },
       clear: '#c2cedd',
     },
+    bed: { x: 0, z: -7.4, y: 1.1, yaw: 0 }, // CT/MRI table (length along Z, head toward the bore)
   };
 }
 

@@ -226,6 +226,15 @@ describe('castPose — procedural MakeHuman idle', () => {
     for (let i = 0; i < 200; i += 1) ctl.update(i / 60, 1 / 60, { pose: 'stand', moving: false });
     expect(rig.quaternion.angleTo(upright)).toBeLessThan(0.1);
   });
+
+  it('lifts a collapsed patient onto a bed surface and back down for stand', () => {
+    const rig = makeHumanRig();
+    const ctl = new CastPoseController(rig, 0);
+    for (let i = 0; i < 200; i += 1) ctl.update(i / 60, 1 / 60, { pose: 'collapsed', moving: false, surfaceY: 0.85 });
+    expect(rig.position.y).toBeGreaterThan(0.8); // lifted onto the ~0.85m trolley
+    for (let i = 0; i < 200; i += 1) ctl.update(i / 60, 1 / 60, { pose: 'stand', moving: false, surfaceY: 0.85 });
+    expect(rig.position.y).toBeLessThan(0.05); // back to the floor when upright
+  });
 });
 
 describe('atmosphere — drifting dust motes', () => {

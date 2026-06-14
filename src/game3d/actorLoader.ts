@@ -113,6 +113,9 @@ export interface ActorFigure {
     walking: boolean;
     speaking: boolean;
     isLead: boolean;
+    /** Lift a `collapsed` patient onto a clinical bed/table at this world
+     *  height (0 = floor). Set by Stage3D from the scene's BedSpot. */
+    surfaceY: number;
   }>): void;
   update(t: number, dt: number): void;
   dispose(): void;
@@ -130,7 +133,7 @@ class GlbFigure implements ActorFigure {
   readonly actorId: string;
   private goal = new THREE.Vector2(0, 0);
   private moving = false;
-  private state = { pose: 'stand' as BeatPose, expression: 'neutral' as BeatExpression, walking: false, speaking: false, isLead: false };
+  private state = { pose: 'stand' as BeatPose, expression: 'neutral' as BeatExpression, walking: false, speaking: false, isLead: false, surfaceY: 0 };
   /** Mixamo-clip retargeting driver — auto-loads any pose clips that
    *  exist at public/3d/anims/ and cross-fades on pose change. */
   private driver: PoseAnimationDriver;
@@ -205,7 +208,7 @@ class GlbFigure implements ActorFigure {
       this.root.rotation.y = Math.atan2(dx, dz);
     }
     if (this.castPose.active) {
-      this.castPose.update(t, dt, { pose: this.state.pose, moving: this.moving });
+      this.castPose.update(t, dt, { pose: this.state.pose, moving: this.moving, surfaceY: this.state.surfaceY });
     } else {
       this.driver.update(dt);
     }
