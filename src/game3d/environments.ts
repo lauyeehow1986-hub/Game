@@ -128,9 +128,20 @@ function groundTexture(hex: string, tilePx = 32): THREE.DataTexture {
   return tex;
 }
 
-function floor(group: THREE.Group, color: string, stripColor?: string) {
-  const mat = std(color, 0.82);
+function floor(group: THREE.Group, color: string, stripColor?: string, gloss = false) {
+  // `gloss` turns the matte slab into a polished clinical surface (low
+  // roughness + clearcoat) so it catches the ceiling bars, overhead exam light
+  // and IBL — the wet-look of a real resus/OR vinyl floor. It also grounds the
+  // figures with soft specular reflections and fills the otherwise-dead
+  // foreground that dominates the wide cinematic shot. Default keeps the matte
+  // terrazzo/asphalt/concrete for outdoor + non-clinical scenes.
+  const mat: THREE.MeshStandardMaterial = gloss
+    ? new THREE.MeshPhysicalMaterial({
+        color, roughness: 0.26, metalness: 0.0, clearcoat: 0.85, clearcoatRoughness: 0.2,
+      })
+    : std(color, 0.82);
   mat.map = groundTexture(color);
+  mat.envMapIntensity = gloss ? 1.5 : 1.0;
   const slab = new THREE.Mesh(new THREE.PlaneGeometry(40, 30), mat);
   slab.rotation.x = -Math.PI / 2;
   slab.position.set(0, 0, -7);
@@ -477,7 +488,7 @@ function buildMrt(): Environment3D {
 
 function buildResus(): Environment3D {
   const g = new THREE.Group();
-  floor(g, '#cfd8da', '#9fb3b6');
+  floor(g, '#cfd8da', '#9fb3b6', true); // polished resus vinyl
   walls(g, '#dfe8e6');
   trolley(g, 0, -7.5);
   monitor(g, -2.6, -9); ivPole(g, 2.4, -8.8);
@@ -518,7 +529,7 @@ function buildResus(): Environment3D {
 
 function buildCathlab(): Environment3D {
   const g = new THREE.Group();
-  floor(g, '#3c4654', '#2f3845');
+  floor(g, '#3c4654', '#2f3845', true); // polished OR floor
   walls(g, '#46505e');
   // cath table
   g.add(box(2.6, 0.14, 0.8, std('#1f2937', 0.5), 0, 0.95, -7.5));
@@ -589,7 +600,7 @@ function buildCathlab(): Environment3D {
 
 function buildImaging(): Environment3D {
   const g = new THREE.Group();
-  floor(g, '#cdd6e0', '#aebbcb');
+  floor(g, '#cdd6e0', '#aebbcb', true); // polished imaging-suite floor
   walls(g, '#dde5ee');
   // scanner gantry: big ring + bore — clearcoat-white plastic on the
   // gantry shell so IBL gives it the curved sheen MRI scanners actually
@@ -676,7 +687,7 @@ function buildCounsel(): Environment3D {
 
 function buildWard(): Environment3D {
   const g = new THREE.Group();
-  floor(g, '#d8dcd3', '#b3bcab');
+  floor(g, '#d8dcd3', '#b3bcab', true); // polished ward vinyl
   walls(g, '#e7ebe0');
   trolley(g, -4.5, -9, 0, '#fefce8');
   trolley(g, 4.5, -9, 0, '#fefce8');
@@ -722,7 +733,7 @@ function buildWard(): Environment3D {
 
 function buildPharmacy(): Environment3D {
   const g = new THREE.Group();
-  floor(g, '#d6d3cd', '#b8b4ab');
+  floor(g, '#d6d3cd', '#b8b4ab', true); // polished pharmacy floor
   walls(g, '#e4e1da');
   // dispensing counter
   g.add(box(9, 1.05, 1.0, std('#0e7490', 0.75), 0, 0.53, -9.5));
@@ -792,7 +803,7 @@ function buildRehab(): Environment3D {
 
 function buildClinic(): Environment3D {
   const g = new THREE.Group();
-  floor(g, '#d3d7dc', '#b4bac2');
+  floor(g, '#d3d7dc', '#b4bac2', true); // polished clinic floor
   walls(g, '#e2e6ea');
   // consult desk + monitor + two chairs
   g.add(box(2.2, 0.07, 1.0, std('#9c8468', 0.6), -2.5, 0.76, -8.5));

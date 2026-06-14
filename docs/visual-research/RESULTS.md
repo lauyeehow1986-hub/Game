@@ -414,3 +414,25 @@ plane, sparse floating props, flat unmodelled light. The next iterations pivot
 the photoreal budget to the axes that actually move at this distance:
 **C (environment richness), A (lighting contrast/key), E (composition — bring the
 camera in so the photoreal cast is finally large enough to read).**
+
+| 22 | **polished clinical floors** (gloss vinyl/epoxy, clearcoat + IBL) | +½ | — | **+1** | — | — | **+1** | — | **C/F ↑ — first visible env win** | ✅ kept |
+
+**iter 22 notes — acting on iter 21's pivot, the floor was the right first
+move.** One variable: the shared `floor()` builder gained a `gloss` flag that
+swaps the matte slab (`MeshStandardMaterial` roughness 0.82) for a polished
+`MeshPhysicalMaterial` (roughness 0.26, clearcoat 0.85, `clearcoatRoughness`
+0.2, `envMapIntensity` 1.5). Applied to the six clinical interiors (resus,
+cathlab, imaging, ward, pharmacy, clinic); outdoor/wood/concrete scenes
+(street asphalt, kopitiam terrazzo, MRT, rehab sprung-wood, backhouse concrete,
+counsel) keep the matte default — no regression risk there. **A/B on the trauma
+bay (3D ᴮᴱᵀᴬ, resus IBL, PostFX):** the dead-flat grey foreground that dominated
+the frame now reads as a real wet-look resus floor — it catches the overhead
+exam light + ceiling bars, takes the bright sterile IBL, and **grounds the
+figures with soft vertical reflections** (the cheap-but-honest substitute for
+SSR, which the pipeline doesn't run). Tuned in two A/B steps (roughness 0.34 →
+0.26 was clearly crisper without tipping into an unrealistic mirror). **This is
+the first environment change that moved the wide shot** — confirming iter 21's
+thesis that, with the cast saturated, the floor/light/set are where the visible
+points now live. 826 tests + tsc + build green. **Next:** lighting contrast
+(A — drop the flat hemisphere fill, carve the scene with the key + shadows) and
+composition (E — a tighter cinematic two-shot so the photoreal cast reads).
