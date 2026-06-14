@@ -43,7 +43,10 @@ front_sign = float(os.environ.get("FRONT_SIGN", "-1"))
 H = dims[up_axis]
 
 target = center.copy()
-if mode == "portrait":
+if mode == "face":
+    target[up_axis] = mins[up_axis] + H * 0.93   # tight on the head
+    frame_radius = H * 0.085
+elif mode == "portrait":
     target[up_axis] = mins[up_axis] + H * 0.86   # head/shoulders
     frame_radius = H * 0.16
 else:

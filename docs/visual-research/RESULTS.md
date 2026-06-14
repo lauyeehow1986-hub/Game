@@ -378,3 +378,39 @@ parses) and **renders real clothed humans in the trauma bay** — capsules gone.
 loop. (Mean would land ~9.x; rubric was built for environment, so D dominates.)
 **Next:** eye meshes for catch-lights, more authentic SG-Indian skin tone, then
 back to environment/atmosphere polish (dust motes, kopitiam warmth).
+
+| 21 | **eyes (universal) + SG skin tones + in-engine PBR re-shade** (sheen/clearcoat) | — | — | — | +½ | — | +½ | — | **F/D ↑ at range, flat at distance** | ✅ kept (latent) |
+
+**iter 21 notes — the "different asset pipeline for photoreal 10" branch, and
+what it taught:** three character-level changes this iter:
+  1. **Glossy eye meshes, now on all 14** (`low-poly.mhclo` + `eye_material`:
+     Roughness 0.12, Specular 0.7, brown iris texture) — was on only 2 of 14;
+     regenerated the whole cast so every actor has 3-D irises with a catch-light.
+     A real face-crop win (Blender QA confirmed).
+  2. **SG-authentic skin tones** — Malay / Indian / mixed now draw the *asian*
+     photo-diffuse with a per-ethnicity MULTIPLY tint (Indian `(0.60,0.43,0.32)`
+     for a medium-brown). Tuned against face-crop renders.
+  3. **In-engine photoreal re-shade** (`src/game3d/castMaterials.ts`, wired into
+     `actorLoader`): the GLBs ship flat export-safe Principled → GLTFLoader gives
+     matte `MeshStandardMaterial`. At load we re-shade by material name
+     (`*_skin/_eyes/_hair/_cloth`) to `MeshPhysicalMaterial` and add the BRDF
+     terms that sell a face — **sheen** (velvety skin/fabric fresnel) + **eye
+     clearcoat** (wet catch-light) — preserving every map, zero new asset bytes,
+     all 14 lifted in one pass, lit by the existing WebGL IBL. 19 unit tests +
+     tsc + build green; Playwright confirmed the full cast renders clean (no
+     black/broken mats, no console errors).
+
+**The honest keep-if-better verdict — and the loop's course-correction:** scored
+from the 3D ᴮᴱᵀᴬ trauma-bay screenshot (WebGL + resus IBL, PostFX on), changes 2
+and 3 are **visually neutral**: at walkthrough distance each actor is ~80 px tall
+under flat even light, so face-tone multiplies and sheen/clearcoat are simply
+**below the perceptual floor** — the same lesson the skin-multiply micro-tuning
+(0.70 vs 0.60 → identical render) had been quietly teaching. They are **kept on
+correctness + latent-benefit grounds** (real wins at role-card range and under
+the WebGL+IBL deploy, free, tested, non-regressing), not on a visible-rubric
+delta. The decisive finding: **character-asset fidelity has saturated for this
+camera.** The frame is now dominated by the **environment** — an empty grey floor
+plane, sparse floating props, flat unmodelled light. The next iterations pivot
+the photoreal budget to the axes that actually move at this distance:
+**C (environment richness), A (lighting contrast/key), E (composition — bring the
+camera in so the photoreal cast is finally large enough to read).**

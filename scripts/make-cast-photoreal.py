@@ -62,12 +62,14 @@ RACE = {
     "mixed":   {"asian": 0.62, "caucasian": 0.28, "african": 0.10},
 }
 # Which photo-skin folder ethnicity to draw the diffuse from, plus an optional
-# multiply tint to nudge a "lightskinned" texture toward an authentic SG tone.
+# tint to nudge the texture toward an authentic SG tone. Tuple is
+# (eth_folder, rgb|None, blend, fac): MULTIPLY darkens (tan a light texture),
+# MIX lightens/shifts (lift the dark African texture to a warm SG-Indian brown).
 SKIN_SRC = {
-    "chinese": ("asian",     None),
-    "malay":   ("asian",     (0.90, 0.80, 0.70)),   # slightly tanned
-    "indian":  ("caucasian", (0.66, 0.50, 0.39)),   # warm brown
-    "mixed":   ("asian",     (0.96, 0.90, 0.84)),
+    "chinese": ("asian",    None,                 "MULTIPLY", 1.0),
+    "malay":   ("asian",    (0.90, 0.80, 0.70),   "MULTIPLY", 1.0),   # slightly tanned
+    "indian":  ("asian",    (0.60, 0.43, 0.32),   "MULTIPLY", 1.0),   # warm asian base -> SG medium-brown
+    "mixed":   ("asian",    (0.96, 0.90, 0.84),   "MULTIPLY", 1.0),
 }
 HAIR_RGB = {"black": (0.035, 0.028, 0.025), "darkbrown": (0.09, 0.06, 0.04), "grey": (0.55, 0.55, 0.57)}
 
@@ -104,11 +106,11 @@ def _agegroup(age):
 
 
 def skin_diffuse(eth, age, sex):
-    src_eth, tint = SKIN_SRC[eth]
+    src_eth, tint, blend, fac = SKIN_SRC[eth]
     s = "male" if sex >= 0.5 else "female"
     folder = os.path.join(ASSETS, "skins", f"{_agegroup(age)}_{src_eth}_{s}")
     pngs = glob.glob(os.path.join(folder, "*diffuse*.png"))
-    return (pngs[0] if pngs else None), tint
+    return (pngs[0] if pngs else None), tint, blend, fac
 
 
 def garment_paths(name):
@@ -132,6 +134,28 @@ def eyebrow_paths(idx="eyebrow006"):
     mhclo = os.path.join(d, idx + ".mhclo")
     diff = os.path.join(d, idx + ".png")
     return (mhclo if os.path.exists(mhclo) else None, diff if os.path.exists(diff) else None)
+
+
+def eye_paths(iris="brown"):
+    mhclo = os.path.join(ASSETS, "eyes", "low-poly", "low-poly.mhclo")
+    diff = os.path.join(ASSETS, "eyes", "materials", iris + "_eye.png")
+    return (mhclo if os.path.exists(mhclo) else None, diff if os.path.exists(diff) else None)
+
+
+def eye_material(name, diffuse_png):
+    """Glossy eyeball — low roughness + bright specular gives the wet catch-light
+    that brings a face to life."""
+    m, nt, b = principled(name)
+    _set(b, ("Roughness",), 0.12)
+    _set(b, ("Specular IOR Level", "Specular"), 0.7)
+    if diffuse_png and os.path.exists(diffuse_png):
+        tex = nt.nodes.new("ShaderNodeTexImage")
+        tex.image = _img(diffuse_png, maxdim=256)
+        tex.location = (-500, 250)
+        nt.links.new(tex.outputs["Color"], b.inputs["Base Color"])
+    else:
+        b.inputs["Base Color"].default_value = (0.18, 0.11, 0.07, 1.0)
+    return m
 
 
 # ---- material builders (all plain Principled, GLB-export safe) ---------------
@@ -175,7 +199,7 @@ def _set(bsdf, key_options, val):
                 pass
 
 
-def skin_material(name, diffuse_png, tint, roughness=0.48):
+def skin_material(name, diffuse_png, tint, blend="MULTIPLY", fac=1.0, roughness=0.48):
     m, nt, b = principled(name)
     _set(b, ("Roughness",), roughness)
     _set(b, ("Subsurface Weight", "Subsurface"), 0.12)
@@ -191,8 +215,8 @@ def skin_material(name, diffuse_png, tint, roughness=0.48):
         tex.location = (-600, 300)
         if tint:
             mix = nt.nodes.new("ShaderNodeMixRGB")
-            mix.blend_type = "MULTIPLY"
-            mix.inputs["Fac"].default_value = 1.0
+            mix.blend_type = blend  # MULTIPLY tans a light tone; MIX lifts a dark one
+            mix.inputs["Fac"].default_value = fac
             mix.inputs["Color2"].default_value = (tint[0], tint[1], tint[2], 1.0)
             mix.location = (-300, 300)
             nt.links.new(tex.outputs["Color"], mix.inputs["Color1"])
@@ -293,9 +317,9 @@ def build(name, spec):
         log("  rig warn:", e)
 
     # 1) photoreal skin diffuse on the body
-    diff, tint = skin_diffuse(spec["eth"], spec["age"], spec["sex"])
-    replace_materials(human, skin_material(name + "_skin", diff, tint))
-    log(f"  skin: {os.path.basename(diff) if diff else 'flat'} tint={tint}")
+    diff, tint, blend, fac = skin_diffuse(spec["eth"], spec["age"], spec["sex"])
+    replace_materials(human, skin_material(name + "_skin", diff, tint, blend, fac))
+    log(f"  skin: {os.path.basename(diff) if diff else 'flat'} {blend} tint={tint}")
 
     # 2) fitted, rigged garment mesh (parented under the armature, so track new
     #    objects rather than human.children).
@@ -348,7 +372,22 @@ def build(name, spec):
         except Exception as e:  # noqa: BLE001
             log("  eyebrows FAILED:", e)
 
-    # export everything (body + rig + clothes + hair + brows) to one GLB
+    # 5) glossy eyeball mesh — adds the specular catch-light that sells a face
+    ey_mhclo, ey_diff = eye_paths("brown")
+    if ey_mhclo:
+        try:
+            before = set(bpy.data.objects)
+            HS.add_mhclo_asset(ey_mhclo, human, asset_type="Eyes", subdiv_levels=0,
+                               material_type="MAKESKIN", set_up_rigging=True,
+                               interpolate_weights=True, import_subrig=False, import_weights=False)
+            new = [o for o in bpy.data.objects if o not in before and o.type == "MESH"]
+            if new:
+                replace_materials(new[-1], eye_material(name + "_eyes", ey_diff))
+                log("  eyes applied")
+        except Exception as e:  # noqa: BLE001
+            log("  eyes FAILED:", e)
+
+    # export everything (body + rig + clothes + hair + brows + eyes) to one GLB
     out = os.path.join(LIB_DIR, name + ".glb")
     os.makedirs(LIB_DIR, exist_ok=True)
     bpy.ops.object.select_all(action="SELECT")

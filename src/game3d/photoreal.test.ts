@@ -18,6 +18,7 @@ import {
   _resetClipCache,
   loadPoseClip,
 } from './animationLibrary';
+import { refineMaterial, refineCastMaterials } from './castMaterials';
 import { stemiWalkthrough } from '../lib/walkthrough-stemi';
 import type { BeatPose } from '../lib/walkthrough';
 
@@ -87,6 +88,62 @@ describe('IBL — per-scene HDRI registry', () => {
     expect(scene.environment).toBeNull();
     expect(scene.environmentIntensity).toBe(1.0);
     rt.dispose();
+  });
+});
+
+describe('castMaterials — in-engine photoreal re-shade', () => {
+  function std(name: string) {
+    const m = new THREE.MeshStandardMaterial();
+    m.name = name;
+    return m;
+  }
+
+  it('upgrades skin to a sheened MeshPhysicalMaterial', () => {
+    const out = refineMaterial(std('doctor-male-young_skin'));
+    expect(out).toBeInstanceOf(THREE.MeshPhysicalMaterial);
+    const p = out as THREE.MeshPhysicalMaterial;
+    expect(p.sheen).toBeGreaterThan(0);
+    expect(p.metalness).toBe(0);
+    expect(p.name).toBe('doctor-male-young_skin');
+  });
+
+  it('gives eyes a clearcoat (wet catch-light)', () => {
+    const p = refineMaterial(std('x_eyes')) as THREE.MeshPhysicalMaterial;
+    expect(p).toBeInstanceOf(THREE.MeshPhysicalMaterial);
+    expect(p.clearcoat).toBe(1.0);
+    expect(p.roughness).toBeLessThan(0.2);
+  });
+
+  it('keeps the hair alpha cutout while adding strand sheen', () => {
+    const src = std('x_hair');
+    src.transparent = true;
+    src.alphaTest = 0.5;
+    const p = refineMaterial(src) as THREE.MeshPhysicalMaterial;
+    expect(p.sheen).toBeGreaterThan(0);
+    expect(p.alphaTest).toBe(0.5);
+  });
+
+  it('preserves diffuse maps through the upgrade', () => {
+    const src = std('x_skin');
+    const tex = new THREE.Texture();
+    src.map = tex;
+    const p = refineMaterial(src) as THREE.MeshPhysicalMaterial;
+    expect(p.map).toBe(tex);
+  });
+
+  it('leaves unknown / brow materials untouched', () => {
+    const brow = std('x_brow');
+    expect(refineMaterial(brow)).toBe(brow);
+    const other = std('floor');
+    expect(refineMaterial(other)).toBe(other);
+  });
+
+  it('refineCastMaterials walks a scene tree and re-shades meshes', () => {
+    const root = new THREE.Group();
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(), std('a_skin'));
+    root.add(mesh);
+    refineCastMaterials(root);
+    expect(mesh.material).toBeInstanceOf(THREE.MeshPhysicalMaterial);
   });
 });
 

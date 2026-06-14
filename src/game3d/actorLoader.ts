@@ -18,6 +18,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Humanoid } from './humanoid';
 import { PoseAnimationDriver, cloneRig } from './animationLibrary';
 import { CAST_LIB_DIR, resolveLibFile } from './castManifest';
+import { refineCastMaterials } from './castMaterials';
 import type { BeatExpression, BeatPose, WalkthroughActor } from '../lib/walkthrough';
 
 /** Public path where authored character GLBs live. Files are optional.
@@ -49,7 +50,13 @@ function fetchGlb(url: string): Promise<THREE.Group | null> {
     try {
       gltf().load(
         url,
-        (g) => resolve(g.scene),
+        (g) => {
+          // One-shot photoreal re-shade of the template (skin sheen, wet eyes,
+          // fabric/hair nap). Clones share these upgraded materials, so it runs
+          // once per file, not per actor instance.
+          refineCastMaterials(g.scene);
+          resolve(g.scene);
+        },
         undefined,
         () => resolve(null),
       );
