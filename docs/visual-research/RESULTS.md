@@ -645,3 +645,27 @@ tests (+1 bed-lift) + tsc + build green. **Scope:** ward/CCU "in bed" patients
 are `sit` not `collapsed` (sitting up) — a future `sit`-on-bed pass. **Next:**
 `sit` (seated family / patients sitting up) or extend BedSpots to stroke/sepsis
 clinical beats.
+
+| 32 | **ward bed (attempted) → reverted; iter-31 cross-walkthrough confirmed** | — | — | — | — | — | — | — | **neutral — kept-if-better held the line** | ❌ reverted |
+
+**iter 32 notes — a negative result, honestly logged.** Tried extending BedSpots
+to the **ward** (the STEMI "settled into the CCU bed" recovery beat). The
+mechanism worked, but the result was **reverted**: the recovery beat crowds *four*
+attending staff (nurse, MO, pharmacist, visiting spouse) in front of the bed, so
+the patient is occluded and the win can't be shown — and moving the hero trolley
+to un-occlude started dragging the scene's curtain/locker/IV-pole layout with it
+for a one-beat, one-walkthrough payoff. Not worth the churn; `git checkout`'d the
+scene. **The valuable finding instead:** BedSpots are **per-scene, so iter 31
+already covers all four walkthroughs for free** — verified the **stroke** patient
+lies on the resus trolley in "NNI stroke bypass" (same `resus` scene the STEMI
+patient uses). So the highest-value staging fix has the broadest possible reach
+with zero extra work. **Plateau read:** after 11 shipped iterations the cheap
+keep-if-better wins are exhausted — the cast, poses, bed-staging, per-scene
+lighting, glossy floors and atmosphere are all in. What's left needs *deliberate,
+bigger* investment, not one-variable ticks: **`sit` with real leg IK** (no-IK
+lowering sinks the feet, and the family chairs don't occlude them), **stretcher
+beats** (blocked by the per-scene heuristic — the street scene hosts both
+road-collapse *and* on-stretcher patients), or a **genuinely new asset source**
+(scanned/RPM avatars) to push face fidelity past the MakeHuman ceiling. Next
+iterations should pick one of those and commit to it rather than chase marginal
+ticks.
