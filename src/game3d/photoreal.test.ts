@@ -151,7 +151,7 @@ describe('castMaterials — in-engine photoreal re-shade', () => {
 describe('castPose — procedural MakeHuman idle', () => {
   function makeHumanRig() {
     const root = new THREE.Group();
-    const names = ['root', 'spine03', 'upperarm01.L', 'upperarm01.R', 'lowerarm01.L', 'lowerarm01.R'];
+    const names = ['root', 'spine03', 'spine05', 'upperarm01.L', 'upperarm01.R', 'lowerarm01.L', 'lowerarm01.R'];
     for (const n of names) {
       const b = new THREE.Bone();
       b.name = n;
@@ -201,6 +201,17 @@ describe('castPose — procedural MakeHuman idle', () => {
     const a = chest.quaternion.clone();
     ctl.update(1.0, 1 / 60, { pose: 'stand', moving: false });
     expect(chest.quaternion.angleTo(a)).toBeGreaterThanOrEqual(0);
+  });
+
+  it('folds the waist for kneel and relaxes it back for stand', () => {
+    const rig = makeHumanRig();
+    const ctl = new CastPoseController(rig, 0);
+    const waist = rig.children.find((c) => c.name === 'spine05') as THREE.Bone;
+    const rest = waist.quaternion.clone();
+    for (let i = 0; i < 200; i += 1) ctl.update(i / 60, 1 / 60, { pose: 'kneel', moving: false });
+    expect(waist.quaternion.angleTo(rest)).toBeGreaterThan(0.5); // deep forward fold
+    for (let i = 0; i < 200; i += 1) ctl.update(i / 60, 1 / 60, { pose: 'stand', moving: false });
+    expect(waist.quaternion.angleTo(rest)).toBeLessThan(0.05);
   });
 
   it('pitches the whole body when collapsed, and not when standing', () => {

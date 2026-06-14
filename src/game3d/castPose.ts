@@ -40,6 +40,17 @@ const ELBOW_AXIS = new THREE.Vector3(1, 0, 0);
  *  forward, feet stay at the actor's mark). Sign tuned in-engine. */
 const COLLAPSE_PITCH = -Math.PI / 2;
 const BODY_X = new THREE.Vector3(1, 0, 0);
+/** Forward fold at the waist (lowest spine) for an actor tending a patient on
+ *  the ground — `kneel` (pressing a wound / assessing) and `cpr` (compressions).
+ *  A deep hinge with feet planted reads as "bent over the casualty" and avoids
+ *  the floor-clipping a procedural leg-articulated kneel invites. Sign/axis
+ *  tuned in-engine. */
+const KNEEL_FOLD_DEG = 60;
+const CPR_FOLD_DEG = 48;
+/** Compression bob amplitude + rate (~1.5 Hz) layered on the CPR fold. */
+const CPR_BOB_DEG = 8;
+const CPR_BOB_RATE = 9;
+const WAIST_AXIS = new THREE.Vector3(1, 0, 0);
 
 interface Tracked {
   bone: THREE.Bone;
@@ -53,6 +64,7 @@ const ARM_R = 'upperarm01.R';
 const FOREARM_L = 'lowerarm01.L';
 const FOREARM_R = 'lowerarm01.R';
 const CHEST = 'spine03';
+const WAIST = 'spine05';
 const ROOT = 'root';
 
 export class CastPoseController {
@@ -61,7 +73,9 @@ export class CastPoseController {
   private foreL?: Tracked;
   private foreR?: Tracked;
   private chest?: Tracked;
+  private waist?: Tracked;
   private rootBone?: Tracked;
+  private waistFold = 0;
   private phase: number;
   /** The clone root — pitched as a whole for `collapsed` (and future supine
    *  poses), independent of the per-bone idle. */
@@ -92,6 +106,7 @@ export class CastPoseController {
     this.foreL = track(FOREARM_L);
     this.foreR = track(FOREARM_R);
     this.chest = track(CHEST);
+    this.waist = track(WAIST);
     this.rootBone = track(ROOT);
     this.active = !!(this.armL && this.armR);
     if (this.active) this.applyRestCorrection();
@@ -128,6 +143,20 @@ export class CastPoseController {
     this.bodyPitch += (targetPitch - this.bodyPitch) * Math.min(1, dt * 6);
     this.body.quaternion.copy(this.bodyRest)
       .multiply(new THREE.Quaternion().setFromAxisAngle(BODY_X, this.bodyPitch));
+    // Waist fold: bend over a patient for `kneel` (assess / press a wound) and
+    // `cpr` (compressions, with a chest-compression bob). Feet stay planted.
+    let foldTarget = 0;
+    if (opts.pose === 'kneel') foldTarget = THREE.MathUtils.degToRad(KNEEL_FOLD_DEG);
+    else if (opts.pose === 'cpr') foldTarget = THREE.MathUtils.degToRad(CPR_FOLD_DEG);
+    this.waistFold += (foldTarget - this.waistFold) * Math.min(1, dt * 6);
+    if (this.waist) {
+      let fold = this.waistFold;
+      if (opts.pose === 'cpr') {
+        fold += THREE.MathUtils.degToRad(CPR_BOB_DEG) * Math.abs(Math.sin(t * CPR_BOB_RATE));
+      }
+      this.waist.bone.quaternion.copy(this.waist.rest)
+        .multiply(new THREE.Quaternion().setFromAxisAngle(WAIST_AXIS, fold));
+    }
     const breathe = Math.sin(t * 1.5 + this.phase) * 0.5 + 0.5; // 0..1, ~0.24Hz
     // Chest rises a hair on the in-breath.
     if (this.chest) {

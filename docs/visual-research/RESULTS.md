@@ -537,3 +537,24 @@ tests (+1 collapsed-pitch) + tsc + build green. **Scope:** kneel/sit/cpr still
 stand — they need per-bone leg flexion (the knee/hip axes, dialed in-engine like
 the arm swing was). **Next:** kneel + cpr procedural states, then per-scene
 lighting passes for the non-resus clinical scenes.
+
+| 27 | **kneel + cpr poses** (waist fold over the casualty, CPR compression bob) | — | — | — | **+1** | — | — | — | **D/narrative ↑ — responders tend the patient** | ✅ kept |
+
+**iter 27 notes — the responders now bend over the casualty.** With stand /
+collapsed done, the remaining wrong poses were `kneel` (assess / press a wound)
+and `cpr` (compressions) — both still standing bolt-upright. One mechanism: a
+**forward waist fold** driven by the lowest spine bone (`spine05`) — `kneel`
+folds ~60°, `cpr` ~48° plus an `abs(sin)` **compression bob** (~1.5 Hz). A deep
+hinge with **feet planted** was chosen over procedural leg articulation on
+purpose: it reads convincingly as "bent over the patient" and sidesteps the
+floor-clipping + knee-axis guessing a fake squat invites. Smoothed with the same
+`lerp dt·6` as the collapse. **A/B'd across two scenes:** the street "Impact"
+bystander folds over the supine rider ("firm direct pressure, keep the rider
+still"), and the STEMI kopitiam collapse shows **two responders bent over Mr Tan
+doing CPR** ("CPR resumed, second cycle") — both match their narration. 832
+tests (+1 waist-fold) + tsc + build green. The cast pose vocabulary now covers
+**stand · walk · collapsed · kneel · cpr** — the figures read correctly across
+the emergency beats that carry the most dramatic weight. **Next:** pivot back to
+environment — per-scene lighting passes for the non-resus clinical scenes
+(cathlab dim-cool surgical, imaging, ward) and atmosphere (dust motes / volumetric
+warmth) now that the cast is believable.
