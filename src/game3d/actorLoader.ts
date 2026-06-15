@@ -19,7 +19,7 @@ import { Humanoid } from './humanoid';
 import { PoseAnimationDriver, cloneRig } from './animationLibrary';
 import { CAST_LIB_DIR, resolveLibFile } from './castManifest';
 import { refineCastMaterials } from './castMaterials';
-import { CastPoseController } from './castPose';
+import { applyCastStyle } from './castStyle';
 import type { BeatExpression, BeatPose, WalkthroughActor } from '../lib/walkthrough';
 
 /** Public path where authored character GLBs live. Files are optional.
@@ -137,12 +137,7 @@ class GlbFigure implements ActorFigure {
   /** Mixamo-clip retargeting driver — auto-loads any pose clips that
    *  exist at public/3d/anims/ and cross-fades on pose change. */
   private driver: PoseAnimationDriver;
-  /** Procedural idle for the MakeHuman cast (the CC0 clips are Quaternius-rigged
-   *  and never bind). When this rig is recognised it drives the body and the
-   *  clip `driver` is left idle. */
-  private castPose: CastPoseController;
   private focusRing: THREE.Mesh;
-  private phase: number;
 
   constructor(actor: WalkthroughActor, template: THREE.Group) {
     this.actorId = actor.id;
@@ -158,12 +153,11 @@ class GlbFigure implements ActorFigure {
       }
     });
     this.root.add(clone);
-    this.phase = [...actor.id].reduce((h, c) => h + c.charCodeAt(0), 0) % 7;
-    // Procedural idle if this is the MakeHuman cast (arms-down + breathing);
-    // otherwise fall back to the Mixamo-style clip driver.
-    this.castPose = new CastPoseController(clone, this.phase);
+    // Per-instance soft-clean look + variation (skin/hair/clothing/scale) so
+    // reused base meshes never read as identical clones.
+    applyCastStyle(clone, actor);
     this.driver = new PoseAnimationDriver(clone);
-    if (!this.castPose.active) void this.driver.setPose('stand');
+    void this.driver.setPose('stand');
 
     // speaker focus ring (same as procedural humanoid)
     const ring = new THREE.Mesh(
@@ -190,7 +184,7 @@ class GlbFigure implements ActorFigure {
     // Forward pose changes to the animation driver — when a clip exists
     // for the new pose, it cross-fades; when not, the no-op resolves
     // silently and the rig stays in its previous animation (or bind pose).
-    if (next.pose && next.pose !== prevPose && !this.castPose.active) {
+    if (next.pose && next.pose !== prevPose) {
       void this.driver.setPose(next.pose);
     }
   }
@@ -207,11 +201,12 @@ class GlbFigure implements ActorFigure {
       this.root.position.z += (dz / dist) * step;
       this.root.rotation.y = Math.atan2(dx, dz);
     }
-    if (this.castPose.active) {
-      this.castPose.update(t, dt, { pose: this.state.pose, moving: this.moving, surfaceY: this.state.surfaceY });
-    } else {
-      this.driver.update(dt);
-    }
+    this.driver.update(dt);
+    // Lift a collapsed patient onto the scene's surface (trolley/table) when one
+    // is provided; settle to the floor otherwise. Smoothed so it reads as
+    // settling, not snapping.
+    const targetY = this.state.pose === 'collapsed' ? this.state.surfaceY : 0;
+    this.root.position.y += (targetY - this.root.position.y) * Math.min(1, dt * 6);
 
     const want = this.state.isLead ? 0.55 + Math.sin(t * 4) * 0.18 : 0;
     const m = this.focusRing.material as THREE.MeshBasicMaterial;

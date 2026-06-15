@@ -3,7 +3,7 @@ import { styleForActor, SKIN_TONES } from './castStyle';
 import type { WalkthroughActor } from '../lib/walkthrough';
 
 const actor = (id: string, role = '', team = ''): WalkthroughActor =>
-  ({ id, name: id, role, team } as WalkthroughActor);
+  ({ id, name: id, role, team } as unknown as WalkthroughActor);
 
 describe('castStyle.styleForActor', () => {
   it('is deterministic for the same id', () => {
