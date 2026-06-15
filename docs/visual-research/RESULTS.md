@@ -729,3 +729,44 @@ mesh itself, and replacing it is gated on a **user-supplied avatar GLB**, not on
 more agent effort. Remaining optional polish (`sit` leg-IK) is a contained
 engineering task, not a perceptual mover. The loop has delivered its goal; the
 next real jump in photoreal fidelity is a human-in-the-loop asset hand-off.
+
+---
+
+## 2026-06-15 — Strategic pivot: photoreal → cohesive soft-clean stylized
+
+After reviewing live frames (STEMI ambulance, ICU crowd, Cardiac-MRI b-roll) the
+user called it honestly: the failed-photoreal cast read as **cloned mannequins
+doing weird actions**. We stopped polishing the photoreal dead-end and committed
+(via brainstorming → spec → plan) to a **cohesive soft-clean stylized** look —
+the only direction that reaches "10/10 for its style" fully autonomously (no
+auth-gated assets). Spec: `docs/superpowers/specs/2026-06-15-stylized-cast-staging-overhaul-design.md`.
+Plan 1 (cast foundation): `docs/superpowers/plans/2026-06-15-stylized-cast-foundation.md`.
+
+**The unlock — revert the cast to the Quaternius rig.** Verified the Quaternius
+source characters (still on disk) share the *exact* skeleton as the CC0 clips
+(`CharacterArmature / Hips / UpperArm.L / PoleTarget.L`). So `pnpm map:cast`
+rebuilds the `_lib` cast on a rig where **every clip binds natively** — no
+retargeting, no procedural fold-hack — and the characters arrive **clothed**.
+This is the same plumbing every past iteration danced around.
+
+**Plan 1 delivered (this session):**
+  • **Quaternius cast** — regenerated all 14 `_lib` characters + 7 clips. Clips
+    bind; cast is clothed; the `castPose` waist-fold hack and the photoreal
+    `castMaterials` sheen reshade are both **deleted**.
+  • **`castStyle.ts`** — deterministic per-instance variation keyed on actor id:
+    SG skin-tone palette, hair, role-appropriate clothing (teal scrubs / white
+    coat / SCDF), height jitter; clones the 6 named Quaternius materials and
+    pushes them matte. Kills the clones; stable per recurring character. 5 tests.
+  • **Soft rim/back light** in Stage3D for the premium studio wrap.
+  • **Surface lift** preserved on the figure (collapsed → onto trolley/table).
+
+**Verified in-browser across all 4 walkthroughs** (STEMI, stroke, trauma,
+sepsis): clothed, distinct skin/hair/clothing (no clones), real articulated
+animation (walk/kneel/lie), casualties posed, no console errors. `pnpm verify`
+green (828 tests, tsc, build). MakeHuman face-fidelity chase formally retired.
+
+**Carried to Plan 2/3:** per-beat supine *surface* (patients on the CT/cath
+table, not floating); directed blocking + framing; the 12-scene environment
+audit; the B-roll/showpiece cohesion (restyle 2D fluoroscopy, immersive in-engine
+MRI/AED). Minor: extend `castStyle` SLOT to cover the Worker/other models' extra
+material names (paramedic hi-vis currently shows the model default, not SCDF red).
