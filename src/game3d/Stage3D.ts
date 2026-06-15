@@ -74,6 +74,7 @@ export class Stage3D {
   private camera: THREE.PerspectiveCamera;
   private hemi: THREE.HemisphereLight;
   private key: THREE.DirectionalLight;
+  private rim: THREE.DirectionalLight;
   private env: Environment3D | null = null;
   private envId: SceneId | null = null;
   /** Scrolling emissive screens (live ECG monitors), advanced each tick. */
@@ -163,7 +164,13 @@ export class Stage3D {
     this.key.shadow.blurSamples = 16;
     this.key.shadow.bias = -0.0004;
     this.key.shadow.normalBias = 0.03;
-    this.scene.add(this.hemi, this.key, this.key.target);
+    // Soft rim/back light — a low, cool back-light that wraps a bright edge
+    // around the cast so they separate from the set (the "premium studio" read
+    // of the soft-clean look). Fill only (no shadow), low intensity; its
+    // per-scene intensity/colour are set in swapEnvironment.
+    this.rim = new THREE.DirectionalLight('#cfe0ff', 0.5);
+    this.rim.position.set(-4, 5, -8);
+    this.scene.add(this.hemi, this.key, this.key.target, this.rim);
 
     // Cinematic air: a global drifting dust-mote layer (one draw call) so the
     // light shafts read as real beams and the room never looks vacuum-empty.
@@ -311,6 +318,9 @@ export class Stage3D {
     this.key.intensity = L.key.intensity;
     this.key.position.set(...L.key.pos);
     this.key.target.position.set(0, 0, -7);
+    // Rim follows the key — subtle, cool, keyed off the scene's sky tone.
+    this.rim.intensity = L.key.intensity * 0.28;
+    this.rim.color.set(L.hemi.sky);
     // Tint the dust to this scene's key light so the air reads warm (kopitiam)
     // or cool (clinical) — dust is lit by the key, so it takes its colour.
     this.dust?.setTint(L.key.color);
