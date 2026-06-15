@@ -31,9 +31,18 @@ walkthrough is not good enough, and the cause is structural, not cosmetic:
 
 Commit to a **cohesive soft-clean stylized** look (matte materials, soft studio
 light, gentle rim light, smooth appealing shapes — "premium medical app" feel)
-and rebuild the cast on a foundation where real animation, variety, clothing, and
-direction all work. Reach "10/10 for its style," fully autonomously (no account
-or credential steps).
+and bring the **entire 3D walkthrough** to that bar, fully autonomously (no
+account or credential steps). Reach "10/10 for its style."
+
+The look must hold across **three pillars**, audited systematically rather than
+fixed one screenshot at a time:
+
+1. **Cast** — meshes, animation, variety, clothing (workstreams 1–4).
+2. **Environments** — every scene set reads as a real, soft-clean clinical space
+   (workstream 6), not a few boxes.
+3. **Overlays** — the B-roll showpieces are cohesive: genuinely-2D clinical
+   artifacts (fluoroscopy) restyled premium; real spatial moments (MRI bore
+   slide, AED shock) played immersively in-engine (workstream 7).
 
 ### Non-goals
 
@@ -77,6 +86,9 @@ the nudity bug, and is more code for a worse result.
 | `src/game3d/environments.ts` | register a `surface` (height) for each scene's trolley/table |
 | `src/lib/walkthrough-staging.ts` | orient figures to the casualty/task; thin the crowd |
 | `src/game3d/castPose.ts` | retire (or keep solely as procedural-fallback for the no-asset `Humanoid`) |
+| `src/game3d/environments.ts` | audit + enrich every scene set to the soft-clean bar; props, materials, framing |
+| `src/ui/modals/ShowpieceOverlay.tsx` | cohesive frame treatment; immersive 3D path for spatial showpieces |
+| `src/lib/showpieces.tsx` | restyle the genuinely-2D fluoroscopy artifacts to premium soft-clean |
 | tests | update `photoreal.test.ts` / `castManifest.test.ts`; add variation + surface tests |
 
 ## Workstreams
@@ -137,10 +149,45 @@ Register surfaces for the street/ambulance, resus, cath, imaging, ICU scenes.
 Then orient figures to face the casualty/task and thin/spread the crowd so a scene
 reads as a team, not a clump.
 
-### 6. Verify + ship
-Update/extend tests. Playwright/preview screenshots of the **same two scenes**
-(STEMI ambulance + ICU) as before/after proof. `pnpm verify`, commit, push,
-confirm the GitHub Pages deploy is green.
+### 6. Environments — soft-clean across all 12 scenes
+Audit every scene builder in `environments.ts` against the soft-clean bar. For
+each: enough props to read as a real space (not a few boxes), materials retuned
+to matte/soft, framing so key props sit within the camera composition (the
+imaging gantry/table that juts past frame is the canonical example), and
+per-scene lighting consistent with the cast treatment. Priority to the weakest
+sets first (imaging, mrt, backhouse, pharmacy) but none ships unaudited.
+
+### 7. Overlays / showpieces — cohesive B-roll
+Two paths by showpiece type:
+
+- **Genuinely-2D clinical artifacts** (`stent-deployment`, `thrombectomy-pass` —
+  fluoroscopy screens): keep as cards, but restyle the art in `showpieces.tsx`
+  and the frame in `ShowpieceOverlay.tsx` to a premium, cohesive look; clean up
+  the scrim/letterbox/framing so it reads intentional, not pasted-on.
+- **Real spatial moments** (`mri-bore-slide`, `aed-shock`): play them
+  **in-engine** — patient on the table gliding into the bore with the scanner
+  glow; the defib shock as a light flash + the existing camera shake — and demote
+  the redundant flat card (drop it, or reduce to a tasteful caption strip).
+
+### 8. Verify + ship — full coverage, every scene, every walkthrough
+Verification is **not** limited to the two flagged frames. It is a matrix over
+**all 12 distinct scenes** (`kopitiam, street, mrt, resus, cathlab, imaging,
+counsel, ward, pharmacy, rehab, clinic, backhouse`) as they appear across **all 4
+walkthroughs** (STEMI, stroke, trauma, sepsis), plus **all 4 showpieces**
+(`stent-deployment, mri-bore-slide, aed-shock, thrombectomy-pass`).
+
+- Drive each walkthrough in 3D via Playwright/preview; capture a representative
+  beat per distinct scene and each showpiece. No scene ships unaudited.
+- Every captured frame must pass the same checklist: no clones, no broken poses,
+  patients on the correct surface, clothed cast, cohesive soft-clean materials +
+  lighting, sensible blocking, framed composition.
+- Before/after screenshots for the regression record (`docs/visual-research/`).
+- `pnpm verify` (lint + types + unit tests + build) green; commit; push; confirm
+  the GitHub Pages deploy is green.
+
+A lightweight capture harness (a Playwright script that opens each walkthrough,
+seeks to each scene's beat, and screenshots) makes this repeatable and is itself
+part of the deliverable so future changes can re-run the full matrix.
 
 ## Risks
 
@@ -159,6 +206,11 @@ confirm the GitHub Pages deploy is green.
 2. Variation (kill clones).
 3. Soft-clean materials + rim light.
 4. Per-beat surface + blocking.
-5. Tests, before/after screenshots, ship.
+5. Environments: soft-clean audit across all 12 scenes (weakest first).
+6. Overlays: restyle 2D fluoroscopy cards; immersive in-engine MRI + AED.
+7. Full verification matrix (every scene × every walkthrough + showpieces),
+   before/after screenshots, `pnpm verify`, push, deploy green.
 
-Each phase is independently verifiable and independently shippable.
+Each phase is independently verifiable and independently shippable. After each
+phase the relevant subset of the verification matrix is captured so regressions
+surface immediately rather than at the end.
