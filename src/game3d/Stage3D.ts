@@ -31,7 +31,7 @@ import { createActorFigure, type ActorFigure } from './actorLoader';
 import { loadSceneEnvironment, applyEnvironment } from './ibl';
 import type { PostFxPipeline } from './postFx';
 import type { RendererBackend } from './webgpu';
-import { CAMERA, worldX, worldZ, yawFor } from './space';
+import { CAMERA, worldX, worldZ, yawFor, surfacePlacement } from './space';
 import { DustMotes } from './atmosphere';
 
 export interface Figure3D {
@@ -48,6 +48,8 @@ export interface Figure3D {
   isActive: boolean;
   isLead: boolean;
   isSelected: boolean;
+  /** This beat lays a collapsed patient on the scene's opt-in surface. */
+  onSurface: boolean;
 }
 
 export interface Frame3D {
@@ -218,17 +220,18 @@ export class Stage3D {
     if (sceneChanged) this.swapEnvironment(frame.scene);
 
     const seen = new Set<string>();
-    const bed = this.env?.bed;
+    const surface = this.env?.surface;
     for (const f of frame.figures) {
       seen.add(f.id);
-      // A `collapsed` patient in a scene with a bed lies *on* the trolley/table:
-      // snap to its centre, face along its length, and lift to its surface
-      // (the 2D staging puts them on the floor in front of it). Everyone else
-      // keeps their authored mark.
-      const onBed = !!bed && f.pose === 'collapsed';
-      const gx = onBed ? bed!.x : worldX(f.x);
-      const gz = onBed ? bed!.z : worldZ(f.y);
-      const yaw = onBed ? bed!.yaw : yawFor(f.facing);
+      // A `collapsed` patient lies *on* the scene's surface (trolley / table /
+      // stretcher): snap to its centre, face along its length, and lift to its
+      // height. surfacePlacement decides whether to snap (auto indoor surfaces
+      // always; opt-in outdoor stretchers only when the beat says so). Everyone
+      // else keeps their authored mark.
+      const place = surfacePlacement(surface, f.pose, f.onSurface);
+      const gx = place ? place.x : worldX(f.x);
+      const gz = place ? place.z : worldZ(f.y);
+      const yaw = place ? place.yaw : yawFor(f.facing);
       let entry = this.figures.get(f.id);
       if (!entry) {
         const figure = createActorFigure(f.actor, this.scene);
@@ -238,7 +241,7 @@ export class Stage3D {
         figure.snapToGoal();
         // walk-in: new figures during a chapter enter from their off-side
         // (skip for a bed patient — they're already on the table).
-        if (!sceneChanged && !onBed) {
+        if (!sceneChanged && !place) {
           figure.root.position.x += f.x < 240 ? -4 : 4;
         }
       }
@@ -251,7 +254,7 @@ export class Stage3D {
         walking: f.walking,
         speaking: f.speaking,
         isLead: f.isLead,
-        surfaceY: onBed ? bed!.y : 0,
+        surfaceY: place ? place.y : 0,
       });
       if (f.isLead) this.leadWorldX = worldX(f.x);
     }

@@ -13,6 +13,7 @@
  */
 import * as THREE from 'three';
 import type { SceneId } from '../lib/scenery';
+import type { SurfaceSpot } from './space';
 
 export interface LightingPreset {
   /** Hemisphere sky/ground colours + intensity. */
@@ -31,17 +32,10 @@ export interface LightingPreset {
  *  When a scene declares a `bed`, Stage3D snaps the collapsed patient onto it:
  *  centre (world x/z), surface height `y`, and the `yaw` that lays the body
  *  *along* the bed's length rather than across it. */
-export interface BedSpot {
-  x: number;
-  z: number;
-  y: number;
-  yaw: number;
-}
-
 export interface Environment3D {
   group: THREE.Group;
   lighting: LightingPreset;
-  bed?: BedSpot;
+  surface?: SurfaceSpot;
 }
 
 /* ── shared kit ───────────────────────────────────────────────────────── */
@@ -441,6 +435,7 @@ function buildStreet(): Environment3D {
       fog: { color: '#5a4a3c', density: 0.014 },
       clear: '#2c2a2e',
     },
+    surface: { x: -2.5, z: -4.5, y: 0.86, yaw: Math.PI / 2, auto: false }, // SCDF stretcher (opt-in)
   };
 }
 
@@ -538,7 +533,7 @@ function buildResus(): Environment3D {
       fog: { color: '#aebfbd', density: 0.011 },
       clear: '#d7e4e1',
     },
-    bed: { x: 0, z: -7.5, y: 0.85, yaw: Math.PI / 2 }, // resus trolley (length along X)
+    surface: { x: 0, z: -7.5, y: 0.85, yaw: Math.PI / 2, auto: true }, // resus trolley (length along X)
   };
 }
 
@@ -610,7 +605,7 @@ function buildCathlab(): Environment3D {
       fog: { color: '#2c3442', density: 0.016 },
       clear: '#1d2430',
     },
-    bed: { x: 0, z: -7.5, y: 1.02, yaw: Math.PI / 2 }, // cath table (length along X)
+    surface: { x: 0, z: -7.5, y: 1.02, yaw: Math.PI / 2, auto: true }, // cath table (length along X)
   };
 }
 
@@ -663,7 +658,7 @@ function buildImaging(): Environment3D {
       fog: { color: '#7e8ca0', density: 0.012 },
       clear: '#c2cedd',
     },
-    bed: { x: 0, z: -7.4, y: 1.1, yaw: 0 }, // CT/MRI table (length along Z, head toward the bore)
+    surface: { x: 0, z: -7.4, y: 1.1, yaw: 0, auto: true }, // CT/MRI table (length along Z, head toward the bore)
   };
 }
 
@@ -708,6 +703,9 @@ function buildWard(): Environment3D {
   walls(g, '#e7ebe0');
   trolley(g, -4.5, -9, 0, '#fefce8');
   trolley(g, 4.5, -9, 0, '#fefce8');
+  // hero bed — centred and turned along Z so the collapsed patient frames well
+  // on it (the back-wall pair stay as ward dressing).
+  trolley(g, 0, -7.4, Math.PI / 2, '#fefce8');
   // bedside lockers + visitor chairs
   g.add(box(0.6, 0.8, 0.55, std('#b9aa90', 0.7), -2.6, 0.4, -9.5));
   g.add(box(0.6, 0.8, 0.55, std('#b9aa90', 0.7), 6.4, 0.4, -9.5));
@@ -745,6 +743,7 @@ function buildWard(): Environment3D {
       fog: { color: '#aab3a4', density: 0.011 },
       clear: '#ccd4c6',
     },
+    surface: { x: 0, z: -7.4, y: 0.86, yaw: 0, auto: true }, // ward / CCU hero bed (length along Z)
   };
 }
 

@@ -77,6 +77,10 @@ export interface WalkthroughBeat {
   pos?: { x: number; y: number };
   /** Body pose for this beat (default 'stand'). */
   pose?: BeatPose;
+  /** Lay a collapsed patient on the scene's surface even when that surface is
+   *  opt-in (an outdoor stretcher in a scene that otherwise hosts ground
+   *  collapses). Ignored for `auto` indoor surfaces, which always snap. */
+  onSurface?: boolean;
   /** Facial expression for this beat (default 'neutral'). */
   expression?: BeatExpression;
   /** Optional procedural "b-roll" shown above the stage during this beat

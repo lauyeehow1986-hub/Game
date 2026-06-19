@@ -89,6 +89,7 @@ export default function Walkthrough3DStage({
       isActive: fig.isActive,
       isLead: fig.isLead,
       isSelected: fig.isSelected,
+      onSurface: fig.beat?.onSurface ?? false,
     }));
 
     const leadKey = leadId && leadBeat ? `${leadId}@${leadBeat.at}` : '';
