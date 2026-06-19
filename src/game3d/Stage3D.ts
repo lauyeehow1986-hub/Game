@@ -221,6 +221,17 @@ export class Stage3D {
 
     const seen = new Set<string>();
     const surface = this.env?.surface;
+    // Blocking focus: if a patient is actually on the scene's surface this frame,
+    // find their world spot so clinicians turn to face the casualty (a team
+    // around one patient) instead of facing the camera. Stays null when no
+    // patient is on a surface (e.g. a street ground-casualty), so authored
+    // facings are kept there.
+    let focusX: number | null = null;
+    let focusZ = 0;
+    for (const ff of frame.figures) {
+      const p = surfacePlacement(surface, ff.pose, ff.onSurface);
+      if (p) { focusX = p.x; focusZ = p.z; break; }
+    }
     for (const f of frame.figures) {
       seen.add(f.id);
       // A `collapsed` patient lies *on* the scene's surface (trolley / table /
@@ -248,6 +259,12 @@ export class Stage3D {
       entry.figure.setGoal(gx, gz);
       if (sceneChanged) entry.figure.snapToGoal();
       entry.yawTarget = yaw;
+      // Turn non-patient figures to face the casualty on the surface.
+      if (focusX !== null && f.pose !== 'collapsed') {
+        const fdx = focusX - gx;
+        const fdz = focusZ - gz;
+        if (fdx * fdx + fdz * fdz > 0.25) entry.yawTarget = Math.atan2(fdx, fdz);
+      }
       entry.figure.setState({
         pose: f.pose,
         expression: f.expression,
