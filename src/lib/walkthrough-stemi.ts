@@ -366,7 +366,7 @@ export const stemiWalkthrough: Walkthrough = {
         ],
       },
       beats: [
-        { at: 0, actorId: 'patient', action: 'On the stretcher — pale, post-arrest, responding to voice.', pos: { x: 170, y: 244 }, pose: 'collapsed', expression: 'pained' },
+        { at: 0, actorId: 'patient', action: 'On the stretcher — pale, post-arrest, responding to voice.', pos: { x: 170, y: 244 }, pose: 'collapsed', expression: 'pained', onSurface: true },
         { at: 0, actorId: 'paramedic', action: 'Arrives with EA. Hands over from CFR — ROSC, GCS 14.', pos: { x: 222, y: 246 }, pose: 'kneel', direction: 'W', expression: 'focused' },
         { at: 3, actorId: 'driver', action: 'Sets up the stretcher and clears the route to the EA.', pos: { x: 312, y: 238 }, pose: 'stand', direction: 'W', expression: 'focused', walking: true },
         { at: 5, actorId: 'paramedic', action: '12-lead ECG: ST elevation V1–V4. Calls STEMI alert.', pos: { x: 222, y: 246 }, pose: 'kneel', direction: 'W', expression: 'focused' },
@@ -786,7 +786,7 @@ export const stemiWalkthrough: Walkthrough = {
       location: 'En route Private → SGH',
       defaultNextChapterId: 'arrive-sgh',
       beats: [
-        { at: 0, actorId: 'patient', action: 'On the stretcher for the secondary transfer to SGH.', pos: { x: 150, y: 244 }, pose: 'collapsed', expression: 'pained' },
+        { at: 0, actorId: 'patient', action: 'On the stretcher for the secondary transfer to SGH.', pos: { x: 150, y: 244 }, pose: 'collapsed', expression: 'pained', onSurface: true },
         { at: 0, actorId: 'paramedic', action: 'Re-runs ECG en route; no change.' },
         { at: 5, actorId: 'driver', action: 'Pre-notifies SGH bypass bay; ETA 8 minutes.' },
         { at: 11, actorId: 'paramedic', action: 'Door-to-balloon clock now over the 90-minute target due to the detour.' },
