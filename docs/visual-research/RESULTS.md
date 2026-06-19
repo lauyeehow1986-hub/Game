@@ -770,3 +770,38 @@ table, not floating); directed blocking + framing; the 12-scene environment
 audit; the B-roll/showpiece cohesion (restyle 2D fluoroscopy, immersive in-engine
 MRI/AED). Minor: extend `castStyle` SLOT to cover the Worker/other models' extra
 material names (paramedic hi-vis currently shows the model default, not SCDF red).
+
+---
+
+## 2026-06-20 — Plan 2: per-beat supine surface + blocking
+
+Spec workstream 5. Plan:
+`docs/superpowers/plans/2026-06-20-stylized-surface-blocking.md`.
+
+**Problem:** collapsed patients floated *beside* the CT/cath table or dumped on
+the floor (the street "ambulance on scene" bug), because only resus/cath/imaging
+registered a surface and the `street` scene is ambiguous (STEMI uses it for the
+loaded stretcher; trauma for the ground impact).
+
+**Built:**
+  • `surfacePlacement(surface, pose, onSurface)` — pure, headless-tested helper.
+    Auto surfaces (indoor clinical) snap any `collapsed` patient; non-auto
+    (outdoor stretcher) require the beat to opt in. 4 unit tests.
+  • `Environment3D.bed` → `surface { …, auto }`. resus/cath/CT set `auto: true`;
+    added a centred **ward/CCU hero bed** (auto) and a **street stretcher**
+    (auto: false, opt-in). Stage3D consumes `surfacePlacement`; `onSurface`
+    flows beat → Figure3D → placement.
+  • STEMI's two `scene:'street'` "On the stretcher" beats set `onSurface: true`;
+    trauma's street beats are all ground casualties → untouched, so the
+    motorcycle casualty correctly stays on the road.
+  • Blocking: non-patient figures turn to face the patient-on-surface (a team
+    around one casualty), inert when no one is on a surface.
+
+**Verified:** `surfacePlacement` unit tests + `pnpm verify` (tests + tsc +
+build) all green. **Visual on-screen confirmation pending** — the preview
+browser's screenshot/eval layer wedged this session (dev server + page console
+clean; CDP round-trips time out), so the exact on-bed framing / clinician facing
+and the new ward + street surface positions are best-estimates to eyeball on the
+live deploy and micro-tune next session. The change cannot regress previously-good
+scenes: cath/CT/resus surface positions are unchanged; ward + street are additive
+(those patients previously floated or hit the floor).
