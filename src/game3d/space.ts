@@ -14,6 +14,8 @@
  *    FOV than v9.17.0 to bring figures up to a cinematic two-shot scale.
  */
 
+import type { BeatPose } from '../lib/walkthrough';
+
 export const WORLD_X_PER_STAGE = 1 / 24;
 export const WORLD_Z_PER_STAGE = 1 / 14;
 
@@ -41,6 +43,30 @@ export function yawFor(direction: 'N' | 'S' | 'E' | 'W'): number {
     case 'E': return Math.PI / 2;
     case 'W': return -Math.PI / 2;
   }
+}
+
+/** A clinical surface a collapsed patient lies on (world metres + facing).
+ *  `auto`: indoor clinical scenes (resus/cath/CT/ward) snap any collapsed
+ *  patient; ambiguous outdoor scenes set `auto: false` and require the beat to
+ *  opt in via `onSurface`. */
+export interface SurfaceSpot {
+  x: number;
+  z: number;
+  y: number;
+  yaw: number;
+  auto: boolean;
+}
+
+/** Where (if anywhere) a figure lies on the scene surface this beat. Returns
+ *  null to keep the figure at its authored floor mark. */
+export function surfacePlacement(
+  surface: SurfaceSpot | undefined,
+  pose: BeatPose,
+  onSurface: boolean,
+): { x: number; z: number; y: number; yaw: number } | null {
+  if (!surface || pose !== 'collapsed') return null;
+  if (!surface.auto && !onSurface) return null;
+  return { x: surface.x, z: surface.z, y: surface.y, yaw: surface.yaw };
 }
 
 /** Camera rig constants shared by the engine and tests. */
