@@ -75,9 +75,12 @@ export function resolveLibFile(actor: WalkthroughActor): CastLibFile | null {
   if (/doctor|\bmo\b|medical officer|nurse|\bhca\b|radiog|physio|\bot\b|therapist|dietitian|midwife/.test(hay)) {
     return f ? 'doctor-female-young' : 'doctor-male-young';
   }
-  // Pre-hospital — paramedic / ambulance / CFR / responder / SCDF / driver.
+  // Pre-hospital responders — paramedic / CFR / SCDF / ambulance crew. The
+  // Quaternius pack has no EMS model and the construction "worker" reads wrong
+  // (hard hat + hi-vis), so use the clinical figure and let castStyle dress them
+  // in SCDF red (see garment()).
   if (/paramedic|ambulance|driver|cfr|responder|scdf|smrt-staff|smrt staff/.test(hay)) {
-    return f ? 'worker-female' : 'worker-male';
+    return f ? 'doctor-female-young' : 'doctor-male-young';
   }
   // Pharmacy / coordination / admin / clerk in office attire.
   if (/pharm|coord|clerk|admin|counsel|registration|discharge/.test(hay)) {

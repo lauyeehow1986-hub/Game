@@ -27,11 +27,11 @@ describe('resolveLibFile', () => {
       .toMatch(/doctor-(male|female)-young/);
   });
 
-  it('maps pre-hospital crew to a worker figure', () => {
+  it('maps pre-hospital responders to a clinical figure, not a construction worker', () => {
     expect(resolveLibFile(actor({ id: 'paramedic', role: 'SCDF paramedic', team: 'ambulance' })))
-      .toMatch(/worker-(male|female)/);
-    expect(resolveLibFile(actor({ id: 'smrt-staff', role: 'SMRT station staff', team: 'support' })))
-      .toMatch(/worker-(male|female)/);
+      .toMatch(/doctor-(male|female)-young/);
+    expect(resolveLibFile(actor({ id: 'cfr-responder', role: 'CFR responder', team: 'ambulance' })))
+      .toMatch(/doctor-(male|female)-young/);
   });
 
   it('maps the patient to an older-adult casual figure', () => {

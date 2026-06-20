@@ -126,6 +126,13 @@ export class PoseAnimationDriver {
       this.currentAction.fadeOut(fadeSec);
     }
     action.reset().fadeIn(fadeSec).play();
+    // Settled poses (collapsed on a table/stretcher, seated) should read as
+    // *already* in place — patients are discovered on the surface, not animated
+    // falling onto it. Snap to the clip's final (clamped) frame instead of
+    // playing the fall-down/sit-down from standing.
+    if (pose === 'collapsed' || pose === 'sit') {
+      action.time = action.getClip().duration;
+    }
     this.currentAction = action;
     void this.target;
   }

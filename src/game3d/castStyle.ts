@@ -73,9 +73,21 @@ export function styleForActor(actor: WalkthroughActor): CastStyle {
   return { skin, hair, top: g.top, bottom: g.bottom, accent: g.accent, scale };
 }
 
-/** Quaternius material name → which CastStyle colour drives it. */
+/** Quaternius material name → which CastStyle colour drives it. Covers every
+ *  clothing material across all cast models (doctor / casual / oldclassy / suit /
+ *  worker) so no model falls back to its built-in colours (e.g. the worker's
+ *  construction hi-vis or the oldclassy patient's default suit). */
 const SLOT: Record<string, keyof CastStyle> = {
-  Skin: 'skin', Face: 'skin', Hair: 'hair', Main: 'top', Black: 'bottom', Brown: 'accent',
+  // skin
+  Skin: 'skin', Face: 'skin',
+  // hair
+  Hair: 'hair',
+  // primary garment — coat / shirt / scrub top
+  Main: 'top', Shirt: 'top',
+  // lower garment — trousers / scrub bottoms
+  Black: 'bottom', Pants: 'bottom',
+  // accents — belts, vests, trims, hats, shoes
+  Brown: 'accent', Belt: 'accent', Vest: 'accent', Detail: 'accent', Details: 'accent', Hat: 'accent',
 };
 
 /**
