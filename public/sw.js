@@ -9,7 +9,7 @@
  *
  * Bump CACHE_VERSION when changing strategy to invalidate old caches.
  */
-const CACHE_VERSION = 'sg-pathway-v3';
+const CACHE_VERSION = 'sg-pathway-v4';
 const APP_SHELL = [
   './',
   './index.html',
@@ -56,6 +56,29 @@ self.addEventListener('fetch', (event) => {
           return res;
         })
         .catch(() => caches.match('./index.html').then((m) => m || new Response('Offline', { status: 503 }))),
+    );
+    return;
+  }
+
+  // 3D binary assets (GLB cast / clips / HDRs): these keep stable filenames but
+  // change in place across deploys, so pure cache-first would serve a stale
+  // model forever (e.g. an old animation clip). Use stale-while-revalidate —
+  // serve cache fast, refresh in the background so the next load self-heals
+  // without needing a CACHE_VERSION bump.
+  if (url.pathname.includes('/3d/')) {
+    event.respondWith(
+      caches.match(req).then((cached) => {
+        const network = fetch(req)
+          .then((res) => {
+            if (res && res.status === 200 && res.type !== 'opaque') {
+              const copy = res.clone();
+              caches.open(CACHE_VERSION).then((c) => c.put(req, copy)).catch(() => {});
+            }
+            return res;
+          })
+          .catch(() => cached || new Response('Offline', { status: 503 }));
+        return cached || network;
+      }),
     );
     return;
   }
