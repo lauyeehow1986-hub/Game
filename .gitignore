@@ -35,5 +35,9 @@ public/3d/cast/_stash_overrides/
 scripts/_qa*
 scripts/_gen_all.log
 public/3d/anims/*.glb
+# EXCEPTION: the 7 CC0 Quaternius pose clips ARE committed — without them the
+# deployed cast loads but never animates (frozen in bind-pose) and collapsed
+# patients stand on the bed instead of lying. Required deploy artifact, like _lib.
+!public/3d/anims/*.glb
 public/3d/props/*.glb
 public/3d/props/_quaternius-medical/
