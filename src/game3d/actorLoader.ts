@@ -204,6 +204,12 @@ class GlbFigure implements ActorFigure {
     // settling, not snapping.
     const targetY = this.state.pose === 'collapsed' ? this.state.surfaceY : 0;
     this.root.position.y += (targetY - this.root.position.y) * Math.min(1, dt * 6);
+    // CPR: a quick downward compression bob (~110/min) layered on the crouch
+    // clip, so the responder reads as pumping the chest rather than a static
+    // kneel (the Quaternius pack has no real CPR clip). 0→5cm→0 dip per beat.
+    if (this.state.pose === 'cpr') {
+      this.root.position.y -= ((1 - Math.cos(t * 11.5)) / 2) * 0.05;
+    }
 
     const want = this.state.isLead ? 0.55 + Math.sin(t * 4) * 0.18 : 0;
     const m = this.focusRing.material as THREE.MeshBasicMaterial;

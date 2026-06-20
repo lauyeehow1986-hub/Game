@@ -60,7 +60,7 @@ const POSE_MAP = {
   walking: 'Walk',
   kneeling: 'PickUp', // crouch/bend — closest to kneeling
   sitting: 'SitDown',
-  'cpr-compressions': 'Punch', // repetitive downward arm motion stand-in
+  'cpr-compressions': 'PickUp', // crouch-over-the-casualty base; engine layers a compression bob
   'lying-down': 'Death', // lies down + stays (collapsed)
   pointing: 'Shoot_OneHanded', // arm extended forward
 };
