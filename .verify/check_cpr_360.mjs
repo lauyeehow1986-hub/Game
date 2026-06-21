@@ -123,7 +123,9 @@ async function main() {
   await settle('bystander');
   const pPat = await pos('patient'), pBys = await pos('bystander');
   console.log('  patient', JSON.stringify(pPat), 'bystander', JSON.stringify(pBys));
-  await matrix(page, 'bys', { x: (pPat.x + pBys.x) / 2, y: 0.55, z: (pPat.z + pBys.z) / 2 });
+  // Target the patient's CHEST (torso bone ~world -1.6, z -0.16), not the root
+  // (which sits at the feet) — earlier verification framed the wrong spot.
+  await matrix(page, 'bys', { x: -1.5, y: 0.45, z: -0.2 });
 
   // ---- CFR @ t=23 (settle the long arrival walk first).
   console.log('\n== CFR @ t=23 ==');
@@ -138,7 +140,7 @@ async function main() {
   }
   const pPat2 = await pos('patient'), pCfr = await pos('cfr');
   console.log('  patient', JSON.stringify(pPat2), 'cfr', JSON.stringify(pCfr));
-  await matrix(page, 'cfr', { x: (pPat2.x + pCfr.x) / 2, y: 0.55, z: (pPat2.z + pCfr.z) / 2 });
+  await matrix(page, 'cfr', { x: -1.7, y: 0.45, z: -0.2 });
 
   await browser.close();
   console.log('\nPAGE ERRORS:', errs.length ? errs : '(none)');

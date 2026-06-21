@@ -325,14 +325,14 @@ export const stemiWalkthrough: Walkthrough = {
         // The coffee-shop attendant clears tables and waves onlookers back.
         { at: 4, actorId: 'support-cleaner', action: 'Clears tables and keeps onlookers back so the area is safe.', pos: { x: 314, y: 214 }, pose: 'point', direction: 'W', expression: 'alarmed' },
         // Bystander drops to his knees and starts hands-only CPR.
-        { at: 6, actorId: 'bystander', action: 'On 995: dispatcher confirms cardiac arrest. Starts hands-only CPR.', pos: { x: 216, y: 235 }, pose: 'cpr', direction: 'W', expression: 'focused' },
+        { at: 6, actorId: 'bystander', action: 'On 995: dispatcher confirms cardiac arrest. Starts hands-only CPR.', pos: { x: 208, y: 256 }, pose: 'cpr', direction: 'W', expression: 'focused' },
         // Patient now on the floor, pulseless, receiving compressions.
         { at: 10, actorId: 'patient', action: 'Pulseless. Receiving chest compressions at 100–120 / min.', pos: { x: 202, y: 238 }, pose: 'collapsed', expression: 'unconscious' },
         // The myResponder CFR sprints in from the five-foot-way with a PAD AED.
         { at: 14, actorId: 'cfr', action: 'myResponder ping accepted — arrives with PAD AED from 280 m away.', pos: { x: 372, y: 232 }, pose: 'walk', walking: true, direction: 'W', expression: 'focused' },
         // CFR kneels on the far side, applies pads, delivers a shock.
         { at: 18, actorId: 'cfr', action: 'AED pads on. Shock advised. Stand clear, shock delivered.', pos: { x: 166, y: 242 }, pose: 'kneel', direction: 'E', expression: 'focused', showpiece: { kind: 'svg', id: 'aed-shock' }, sfx: '⚡ CLEAR!' },
-        { at: 22, actorId: 'cfr', action: 'CPR resumed. Second cycle.', pos: { x: 189, y: 235 }, pose: 'cpr', direction: 'E', expression: 'focused' },
+        { at: 22, actorId: 'cfr', action: 'CPR resumed. Second cycle.', pos: { x: 195, y: 256 }, pose: 'cpr', direction: 'E', expression: 'focused' },
         // ROSC — Mr Tan groans, a pulse returns.
         { at: 26, actorId: 'patient', action: 'Return of spontaneous circulation. Groaning. Pulse palpable.', pos: { x: 202, y: 238 }, pose: 'collapsed', expression: 'pained' },
       ],
