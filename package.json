@@ -17,7 +17,8 @@
     "map:cast": "node scripts/map-quaternius-cast.mjs",
     "make:cast": "blender --background --python scripts/make-cast.py",
     "make:cpr": "blender --background --python scripts/make-cpr.py",
-    "make:supine": "blender --background --python scripts/make-cpr.py -- --supine"
+    "make:supine": "blender --background --python scripts/make-cpr.py -- --supine",
+    "make:kneel": "blender --background --python scripts/make-cpr.py -- --kneel"
   },
   "dependencies": {
     "phaser": "^3.80.1",

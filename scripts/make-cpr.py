@@ -23,10 +23,12 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'public', '3d', 'cast', '_quaternius', 'glTF', 'Casual_Male.gltf')
 OUT = os.path.join(ROOT, 'public', '3d', 'anims', 'cpr-compressions.glb')
 OUT_SUPINE = os.path.join(ROOT, 'public', '3d', 'anims', 'lying-down.glb')
+OUT_KNEEL = os.path.join(ROOT, 'public', '3d', 'anims', 'kneeling.glb')
 PREVIEW_DIR = os.path.join(ROOT, '.verify', 'blender')
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 INSPECT = '--inspect' in argv
 SUPINE = '--supine' in argv  # author lying-down.glb (face-up) instead of cpr
+KNEEL = '--kneel' in argv    # author kneeling.glb (bedside attending lean)
 
 os.makedirs(PREVIEW_DIR, exist_ok=True)
 
@@ -159,6 +161,25 @@ def pose_supine(arm):
     dg()
 
 
+# --- "kneel" = bedside attending lean (replaces the PickUp deep waist-bow, which
+# read as the clinician BOWING to the patient). Stay mostly upright with a modest
+# forward lean and reach both hands forward-down toward a patient on a bed. ---
+ATT_ABDOMEN = Vector((0.0, -0.16, 1.45))
+ATT_TORSO = Vector((0.0, -0.30, 1.64))
+ATT_HEAD = Vector((0.0, -0.45, 1.72))
+ATT_HAND_L = Vector((0.18, -0.55, 1.12))
+ATT_HAND_R = Vector((-0.18, -0.55, 1.12))
+
+
+def pose_attend(arm):
+    to_rest(arm)
+    aim(arm, 'Abdomen', ATT_ABDOMEN); aim(arm, 'Torso', ATT_TORSO); aim(arm, 'Head', ATT_HEAD)
+    for seg in ('UpperArm.L', 'LowerArm.L', 'Fist.L'):
+        aim(arm, seg, ATT_HAND_L)
+    for seg in ('UpperArm.R', 'LowerArm.R', 'Fist.R'):
+        aim(arm, seg, ATT_HAND_R)
+
+
 def keyframe_all(arm, name):
     for pb in arm.pose.bones:
         pb.rotation_mode = 'QUATERNION'
@@ -204,6 +225,14 @@ def main():
         keyframe_all(arm, 'lying-down')
         export(arm, OUT_SUPINE)
         print('Supine lying-down pose authored.')
+        return
+    if KNEEL:
+        pose_attend(arm)
+        setup_render('attend_side.png', (4, 0, 1.4), (radians(80), 0, radians(90)))
+        setup_render('attend_3q.png', (3, 3, 1.7), (radians(74), 0, radians(135)))
+        keyframe_all(arm, 'kneeling')
+        export(arm, OUT_KNEEL)
+        print('Attending kneel pose authored.')
         return
     pose_cpr(arm)
     # Preview from several angles (camera looks toward the figure's mid-height).
