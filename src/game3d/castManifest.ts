@@ -51,6 +51,7 @@ export type CastLibFile = (typeof CAST_LIB_FILES)[number];
 
 /** Cheap deterministic pick between two gendered variants from an id. */
 function femaleish(actor: WalkthroughActor): boolean {
+  if (actor.gender) return actor.gender === 'f';
   const hay = `${actor.id} ${actor.role}`.toLowerCase();
   if (/\b(wife|mrs|mdm|madam|daughter|female|woman|mother|she|her)\b/.test(hay)) return true;
   if (/\b(husband|mr|son|male|man|father|he|his)\b/.test(hay)) return false;
@@ -92,7 +93,9 @@ export function resolveLibFile(actor: WalkthroughActor): CastLibFile | null {
     return f ? 'casual-female' : 'casual2-female';
   }
   if (/bystander|support|cleaner|attendant|onlooker|public/.test(hay)) {
-    return f ? 'casual-female' : 'casual3-male';
+    // casual-male (full hair) not casual3-male: the latter has a bald crown that
+    // reads as "bald at the back" when a bystander bends over to do CPR.
+    return f ? 'casual-female' : 'casual-male';
   }
   // The patient themselves — usually an older adult.
   if (/patient/.test(hay)) {

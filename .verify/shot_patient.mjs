@@ -2,7 +2,7 @@
 // (face down). Render the head from above + a low side view, and read the Head
 // bone's local axes in world space to compute which way the face points.
 import { chromium } from 'playwright';
-const BASE = 'http://localhost:5173/Game/';
+const BASE = process.env.BASE || 'http://localhost:5173/Game/';
 
 async function clickByText(page, ...pats) {
   return await page.evaluate((ps) => {
@@ -56,6 +56,15 @@ async function main() {
   });
   console.log('Head bone world axes (cols x/y/z):', JSON.stringify(ori.head));
   console.log('Torso bone world axes:', JSON.stringify(ori.torso));
+  // Torso local-Z up (+Y) = supine; down (-Y) = prone.
+  console.log('=> orientation:', ori.torso.z[1] > 0.3 ? 'SUPINE (face up)' : ori.torso.z[1] < -0.3 ? 'PRONE (face down)' : 'on side/unclear');
+  // bystander fists (how many hands + spread)
+  const fists = await page.evaluate(() => {
+    const v = window.__stage3d.figures.get('bystander'); if (!v) return null; const root = v.figure.root; root.updateWorldMatrix(true, true);
+    const out = {}; root.traverse((o) => { if (o.isBone && /Fist/.test(o.name)) { const m = o.matrixWorld.elements; out[o.name] = [Math.round(m[12] * 100) / 100, Math.round(m[13] * 100) / 100, Math.round(m[14] * 100) / 100]; } });
+    return out;
+  });
+  console.log('bystander fists:', JSON.stringify(fists));
 
   // Patient head ~world (-1.63, 0.24, 0.42); look straight down at it, and from the side.
   await shot(page, 'patient_top.png', [-1.6, 3.5, 0.0], [-1.6, 0, -0.3]);

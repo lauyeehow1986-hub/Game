@@ -104,7 +104,9 @@ KNEE_L = Vector((0.22, -0.18, 0.06));  ANKLE_L = Vector((0.24, 0.42, 0.03));  TO
 KNEE_R = Vector((-0.22, -0.18, 0.06)); ANKLE_R = Vector((-0.24, 0.42, 0.03)); TOE_R = Vector((-0.24, 0.60, 0.06))
 ABDOMEN_T = Vector((0.0, -0.08, 1.00))
 TORSO_T = Vector((0.0, -0.20, 1.14))
-HEAD_T = Vector((0.0, -0.42, 1.22))
+# Head looks forward at the chest, NOT chin-tucked — a sharp down-tilt bares the
+# scalp (rigid hair swings away → "bald back"). Keep it close to level.
+HEAD_T = Vector((0.0, -0.55, 1.58))
 HAND_L = Vector((0.05, -0.34, 0.30))
 HAND_R = Vector((-0.05, -0.34, 0.30))
 

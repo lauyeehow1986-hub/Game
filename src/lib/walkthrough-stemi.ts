@@ -48,6 +48,9 @@ export const stemiWalkthrough: Walkthrough = {
       id: 'bystander',
       role: 'Bystander',
       team: 'bystander',
+      // Male → casual-male (short, full hair). The hashed pick was casual-female
+      // whose long hair bares the scalp when he bends over to do CPR.
+      gender: 'm',
       bio: 'A passer-by trained in DARE (Dispatcher-Assisted first REsponder). Calls 995 and starts hands-only CPR while waiting for the AED.',
       swatch: '#a3e635',
     },

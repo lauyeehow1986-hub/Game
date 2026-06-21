@@ -32,6 +32,11 @@ export interface WalkthroughActor {
   team: ActorTeam;
   /** Long-form role description (i18n key OR literal English). */
   bio: string;
+  /** Optional explicit gender for the 3D cast model. When unset, a stable hash
+   *  of the id picks one. Set it when the narrative implies a gender or when the
+   *  hashed pick reads wrong (e.g. a long-haired model that bares the scalp in a
+   *  bent-over CPR pose). */
+  gender?: 'm' | 'f';
   /** Optional colour swatch for the SVG/Phaser sprite. */
   swatch?: string;
 }
