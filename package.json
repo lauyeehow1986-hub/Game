@@ -16,7 +16,8 @@
     "fetch:3d": "node scripts/fetch-3d-assets.mjs",
     "map:cast": "node scripts/map-quaternius-cast.mjs",
     "make:cast": "blender --background --python scripts/make-cast.py",
-    "make:cpr": "blender --background --python scripts/make-cpr.py"
+    "make:cpr": "blender --background --python scripts/make-cpr.py",
+    "make:supine": "blender --background --python scripts/make-cpr.py -- --supine"
   },
   "dependencies": {
     "phaser": "^3.80.1",

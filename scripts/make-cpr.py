@@ -22,9 +22,11 @@ from mathutils import Euler, Vector, Matrix, Quaternion
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'public', '3d', 'cast', '_quaternius', 'glTF', 'Casual_Male.gltf')
 OUT = os.path.join(ROOT, 'public', '3d', 'anims', 'cpr-compressions.glb')
+OUT_SUPINE = os.path.join(ROOT, 'public', '3d', 'anims', 'lying-down.glb')
 PREVIEW_DIR = os.path.join(ROOT, '.verify', 'blender')
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 INSPECT = '--inspect' in argv
+SUPINE = '--supine' in argv  # author lying-down.glb (face-up) instead of cpr
 
 os.makedirs(PREVIEW_DIR, exist_ok=True)
 
@@ -132,21 +134,55 @@ def pose_cpr(arm):
         aim(arm, seg, HAND_R)
 
 
-def keyframe_all(arm):
+# --- Supine "lying-down" (face-up): the Quaternius Death clip lands the patient
+# FACE-DOWN (prone) — you can't do CPR on a back. Lay the figure flat on its back
+# with the head at the same end the scene expects (glTF +Z), arms at the sides. ---
+SUP_ARM_L = (Vector((0.30, -0.04, 1.05)), Vector((0.33, -0.04, 0.6)), Vector((0.35, -0.04, 0.18)))
+SUP_ARM_R = (Vector((-0.30, -0.04, 1.05)), Vector((-0.33, -0.04, 0.6)), Vector((-0.35, -0.04, 0.18)))
+
+
+def pose_supine(arm):
+    to_rest(arm)
+    # arms down to the sides (from the T-pose) for a natural casualty.
+    for seg, t in zip(('UpperArm.L', 'LowerArm.L', 'Fist.L'), SUP_ARM_L):
+        aim(arm, seg, t)
+    for seg, t in zip(('UpperArm.R', 'LowerArm.R', 'Fist.R'), SUP_ARM_R):
+        aim(arm, seg, t)
+    # tip the whole skeleton onto its back: -90° about world X lays it flat face-up,
+    # +180° about Z puts the head at glTF +Z (matching the Death clip's end).
+    pb = arm.pose.bones['Bone']
+    dg()
+    R = Matrix.Rotation(radians(180), 4, 'Z') @ Matrix.Rotation(radians(-90), 4, 'X')
+    pb.matrix = R @ pb.matrix
+    dg()
+
+
+def keyframe_all(arm, name):
     for pb in arm.pose.bones:
         pb.rotation_mode = 'QUATERNION'
         pb.keyframe_insert('rotation_quaternion', frame=1)
+        pb.keyframe_insert('location', frame=1)
         pb.keyframe_insert('rotation_quaternion', frame=12)
-    arm.animation_data.action.name = 'cpr-compressions'
+        pb.keyframe_insert('location', frame=12)
+    act = arm.animation_data.action
+    act.name = name
+    # Prune the 17 imported source clips. The engine loads animations[0]; left in,
+    # an alphabetically-earlier source clip (e.g. 'Death') wins and the authored
+    # pose is silently ignored. Also clears any NLA stashing of those clips.
+    for tr in list(arm.animation_data.nla_tracks):
+        arm.animation_data.nla_tracks.remove(tr)
+    for a in list(bpy.data.actions):
+        if a is not act:
+            bpy.data.actions.remove(a)
 
 
-def export(arm):
+def export(arm, out):
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.export_scene.gltf(
-        filepath=OUT, export_format='GLB', export_animations=True,
+        filepath=out, export_format='GLB', export_animations=True,
         export_yup=True, use_selection=False,
     )
-    print('  exported', OUT)
+    print('  exported', out)
 
 
 def main():
@@ -159,14 +195,22 @@ def main():
         setup_render('rest_top.png', (0, 0, 5), (0, 0, 0))
         print('INSPECT done.')
         return
+    if SUPINE:
+        pose_supine(arm)
+        setup_render('supine_top.png', (0, 0, 5), (0, 0, 0))
+        setup_render('supine_side.png', (4, 0, 1.0), (radians(85), 0, radians(90)))
+        keyframe_all(arm, 'lying-down')
+        export(arm, OUT_SUPINE)
+        print('Supine lying-down pose authored.')
+        return
     pose_cpr(arm)
     # Preview from several angles (camera looks toward the figure's mid-height).
     setup_render('cpr_back.png', (0, -4, 1.2), (radians(78), 0, 0))
     setup_render('cpr_front.png', (0, 4, 1.2), (radians(78), 0, radians(180)))
     setup_render('cpr_side.png', (4, 0, 1.2), (radians(78), 0, radians(90)))
     setup_render('cpr_3q.png', (3, 3, 1.6), (radians(70), 0, radians(135)))
-    keyframe_all(arm)
-    export(arm)
+    keyframe_all(arm, 'cpr-compressions')
+    export(arm, OUT)
     print('CPR pose authored.')
 
 
