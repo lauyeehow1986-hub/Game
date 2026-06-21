@@ -185,6 +185,30 @@ export class Stage3D {
 
     this.renderer.domElement.addEventListener('pointerdown', this.handlePointer);
     this.renderer.setAnimationLoop(() => this.tick());
+
+    // __VERIFY_HOOK__ (temporary, reverted after verification): expose the
+    // internals the headless Playwright harness needs to orbit the camera and
+    // measure figure bounding boxes. Maps the internal FigureEntry view to the
+    // { figure: { root } } shape the harness reads.
+    if (typeof window !== 'undefined') {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      const self = this;
+      (window as unknown as { __stage3d: unknown }).__stage3d = {
+        get camera() { return self.camera; },
+        get renderer() { return self.renderer; },
+        get scene() { return self.scene; },
+        get postFx() { return self.postFx; },
+        get postFxEnabled() { return self.postFxEnabled; },
+        get figures() {
+          const m = new Map<string, { figure: { root: unknown } }>();
+          for (const [id, entry] of self.figures) {
+            m.set(id, { figure: { root: (entry.figure as { root: unknown }).root } });
+          }
+          return m;
+        },
+        tick: () => self.tick(),
+      };
+    }
   }
 
   setPick(cb: (id: string) => void) {

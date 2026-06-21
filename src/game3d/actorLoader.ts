@@ -254,6 +254,18 @@ export function createActorFigure(actor: WalkthroughActor, parent: THREE.Object3
   const figure = new ProceduralFigure(actor);
   parent.add(figure.root);
 
+  // Record the latest goal + state so a late GLB swap can inherit them. A fresh
+  // GlbFigure starts with goal (0,0) and pose 'stand'; if the template finishes
+  // loading after the *last* setFrame (e.g. the timeline is paused right as a
+  // figure first appears on a scrubbed frame), nothing re-applies setGoal and
+  // the figure quietly walks to the world origin. Carrying them across fixes it.
+  let lastGoal: { x: number; z: number } | null = null;
+  let lastState: Parameters<ActorFigure['setState']>[0] = {};
+  const procSetGoal = figure.setGoal.bind(figure);
+  const procSetState = figure.setState.bind(figure);
+  figure.setGoal = (x: number, z: number) => { lastGoal = { x, z }; procSetGoal(x, z); };
+  figure.setState = (next) => { lastState = { ...lastState, ...next }; procSetState(next); };
+
   loadActorTemplate(actor).then((template) => {
     if (!template) return;
     // swap: remove the procedural figure, mount the GLB at the same world pos.
@@ -262,6 +274,10 @@ export function createActorFigure(actor: WalkthroughActor, parent: THREE.Object3
     figure.dispose();
     const glb = new GlbFigure(actor, template);
     glb.root.position.copy(worldPos);
+    // Inherit the in-progress pose/state and walk goal so a swap during a pause
+    // doesn't reset them (goal→(0,0) would otherwise send the figure to origin).
+    glb.setState(lastState);
+    glb.setGoal(lastGoal ? lastGoal.x : worldPos.x, lastGoal ? lastGoal.z : worldPos.z);
     parent.add(glb.root);
     // bolt the GLB onto the original handle so the engine's reference
     // keeps working — easier than rebroadcasting up to Stage3D.

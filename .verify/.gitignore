@@ -1,0 +1,4 @@
+# Verification harness: the *.mjs scripts are committed (rerun to reproduce
+# the views); the image outputs are regenerable and stay out of git history.
+*.png
+360/
