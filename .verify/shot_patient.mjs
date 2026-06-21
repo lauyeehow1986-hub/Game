@@ -42,8 +42,10 @@ async function main() {
   await page.waitForTimeout(2000);
   await page.evaluate(() => { const el = [...document.querySelectorAll('button,[role="button"]')].find((b) => (b.textContent || '').trim().toLowerCase().startsWith('3d')); if (el) el.click(); });
   await page.waitForTimeout(3500);
-  await clickByText(page, 'collapse'); await page.waitForTimeout(2500);
-  await scrubTo(page, 11); await page.waitForTimeout(2000);
+  const CHAP = process.env.CHAP || 'collapse';
+  const T = Number(process.env.TIME || 11);
+  await clickByText(page, CHAP); await page.waitForTimeout(2500);
+  await scrubTo(page, T); await page.waitForTimeout(2000);
 
   // Head bone world axes → face/torso-up direction (game world: Y up).
   const ori = await page.evaluate(() => {
