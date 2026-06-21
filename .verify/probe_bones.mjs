@@ -83,7 +83,7 @@ async function main() {
   await settle(page, 'bystander');
 
   const patientBones = ['hips', 'abdomen', 'torso', 'body', 'neck', 'head', 'foot'];
-  const handBones = ['fist', 'foot', 'lowerleg', 'upperleg', 'hips', 'head'];
+  const handBones = ['shoulder', 'upperarm', 'lowerarm', 'fist'];
   const pat = await bones(page, 'patient', patientBones);
   const bys = await bones(page, 'bystander', handBones);
   console.log('PATIENT bones:', JSON.stringify(pat));

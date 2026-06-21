@@ -322,11 +322,15 @@ export const stemiWalkthrough: Walkthrough = {
         { at: 0, actorId: 'patient', action: 'Walking to the kopi counter — clutches chest, collapses.', pos: { x: 214, y: 224 }, pose: 'stand', expression: 'pained' },
         // A passer-by sees it and reacts.
         { at: 2, actorId: 'bystander', action: 'Sees the collapse, shouts for help, dials 995.', pos: { x: 264, y: 224 }, pose: 'stand', expression: 'alarmed' },
+        // Mr Tan is on the ground, unresponsive.
+        { at: 3, actorId: 'patient', action: 'Down on the floor — unresponsive.', pos: { x: 202, y: 238 }, pose: 'collapsed', expression: 'unconscious' },
         // The coffee-shop attendant clears tables and waves onlookers back.
         { at: 4, actorId: 'support-cleaner', action: 'Clears tables and keeps onlookers back so the area is safe.', pos: { x: 314, y: 214 }, pose: 'point', direction: 'W', expression: 'alarmed' },
+        // Bystander checks first: unresponsive + no normal breathing = cardiac arrest.
+        { at: 4, actorId: 'bystander', action: 'Kneels, checks: unresponsive, not breathing normally — it’s a cardiac arrest.', pos: { x: 212, y: 256 }, pose: 'kneel', direction: 'W', expression: 'alarmed' },
         // Bystander drops to his knees and starts hands-only CPR.
         { at: 6, actorId: 'bystander', action: 'On 995: dispatcher confirms cardiac arrest. Starts hands-only CPR.', pos: { x: 208, y: 256 }, pose: 'cpr', direction: 'W', expression: 'focused' },
-        // Patient now on the floor, pulseless, receiving compressions.
+        // Pulseless; compressions ongoing.
         { at: 10, actorId: 'patient', action: 'Pulseless. Receiving chest compressions at 100–120 / min.', pos: { x: 202, y: 238 }, pose: 'collapsed', expression: 'unconscious' },
         // The myResponder CFR sprints in from the five-foot-way with a PAD AED.
         { at: 14, actorId: 'cfr', action: 'myResponder ping accepted — arrives with PAD AED from 280 m away.', pos: { x: 372, y: 232 }, pose: 'walk', walking: true, direction: 'W', expression: 'focused' },
