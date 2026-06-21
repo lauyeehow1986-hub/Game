@@ -60,7 +60,10 @@ const POSE_MAP = {
   walking: 'Walk',
   kneeling: 'PickUp', // crouch/bend — closest to kneeling
   sitting: 'SitDown',
-  'cpr-compressions': 'PickUp', // crouch-over-the-casualty base; engine layers a compression bob
+  // NB: cpr-compressions is NOT mapped here — the pack has no usable CPR/kneel
+  // clip (PickUp holds the hands ~1 m apart → one lands on the pelvis). It is
+  // hand-authored by `pnpm make:cpr` (scripts/make-cpr.py); do not re-add it
+  // here or `map:cast` will clobber the authored clip with PickUp.
   'lying-down': 'Death', // lies down + stays (collapsed)
   pointing: 'Shoot_OneHanded', // arm extended forward
 };
