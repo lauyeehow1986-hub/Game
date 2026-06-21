@@ -332,6 +332,9 @@ export const stemiWalkthrough: Walkthrough = {
         { at: 14, actorId: 'cfr', action: 'myResponder ping accepted — arrives with PAD AED from 280 m away.', pos: { x: 372, y: 232 }, pose: 'walk', walking: true, direction: 'W', expression: 'focused' },
         // CFR kneels on the far side, applies pads, delivers a shock.
         { at: 18, actorId: 'cfr', action: 'AED pads on. Shock advised. Stand clear, shock delivered.', pos: { x: 166, y: 242 }, pose: 'kneel', direction: 'E', expression: 'focused', showpiece: { kind: 'svg', id: 'aed-shock' }, sfx: '⚡ CLEAR!' },
+        // Bystander hands over: stands clear for the shock, then supports (only one
+        // rescuer compresses at a time) so the CFR runs the next cycle solo.
+        { at: 18, actorId: 'bystander', action: 'Stands clear for the shock, then supports — reassurance and airway.', pos: { x: 286, y: 230 }, pose: 'stand', direction: 'W', expression: 'focused' },
         { at: 22, actorId: 'cfr', action: 'CPR resumed. Second cycle.', pos: { x: 195, y: 256 }, pose: 'cpr', direction: 'E', expression: 'focused' },
         // ROSC — Mr Tan groans, a pulse returns.
         { at: 26, actorId: 'patient', action: 'Return of spontaneous circulation. Groaning. Pulse palpable.', pos: { x: 202, y: 238 }, pose: 'collapsed', expression: 'pained' },

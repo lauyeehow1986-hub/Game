@@ -202,13 +202,9 @@ class GlbFigure implements ActorFigure {
     // Lift a collapsed patient onto the scene's surface (trolley/table) when one
     // is provided; settle to the floor otherwise. Smoothed so it reads as
     // settling, not snapping.
-    // cpr is the Quaternius 'PickUp' standing waist-bow (no kneel clip exists);
-    // its hands rest ~0.9 m up, so on a floor casualty (chest ~0.27 m) drop the
-    // whole figure ~0.6 m to bring the hands onto the chest — reads as kneeling
-    // over the patient, lower legs tuck behind the torso from the stage camera.
-    const CPR_CROUCH = -0.6;
-    const targetY = this.state.pose === 'collapsed' ? this.state.surfaceY
-      : this.state.pose === 'cpr' ? CPR_CROUCH : 0;
+    // cpr uses an authored kneeling clip (scripts/make-cpr.py) whose hands already
+    // sit at a floor casualty's chest height, so no engine drop is needed.
+    const targetY = this.state.pose === 'collapsed' ? this.state.surfaceY : 0;
     this.root.position.y += (targetY - this.root.position.y) * Math.min(1, dt * 6);
     // CPR: a quick downward compression bob (~110/min) layered on the crouch
     // clip, so the responder reads as pumping the chest rather than a static

@@ -9,7 +9,7 @@
  *
  * Bump CACHE_VERSION when changing strategy to invalidate old caches.
  */
-const CACHE_VERSION = 'sg-pathway-v4';
+const CACHE_VERSION = 'sg-pathway-v5';
 const APP_SHELL = [
   './',
   './index.html',
