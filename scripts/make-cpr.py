@@ -24,11 +24,13 @@ SRC = os.path.join(ROOT, 'public', '3d', 'cast', '_quaternius', 'glTF', 'Casual_
 OUT = os.path.join(ROOT, 'public', '3d', 'anims', 'cpr-compressions.glb')
 OUT_SUPINE = os.path.join(ROOT, 'public', '3d', 'anims', 'lying-down.glb')
 OUT_KNEEL = os.path.join(ROOT, 'public', '3d', 'anims', 'kneeling.glb')
+OUT_POINT = os.path.join(ROOT, 'public', '3d', 'anims', 'pointing.glb')
 PREVIEW_DIR = os.path.join(ROOT, '.verify', 'blender')
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 INSPECT = '--inspect' in argv
 SUPINE = '--supine' in argv  # author lying-down.glb (face-up) instead of cpr
 KNEEL = '--kneel' in argv    # author kneeling.glb (bedside attending lean)
+POINT = '--point' in argv    # author pointing.glb (arm-extended point/direct)
 
 os.makedirs(PREVIEW_DIR, exist_ok=True)
 
@@ -180,6 +182,21 @@ def pose_attend(arm):
         aim(arm, seg, ATT_HAND_R)
 
 
+# --- "point" = arm extended forward to point/direct (replaces Shoot_OneHanded,
+# a two-handed gun-aim that read as "shaking a hand in mid-air"). Right arm out
+# and forward, left arm resting at the side, body upright. ---
+PT_R = (Vector((-0.18, -0.7, 1.75)), Vector((-0.16, -1.15, 1.7)), Vector((-0.14, -1.55, 1.66)))
+PT_L = (Vector((0.26, -0.02, 1.2)), Vector((0.27, -0.03, 0.8)), Vector((0.28, -0.03, 0.42)))
+
+
+def pose_point(arm):
+    to_rest(arm)
+    for seg, t in zip(('UpperArm.R', 'LowerArm.R', 'Fist.R'), PT_R):
+        aim(arm, seg, t)
+    for seg, t in zip(('UpperArm.L', 'LowerArm.L', 'Fist.L'), PT_L):
+        aim(arm, seg, t)
+
+
 def keyframe_all(arm, name):
     for pb in arm.pose.bones:
         pb.rotation_mode = 'QUATERNION'
@@ -233,6 +250,14 @@ def main():
         keyframe_all(arm, 'kneeling')
         export(arm, OUT_KNEEL)
         print('Attending kneel pose authored.')
+        return
+    if POINT:
+        pose_point(arm)
+        setup_render('point_front.png', (0, -4, 1.6), (radians(82), 0, 0))
+        setup_render('point_3q.png', (-3, -3, 1.7), (radians(78), 0, radians(-135)))
+        keyframe_all(arm, 'pointing')
+        export(arm, OUT_POINT)
+        print('Pointing pose authored.')
         return
     pose_cpr(arm)
     # Preview from several angles (camera looks toward the figure's mid-height).

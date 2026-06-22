@@ -59,13 +59,13 @@ const POSE_MAP = {
   'idle-breathing': 'Idle',
   walking: 'Walk',
   sitting: 'SitDown',
-  // NB: cpr-compressions, lying-down AND kneeling are NOT mapped here — the pack's
-  // stand-ins are clinically wrong: PickUp holds the CPR hands ~1 m apart (one
-  // lands on the pelvis) AND reads as a deep BOW for "kneeling" clinicians; Death
-  // lays the casualty FACE-DOWN (compress his back). All three are hand-authored
-  // by `pnpm make:cpr` / `make:supine` / `make:kneel` (scripts/make-cpr.py); do
-  // not re-add them here or `map:cast` will clobber the authored clips.
-  pointing: 'Shoot_OneHanded', // arm extended forward
+  // NB: cpr-compressions, lying-down, kneeling AND pointing are NOT mapped here —
+  // the pack's stand-ins are clinically/visually wrong: PickUp holds the CPR hands
+  // ~1 m apart (one lands on the pelvis) AND reads as a deep BOW for "kneeling"
+  // clinicians; Death lays the casualty FACE-DOWN (compress his back); Shoot_OneHanded
+  // is a two-handed gun-aim that read as "shaking a hand in mid-air" for "point".
+  // All hand-authored via `pnpm make:cpr|make:supine|make:kneel|make:point`
+  // (scripts/make-cpr.py); do not re-add them or `map:cast` clobbers the authored clips.
 };
 
 const io = new NodeIO();

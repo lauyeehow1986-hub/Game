@@ -18,7 +18,8 @@
     "make:cast": "blender --background --python scripts/make-cast.py",
     "make:cpr": "blender --background --python scripts/make-cpr.py",
     "make:supine": "blender --background --python scripts/make-cpr.py -- --supine",
-    "make:kneel": "blender --background --python scripts/make-cpr.py -- --kneel"
+    "make:kneel": "blender --background --python scripts/make-cpr.py -- --kneel",
+    "make:point": "blender --background --python scripts/make-cpr.py -- --point"
   },
   "dependencies": {
     "phaser": "^3.80.1",
