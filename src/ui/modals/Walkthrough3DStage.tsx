@@ -100,6 +100,7 @@ export default function Walkthrough3DStage({
       scene: (chapter.scene ?? 'resus') as SceneId,
       figures: figs,
       shake,
+      aed: figures.some((f) => f.beat?.aed),
     };
     stageRef.current?.setFrame(frame);
   });

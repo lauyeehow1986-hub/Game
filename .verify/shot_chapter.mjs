@@ -25,13 +25,22 @@ async function main() {
   await page.waitForTimeout(2000);
   await page.evaluate(() => { const el = [...document.querySelectorAll('button,[role="button"]')].find((b) => (b.textContent || '').trim().toLowerCase().startsWith('3d')); if (el) el.click(); });
   await page.waitForTimeout(3500);
-  await clickByText(page, CHAP); await page.waitForTimeout(2500);
-  await page.evaluate((t) => {
-    const i = [...document.querySelectorAll('input[type="range"]')].find((x) => Number(x.max) > 5);
-    const set = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(i), 'value').set;
-    set.call(i, String(t)); i.dispatchEvent(new Event('input', { bubbles: true })); i.dispatchEvent(new Event('change', { bubbles: true }));
-  }, T);
-  await page.waitForTimeout(3000);
+  await clickByText(page, CHAP); await page.waitForTimeout(1800);
+  if (process.env.PLAY) {
+    // real playback so walking figures settle naturally
+    const t0 = await page.evaluate(() => { const m = document.body.innerText.match(/(\d{1,2}):(\d{2})\s*\/\s*\d/); return m ? +m[1] * 60 + +m[2] : -1; });
+    await page.waitForTimeout(1200);
+    const t1 = await page.evaluate(() => { const m = document.body.innerText.match(/(\d{1,2}):(\d{2})\s*\/\s*\d/); return m ? +m[1] * 60 + +m[2] : -1; });
+    if (t1 <= t0) await clickByText(page, 'play');
+    for (let i = 0; i < 60; i++) { const t = await page.evaluate(() => { const m = document.body.innerText.match(/(\d{1,2}):(\d{2})\s*\/\s*\d/); return m ? +m[1] * 60 + +m[2] : -1; }); if (t >= T) break; await page.waitForTimeout(400); }
+  } else {
+    await page.evaluate((t) => {
+      const i = [...document.querySelectorAll('input[type="range"]')].find((x) => Number(x.max) > 5);
+      const set = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(i), 'value').set;
+      set.call(i, String(t)); i.dispatchEvent(new Event('input', { bubbles: true })); i.dispatchEvent(new Event('change', { bubbles: true }));
+    }, T);
+    await page.waitForTimeout(3000);
+  }
   await (await page.$('canvas')).screenshot({ path: new URL('./' + OUT, import.meta.url).pathname.replace(/^\//, '') });
   console.log('saved', OUT, 'chap', CHAP, 't', T);
   await browser.close();

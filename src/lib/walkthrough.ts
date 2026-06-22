@@ -95,6 +95,9 @@ export interface WalkthroughBeat {
    *  floating text indicator near the speaker. The PWA has no audio assets;
    *  this gives the action a sound dimension without an audio file. */
   sfx?: string;
+  /** Show the 3D AED prop (device + chest pads + leads) on the patient while
+   *  this beat is active — the physical defibrillation before the shock overlay. */
+  aed?: boolean;
 }
 
 export interface WalkthroughBranchOption {

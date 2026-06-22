@@ -337,12 +337,15 @@ export const stemiWalkthrough: Walkthrough = {
         { at: 10, actorId: 'patient', action: 'Pulseless. Receiving chest compressions at 100–120 / min.', pos: { x: 202, y: 238 }, pose: 'collapsed', expression: 'unconscious' },
         // The myResponder CFR sprints in from the five-foot-way with a PAD AED.
         { at: 14, actorId: 'cfr', action: 'myResponder ping accepted — arrives with PAD AED from 280 m away.', pos: { x: 372, y: 232 }, pose: 'walk', walking: true, direction: 'W', expression: 'focused' },
-        // CFR kneels on the far side, applies pads, delivers a shock.
-        { at: 18, actorId: 'cfr', action: 'AED pads on. Shock advised. Stand clear, shock delivered.', pos: { x: 166, y: 242 }, pose: 'kneel', direction: 'E', expression: 'focused', showpiece: { kind: 'svg', id: 'aed-shock' }, sfx: '⚡ CLEAR!' },
-        // Bystander hands over: stands clear for the shock, then supports (only one
-        // rescuer compresses at a time) so the CFR runs the next cycle solo.
-        { at: 18, actorId: 'bystander', action: 'Stands clear for the shock, then supports — reassurance and airway.', pos: { x: 286, y: 230 }, pose: 'stand', direction: 'W', expression: 'focused' },
-        { at: 22, actorId: 'cfr', action: 'CPR resumed. Second cycle.', pos: { x: 195, y: 256 }, pose: 'cpr', direction: 'E', expression: 'focused' },
+        // CFR kneels, bares the chest and applies the pads (3D AED prop shown on
+        // the patient) — physical defibrillation BEFORE the shock-analysis overlay.
+        { at: 18, actorId: 'cfr', action: 'Bares the chest, applies the AED pads — sternum (RA) and apex.', pos: { x: 190, y: 254 }, pose: 'kneel', direction: 'E', expression: 'focused', aed: true },
+        // Bystander hands over as the CFR moves in (steps back BEFORE the AED beats
+        // so the camera's lead is the CFR/defibrillation, not the bystander).
+        { at: 16, actorId: 'bystander', action: 'Steps back as the CFR takes over — stays clear and supports.', pos: { x: 286, y: 230 }, pose: 'stand', direction: 'W', expression: 'focused' },
+        // Then the device analyses and delivers the shock (overlay + ECG).
+        { at: 20, actorId: 'cfr', action: 'AED analysing — shock advised. Stand clear, shock delivered.', pos: { x: 190, y: 254 }, pose: 'kneel', direction: 'E', expression: 'focused', aed: true, showpiece: { kind: 'svg', id: 'aed-shock' }, sfx: '⚡ CLEAR!' },
+        { at: 22, actorId: 'cfr', action: 'CPR resumed. Second cycle.', pos: { x: 195, y: 256 }, pose: 'cpr', direction: 'E', expression: 'focused', aed: true },
         // ROSC — Mr Tan groans, a pulse returns.
         { at: 26, actorId: 'patient', action: 'Return of spontaneous circulation. Groaning. Pulse palpable.', pos: { x: 202, y: 238 }, pose: 'collapsed', expression: 'pained' },
       ],

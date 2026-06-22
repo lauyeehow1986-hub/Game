@@ -57,6 +57,8 @@ export interface Frame3D {
   figures: Figure3D[];
   /** One-shot camera shake (e.g. AED shock beat). */
   shake: boolean;
+  /** Show the 3D AED prop (device + pads + leads) on the patient's chest. */
+  aed?: boolean;
 }
 
 interface FigureEntry {
@@ -89,6 +91,8 @@ export class Stage3D {
   /** Global drifting dust-mote layer — cinematic air across every scene. */
   private dust: DustMotes | null = null;
   private figures = new Map<string, FigureEntry>();
+  /** Procedural AED prop (device + pads + leads); shown on AED beats. */
+  private aedProp: THREE.Group | null = null;
   private clock = new THREE.Clock();
   private raycaster = new THREE.Raycaster();
   private onPick: (id: string) => void = () => {};
@@ -308,6 +312,100 @@ export class Stage3D {
       }
     }
     if (frame.shake) this.shakeT = 0.45;
+    this.updateAedProp(!!frame.aed);
+  }
+
+  /** World position of the patient's chest (Torso bone) for prop placement,
+   *  or null when there's no patient figure / bone yet. */
+  private patientChestWorld(): THREE.Vector3 | null {
+    const entry = this.figures.get('patient');
+    if (!entry) return null;
+    const root = entry.figure.root;
+    root.updateWorldMatrix(true, true);
+    let bone: THREE.Object3D | null = null;
+    root.traverse((o) => { if ((o as THREE.Bone).isBone && o.name === 'Torso') bone = o; });
+    if (bone) return (bone as THREE.Object3D).getWorldPosition(new THREE.Vector3());
+    // Procedural-rig fallback: a rough chest offset above the figure root.
+    return root.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0.9, 0));
+  }
+
+  /** A defibrillator pad: a flat patch with a coloured lead connector so it reads
+   *  against the casualty's clothing. */
+  private makeAedPad(): THREE.Group {
+    const g = new THREE.Group();
+    const base = new THREE.Mesh(
+      new THREE.BoxGeometry(0.13, 0.014, 0.15),
+      new THREE.MeshStandardMaterial({ color: '#dde4ec', roughness: 0.9, metalness: 0 }),
+    );
+    const nub = new THREE.Mesh(
+      new THREE.BoxGeometry(0.04, 0.028, 0.04),
+      new THREE.MeshStandardMaterial({ color: '#d23b2e', roughness: 0.5 }),
+    );
+    nub.position.y = 0.018;
+    g.add(base, nub);
+    return g;
+  }
+
+  /** Build the AED prop once: a green unit with a dark screen, two chest pads,
+   *  and two lead wires. Children are named so updateAedProp can re-place them. */
+  private buildAedProp(): THREE.Group {
+    const g = new THREE.Group();
+    g.name = 'aed-prop';
+    // device: body + emissive screen, grouped so it moves as a unit.
+    const device = new THREE.Group();
+    device.name = 'aed-device';
+    const body = new THREE.Mesh(
+      new THREE.BoxGeometry(0.24, 0.1, 0.18),
+      new THREE.MeshStandardMaterial({ color: '#1f9d55', roughness: 0.55, metalness: 0.1 }),
+    );
+    body.castShadow = true;
+    const screen = new THREE.Mesh(
+      new THREE.BoxGeometry(0.13, 0.012, 0.09),
+      new THREE.MeshStandardMaterial({ color: '#0b1f33', emissive: '#1d6fb8', emissiveIntensity: 0.7, roughness: 0.3 }),
+    );
+    screen.position.set(0.03, 0.056, 0);
+    device.add(body, screen);
+    // two pads + two lead wires (thin lines, repositioned per frame).
+    const padRa = this.makeAedPad(); padRa.name = 'aed-pad-ra';
+    const padApex = this.makeAedPad(); padApex.name = 'aed-pad-apex';
+    const wireMat = new THREE.LineBasicMaterial({ color: '#0b1220' });
+    const wireRa = new THREE.Line(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3)), wireMat);
+    wireRa.name = 'aed-wire-ra';
+    const wireApex = new THREE.Line(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3)), wireMat.clone());
+    wireApex.name = 'aed-wire-apex';
+    g.add(device, padRa, padApex, wireRa, wireApex);
+    return g;
+  }
+
+  /** Show/hide and place the AED prop. Pads go on the chest (RA upper, apex
+   *  lower-left), the device on the ground beside the casualty, leads between. */
+  private updateAedProp(show: boolean): void {
+    if (!show) {
+      if (this.aedProp) { this.scene.remove(this.aedProp); disposeGroup(this.aedProp); this.aedProp = null; }
+      return;
+    }
+    const chest = this.patientChestWorld();
+    if (!chest) return;
+    if (!this.aedProp) { this.aedProp = this.buildAedProp(); this.scene.add(this.aedProp); }
+    const g = this.aedProp;
+    const padY = chest.y + 0.16; // sit on the chest surface, above the spine bone
+    const ra = g.getObjectByName('aed-pad-ra') as THREE.Object3D;
+    const apex = g.getObjectByName('aed-pad-apex') as THREE.Object3D;
+    const device = g.getObjectByName('aed-device') as THREE.Group;
+    ra.position.set(chest.x + 0.11, padY, chest.z + 0.2);
+    apex.position.set(chest.x - 0.12, padY, chest.z - 0.08);
+    device.position.set(chest.x + 0.62, 0.05, chest.z - 0.28);
+    device.rotation.y = -0.5;
+    // leads: pad → top of device.
+    const dev = new THREE.Vector3(chest.x + 0.62, 0.16, chest.z - 0.28);
+    for (const [wn, pad] of [['aed-wire-ra', ra], ['aed-wire-apex', apex]] as const) {
+      const w = g.getObjectByName(wn) as THREE.Line;
+      const pos = (w.geometry.getAttribute('position') as THREE.BufferAttribute);
+      pos.setXYZ(0, pad.position.x, pad.position.y, pad.position.z);
+      pos.setXYZ(1, dev.x, dev.y, dev.z);
+      pos.needsUpdate = true;
+      w.geometry.computeBoundingSphere();
+    }
   }
 
   /** Build a vertical sky→horizon gradient texture for the scene background.
@@ -503,6 +601,7 @@ export class Stage3D {
     this.renderer.domElement.removeEventListener('pointerdown', this.handlePointer);
     for (const entry of this.figures.values()) entry.figure.dispose();
     this.figures.clear();
+    if (this.aedProp) { this.scene.remove(this.aedProp); disposeGroup(this.aedProp); this.aedProp = null; }
     if (this.env) disposeGroup(this.env.group);
     this.backdrop?.dispose();
     this.fallbackEnv?.dispose();
